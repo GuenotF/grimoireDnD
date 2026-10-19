@@ -125,6 +125,12 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 .spell .meta { font-size: 13px; color: var(--muted); margin-top: 1px; }
 .spell .eff { font-size: 14.5px; margin-top: 3px; max-width: 72ch; }
 .spell .actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; align-items: center; }
+@media (max-width: 560px) {
+  .spell { grid-template-columns: 26px minmax(0,1fr); }
+  .spell .actions { grid-column: 2; justify-content: flex-start; }
+  .spell.noprep { grid-template-columns: minmax(0,1fr); }
+  .spell.noprep .actions { grid-column: 1; }
+}
 .spell.prepared { background: linear-gradient(90deg, var(--rubric-soft), transparent 70%); }
 .tag { display: inline-block; font-family: var(--f-sc); font-size: 11px; letter-spacing: .05em; border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-left: 5px; vertical-align: 2px; line-height: 1.45; }
 .tag.c { color: var(--rubric); }
@@ -179,7 +185,31 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 .welcome { margin-top: 40px; display: grid; gap: 14px; justify-items: start; max-width: 60ch; }
 .welcome h1 { font-family: var(--f-display); font-weight: 500; font-size: 40px; margin: 0; }
 .welcome h1 .initial { color: var(--rubric); font-weight: 700; }
-.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: var(--r); font-size: 14px; z-index: 5; max-width: calc(100% - 32px); }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: var(--r); font-size: 14px; z-index: 5; max-width: calc(100% - 32px); width: max-content; display: flex; align-items: center; gap: 14px; }
+.toast.above-bar { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
+.toast .undo { background: transparent; border: 0; color: var(--rubric-soft); font-weight: 700; padding: 4px 2px; }
+/* Lancer un sort */
+.cast { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
+.btn.cast-go { background: var(--rubric); border-color: var(--rubric); color: var(--surface); font-weight: 500; padding: 7px 14px; }
+.btn.cast-up { padding: 7px 11px; }
+.btn.cast-rit { border-color: var(--ok); color: var(--ok); padding: 7px 14px; }
+.btn.cast-none { border-style: dashed; background: transparent; color: var(--muted); padding: 7px 14px; }
+.chooser { margin-top: 8px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 10px; display: grid; gap: 8px; max-width: 420px; }
+.chooser .lbl { font-family: var(--f-sc); font-size: 12px; letter-spacing: .05em; color: var(--muted); }
+.chooser .lvls { display: flex; flex-wrap: wrap; gap: 6px; }
+.chooser .lvls .btn { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; border-color: var(--rubric); color: var(--pa-fg); }
+.chooser .lvls .btn small { font-size: 12px; }
+.chooser .hint { font-size: 13.5px; color: var(--pd-fg); background: var(--pd-bg); border-radius: 5px; padding: 6px 8px; }
+/* Barre fixe des emplacements */
+.slotbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; background: var(--surface); border: 0; border-top: 1px solid var(--rule); padding: 0 16px; padding-bottom: env(safe-area-inset-bottom, 0px); height: calc(58px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; color: var(--ink); text-align: left; }
+.slotbar .grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; min-width: 0; }
+.slotbar .lv { display: inline-flex; align-items: center; gap: 4px; }
+.slotbar .lv b { font-family: var(--f-display); font-size: 15px; margin-right: 2px; }
+.slotbar .d { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--rubric); box-sizing: border-box; display: inline-block; }
+.slotbar .d.u { background: var(--rubric); }
+#slots-top { scroll-margin-top: 12px; }
+.slotbar .go { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+body.has-slotbar .wrap { padding-block-end: 96px; }
 @media (prefers-reduced-motion: no-preference) { .pip { transition: transform .1s, background .12s; } }
 </style>
 
@@ -196,6 +226,7 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
+<button class="slotbar" id="slotbar" data-a="to-slots" hidden></button>
 
 <script>
 const SPELLS = /*SPELLS*/[];
@@ -318,6 +349,10 @@ function render(fromSnapshot) {
   }
   if (keep) { const el = document.getElementById(keep.id); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
   setStatus(S.statusText || "", S.statusErr);
+  const bar = document.getElementById("slotbar"), showBar = !!g && S.tab === "grimoire" && R.slots(g.level).length > 0;
+  bar.hidden = !showBar; if (showBar) bar.innerHTML = slotbarHTML(g);
+  document.body.classList.toggle("has-slotbar", showBar);
+  document.getElementById("toast").classList.toggle("above-bar", showBar);
 }
 function renderPicker() {
   const ids = Object.keys(S.list).sort((a, b) => S.list[a].name.localeCompare(S.list[b].name, "fr"));
@@ -401,7 +436,7 @@ function tags(s) { return `${s.c ? `<span class="tag c" title="Concentration">C<
 function grimoireHTML(g) {
   const ro = S.readonly ? " disabled" : "";
   const slots = R.slots(g.level), max = slots.length, pMax = R.prepMax(g);
-  let h = `<div class="rubric" style="margin-top:4px"><h2>Emplacements de sorts</h2><span class="aside">touche un cercle quand tu lances un sort</span></div><div class="slots">`;
+  let h = `<div class="rubric" id="slots-top" style="margin-top:4px"><h2>Emplacements de sorts</h2><span class="aside">touche un cercle quand tu lances un sort</span></div><div class="slots">`;
   slots.forEach((n, i) => {
     const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0));
     h += `<div class="slotrow"><span class="lv">Niveau ${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"${ro}></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
@@ -436,7 +471,7 @@ function grimoireHTML(g) {
       const p = prepared.has(s.id);
       h += `<div class="spell${p ? " prepared" : ""}"><div class="prep"><input type="checkbox" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked || S.readonly ? " disabled" : ""}></div>
       <div><div class="name">${esc(s.n)}${tags(s)}<span class="vo">${esc(s.en)}</span></div>${spellBody(s, g)}
-      ${s.ri && !p ? `<div class="meta">Rituel : se lance depuis le grimoire sans être préparé (+10 min, sans emplacement).</div>` : ""}</div>
+      ${s.ri && !p ? `<div class="meta">Rituel : se lance depuis le grimoire sans être préparé (+10 min, sans emplacement).</div>` : ""}${locked || S.readonly ? "" : castHTML(g, s, p)}</div>
       <div class="actions"><span class="origin">${x.how === "copie" ? `Copié · ${fmt(x.h)} h · ${fr(x.po)} po` : "Montée de niveau"}</span>${removeBtn("s:" + s.id, ro)}</div></div>`;
     });
   }
@@ -469,6 +504,35 @@ function removeBtn(key, ro) {
   return S.confirm === key ? `<button class="btn confirm" data-a="rm" data-k="${esc(key)}">Retirer ?</button>` : `<button class="btn ghost" data-a="rm" data-k="${esc(key)}" aria-label="Retirer">Retirer</button>`;
 }
 const byName = (a, b) => a.n.localeCompare(b.n, "fr");
+
+// ---------- Lancer un sort ----------
+const slotsLeft = (g, lv) => Math.max(0, (R.slots(g.level)[lv - 1] || 0) - (+(g.used[lv] || 0)));
+const firstFree = (g, s) => { for (let lv = s.l; lv <= R.maxLevel(g.level); lv++) if (slotsLeft(g, lv) > 0) return lv; return 0; };
+function castHTML(g, s, prepared) {
+  let h = "";
+  if (prepared) {
+    const lv = firstFree(g, s), higher = R.maxLevel(g.level) > s.l;
+    h += lv ? `<button class="btn cast-go" data-a="cast" data-id="${s.id}" data-l="${lv}">Lancer · niv. ${lv}</button>` : `<button class="btn cast-none" disabled>Plus d'emplacement</button>`;
+    if (higher && lv) h += `<button class="btn cast-up" data-a="cast-open" data-id="${s.id}" aria-label="Lancer ${esc(s.n)} à un niveau supérieur" aria-expanded="${S.castOpen === s.id}">▲</button>`;
+  }
+  if (s.ri) h += `<button class="btn cast-rit" data-a="cast-rit" data-id="${s.id}">Rituel · +10 min</button>`;
+  if (!h) return "";
+  h = `<div class="cast">${h}</div>`;
+  if (prepared && S.castOpen === s.id) {
+    const lvls = []; for (let lv = s.l; lv <= R.maxLevel(g.level); lv++) lvls.push(lv);
+    h += `<div class="chooser"><span class="lbl">Lancer avec un emplacement de</span><div class="lvls">${lvls.map(lv => {
+      const left = slotsLeft(g, lv);
+      return `<button class="btn" data-a="cast" data-id="${s.id}" data-l="${lv}"${left ? "" : " disabled"}><b>Niveau ${lv}</b><small>${left ? `${left} restant${left > 1 ? "s" : ""}` : "épuisé"}</small></button>`;
+    }).join("")}</div>${s.up ? `<div class="hint">Emplacement plus élevé : ${esc(s.up)}</div>` : ""}<button class="btn ghost" data-a="cast-close" style="justify-self:start">Fermer</button></div>`;
+  }
+  return h;
+}
+function slotbarHTML(g) {
+  return `<span class="grp">${R.slots(g.level).map((n, i) => {
+    const used = Math.min(n, +(g.used[i + 1] || 0));
+    return `<span class="lv" aria-label="Niveau ${i + 1} : ${n - used} sur ${n}"><b>${i + 1}</b>${Array.from({ length: n }, (_, k) => `<span class="d${k < used ? " u" : ""}"></span>`).join("")}</span>`;
+  }).join("")}</span><span class="go">Gérer ⌃</span>`;
+}
 
 function biblioHTML(g) {
   const f = S.f, max = R.maxLevel(g.level);
@@ -624,7 +688,12 @@ ${g.level >= 2 ? `<p><b>Savant en ${esc(g.school)} :</b> temps et or divisés pa
 
 // ---------- Actions ----------
 let toastT;
-function toast(t) { const el = document.getElementById("toast"); el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 2600); }
+function toast(t, undo) {
+  const el = document.getElementById("toast");
+  el.innerHTML = `<span>${t}</span>${undo ? `<button class="undo" data-a="undo">Annuler</button>` : ""}`;
+  S.undo = undo || null; el.hidden = false; clearTimeout(toastT);
+  toastT = setTimeout(() => { el.hidden = true; S.undo = null; }, undo ? 5000 : 2600);
+}
 function mutate(fn, rerender = true) { const g = G(); if (!g || S.readonly) return; fn(g); save(S.cur); if (rerender) render(); }
 // Nom des fichiers de sauvegarde, datés pour qu'ils se rangent d'eux-mêmes : « Grimoire - Némeia - 2026-10-19 »
 function backupName(g) {
@@ -681,8 +750,8 @@ document.addEventListener("click", e => {
   else if (a === "flvl") { S.f.lvl = b.dataset.v; render(); }
   else if (a === "add") mutate(g => {
     const s = BY_ID[b.dataset.id];
-    if (b.dataset.how === "mineur") { g.cantrips.push(s.id); if (g.cantrips.length > R.cantrips(g.level)) toast(`Attention : ${g.cantrips.length} sorts mineurs pour ${R.cantrips(g.level)} connus à ce niveau.`); else toast(`${s.n} appris`); }
-    else { const c = R.copy(g, s); g.spells.push(b.dataset.how === "copie" ? { id: s.id, how: "copie", h: c.h, po: c.po } : { id: s.id, how: "niv" }); toast(`${s.n} ajouté au grimoire`); }
+    if (b.dataset.how === "mineur") { g.cantrips.push(s.id); if (g.cantrips.length > R.cantrips(g.level)) toast(`Attention : ${g.cantrips.length} sorts mineurs pour ${R.cantrips(g.level)} connus à ce niveau.`); else toast(`${esc(s.n)} appris`); }
+    else { const c = R.copy(g, s); g.spells.push(b.dataset.how === "copie" ? { id: s.id, how: "copie", h: c.h, po: c.po } : { id: s.id, how: "niv" }); toast(`${esc(s.n)} ajouté au grimoire`); }
   });
   else if (a === "rm") {
     const k = b.dataset.k;
@@ -707,9 +776,21 @@ document.addEventListener("click", e => {
   else if (a === "share-json") shareToGM(G());
   else if (a === "del") {
     if (S.confirm !== "del") { S.confirm = "del"; render(); return; }
-    S.confirm = null; const id = S.cur; const n = G().name; S.cur = null; removeDoc(id).then(() => { pickCurrent(); S.tab = "grimoire"; render(); toast(`${n} supprimé`); }); render();
+    S.confirm = null; const id = S.cur; const n = G().name; S.cur = null; removeDoc(id).then(() => { pickCurrent(); S.tab = "grimoire"; render(); toast(`${esc(n)} supprimé`); }); render();
   }
   else if (a === "cancel") { S.confirm = null; render(); }
+  else if (a === "cast") {
+    const s = BY_ID[b.dataset.id], lv = +b.dataset.l, g = G();
+    if (!g || slotsLeft(g, lv) < 1) return;
+    S.castOpen = null;
+    mutate(g => { g.used[lv] = (+(g.used[lv] || 0)) + 1; });
+    toast(`<b>${esc(s.n)}</b> lancé · emplacement de niveau ${lv}`, () => mutate(g => { g.used[lv] = Math.max(0, (+(g.used[lv] || 0)) - 1); }));
+  }
+  else if (a === "cast-open") { S.castOpen = S.castOpen === b.dataset.id ? null : b.dataset.id; render(); }
+  else if (a === "cast-close") { S.castOpen = null; render(); }
+  else if (a === "cast-rit") { toast(`<b>${esc(BY_ID[b.dataset.id].n)}</b> lancé en rituel : 10 minutes de plus, aucun emplacement`); }
+  else if (a === "undo") { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { u(); toast("Lancement annulé"); } }
+  else if (a === "to-slots") { const el = document.getElementById("slots-top"); if (el) el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); }
   else if (a === "hide-ios") { try { localStorage.setItem("grimoire.iosTip", "0"); } catch (e) {} render(); }
   else if (a === "xedit") { S.editX = +b.dataset.i; S.xdraft = null; render(); const el = document.getElementById("x-ename"); if (el) { el.focus(); el.select(); } }
   else if (a === "xcancel") { S.editX = null; S.xdraft = null; render(); }
@@ -728,7 +809,7 @@ document.addEventListener("change", e => {
   if (t.id === "f-full") { renderPicker(); return; }
   if (t.id === "f-import" && t.files && t.files[0]) {
     const r = new FileReader();
-    r.onload = () => { try { const j = JSON.parse(r.result); const g = norm(j.grimoire || j); const id = newId(g.name); S.list[id] = g; S.tab = "grimoire"; setCur(id); save(id); toast(`${g.name} importé`); } catch (err) { toast("Ce fichier n'est pas un grimoire valide (.json exporté depuis cet atelier)."); } };
+    r.onload = () => { try { const j = JSON.parse(r.result); const g = norm(j.grimoire || j); const id = newId(g.name); S.list[id] = g; S.tab = "grimoire"; setCur(id); save(id); toast(`${esc(g.name)} importé`); } catch (err) { toast("Ce fichier n'est pas un grimoire valide (.json exporté depuis cet atelier)."); } };
     r.readAsText(t.files[0]);
   }
 });
