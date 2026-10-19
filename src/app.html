@@ -301,12 +301,10 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .npen:hover { border-color: var(--rule); color: var(--muted); }
 .npen.has { border-color: var(--gold); background: var(--note-bg); color: var(--gold); }
 .npen.on { background: var(--gold); border-color: var(--gold); color: var(--surface); }
-.npre { margin: 0 0 2px 28px; background: var(--note-bg); border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0; padding: 3px 9px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nedit { margin: 4px 0 6px 28px; display: grid; gap: 6px; }
 .nedit textarea { font-size: 14.5px; line-height: 1.4; border: 1.5px solid var(--gold); border-radius: 6px; padding: 7px 9px; background: var(--surface); resize: vertical; width: 100%; box-sizing: border-box; }
 .nedit .cast { display: flex; align-items: center; gap: 8px; }
-.nbtn { flex: none; font-size: 12.5px; font-weight: 700; padding: 5px 9px; border-radius: 6px; border: 1.2px solid var(--gold); background: var(--note-bg); color: var(--gold); }
-.nbtn[aria-pressed="true"] { background: var(--gold); color: var(--surface); }
+.nmark { font-size: 12px; font-weight: 700; color: var(--gold); border: 1.2px solid var(--gold); background: var(--note-bg); border-radius: 4px; padding: 0 5px; line-height: 1.4; }
 .nbox { background: var(--note-bg); border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0; padding: 7px 10px; font-size: 14px; line-height: 1.4; margin: 4px 0 2px; white-space: pre-wrap; max-width: 72ch; }
 /* Passage de niveau */
 .lvrow { display: flex; gap: 6px; align-items: stretch; min-width: 0; }
@@ -680,9 +678,10 @@ function noteGerer(g, s) {
     return `<div class="nedit"><textarea id="n-edit" rows="3" maxlength="600" placeholder="Rappel, règle de table, phrase préparée…" aria-label="Note pour ${esc(s.n)}">${esc(v)}</textarea>
     <div class="cast"><button class="btn cast-go sm" data-a="note-save" data-id="${s.id}">Enregistrer</button><button class="btn sm" data-a="note-cancel">Annuler</button>${n ? `<span style="flex:1"></span><button class="linkbtn" data-a="note-clear" data-id="${s.id}">Effacer</button>` : ""}</div></div>`;
   }
-  return n ? `<div class="npre">${esc(n)}</div>` : "";
+  return "";
 }
-const noteBtn = (g, s) => noteOf(g, s) ? `<button class="nbtn" data-a="note-show" data-id="${s.id}" aria-pressed="${S.noteShow === s.id}">Note</button>` : "";
+// En jeu : petit repère doré quand une note existe ; la note se lit en dépliant le sort
+const noteMark = (g, s) => noteOf(g, s) ? `<span class="nmark" title="Ce sort a une note" aria-label="note">✎</span>` : "";
 const noteBox = (g, s) => `<div class="nbox">${esc(noteOf(g, s))}</div>`;
 
 // Mode Gérer : une ligne par sort (case Préparer, nom, pastilles clés), détail complet au toucher du nom
@@ -693,7 +692,7 @@ function gererRow(g, s, x, locked, p, cantrip) {
   let body = "";
   if (open) {
     const origin = cantrip ? "Sort mineur" : x && x.how === "copie" ? `Copié · ${fmt(x.h)} h · ${fr(x.po)} po` : "Montée de niveau";
-    body = `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g)}
+    body = `<div class="jbody">${noteOf(g, s) && S.noteEdit !== s.id ? noteBox(g, s) : ""}<span class="vo">${esc(s.en)}</span>${spellBody(s, g)}
     ${!cantrip && s.ri && !p ? `<div class="meta">Rituel : se lance depuis le grimoire sans être préparé (+10 min, sans emplacement).</div>` : ""}
     ${!cantrip && !locked && !S.readonly ? castHTML(g, s, p) : ""}
     <div class="rowact"><span class="origin">${origin}</span>${removeBtn((cantrip ? "c:" : "s:") + s.id, ro)}</div></div>`;
@@ -815,8 +814,8 @@ function jeuRow(g, s, kind) {
     if (kind === "prep") { const lv = firstFree(g, s); act = lv ? `<button class="btn cast-go sm" data-a="cast" data-id="${s.id}" data-l="${lv}">${lv === s.l ? "Lancer" : "Lancer · niv. " + lv}</button>` : `<button class="btn cast-none sm" disabled>Épuisé</button>`; }
     else if (kind === "rit") act = `<button class="btn cast-rit sm" data-a="cast-rit" data-id="${s.id}">Rituel</button>`;
   }
-  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${noteBtn(g, s)}${act}</div>
-  ${!open && noteOf(g, s) && S.noteShow === s.id ? noteBox(g, s) : ""}${open ? `<div class="jbody">${noteOf(g, s) ? noteBox(g, s) : ""}${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${kind !== "cantrip" && !S.readonly ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
+  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${noteMark(g, s)}${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${act}</div>
+  ${open ? `<div class="jbody">${noteOf(g, s) ? noteBox(g, s) : ""}${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${kind !== "cantrip" && !S.readonly ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
 }
 function jeuHTML(g) {
   const prepared = new Set(g.prepared), max = R.maxLevel(g.level), slots = R.slots(g.level);
@@ -1255,7 +1254,6 @@ document.addEventListener("click", e => {
     mutate(g => { delete g.snotes[id]; });
     toast("Note effacée", () => { mutate(g => { g.snotes[id] = old; }); return "Note rétablie"; });
   }
-  else if (a === "note-show") { S.noteShow = S.noteShow === b.dataset.id ? null : b.dataset.id; render(); }
   else if (a === "lu-open") { const g = G(); if (!g || g.level >= 20 || S.readonly) return; luOpen(g); render(); const x = document.querySelector("#lvlup .lufoot .primary"); if (x) x.focus({ preventScroll: true }); }
   else if (a === "lu-close") { S.lu = null; render(); }
   else if (S.lu && a === "lu-next") { S.lu.step = Math.min(3, S.lu.step + 1); S.lu.open = null; render(); }
