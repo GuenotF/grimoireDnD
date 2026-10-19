@@ -283,7 +283,9 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .short .meter .fill { height: 100%; background: var(--gold); }
 .jrow.on { background: linear-gradient(90deg, var(--rubric-soft), transparent 75%); }
 .gprep { width: 20px; height: 20px; accent-color: var(--rubric); margin: 0 2px 0 0; flex: none; }
-.gprep.full, .luprep input.full { opacity: .35; }
+.gprep.full, .luprep input.full { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; box-sizing: border-box; border: 1.5px dashed var(--pn-bd); border-radius: 4px; background: var(--sunk); cursor: not-allowed; }
+.gprep.full + .jmain .jname, .gprep.full ~ .jmain .jname { color: var(--muted); }
+.aside .lim { color: var(--rubric); font-weight: 700; font-style: normal; }
 .jbody .vo { font-size: 13px; color: var(--muted); font-style: italic; }
 .jbody .meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .jbody .rowact { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px dotted var(--rule); }
@@ -618,7 +620,7 @@ function grimoireHTML(g) {
   // Sorts de niveau 1+
   const prepared = new Set(g.prepared);
   const conc = g.spells.map(x => BY_ID[x.id]).filter(s => s.c && prepared.has(s.id));
-  h += `<div class="rubric"><h2>Le grimoire</h2><span class="aside">${g.prepared.length} préparé${g.prepared.length > 1 ? "s" : ""} sur ${pMax} · coche les sorts préparés après un repos long</span></div>`;
+  h += `<div class="rubric"><h2>Le grimoire</h2><span class="aside">${g.prepared.length > pMax ? `<span class="lim">Trop de sorts préparés : ${g.prepared.length} / ${pMax}</span> · décoche-en ${g.prepared.length - pMax}` : g.prepared.length === pMax ? `<span class="lim">Limite atteinte : ${pMax} / ${pMax}</span> · décoche un sort pour en préparer un autre` : `${g.prepared.length} préparé${g.prepared.length > 1 ? "s" : ""} sur ${pMax} · coche les sorts préparés après un repos long`}</span></div>`;
   if (g.prepared.length > pMax) h += `<div class="note warn">Trop de sorts préparés : ${g.prepared.length} pour ${pMax} autorisés (modificateur d'Intelligence + niveau).</div>`;
   if (conc.length > 1) h += `<div class="note">Sorts de concentration préparés : ${conc.map(s => esc(s.n)).join(", ")}. Un seul peut être actif à la fois.</div>`;
   const top = Math.min(9, max + 1);
