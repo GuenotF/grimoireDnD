@@ -696,8 +696,9 @@ function gererRow(g, s, x, locked, p, cantrip) {
     const origin = cantrip ? "Sort mineur" : x && x.how === "copie" ? `Copié · ${fmt(x.h)} h · ${fr(x.po)} po` : "Montée de niveau";
     body = `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g)}
     ${!cantrip && s.ri && !p ? `<div class="meta">Rituel : se lance depuis le grimoire sans être préparé (+10 min, sans emplacement).</div>` : ""}
+    ${noteOf(g, s) && S.noteEdit !== s.id ? noteBox(g, s) : ""}
     ${!cantrip && !locked && !S.readonly ? castHTML(g, s, p) : ""}
-    ${noteOf(g, s) && S.noteEdit !== s.id ? noteBox(g, s) : ""}<div class="rowact"><span class="origin">${origin}</span>${removeBtn((cantrip ? "c:" : "s:") + s.id, ro)}</div></div>`;
+    <div class="rowact"><span class="origin">${origin}</span>${removeBtn((cantrip ? "c:" : "s:") + s.id, ro)}</div></div>`;
   }
   return `<div class="jrow${p ? " on" : ""}"><div class="jline">${box}<div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${notePen(g, s)}</div>${noteGerer(g, s)}${body}${concWarnHTML(g, s)}</div>`;
 }
@@ -817,7 +818,7 @@ function jeuRow(g, s, kind) {
     else if (kind === "rit") act = `<button class="btn cast-rit sm" data-a="cast-rit" data-id="${s.id}">Rituel</button>`;
   }
   return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${noteMark(g, s)}${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${act}</div>
-  ${open ? `<div class="jbody">${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${kind !== "cantrip" && !S.readonly ? castHTML(g, s, kind === "prep") : ""}${noteOf(g, s) ? noteBox(g, s) : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
+  ${open ? `<div class="jbody">${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${noteOf(g, s) ? noteBox(g, s) : ""}${kind !== "cantrip" && !S.readonly ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
 }
 function jeuHTML(g) {
   const prepared = new Set(g.prepared), max = R.maxLevel(g.level), slots = R.slots(g.level);

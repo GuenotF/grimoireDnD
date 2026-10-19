@@ -14,13 +14,13 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 **Onglet Grimoire, mode « Gérer »** (préparer et organiser)
 - Une ligne par sort : case *Préparer*, nom, pastilles clés (dégâts, jet ou effet). Toucher le nom déplie le détail complet, les boutons de lancement, l'origine et *Retirer*.
-- **Notes par sort** : crayon à droite de chaque ligne (gris sans note, doré avec une note) pour écrire un rappel, une règle de table ou une phrase préparée. La note s'affiche en bas du détail, au-dessus de *Retirer*, quand on déplie le sort. Les notes figurent aussi sur la fiche imprimable et dans les sauvegardes.
+- **Notes par sort** : crayon à droite de chaque ligne (gris sans note, doré avec une note) pour écrire un rappel, une règle de table ou une phrase préparée. La note s'affiche en bas du détail, au-dessus du bouton *Lancer*, quand on déplie le sort. Les notes figurent aussi sur la fiche imprimable et dans les sauvegardes.
 - Compteur *Préparés x / y* dans la barre du bas pendant la préparation. Limite respectée : une fois atteinte, les autres cases sont grisées (toucher l’une d’elles explique pourquoi) ; on décoche un sort pour en préparer un autre.
 - *Autres sorts* (race, dons, objets) : une ligne avec la case *utilisé*, l'usage et *Modifier* au toucher du nom.
 
 **Onglet Grimoire, mode « En jeu »** (en partie)
 - Seulement les sorts préparés, les sorts mineurs, les rituels et les autres sorts, en lignes compactes avec *Lancer* à droite.
-- Repère doré ✎ sur les sorts qui ont une note ; la note s'affiche en bas du détail quand on déplie le sort (lecture seule).
+- Repère doré ✎ sur les sorts qui ont une note ; la note s'affiche au-dessus du bouton *Lancer* quand on déplie le sort (lecture seule).
 - *Lancer* coche un emplacement du niveau du sort (ou du premier niveau supérieur libre) ; **▲** choisit un niveau supérieur quand le sort y gagne quelque chose ; *Rituel* pour les sorts lancés en rituel. Chaque lancement peut être annulé.
 - **Concentration** : avertissement avant de remplacer un sort de concentration, panneau du jet de concentration (DD calculé à partir des dégâts subis).
 - **Sorts en cours** : ajoutés automatiquement au lancement, puces dans la barre du bas, volet *En cours* avec note facultative et *Terminer*.
