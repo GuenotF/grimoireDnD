@@ -304,6 +304,7 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .short .meter .fill { height: 100%; background: var(--gold); }
 .jrow.on { background: linear-gradient(90deg, var(--rubric-soft), transparent 75%); }
 .gprep { width: 20px; height: 20px; accent-color: var(--rubric); margin: 0 2px 0 0; flex: none; }
+.gprep.full, .luprep input.full { opacity: .35; }
 .jbody .vo { font-size: 13px; color: var(--muted); font-style: italic; }
 .jbody .meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .jbody .rowact { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px dotted var(--rule); }
@@ -675,7 +676,8 @@ function grimoireHTML(g) {
 // Mode Gérer : une ligne par sort (case Préparer, nom, pastilles clés), détail complet au toucher du nom
 function gererRow(g, s, x, locked, p, cantrip) {
   const open = S.openRow === s.id, ro = S.readonly ? " disabled" : "";
-  const box = cantrip ? "" : `<input type="checkbox" class="gprep" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked || S.readonly ? " disabled" : ""}>`;
+  const full = !p && !locked && g.prepared.length >= R.prepMax(g); // limite atteinte : on ne peut plus que décocher
+  const box = cantrip ? "" : `<input type="checkbox" class="gprep${full ? " full" : ""}" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked || S.readonly ? " disabled" : full ? ' aria-disabled="true"' : ""}>`;
   let body = "";
   if (open) {
     const origin = cantrip ? "Sort mineur" : x && x.how === "copie" ? `Copié · ${fmt(x.h)} h · ${fr(x.po)} po` : "Montée de niveau";
@@ -1070,7 +1072,7 @@ function luStep3(g, b) {
   h += `<button class="linkbtn" data-a="lu-edit">Modifier le choix</button></div>`;
   const n = g.prepared.length + L.prep.length;
   h += `<div class="luprep"><h3>Préparation</h3><span>Tu peux maintenant préparer <b>${plural(pNew, "sort")}</b>${pNew > pOld ? ` (${pNew - pOld} de plus)` : ""}. En principe, la liste change au prochain repos long : vois avec ton MJ si tu peux préparer un nouveau sort tout de suite.</span>
-  ${L.picks.map(id => `<label><input type="checkbox" data-a="lu-prep" data-id="${id}"${L.prep.includes(id) ? " checked" : ""}> Préparer <b>${esc(BY_ID[id].n)}</b></label>`).join("")}
+  ${L.picks.map(id => { const on = L.prep.includes(id), full = !on && n >= pNew; return `<label><input type="checkbox" data-a="lu-prep" data-id="${id}"${on ? " checked" : ""}${full ? ' class="full" aria-disabled="true"' : ""}> Préparer <b>${esc(BY_ID[id].n)}</b></label>`; }).join("")}
   <span class="${n > pNew ? "" : "muted"}" style="font-size:13px${n > pNew ? ";color:var(--warn);font-weight:700" : ""}">Préparés après validation : ${n} / ${pNew}</span></div>`;
   const a0 = R.slots(g.level), a1 = R.slots(to), gained = a1.some((x, i) => x > (a0[i] || 0));
   h += `<div style="display:grid;gap:4px;font-size:13.5px;color:var(--muted);line-height:1.45">
@@ -1259,6 +1261,10 @@ document.addEventListener("click", e => {
 document.addEventListener("change", e => {
   const t = e.target, a = t.dataset.a;
   if (t.id === "cur") { setCur(t.value); return; }
+  if ((a === "prep" || a === "lu-prep") && t.checked) {
+    const g = G(), lu = a === "lu-prep" && S.lu, max = lu ? R.prepMax({ ...g, level: S.lu.to }) : R.prepMax(g), n = g.prepared.length + (lu ? S.lu.prep.length : 0);
+    if (n >= max) { t.checked = false; toast(`Limite atteinte (${n}/${max}) : décoche d'abord un sort`); return; }
+  }
   if (a === "prep") return mutate(g => { const id = t.dataset.id; g.prepared = t.checked ? [...g.prepared, id] : g.prepared.filter(x => x !== id); });
   if (a === "arcane") return mutate(g => { g.arcane = t.checked; });
   if (a === "lu-prep" && S.lu) { const id = t.dataset.id; S.lu.prep = t.checked ? [...S.lu.prep, id] : S.lu.prep.filter(x => x !== id); S.luKeep = true; render(); return; }

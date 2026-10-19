@@ -14,7 +14,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 **Onglet Grimoire, mode « Gérer »** (préparer et organiser)
 - Une ligne par sort : case *Préparer*, nom, pastilles clés (dégâts, jet ou effet). Toucher le nom déplie le détail complet, les boutons de lancement, l'origine et *Retirer*.
-- Compteur *Préparés x / y* dans la barre du bas pendant la préparation.
+- Compteur *Préparés x / y* dans la barre du bas pendant la préparation. Limite respectée : une fois atteinte, les autres cases sont grisées (toucher l’une d’elles explique pourquoi) ; on décoche un sort pour en préparer un autre.
 - *Autres sorts* (race, dons, objets) : une ligne avec la case *utilisé*, l'usage et *Modifier* au toucher du nom.
 
 **Onglet Grimoire, mode « En jeu »** (en partie)
