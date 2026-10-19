@@ -6,6 +6,7 @@
   --bg: #ECEEF1;
   --surface: #F9FAFB;
   --sunk: #E2E5EA;
+  --note-bg: #F5EEDC;
   --ink: #1B2136;
   --muted: #5A6176;
   --rule: #C9CED8;
@@ -24,13 +25,13 @@
   --pd-bg: #FBE7DC; --pd-bd: #C2410C; --pd-fg: #8F2F08; --pa-bg: #F3DEDB; --pa-bd: #A2261C; --pa-fg: #7A1C14; --ps-bg: #E6EAF5; --ps-bd: #2D4A9A; --ps-fg: #233C80; --pf-bg: #EFE6F7; --pf-bd: #6B3FA0; --pf-fg: #4F2C7A; --pn-bd: #9AA0AE;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #10131B; --surface: #171B26; --sunk: #0C0F15; --ink: #E8E4D8; --muted: #9CA2B4; --rule: #2B3142;
+  --bg: #10131B; --surface: #171B26; --sunk: #0C0F15; --note-bg: #2A2416; --ink: #E8E4D8; --muted: #9CA2B4; --rule: #2B3142;
   --rubric: #E46F62; --rubric-soft: #3A1E1C; --gold: #D6AA4E; --ok: #6FC08E; --warn: #E8A64A; --focus: #8AA8FF;
   --s-abj: #7FA9DA; --s-div: #A8A3D6; --s-enc: #E07FAE; --s-evo: #F08A5D; --s-ill: #B392E8; --s-inv: #5CC7A8; --s-nec: #A3AAB8; --s-tra: #D9A94A;
   --pd-bg: #3A2214; --pd-bd: #F08A5D; --pd-fg: #F6B08E; --pa-bg: #3A1E1C; --pa-bd: #E46F62; --pa-fg: #F2A39A; --ps-bg: #1C2540; --ps-bd: #7F9BE0; --ps-fg: #AFC2F2; --pf-bg: #2C2140; --pf-bd: #B392E8; --pf-fg: #D3BDF5; --pn-bd: #4A5166;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
-  --bg: #10131B; --surface: #171B26; --sunk: #0C0F15; --ink: #E8E4D8; --muted: #9CA2B4; --rule: #2B3142;
+  --bg: #10131B; --surface: #171B26; --sunk: #0C0F15; --note-bg: #2A2416; --ink: #E8E4D8; --muted: #9CA2B4; --rule: #2B3142;
   --rubric: #E46F62; --rubric-soft: #3A1E1C; --gold: #D6AA4E; --ok: #6FC08E; --warn: #E8A64A; --focus: #8AA8FF;
   --s-abj: #7FA9DA; --s-div: #A8A3D6; --s-enc: #E07FAE; --s-evo: #F08A5D; --s-ill: #B392E8; --s-inv: #5CC7A8; --s-nec: #A3AAB8; --s-tra: #D9A94A;
   --pd-bg: #3A2214; --pd-bd: #F08A5D; --pd-fg: #F6B08E; --pa-bg: #3A1E1C; --pa-bd: #E46F62; --pa-fg: #F2A39A; --ps-bg: #1C2540; --ps-bd: #7F9BE0; --ps-fg: #AFC2F2; --pf-bg: #2C2140; --pf-bd: #B392E8; --pf-fg: #D3BDF5; --pn-bd: #4A5166;
@@ -295,6 +296,18 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .libmark.ok { color: var(--ok); font-weight: 500; }
 .rubric.rit { border-bottom-color: var(--ok); } .rubric.rit h3 { color: var(--ok); }
 @media (prefers-reduced-motion: no-preference) { .pip { transition: transform .1s, background .12s; } }
+/* Notes par sort */
+.npen { flex: none; width: 34px; height: 34px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: var(--pn-bd); font-size: 17px; line-height: 1; padding: 0; }
+.npen:hover { border-color: var(--rule); color: var(--muted); }
+.npen.has { border-color: var(--gold); background: var(--note-bg); color: var(--gold); }
+.npen.on { background: var(--gold); border-color: var(--gold); color: var(--surface); }
+.npre { margin: 0 0 2px 28px; background: var(--note-bg); border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0; padding: 3px 9px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nedit { margin: 4px 0 6px 28px; display: grid; gap: 6px; }
+.nedit textarea { font-size: 14.5px; line-height: 1.4; border: 1.5px solid var(--gold); border-radius: 6px; padding: 7px 9px; background: var(--surface); resize: vertical; width: 100%; box-sizing: border-box; }
+.nedit .cast { display: flex; align-items: center; gap: 8px; }
+.nbtn { flex: none; font-size: 12.5px; font-weight: 700; padding: 5px 9px; border-radius: 6px; border: 1.2px solid var(--gold); background: var(--note-bg); color: var(--gold); }
+.nbtn[aria-pressed="true"] { background: var(--gold); color: var(--surface); }
+.nbox { background: var(--note-bg); border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0; padding: 7px 10px; font-size: 14px; line-height: 1.4; margin: 4px 0 2px; white-space: pre-wrap; max-width: 72ch; }
 /* Passage de niveau */
 .lvrow { display: flex; gap: 6px; align-items: stretch; min-width: 0; }
 .lvrow select { flex: 0 0 auto; width: 4.2em; }
@@ -411,7 +424,7 @@ try { const t = localStorage.getItem("grimoire.tab"); if (t) S.tab = t; if (loca
 
 function blank(name) {
   return { name: name || "Nouveau magicien", level: 1, int: 16, school: "Évocation", cantrips: [], spells: [],
-    prepared: [], used: {}, arcane: false, extras: [], effects: [], notes: "", updatedAt: Date.now() };
+    prepared: [], used: {}, arcane: false, extras: [], effects: [], notes: "", snotes: {}, updatedAt: Date.now() };
 }
 const fxKey = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const NO_TRACK = ["Instantanée", "Jusqu'à dissipation", "Spéciale"]; // durées non suivies dans « En cours »
@@ -423,6 +436,7 @@ function norm(g) {
   o.spells = o.spells.filter(x => x && BY_ID[x.id]); o.cantrips = o.cantrips.filter(id => BY_ID[id]);
   o.prepared = o.prepared.filter(id => o.spells.some(x => x.id === id));
   if (!o.used || typeof o.used !== "object") o.used = {};
+  if (!o.snotes || typeof o.snotes !== "object" || Array.isArray(o.snotes)) o.snotes = {}; // notes personnelles par sort : {id: texte}
   if (!Array.isArray(o.effects)) o.effects = []; // sorts en cours : {k, id, name, d, c (concentration), note}
   o.effects.forEach(e => { if (!e.k) e.k = fxKey(); });
   return o;
@@ -652,6 +666,25 @@ function grimoireHTML(g) {
   h += `<div class="rubric"><h3>Notes</h3></div><textarea id="f-notes" placeholder="Grimoires trouvés, sorts à copier, idées…"${ro}>${esc(g.notes)}</textarea>`;
   return h;
 }
+// ---------- Notes personnelles par sort ----------
+const noteOf = (g, s) => (g.snotes && g.snotes[s.id]) || "";
+function notePen(g, s) {
+  if (S.readonly) return "";
+  const has = !!noteOf(g, s), ed = S.noteEdit === s.id;
+  return `<button class="npen${has ? " has" : ""}${ed ? " on" : ""}" data-a="note-edit" data-id="${s.id}" aria-label="${has ? "Modifier la note" : "Ajouter une note"} : ${esc(s.n)}" aria-expanded="${ed}">✎</button>`;
+}
+function noteGerer(g, s) {
+  const n = noteOf(g, s);
+  if (S.noteEdit === s.id) {
+    const v = S.ndraft != null ? S.ndraft : n;
+    return `<div class="nedit"><textarea id="n-edit" rows="3" maxlength="600" placeholder="Rappel, règle de table, phrase préparée…" aria-label="Note pour ${esc(s.n)}">${esc(v)}</textarea>
+    <div class="cast"><button class="btn cast-go sm" data-a="note-save" data-id="${s.id}">Enregistrer</button><button class="btn sm" data-a="note-cancel">Annuler</button>${n ? `<span style="flex:1"></span><button class="linkbtn" data-a="note-clear" data-id="${s.id}">Effacer</button>` : ""}</div></div>`;
+  }
+  return n ? `<div class="npre">${esc(n)}</div>` : "";
+}
+const noteBtn = (g, s) => noteOf(g, s) ? `<button class="nbtn" data-a="note-show" data-id="${s.id}" aria-pressed="${S.noteShow === s.id}">Note</button>` : "";
+const noteBox = (g, s) => `<div class="nbox">${esc(noteOf(g, s))}</div>`;
+
 // Mode Gérer : une ligne par sort (case Préparer, nom, pastilles clés), détail complet au toucher du nom
 function gererRow(g, s, x, locked, p, cantrip) {
   const open = S.openRow === s.id, ro = S.readonly ? " disabled" : "";
@@ -665,7 +698,7 @@ function gererRow(g, s, x, locked, p, cantrip) {
     ${!cantrip && !locked && !S.readonly ? castHTML(g, s, p) : ""}
     <div class="rowact"><span class="origin">${origin}</span>${removeBtn((cantrip ? "c:" : "s:") + s.id, ro)}</div></div>`;
   }
-  return `<div class="jrow${p ? " on" : ""}"><div class="jline">${box}<div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div></div>${body}${concWarnHTML(g, s)}</div>`;
+  return `<div class="jrow${p ? " on" : ""}"><div class="jline">${box}<div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${notePen(g, s)}</div>${noteGerer(g, s)}${body}${concWarnHTML(g, s)}</div>`;
 }
 // Autres sorts : une ligne (nom + « utilisé »), usage et actions au toucher du nom
 function extraRow(x, i, manage) {
@@ -782,8 +815,8 @@ function jeuRow(g, s, kind) {
     if (kind === "prep") { const lv = firstFree(g, s); act = lv ? `<button class="btn cast-go sm" data-a="cast" data-id="${s.id}" data-l="${lv}">${lv === s.l ? "Lancer" : "Lancer · niv. " + lv}</button>` : `<button class="btn cast-none sm" disabled>Épuisé</button>`; }
     else if (kind === "rit") act = `<button class="btn cast-rit sm" data-a="cast-rit" data-id="${s.id}">Rituel</button>`;
   }
-  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${act}</div>
-  ${open ? `<div class="jbody">${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${kind !== "cantrip" && !S.readonly ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
+  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${noteBtn(g, s)}${act}</div>
+  ${!open && noteOf(g, s) && S.noteShow === s.id ? noteBox(g, s) : ""}${open ? `<div class="jbody">${noteOf(g, s) ? noteBox(g, s) : ""}${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${kind !== "cantrip" && !S.readonly ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
 }
 function jeuHTML(g) {
   const prepared = new Set(g.prepared), max = R.maxLevel(g.level), slots = R.slots(g.level);
@@ -907,6 +940,7 @@ function printable(g) {
   const sp = lv => g.spells.map(x => BY_ID[x.id]).filter(s => s.l === lv).sort(byName);
   const t = s => `${s.c ? '<span class="tag">C</span>' : ""}${s.ri ? '<span class="tag r">R</span>' : ""}`;
   const short = x => (x || "").replace(/^réussite : /, "").replace("moitié des dégâts", "moitié");
+  const pn = s => g.snotes && g.snotes[s.id] ? `<div style="margin-top:2px;padding-left:6px;border-left:2px solid #8A6516;font-style:italic">✎ ${esc(g.snotes[s.id])}</div>` : "";
   const pl = s => `<div class="pls">${pillData(s, g).map(p => `<span class="pl ${p.k}">${esc(p.l === "Jet" ? cap(p.sub) : p.v)}${p.k === "s" && p.sub ? ` <i>(${esc(short(p.sub))})</i>` : p.k === "a" ? " <i>/ CA</i>" : ""}${p.conc ? " <i>(conc.)</i>" : ""}</span>`).join("")}</div>`;
   const dots = (n, fut) => Array.from({length: n}, () => `<span class="dot${fut ? " fut" : ""}"></span>`).join("");
   const futSlots = next > max ? (SLOTS[R.unlockAt(next)] || [])[next - 1] || 0 : 0;
@@ -914,7 +948,7 @@ function printable(g) {
   for (let lv = 1; lv <= next; lv++) {
     const locked = lv > max, list = sp(lv);
     rows += `<tr class="lvl"><td colspan="4">Niveau ${lv}<span>${locked ? `s'ouvre au niveau ${R.unlockAt(lv)}` : `${slots[lv - 1]} emplacement${slots[lv - 1] > 1 ? "s" : ""}`}</span></td></tr>`;
-    list.forEach(s => { rows += `<tr><td class="c"><span class="box"></span></td><td class="n">${esc(s.n)} ${t(s)}</td><td class="m">${esc(s.t)} · ${esc(s.v.replace(/,/g, ", "))}</td><td>${pl(s)}${esc(s.e)}${s.up ? ` <i style="color:#5a6176">${esc(s.up)}.</i>` : ""}</td></tr>`; });
+    list.forEach(s => { rows += `<tr><td class="c"><span class="box"></span></td><td class="n">${esc(s.n)} ${t(s)}</td><td class="m">${esc(s.t)} · ${esc(s.v.replace(/,/g, ", "))}</td><td>${pl(s)}${esc(s.e)}${pn(s)}${s.up ? ` <i style="color:#5a6176">${esc(s.up)}.</i>` : ""}</td></tr>`; });
     for (let i = 0; i < (locked ? 3 : 2); i++) rows += `<tr class="blank"><td class="c"><span class="box"></span></td><td></td><td></td><td></td></tr>`;
   }
   const extras = g.extras.map(x => `<tr><td class="n">${esc(x.name)}</td><td class="c"><span class="box"></span></td><td>${esc(x.note)}</td></tr>`).join("");
@@ -949,7 +983,7 @@ ${next > max ? `<div class="slot"><span class="l" style="color:#9aa0ae">Niveau $
 <div class="callout"><span class="box"></span> <b>Restauration arcanique</b> : une fois par jour, après un repos court, récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</div>
 <h2>Sorts mineurs <small>à volonté · jamais préparés</small></h2>
 <table><tr><th>Sort</th><th>Incantation · composantes</th><th>Effet</th></tr>
-${can.map(s => `<tr><td class="n">${esc(s.n)} ${t(s)}</td><td class="m">${esc(s.t)} · ${esc(s.v.replace(/,/g, ", "))}</td><td>${pl(s)}${esc(s.e)}${s.up ? ` <i style="color:#5a6176">${esc(s.up)}.</i>` : ""}</td></tr>`).join("")}
+${can.map(s => `<tr><td class="n">${esc(s.n)} ${t(s)}</td><td class="m">${esc(s.t)} · ${esc(s.v.replace(/,/g, ", "))}</td><td>${pl(s)}${esc(s.e)}${pn(s)}${s.up ? ` <i style="color:#5a6176">${esc(s.up)}.</i>` : ""}</td></tr>`).join("")}
 ${Array.from({length: Math.max(0, R.cantrips(g.level) - can.length) || 1}, () => `<tr class="blank"><td></td><td></td><td></td></tr>`).join("")}</table>
 ${g.extras.length ? `<h2>Autres sorts <small>race, dons, objets</small></h2><table><tr><th>Sort</th><th>Utilisé</th><th>Usage et effet</th></tr>${extras}</table>` : ""}
 <div class="callout"><b>Concentration : un seul sort à la fois.</b> Dégâts subis : JdS de Constitution, DD 10 ou la moitié des dégâts (le plus élevé).</div>
@@ -1134,8 +1168,8 @@ document.addEventListener("click", e => {
     S.confirm = null;
     mutate(g => {
       const [t, v] = [k.slice(0, 1), k.slice(2)];
-      if (t === "c") g.cantrips = g.cantrips.filter(id => id !== v);
-      if (t === "s") { g.spells = g.spells.filter(x => x.id !== v); g.prepared = g.prepared.filter(id => id !== v); }
+      if (t === "c") { g.cantrips = g.cantrips.filter(id => id !== v); delete g.snotes[v]; }
+      if (t === "s") { g.spells = g.spells.filter(x => x.id !== v); g.prepared = g.prepared.filter(id => id !== v); delete g.snotes[v]; }
       if (t === "x") { g.extras.splice(+v, 1); S.editX = null; S.xdraft = null; S.openRow = null; }
     });
   }
@@ -1205,6 +1239,23 @@ document.addEventListener("click", e => {
   else if (a === "row") { S.openRow = S.openRow === b.dataset.id ? null : b.dataset.id; S.castOpen = null; render(); }
   else if (a === "util") { S.openUtil = true; render(); }
   else if (a === "undo") { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } }
+  else if (a === "note-edit") {
+    const id = b.dataset.id; S.noteEdit = S.noteEdit === id ? null : id; S.ndraft = null; render();
+    if (S.noteEdit) { const el = document.getElementById("n-edit"); if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(el.value.length, el.value.length); } }
+  }
+  else if (a === "note-save") {
+    const id = b.dataset.id, el = document.getElementById("n-edit"), v = el ? el.value.trim() : "";
+    S.noteEdit = null; S.ndraft = null;
+    mutate(g => { if (v) g.snotes[id] = v; else delete g.snotes[id]; });
+    toast(v ? "Note enregistrée" : "Note effacée");
+  }
+  else if (a === "note-cancel") { S.noteEdit = null; S.ndraft = null; render(); }
+  else if (a === "note-clear") {
+    const id = b.dataset.id, g = G(), old = g && g.snotes[id]; S.noteEdit = null; S.ndraft = null;
+    mutate(g => { delete g.snotes[id]; });
+    toast("Note effacée", () => { mutate(g => { g.snotes[id] = old; }); return "Note rétablie"; });
+  }
+  else if (a === "note-show") { S.noteShow = S.noteShow === b.dataset.id ? null : b.dataset.id; render(); }
   else if (a === "lu-open") { const g = G(); if (!g || g.level >= 20 || S.readonly) return; luOpen(g); render(); const x = document.querySelector("#lvlup .lufoot .primary"); if (x) x.focus({ preventScroll: true }); }
   else if (a === "lu-close") { S.lu = null; render(); }
   else if (S.lu && a === "lu-next") { S.lu.step = Math.min(3, S.lu.step + 1); S.lu.open = null; render(); }
@@ -1265,6 +1316,7 @@ document.addEventListener("input", e => {
   const t = e.target;
   if (t.id === "f-full") { mutate(g => { g.name = t.value || "Sans nom"; }, false); const g = G(), h = document.getElementById("title"); if (h && g) h.innerHTML = `<span class="initial">${esc(g.name.charAt(0))}</span>${esc(g.name.slice(1))}`; }
   else if (t.id === "f-notes") mutate(g => { g.notes = t.value; }, false);
+  else if (t.id === "n-edit") S.ndraft = t.value;
   else if (t.id === "conc-dmg") { const el = document.getElementById("conc-dd"); if (el) el.textContent = `JdS CON · DD ${concDD(t.value)}`; }
   else if (t.id === "x-ename" || t.id === "x-enote") S.xdraft = { name: document.getElementById("x-ename").value, note: document.getElementById("x-enote").value };
   else if (t.id === "f-q") { S.f.q = t.value; const p = document.getElementById("panel"); if (p) { p.innerHTML = biblioHTML(G()); const q = document.getElementById("f-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); } }
