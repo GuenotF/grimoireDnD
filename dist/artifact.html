@@ -834,7 +834,7 @@ function biblioHTML(g) {
       <label class="check"><input type="checkbox" data-a="ftog" data-v="conc"${f.conc ? " checked" : ""}> Concentration</label>
       <label class="check"><input type="checkbox" data-a="ftog" data-v="rit"${f.rit ? " checked" : ""}> Rituel</label>
       <label class="check"><input type="checkbox" data-a="ftog" data-v="reachable"${f.reachable ? " checked" : ""}> Accessibles à son niveau</label>
-      <label class="check"><input type="checkbox" data-a="ftog" data-v="hideOwned"${f.hideOwned ? " checked" : ""}> Masquer ceux du grimoire</label>
+      <label class="check"><input type="checkbox" data-a="ftog" data-v="hideOwned"${f.hideOwned ? " checked" : ""}> Masquer les sorts déjà appris</label>
     </div></div>
     <p class="found">${list.length} sort${list.length > 1 ? "s" : ""}${R.savant(g, {s: g.school}) ? ` · ${esc(g.school)} : copie à moitié prix (Savant en ${esc(g.school)})` : ""}${q ? "" : " · touche un sort pour voir sa description, ou fais une recherche pour tout afficher"}</p>`;
   let cur = -1;
@@ -850,12 +850,12 @@ function biblioHTML(g) {
 }
 function libRow(g, s, owned, max, prefix) {
   const key = "lib:" + s.id, open = S.openRow === key;
-  const mark = owned.has(s.id) ? `<span class="libmark ok">Au grimoire</span>` : s.l > max ? `<span class="libmark">Niveau ${R.unlockAt(s.l)} requis</span>` : "";
+  const mark = owned.has(s.id) ? `<span class="libmark ok">Déjà appris</span>` : s.l > max ? `<span class="libmark">Niveau ${R.unlockAt(s.l)} requis</span>` : "";
   return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button><span class="kps">${keyPills(s, g)}</span></div>${mark}</div>
   ${open ? `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g, prefix)}<div class="rowact">${addBtns(g, s, owned, max)}</div></div>` : ""}</div>`;
 }
 function addBtns(g, s, owned, max) {
-  if (owned.has(s.id)) return `<span class="origin">Dans le grimoire</span>`;
+  if (owned.has(s.id)) return `<span class="origin">Déjà appris</span>`;
   if (S.readonly) return "";
   if (s.l === 0) return `<button class="btn" data-a="add" data-id="${s.id}" data-how="mineur">Apprendre</button>`;
   if (s.l > max) return `<span class="origin">Niveau ${R.unlockAt(s.l)} requis</span>`;

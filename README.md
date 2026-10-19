@@ -29,7 +29,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 - *Repos court* : assistant de Restauration arcanique (choix rapides valides, budget de niveaux, une fois par jour).
 
 **Onglet Bibliothèque**
-- Les 213 sorts, filtrables par niveau, école, concentration, rituel, accessibilité et présence au grimoire.
+- Les 213 sorts, filtrables par niveau, école, concentration, rituel, accessibilité et sorts déjà appris.
 - Une ligne par sort par défaut ; les résultats d'une recherche s'affichent avec leur description complète.
 - Ajout par montée de niveau ou par copie (coût calculé, moitié prix pour l'école du magicien).
 
