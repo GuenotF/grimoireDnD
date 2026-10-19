@@ -185,8 +185,9 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 .welcome { margin-top: 40px; display: grid; gap: 14px; justify-items: start; max-width: 60ch; }
 .welcome h1 { font-family: var(--f-display); font-weight: 500; font-size: 40px; margin: 0; }
 .welcome h1 .initial { color: var(--rubric); font-weight: 700; }
-.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: var(--r); font-size: 14px; z-index: 5; max-width: calc(100% - 32px); width: max-content; display: flex; align-items: center; gap: 14px; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: var(--r); font-size: 14px; z-index: 9; max-width: calc(100% - 32px); width: max-content; display: flex; align-items: center; gap: 14px; }
 .toast.above-bar { bottom: calc(var(--barh, 58px) + 16px); }
+.toast.on-top { bottom: auto; top: calc(14px + env(safe-area-inset-top, 0px)); }
 .toast .undo { background: transparent; border: 0; color: var(--rubric-soft); font-weight: 700; padding: 4px 2px; }
 /* Lancer un sort */
 .cast { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
@@ -248,6 +249,20 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .jextra { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--rule); padding: 8px 0; }
 .jextra .n { flex: 1; min-width: 0; font-family: var(--f-display); font-weight: 700; }
 .jextra .n small { display: block; font-family: var(--f-body); font-weight: 400; font-size: 13px; color: var(--muted); }
+.fxback { position: fixed; inset: 0; z-index: 7; background: rgba(27,33,54,.28); }
+.fxsheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; max-height: 75vh; overflow-y: auto; background: var(--surface); border-radius: 14px 14px 0 0; box-shadow: 0 -6px 24px rgba(27,33,54,.2); padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 10px; max-width: 640px; margin: 0 auto; }
+.fxsheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--rule); justify-self: center; }
+.fxsheet .head { display: flex; justify-content: space-between; align-items: baseline; }
+.fxsheet .head h2 { font-family: var(--f-display); font-weight: 500; font-size: 22px; color: var(--rubric); margin: 0; }
+.fxsheet .help { font-size: 13px; color: var(--muted); line-height: 1.4; margin: -4px 0 0; }
+.fxitem { display: grid; grid-template-columns: 10px minmax(0,1fr) auto; gap: 4px 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--rule); }
+.fxitem:last-of-type { border-bottom: 1px solid var(--rule); }
+.fxitem .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--pf-bd); }
+.fxitem .dot.c { background: var(--rubric); }
+.fxitem .n { font-family: var(--f-display); font-weight: 700; font-size: 16px; }
+.fxitem .sub { font-size: 13px; color: var(--muted); }
+.fxitem .sub b { color: var(--rubric); font-weight: 500; }
+.fxitem input { grid-column: 2 / 4; font-size: 14px; padding: 5px 8px; }
 .rubric.rit { border-bottom-color: var(--ok); } .rubric.rit h3 { color: var(--ok); }
 @media (prefers-reduced-motion: no-preference) { .pip { transition: transform .1s, background .12s; } }
 </style>
@@ -267,6 +282,8 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 <div class="toast" id="toast" hidden></div>
 <div class="slotbar" id="slotbar" hidden></div>
 <div class="concpanel" id="concpanel" role="dialog" aria-label="Concentration" hidden></div>
+<div class="fxback" id="fxback" data-a="fx-close" hidden></div>
+<div class="fxsheet" id="fxsheet" role="dialog" aria-label="Sorts en cours" hidden></div>
 
 <script>
 const SPELLS = /*SPELLS*/[];
@@ -301,7 +318,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const fr = n => n.toLocaleString("fr-FR");
 
 // ---------- État ----------
-const S = { list: {}, cur: null, tab: "grimoire", mode: "pending", readonly: false, view: "gerer", openRow: null, openUtil: false, concWarn: null, concPanel: false,
+const S = { list: {}, cur: null, tab: "grimoire", mode: "pending", readonly: false, view: "gerer", fxOpen: false, openRow: null, openUtil: false, concWarn: null, concPanel: false,
   f: { q: "", lvl: "all", school: "", conc: false, rit: false, hideOwned: false, reachable: false },
   confirm: null, newForm: false };
 try { const t = localStorage.getItem("grimoire.tab"); if (t) S.tab = t; if (localStorage.getItem("grimoire.view") === "jeu") S.view = "jeu"; } catch (e) {}
@@ -310,6 +327,8 @@ function blank(name) {
   return { name: name || "Nouveau magicien", level: 1, int: 16, school: "Évocation", cantrips: [], spells: [],
     prepared: [], used: {}, arcane: false, extras: [], notes: "", updatedAt: Date.now() };
 }
+const fxKey = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const NO_TRACK = ["Instantanée", "Jusqu'à dissipation", "Spéciale"]; // durées non suivies dans « En cours »
 function norm(g) {
   // Les documents reçus de la base sont figés (lecture seule) : on travaille sur une copie profonde.
   const b = blank(); const o = Object.assign(b, JSON.parse(JSON.stringify(g || {})));
@@ -318,7 +337,8 @@ function norm(g) {
   o.spells = o.spells.filter(x => x && BY_ID[x.id]); o.cantrips = o.cantrips.filter(id => BY_ID[id]);
   o.prepared = o.prepared.filter(id => o.spells.some(x => x.id === id));
   if (!o.used || typeof o.used !== "object") o.used = {};
-  if (!Array.isArray(o.effects)) o.effects = []; // sorts en cours : {id, name, d, c (concentration), note}
+  if (!Array.isArray(o.effects)) o.effects = []; // sorts en cours : {k, id, name, d, c (concentration), note}
+  o.effects.forEach(e => { if (!e.k) e.k = fxKey(); });
   return o;
 }
 const G = () => S.cur && S.list[S.cur] ? S.list[S.cur] : null;
@@ -397,6 +417,10 @@ function render(fromSnapshot) {
   document.getElementById("toast").classList.toggle("above-bar", showBar);
   const cp = document.getElementById("concpanel"), cur = g && concOf(g), showCp = showBar && S.concPanel && !!cur;
   cp.hidden = !showCp; if (showCp) cp.innerHTML = concPanelHTML(cur);
+  const showFx = showBar && S.fxOpen && g.effects.length > 0, fs = document.getElementById("fxsheet");
+  fs.hidden = !showFx; document.getElementById("fxback").hidden = !showFx; if (showFx) fs.innerHTML = fxSheetHTML(g);
+  if (!showFx) S.fxOpen = false;
+  document.getElementById("toast").classList.toggle("on-top", showFx);
 }
 function renderPicker() {
   const ids = Object.keys(S.list).sort((a, b) => S.list[a].name.localeCompare(S.list[b].name, "fr"));
@@ -575,7 +599,8 @@ function castHTML(g, s, prepared) {
 }
 function slotbarHTML(g) {
   const cur = concOf(g);
-  const fx = cur ? `<div class="fx"><button class="chip conc" data-a="conc-panel" aria-expanded="${S.concPanel}">◉ ${esc(cur.name)} · conc.</button></div>` : "";
+  const others = g.effects.filter(e => !e.c);
+  const fx = g.effects.length ? `<div class="fx">${cur ? `<button class="chip conc" data-a="conc-panel" aria-expanded="${S.concPanel}">◉ ${esc(cur.name)} · conc.</button>` : ""}${others.map(e => `<button class="chip" data-a="fx-open">${esc(e.name)} · ${esc(e.d)}</button>`).join("")}${g.effects.length > 1 || !cur ? `<button class="chip" data-a="fx-open" style="background:transparent;border-color:var(--rule);color:var(--muted)">Tout voir</button>` : ""}</div>` : "";
   return `${fx}<button class="line" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g.level).map((n, i) => {
     const used = Math.min(n, +(g.used[i + 1] || 0));
     return `<span class="lv" aria-label="Niveau ${i + 1} : ${n - used} sur ${n}"><b>${i + 1}</b>${Array.from({ length: n }, (_, k) => `<span class="d${k < used ? " u" : ""}"></span>`).join("")}</span>`;
@@ -595,6 +620,14 @@ function concWarnHTML(g, s) {
   if (!w || w.id !== s.id || !cur) return "";
   return `<div class="concwarn" role="alert"><div><b>${esc(s.n)} demande ta concentration.</b> ${w.rit ? "Le lancer en rituel" : "Le lancer"} met fin à <b>${esc(cur.name)}</b>.</div>
   <div class="cast"><button class="btn cast-go" data-a="cast-force" data-id="${s.id}" data-l="${w.lv}" data-rit="${w.rit ? 1 : 0}">Lancer quand même</button><button class="btn" data-a="conc-cancel">Annuler</button></div></div>`;
+}
+function fxSheetHTML(g) {
+  const list = [...g.effects].sort((a, b) => (b.c ? 1 : 0) - (a.c ? 1 : 0));
+  return `<div class="grab"></div><div class="head"><h2>En cours</h2><button class="btn ghost" data-a="fx-all">Tout terminer</button></div>
+  <p class="help">Ajoutés quand tu lances un sort qui dure. La durée est un rappel en temps de jeu, pas un minuteur. Le repos long vide la liste.</p>
+  <div>${list.map(e => `<div class="fxitem"><span class="dot${e.c ? " c" : ""}"></span><div><div class="n">${esc(e.name)}</div><div class="sub">${e.c ? "<b>Concentration</b> · jusqu'à " : ""}${esc(e.d)}</div></div><button class="btn" data-a="fx-end" data-k="${e.k}">Terminer</button>
+  <input type="text" id="fx-note-${e.k}" data-k="${e.k}" class="fxnote" value="${esc(e.note || "")}" placeholder="Note facultative (cible, détail…)" aria-label="Note pour ${esc(e.name)}"></div>`).join("")}</div>
+  <button class="btn" data-a="fx-close" style="justify-self:end">Fermer</button>`;
 }
 const liveMark = (g, s) => { const c = concOf(g); return c && c.id === s.id ? `<span class="live">◉ en cours</span>` : ""; };
 
@@ -898,7 +931,8 @@ document.addEventListener("click", e => {
     const prev = JSON.parse(JSON.stringify({ used: g.used, effects: g.effects }));
     mutate(g => {
       if (!rit) g.used[lv] = (+(g.used[lv] || 0)) + 1;
-      if (s.c) { g.effects = g.effects.filter(e => !e.c); g.effects.push({ id: s.id, name: s.n, d: s.d, c: true }); }
+      if (s.c) { g.effects = g.effects.filter(e => !e.c); g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: true, note: "" }); }
+      else if (!NO_TRACK.includes(s.d)) g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: false, note: "" });
     });
     const ended = s.c && cur && cur.id !== s.id ? ` · fin de ${esc(cur.name)}` : "";
     toast((rit ? `<b>${esc(s.n)}</b> lancé en rituel : +10 min, aucun emplacement` : `<b>${esc(s.n)}</b> lancé · emplacement de niveau ${lv}`) + ended,
@@ -915,6 +949,14 @@ document.addEventListener("click", e => {
     mutate(g => { g.effects = g.effects.filter(e => !e.c); });
     toast(`Concentration perdue : <b>${esc(cur.name)}</b> prend fin`, () => mutate(g => { g.effects = prev; }));
   }
+  else if (a === "fx-open") { S.fxOpen = true; S.concPanel = false; render(); }
+  else if (a === "fx-close") { S.fxOpen = false; render(); }
+  else if (a === "fx-end" || a === "fx-all") {
+    const g = G(); if (!g) return; const prev = JSON.parse(JSON.stringify(g.effects));
+    const gone = a === "fx-all" ? null : g.effects.find(e => e.k === b.dataset.k);
+    mutate(g => { g.effects = a === "fx-all" ? [] : g.effects.filter(e => e.k !== b.dataset.k); });
+    toast(a === "fx-all" ? "Tous les sorts en cours sont terminés" : `<b>${esc(gone ? gone.name : "Sort")}</b> terminé`, () => mutate(g => { g.effects = prev; }));
+  }
   else if (a === "view") { S.view = b.dataset.v; S.openRow = null; S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); }
   else if (a === "row") { S.openRow = S.openRow === b.dataset.id ? null : b.dataset.id; S.castOpen = null; render(); }
   else if (a === "util") { S.openUtil = true; render(); }
@@ -929,6 +971,7 @@ document.addEventListener("change", e => {
   if (t.id === "cur") { setCur(t.value); return; }
   if (a === "prep") return mutate(g => { const id = t.dataset.id; g.prepared = t.checked ? [...g.prepared, id] : g.prepared.filter(x => x !== id); });
   if (a === "arcane") return mutate(g => { g.arcane = t.checked; });
+  if (t.classList.contains("fxnote")) return mutate(g => { const e = g.effects.find(e => e.k === t.dataset.k); if (e) e.note = t.value.trim(); }, false);
   if (a === "xused") return mutate(g => { g.extras[+t.dataset.i].used = t.checked; });
   if (a === "ftog") { S.f[t.dataset.v] = t.checked; render(); return; }
   if (t.id === "f-level") return mutate(g => { g.level = +t.value; });
