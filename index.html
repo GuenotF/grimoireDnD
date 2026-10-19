@@ -438,7 +438,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const fr = n => n.toLocaleString("fr-FR");
 
 // ---------- État ----------
-const S = { list: {}, cur: null, tab: "grimoire", mode: "pending", readonly: false, view: "gerer", fxOpen: false, shortOpen: false, sr: {}, openRow: null, openUtil: false, concWarn: null, concPanel: false,
+const S = { list: {}, cur: null, tab: "grimoire", mode: "pending", readonly: false, view: "gerer", fxOpen: false, shortOpen: false, sr: {}, openRow: null, concWarn: null, concPanel: false,
   f: { q: "", lvl: "all", school: "", conc: false, rit: false, hideOwned: false, reachable: false },
   confirm: null, newForm: false };
 try { const t = localStorage.getItem("grimoire.tab"); if (t) S.tab = t; if (localStorage.getItem("grimoire.view") === "jeu") S.view = "jeu"; } catch (e) {}
@@ -845,11 +845,10 @@ function jeuHTML(g) {
   let h = "";
   const cans = g.cantrips.map(id => BY_ID[id]).sort(byName);
   if (cans.length) {
+    // Sorts mineurs : un par ligne, ceux qui ont un jet (attaque, sauvegarde) d'abord
     const combat = cans.filter(s => s.j), util = cans.filter(s => !s.j);
     h += `<div class="rubric"><h3>Sorts mineurs</h3><span class="aside">à volonté</span></div>`;
-    combat.forEach(s => { h += jeuRow(g, s, "cantrip"); });
-    if (util.length > 1 && !S.openUtil) h += `<div class="jrow"><div class="jline"><button class="jname" data-a="util" aria-expanded="false">${util.map(s => esc(s.n)).join(" · ")}<span class="chev">${util.length} utilitaires ▾</span></button></div></div>`;
-    else util.forEach(s => { h += jeuRow(g, s, "cantrip"); });
+    [...combat, ...util].forEach(s => { h += jeuRow(g, s, "cantrip"); });
   }
   for (let lv = 1; lv <= max; lv++) {
     const list = g.spells.map(x => BY_ID[x.id]).filter(s => s.l === lv && prepared.has(s.id)).sort(byName);
@@ -1259,7 +1258,6 @@ document.addEventListener("click", e => {
   }
   else if (a === "view") { S.view = b.dataset.v; S.openRow = null; S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); }
   else if (a === "row") { S.openRow = S.openRow === b.dataset.id ? null : b.dataset.id; S.castOpen = null; render(); }
-  else if (a === "util") { S.openUtil = true; render(); }
   else if (a === "undo") { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } }
   else if (a === "note-edit") {
     const id = b.dataset.id; S.noteEdit = S.noteEdit === id ? null : id; S.ndraft = null; render();
