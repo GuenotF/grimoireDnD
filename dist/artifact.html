@@ -289,6 +289,9 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .slotbar .prepc { font-size: 13px; color: var(--muted); white-space: nowrap; }
 .slotbar .prepc b { color: var(--ink); font-size: 14px; }
 .slotbar .prepc.over, .slotbar .prepc.over b { color: var(--warn); }
+@media (max-width: 560px) { .filters { position: static; } }
+.libmark { flex: none; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.libmark.ok { color: var(--ok); font-weight: 500; }
 .rubric.rit { border-bottom-color: var(--ok); } .rubric.rit h3 { color: var(--ok); }
 @media (prefers-reduced-motion: no-preference) { .pip { transition: transform .1s, background .12s; } }
 </style>
@@ -766,15 +769,23 @@ function biblioHTML(g) {
       <label class="check"><input type="checkbox" data-a="ftog" data-v="reachable"${f.reachable ? " checked" : ""}> Accessibles à son niveau</label>
       <label class="check"><input type="checkbox" data-a="ftog" data-v="hideOwned"${f.hideOwned ? " checked" : ""}> Masquer ceux du grimoire</label>
     </div></div>
-    <p class="found">${list.length} sort${list.length > 1 ? "s" : ""}${R.savant(g, {s: g.school}) ? ` · ${esc(g.school)} : copie à moitié prix (Savant en ${esc(g.school)})` : ""}</p>`;
+    <p class="found">${list.length} sort${list.length > 1 ? "s" : ""}${R.savant(g, {s: g.school}) ? ` · ${esc(g.school)} : copie à moitié prix (Savant en ${esc(g.school)})` : ""}${q ? "" : " · touche un sort pour voir sa description, ou fais une recherche pour tout afficher"}</p>`;
   let cur = -1;
   list.forEach(s => {
     if (f.lvl === "all" && s.l !== cur) { cur = s.l; h += `<div class="rubric${s.l > max ? " locked" : ""}"><h3>${LVL_NAME[s.l]}</h3><span class="aside">${s.l === 0 ? `${g.cantrips.length} sur ${R.cantrips(g.level)} connus` : s.l > max ? `s'ouvre au niveau ${R.unlockAt(s.l)} de magicien` : `accessible`}</span></div>`; }
+    // Sans recherche : une ligne par sort, dépliable. Avec une recherche : résultats affichés en entier.
+    if (!q) { h += libRow(g, s, owned, max, f.lvl === "all" ? "" : LVL_NAME[s.l] + " · "); return; }
     h += `<div class="spell noprep"><div><div class="name">${esc(s.n)}${tags(s)}<span class="vo">${esc(s.en)}</span></div>${spellBody(s, g, f.lvl === "all" ? "" : LVL_NAME[s.l] + " · ")}</div>
     <div class="actions">${addBtns(g, s, owned, max)}</div></div>`;
   });
   if (!list.length) h += `<div class="empty">Aucun sort ne correspond à ces filtres.</div>`;
   return h;
+}
+function libRow(g, s, owned, max, prefix) {
+  const key = "lib:" + s.id, open = S.openRow === key;
+  const mark = owned.has(s.id) ? `<span class="libmark ok">Au grimoire</span>` : s.l > max ? `<span class="libmark">Niveau ${R.unlockAt(s.l)} requis</span>` : "";
+  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button><span class="kps">${keyPills(s, g)}</span></div>${mark}</div>
+  ${open ? `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g, prefix)}<div class="rowact">${addBtns(g, s, owned, max)}</div></div>` : ""}</div>`;
 }
 function addBtns(g, s, owned, max) {
   if (owned.has(s.id)) return `<span class="origin">Dans le grimoire</span>`;
