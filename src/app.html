@@ -516,12 +516,12 @@ function renderPicker() {
   const ids = Object.keys(S.list).sort((a, b) => S.list[a].name.localeCompare(S.list[b].name, "fr"));
   const p = document.getElementById("picker");
   p.innerHTML = (ids.length ? `<select id="cur" aria-label="Grimoire affiché">${ids.map(id => `<option value="${esc(id)}"${id === S.cur ? " selected" : ""}>${esc(S.list[id].name)} · niv. ${S.list[id].level}</option>`).join("")}</select>` : "")
-    + `<button class="btn" data-a="new"${S.readonly ? " disabled" : ""}>Nouveau magicien</button><span class="status" id="status"></span>`;
+    + (ids.length ? `<button class="btn" data-a="new"${S.readonly ? " disabled" : ""}>Nouveau magicien</button>` : "") + `<span class="status" id="status"></span>`;
 }
 function welcomeHTML() {
   return `<div class="welcome"><h1><span class="initial">G</span>rimoires</h1>
-  <p>Aucun grimoire pour l'instant. Crée un magicien, choisis son école, puis ajoute ses sorts depuis la bibliothèque des 213 sorts de magicien du Manuel des joueurs.</p>
-  <button class="btn primary" data-a="new"${S.readonly ? " disabled" : ""}>Créer un magicien</button></div>`;
+  <p>Aucun grimoire pour l'instant. Crée un magicien, choisis son école, puis ajoute ses sorts depuis la bibliothèque des 213 sorts de magicien du Manuel des joueurs. Tu as déjà un grimoire sauvegardé (fichier .json ou .txt) ? Importe-le.</p>
+  <div class="frow"><button class="btn primary" data-a="new"${S.readonly ? " disabled" : ""}>Créer un magicien</button>${S.readonly ? "" : `<label class="btn" for="f-import">Importer un grimoire</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden>`}</div></div>`;
 }
 function heroHTML(g) {
   const prof = R.prof(g.level), mod = R.mod(g.int), max = R.maxLevel(g.level);
