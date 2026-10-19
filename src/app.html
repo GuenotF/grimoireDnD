@@ -626,6 +626,11 @@ ${g.level >= 2 ? `<p><b>Savant en ${esc(g.school)} :</b> temps et or divisés pa
 let toastT;
 function toast(t) { const el = document.getElementById("toast"); el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 2600); }
 function mutate(fn, rerender = true) { const g = G(); if (!g || S.readonly) return; fn(g); save(S.cur); if (rerender) render(); }
+// Nom des fichiers de sauvegarde, datés pour qu'ils se rangent d'eux-mêmes : « Grimoire - Némeia - 2026-10-19 »
+function backupName(g) {
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  return `Grimoire - ${g.name} - ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
 const exportJSON = g => JSON.stringify({ format: "grimoire-5e", version: 1, grimoire: g }, null, 2);
 // Partage par le menu du téléphone (Web Share). Uniquement hors de claude.ai, qui le refuse.
 function canShareFiles() {
@@ -633,7 +638,7 @@ function canShareFiles() {
   try { return navigator.canShare({ files: [new File(["{}"], "test.txt", { type: "text/plain" })] }); } catch (e) { return false; }
 }
 function shareToGM(g) {
-  const json = exportJSON(g), base = `Grimoire - ${g.name}`;
+  const json = exportJSON(g), base = backupName(g);
   // Safari partage le .json ; Chrome (Android) n'accepte de façon fiable que le .txt (même contenu, réimportable).
   const json1 = new File([json], base + ".json", { type: "application/json" }), txt = new File([json], base + ".txt", { type: "text/plain" });
   const files = isIOS() ? [json1, txt] : [txt, json1];
@@ -698,7 +703,7 @@ document.addEventListener("click", e => {
     if (!w) toast("Le navigateur a bloqué l'ouverture : autorise les fenêtres pour ce fichier.");
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
-  else if (a === "dl-json") { const g = G(); offer(`Grimoire - ${g.name}.json`, exportJSON(g)); }
+  else if (a === "dl-json") { const g = G(); offer(backupName(g) + ".json", exportJSON(g)); }
   else if (a === "share-json") shareToGM(G());
   else if (a === "del") {
     if (S.confirm !== "del") { S.confirm = "del"; render(); return; }
