@@ -599,9 +599,7 @@ function grimoireHTML(g) {
       <div class="bar"><button class="btn ghost" type="button" data-a="xcancel">Annuler</button><button class="btn primary" type="submit">Enregistrer</button></div></form>`;
       return;
     }
-    h += `<div class="extra"><div><div class="n">${esc(x.name)}</div>${x.note ? `<div class="meta muted">${esc(x.note)}</div>` : ""}</div>
-    <label class="check"><input type="checkbox" data-a="xused" data-i="${i}"${x.used ? " checked" : ""}${ro}> utilisé</label>
-    <div class="actions">${ro ? "" : `<button class="btn ghost" data-a="xedit" data-i="${i}" aria-label="Modifier ${esc(x.name)}">Modifier</button>`}${removeBtn("x:" + i, ro)}</div></div>`;
+    h += extraRow(x, i, true);
   });
   h += `</div>${S.readonly ? "" : `<form class="addrow" data-a="addx"><input type="text" id="x-name" placeholder="Nom du sort" required aria-label="Nom du sort"><input type="text" id="x-note" placeholder="Usage et effet (ex. 1/repos long, 3d10 feu)" aria-label="Usage et effet"><button class="btn" type="submit">Ajouter</button></form>`}`;
 
@@ -621,6 +619,13 @@ function gererRow(g, s, x, locked, p, cantrip) {
     <div class="rowact"><span class="origin">${origin}</span>${removeBtn((cantrip ? "c:" : "s:") + s.id, ro)}</div></div>`;
   }
   return `<div class="jrow${p ? " on" : ""}"><div class="jline">${box}<div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div></div>${body}${concWarnHTML(g, s)}</div>`;
+}
+// Autres sorts : une ligne (nom + « utilisé »), usage et actions au toucher du nom
+function extraRow(x, i, manage) {
+  const key = "x:" + i, open = S.openRow === key, ro = S.readonly ? " disabled" : "";
+  const body = open ? `<div class="jbody">${x.note ? `<div class="eff">${esc(x.note)}</div>` : `<div class="meta">Aucune description.${manage && !S.readonly ? " Utilise « Modifier » pour en ajouter une." : ""}</div>`}
+    ${manage && !S.readonly ? `<div class="rowact"><button class="btn ghost" data-a="xedit" data-i="${i}" aria-label="Modifier ${esc(x.name)}">Modifier</button>${removeBtn(key, ro)}</div>` : ""}</div>` : "";
+  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(x.name)}<span class="chev">${open ? "▴" : "▾"}</span></button></div><label class="check"><input type="checkbox" data-a="xused" data-i="${i}"${x.used ? " checked" : ""}${ro}> utilisé</label></div>${body}</div>`;
 }
 function removeBtn(key, ro) {
   if (ro) return "";
@@ -755,7 +760,7 @@ function jeuHTML(g) {
   if (rits.length) { h += `<div class="rubric rit"><h3>Rituels</h3><span class="aside">depuis le grimoire, +10 min, sans emplacement</span></div>`; rits.forEach(s => { h += jeuRow(g, s, "rit"); }); }
   if (g.extras.length) {
     h += `<div class="rubric"><h3>Autres sorts</h3></div>`;
-    g.extras.forEach((x, i) => { h += `<div class="jextra"><span class="n">${esc(x.name)}${x.note ? `<small>${esc(x.note)}</small>` : ""}</span><label class="check"><input type="checkbox" data-a="xused" data-i="${i}"${x.used ? " checked" : ""}${S.readonly ? " disabled" : ""}> utilisé</label></div>`; });
+    g.extras.forEach((x, i) => { h += extraRow(x, i, false); });
   }
   return h;
 }
@@ -987,7 +992,7 @@ document.addEventListener("click", e => {
       const [t, v] = [k.slice(0, 1), k.slice(2)];
       if (t === "c") g.cantrips = g.cantrips.filter(id => id !== v);
       if (t === "s") { g.spells = g.spells.filter(x => x.id !== v); g.prepared = g.prepared.filter(id => id !== v); }
-      if (t === "x") { g.extras.splice(+v, 1); S.editX = null; S.xdraft = null; }
+      if (t === "x") { g.extras.splice(+v, 1); S.editX = null; S.xdraft = null; S.openRow = null; }
     });
   }
   else if (a === "dl-print") { const g = G(); offer(`Grimoire - ${g.name}.html`, printable(g)); }
@@ -1058,7 +1063,7 @@ document.addEventListener("click", e => {
   else if (a === "undo") { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { u(); toast("Lancement annulé"); } }
   else if (a === "to-slots") { const el = document.getElementById("slots-top"); if (el) el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); }
   else if (a === "hide-ios") { try { localStorage.setItem("grimoire.iosTip", "0"); } catch (e) {} render(); }
-  else if (a === "xedit") { S.editX = +b.dataset.i; S.xdraft = null; render(); const el = document.getElementById("x-ename"); if (el) { el.focus(); el.select(); } }
+  else if (a === "xedit") { S.openRow = null; S.editX = +b.dataset.i; S.xdraft = null; render(); const el = document.getElementById("x-ename"); if (el) { el.focus(); el.select(); } }
   else if (a === "xcancel") { S.editX = null; S.xdraft = null; render(); }
 });
 document.addEventListener("change", e => {
