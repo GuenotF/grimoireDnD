@@ -8,6 +8,8 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 **Le magicien**
 - Niveau, Intelligence et tradition arcanique : DD, bonus d'attaque, emplacements, nombre de sorts préparés et de sorts mineurs calculés automatiquement.
+- Dés des sorts mineurs à dégâts ajustés au niveau (5, 11, 17).
+- **Passage de niveau** : le bouton *↑ Niveau N*, à côté du sélecteur, ouvre un assistant en 3 étapes : ce qui change (DD, attaque, emplacements, préparation, Restauration arcanique, sorts mineurs), choix des 2 sorts gratuits (et du sort mineur supplémentaire aux niveaux 4 et 10), validation avec préparation facultative. Annulable. Le sélecteur reste un réglage direct, sans assistant (création, correction).
 - Plusieurs grimoires sur le même appareil.
 
 **Onglet Grimoire, mode « Gérer »** (préparer et organiser)

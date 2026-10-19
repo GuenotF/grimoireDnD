@@ -292,6 +292,61 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .libmark.ok { color: var(--ok); font-weight: 500; }
 .rubric.rit { border-bottom-color: var(--ok); } .rubric.rit h3 { color: var(--ok); }
 @media (prefers-reduced-motion: no-preference) { .pip { transition: transform .1s, background .12s; } }
+/* Passage de niveau */
+.lvrow { display: flex; gap: 6px; align-items: stretch; min-width: 0; }
+.lvrow select { flex: 0 0 auto; width: 4.2em; }
+.btn.lvup { flex: 1 1 auto; min-width: 0; white-space: nowrap; border-color: var(--rubric); color: var(--pa-fg); font-weight: 700; padding: 6px 10px; }
+.btn.lvup:hover { background: var(--rubric-soft); }
+body.lu-on { overflow: hidden; }
+.lvlup { position: fixed; inset: 0; z-index: 8; background: rgba(27,33,54,.35); display: flex; justify-content: center; align-items: center; }
+.lvlup[hidden] { display: none; }
+.lubox { background: var(--surface); width: 100%; max-width: 560px; height: 100%; max-height: 860px; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(27,33,54,.3); }
+@media (min-width: 600px) { .lubox { height: calc(100% - 48px); border-radius: 12px; overflow: hidden; } }
+.luhead { padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 12px; background: var(--bg); border-bottom: 1px solid var(--rule); display: grid; gap: 10px; }
+.luhead .t { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.luhead h2 { margin: 0; font-family: var(--f-display); font-weight: 500; font-size: 23px; line-height: 1.15; }
+.luhead h2 .initial { color: var(--rubric); font-weight: 700; }
+.luhead .x { font-size: 20px; background: transparent; border: 0; color: var(--muted); padding: 0 4px; }
+.lusteps { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
+.lusteps div { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+.lusteps div::before { content: ""; height: 4px; border-radius: 2px; background: var(--rule); }
+.lusteps .done::before, .lusteps .cur::before { background: var(--rubric); }
+.lusteps .cur { color: var(--ink); font-weight: 700; }
+.lubody { flex: 1; overflow-y: auto; padding: 14px 16px; display: grid; align-content: start; gap: 14px; }
+.lufoot { padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 8px; background: var(--surface); }
+.lufoot .btn { padding: 9px 15px; font-size: 14.5px; }
+.lunew { background: var(--rubric-soft); border: 1.5px solid var(--rubric); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; color: var(--pa-fg); }
+.lunew .k { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; }
+.lunew b.h { font-family: var(--f-display); font-size: 19px; }
+.lunew .sl { display: flex; align-items: center; gap: 6px; font-size: 14px; flex-wrap: wrap; }
+.lunew .sl .o { width: 15px; height: 15px; border-radius: 50%; border: 1.6px solid var(--rubric); box-sizing: border-box; }
+.lutab { display: grid; }
+.lutab > div { display: grid; grid-template-columns: minmax(0,1fr) 58px 16px 58px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--sunk); font-size: 14.5px; font-variant-numeric: tabular-nums; }
+.lutab > div > :nth-child(n+2) { text-align: center; }
+.lutab .hd { font-family: var(--f-sc); font-size: 11.5px; letter-spacing: .05em; color: var(--muted); border-bottom-color: var(--rule); }
+.lutab .old { color: var(--muted); } .lutab .ar { color: var(--pn-bd); }
+.lutab .same { color: var(--muted); } .lutab .same b { font-weight: 400; }
+.lusub { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+.lucan { display: flex; align-items: center; gap: 8px; font-size: 14.5px; }
+.lucan .n { flex: 1; font-family: var(--f-display); font-weight: 700; }
+.lucan s { color: var(--muted); }
+.lunote { font-size: 13.5px; color: var(--muted); line-height: 1.45; border-left: 3px solid var(--gold); padding-left: 10px; display: grid; gap: 4px; }
+.lunote b { color: var(--ink); }
+.lupicks { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; }
+.lupick { font-size: 13.5px; font-weight: 700; color: var(--surface); background: var(--rubric); border-radius: 999px; padding: 3px 4px 3px 11px; display: inline-flex; align-items: center; gap: 4px; border: 0; }
+.lupick span { padding: 0 5px; }
+.luempty { font-size: 13.5px; color: var(--muted); border: 1px dashed var(--pn-bd); border-radius: 999px; padding: 3px 11px; }
+.lurow.on { background: linear-gradient(90deg, var(--rubric-soft), transparent 80%); }
+.btn.pick { border-color: var(--rubric); color: var(--pa-fg); }
+.btn.pick[aria-pressed="true"] { background: var(--rubric); color: var(--surface); font-weight: 700; }
+.luprep { background: var(--bg); border-radius: 10px; padding: 12px; display: grid; gap: 8px; font-size: 14px; line-height: 1.4; }
+.luprep h3 { margin: 0; font-family: var(--f-display); font-size: 17px; }
+.luprep label { display: flex; align-items: center; gap: 8px; font-size: 14.5px; }
+.luprep input { width: 20px; height: 20px; accent-color: var(--rubric); }
+.luadd > div { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.luadd .n { flex: 1; font-family: var(--f-display); font-weight: 700; font-size: 16px; }
+.luadd small { color: var(--muted); font-size: 12.5px; }
+.linkbtn { background: transparent; border: 0; padding: 2px 0; color: var(--muted); text-decoration: underline; justify-self: start; font-size: 13.5px; }
 </style>
 
 <div class="wrap" id="app">
@@ -311,6 +366,7 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 <div class="concpanel" id="concpanel" role="dialog" aria-label="Concentration" hidden></div>
 <div class="fxback" id="fxback" data-a="fx-close" hidden></div>
 <div class="fxsheet" id="fxsheet" role="dialog" aria-label="Sorts en cours" hidden></div>
+<div class="lvlup" id="lvlup" role="dialog" aria-modal="true" aria-label="Passage de niveau" hidden></div>
 
 <script>
 const SPELLS = /*SPELLS*/[];
@@ -447,7 +503,11 @@ function render(fromSnapshot) {
   const showFx = showBar && S.fxOpen && g.effects.length > 0, fs = document.getElementById("fxsheet");
   fs.hidden = !showFx; document.getElementById("fxback").hidden = !showFx; if (showFx) fs.innerHTML = fxSheetHTML(g);
   if (!showFx) S.fxOpen = false;
-  document.getElementById("toast").classList.toggle("on-top", showFx);
+  const lu = document.getElementById("lvlup"), showLu = !!g && !!S.lu && !S.readonly;
+  if (!showLu) S.lu = null;
+  lu.hidden = !showLu; document.body.classList.toggle("lu-on", showLu);
+  if (showLu) { const sc = lu.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; lu.innerHTML = luHTML(g); const nb = lu.querySelector(".lubody"); if (nb && S.luKeep) nb.scrollTop = top; S.luKeep = false; }
+  document.getElementById("toast").classList.toggle("on-top", showFx || showLu);
 }
 function renderPicker() {
   const ids = Object.keys(S.list).sort((a, b) => S.list[a].name.localeCompare(S.list[b].name, "fr"));
@@ -472,7 +532,7 @@ function heroHTML(g) {
   </div>
   <div class="setup">
     <div class="field"><label for="f-full">Nom complet</label><input id="f-full" type="text" value="${esc(g.name)}"${ro}></div>
-    <div class="field"><label for="f-level">Niveau de magicien</label><select id="f-level"${ro}>${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select></div>
+    <div class="field"><label for="f-level">Niveau de magicien</label><div class="lvrow"><select id="f-level"${ro}>${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select>${g.level < 20 && !S.readonly ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}</div></div>
     <div class="field"><label for="f-int">Intelligence (valeur)</label><input id="f-int" type="number" min="1" max="30" value="${g.int}"${ro}></div>
     <div class="field"><label for="f-school">Tradition arcanique</label><select id="f-school"${ro}>${SCHOOLS.map(s=>`<option${s===g.school?" selected":""}>${s}</option>`).join("")}</select></div>
   </div>
@@ -506,7 +566,7 @@ function metaLine(s) {
 // Pastilles : dégâts ou effet → jet → portée / zone → durée
 function pillData(s, g) {
   const out = [];
-  if (s.p) out.push(s.p.startsWith("d:") ? { k: "d", l: "Dégâts", v: s.p.slice(2) } : { k: "f", l: "Effet", v: s.p.slice(2) });
+  if (s.p) out.push(s.p.startsWith("d:") ? { k: "d", l: "Dégâts", v: pText(s, g.level) } : { k: "f", l: "Effet", v: pText(s, g.level) });
   if (s.j === "atk") out.push({ k: "a", l: "Ton jet", v: `Attaque ${signed(R.prof(g.level) + R.mod(g.int))}`, sub: s.ok, short: "contre la CA" });
   else if (s.j === "auto") out.push({ k: "n", l: "Jet", v: "Aucun", sub: s.ok });
   else if (s.j) {
@@ -520,6 +580,9 @@ function pillData(s, g) {
   return out;
 }
 const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+// Sorts mineurs à dégâts : un dé de plus aux niveaux 5, 11 et 17
+const tier = lv => 1 + (lv >= 5) + (lv >= 11) + (lv >= 17);
+function pText(s, lv) { if (!s.p) return ""; const v = s.p.slice(2); return s.l === 0 && s.p.startsWith("d:") && s.up ? v.replace(/^(\d+)d/, (m, n) => (n * tier(lv)) + "d") : v; }
 function pillsHTML(s, g) {
   return `<div class="pills">${pillData(s, g).map(p => `<div class="pill ${p.k}"><span class="pl">${p.l}</span><span class="pv">${esc(p.v)}</span>${p.sub ? `<span class="ps${p.conc ? " conc" : ""}">${esc(p.sub)}</span>` : ""}</div>`).join("")}</div>`;
 }
@@ -703,7 +766,7 @@ const liveMark = (g, s) => { const c = concOf(g); return c && c.id === s.id ? `<
 // ---------- Mode En jeu ----------
 function keyPills(s, g) {
   let h = "";
-  if (s.p) h += `<span class="kp ${s.p.startsWith("d:") ? "d" : "f"}">${esc(s.p.slice(2))}</span>`;
+  if (s.p) h += `<span class="kp ${s.p.startsWith("d:") ? "d" : "f"}">${esc(pText(s, g.level))}</span>`;
   if (s.j === "atk") h += `<span class="kp a" title="Attaque de sort">${signed(R.prof(g.level) + R.mod(g.int))}</span>`;
   else if (s.j && s.j !== "auto") { const fixed = /^DD (\d+) fixe/.exec(s.ok || ""); h += `<span class="kp s" title="Jet de sauvegarde de la cible">${s.j} ${fixed ? fixed[1] : 8 + R.prof(g.level) + R.mod(g.int)}</span>`; }
   return h;
@@ -905,6 +968,95 @@ ${g.level >= 2 ? `<p><b>Savant en ${esc(g.school)} :</b> temps et or divisés pa
 </body></html>`;
 }
 
+// ---------- Passage de niveau ----------
+// Assistant ouvert par le bouton « ↑ Niveau N » : ce qui change, sorts gratuits, validation.
+// Le sélecteur de niveau reste un réglage direct (création, correction), sans assistant.
+function luOpen(g) { S.lu = { step: 1, to: g.level + 1, picks: [], cpicks: [], prep: [], flt: R.maxLevel(g.level + 1), open: null }; S.concPanel = false; S.fxOpen = false; S.shortOpen = false; }
+const luNeed = (g, to) => ({ s: 2, c: Math.max(0, R.cantrips(to) - R.cantrips(g.level)) });
+const firstName = g => g.name.trim().split(/\s+/)[0] || g.name;
+const plural = (n, w, ws) => `${n} ${n > 1 ? (ws || w + "s") : w}`;
+function luHTML(g) {
+  const L = S.lu, to = L.to, b = { ...g, level: to }, step = L.step, fn = firstName(g);
+  const names = ["Ce qui change", "Sorts gratuits", "Valider"];
+  const head = `<div class="luhead"><div class="t"><h2><span class="initial">${esc(fn.charAt(0))}</span>${esc(fn.slice(1))} passe au niveau ${to}</h2><button class="x" data-a="lu-close" aria-label="Fermer l'assistant">✕</button></div>
+  <div class="lusteps">${names.map((n, i) => `<div class="${i + 1 < step ? "done" : i + 1 === step ? "cur" : ""}"${i + 1 === step ? ' aria-current="step"' : ""}>${i + 1} · ${n}</div>`).join("")}</div></div>`;
+  const body = step === 1 ? luStep1(g, b) : step === 2 ? luStep2(g, b) : luStep3(g, b);
+  const need = luNeed(g, to);
+  const foot = step === 1 ? `<button class="btn" data-a="lu-close">Annuler</button><button class="btn primary" data-a="lu-next">${need.c ? "Choisir les sorts" : "Choisir les 2 sorts"} →</button>`
+    : step === 2 ? `<button class="btn" data-a="lu-back">← Retour</button><button class="btn primary" data-a="lu-next">Suivant →</button>`
+    : `<button class="btn" data-a="lu-back">← Retour</button><button class="btn primary" data-a="lu-go" style="font-weight:700">Passer au niveau ${to}</button>`;
+  return `<div class="lubox">${head}<div class="lubody">${body}</div><div class="lufoot">${foot}</div></div>`;
+}
+function luStep1(g, b) {
+  const from = g.level, to = b.level, a0 = R.slots(from), a1 = R.slots(to), mod = R.mod(g.int);
+  let h = "";
+  if (a1.length > a0.length) {
+    const lv = a1.length, n = a1[lv - 1];
+    h += `<div class="lunew"><span class="k">Nouveau</span><b class="h">Sorts de niveau ${lv} accessibles</b><div class="sl"><b>Niveau ${lv}</b>${Array.from({ length: n }, () => `<span class="o"></span>`).join("")}<span>${plural(n, "emplacement")}</span></div></div>`;
+  }
+  const more = a1.map((n, i) => [i + 1, n - (a0[i] || 0)]).filter(([lv, d]) => d > 0 && lv <= a0.length);
+  if (more.length) h += `<div class="lunew"><span class="k">${a1.length > a0.length ? "Et aussi" : "Nouveau"}</span><div class="sl">${more.map(([lv, d]) => `<span>+${d} emplacement${d > 1 ? "s" : ""} de niveau ${lv}</span>`).join(" · ")}</div></div>`;
+  const row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
+  const need = luNeed(g, to);
+  h += `<div class="lutab"><div class="hd"><span></span><span>Niv. ${from}</span><span></span><span>Niv. ${to}</span></div>
+  ${row("DD des sorts", 8 + R.prof(from) + mod, 8 + R.prof(to) + mod, "--ps-fg")}
+  ${row("Attaque de sort", signed(R.prof(from) + mod), signed(R.prof(to) + mod), "--pa-fg")}
+  ${row("Sorts préparés", R.prepMax(g), R.prepMax(b))}
+  ${row("Restauration arcanique", R.arcane(from) + " niv.", R.arcane(to) + " niv.")}
+  <div><span>Sorts gratuits à choisir</span><span></span><span></span><b style="color:var(--rubric)">+${need.s}</b></div>
+  ${row("Sorts mineurs connus", R.cantrips(from), R.cantrips(to), "--rubric")}</div>`;
+  if (tier(to) > tier(from)) {
+    const up = g.cantrips.map(id => BY_ID[id]).filter(s => s && s.p && s.p.startsWith("d:") && s.up);
+    if (up.length) h += `<div style="display:grid;gap:6px"><span class="lusub">Tes sorts mineurs gagnent un dé</span>${up.map(s => `<div class="lucan"><span class="n">${esc(s.n)}</span><s>${esc(pText(s, from).split(" ")[0])}</s><span class="kp d">${esc(pText(s, to))}</span></div>`).join("")}</div>`;
+  }
+  const notes = [];
+  if (need.c) notes.push(`<span><b>Un sort mineur de plus</b> : tu le choisis à l'étape suivante.</span>`);
+  if ([2, 6, 10, 14].includes(to)) notes.push(`<span><b>Capacité de tradition arcanique</b> (${esc(g.school)}) : voir le Manuel des joueurs.</span>`);
+  if ([4, 8, 12, 16, 19].includes(to)) notes.push(`<span><b>Amélioration de caractéristiques</b> : si tu augmentes l'Intelligence, change sa valeur dans la fiche, le DD et l'attaque suivront.</span>`);
+  if (to === 18) notes.push(`<span><b>Maîtrise des sorts</b> : un sort de niveau 1 et un de niveau 2 lancés à volonté.</span>`);
+  if (to === 20) notes.push(`<span><b>Sorts de prédilection</b> : deux sorts de niveau 3, une fois chacun par repos court sans emplacement.</span>`);
+  notes.push(`<span>Hors grimoire, à vérifier sur ta fiche : points de vie, capacités de race${g.extras.length ? " et autres sorts (certains se débloquent avec le niveau)" : ""}.</span>`);
+  return h + `<div class="lunote">${notes.join("")}</div>`;
+}
+function luStep2(g, b) {
+  const L = S.lu, to = b.level, max = R.maxLevel(to), need = luNeed(g, to), maxOld = R.maxLevel(g.level);
+  const owned = new Set([...g.spells.map(x => x.id), ...g.cantrips]);
+  const chips = (arr, n, word) => `<div class="lupicks"><b>${arr.length} / ${n}</b>${arr.map(id => `<button class="lupick" data-a="lu-pick" data-id="${id}" aria-label="Retirer ${esc(BY_ID[id].n)}">${esc(BY_ID[id].n)}<span aria-hidden="true">✕</span></button>`).join("")}${arr.length < n ? `<span class="luempty">${arr.length ? (arr.length + 1) + "e" : n > 1 ? "1er" : ""} ${word}…</span>` : ""}</div>`;
+  let h = `<div style="font-size:14px;line-height:1.4">Choisis <b>${plural(need.s, "sort")} de magicien</b> de niveau 1${max > 1 ? " à " + max : ""}, gratuits${need.c ? `, et <b>${plural(need.c, "sort mineur", "sorts mineurs")}</b>` : ""}. Ceux déjà dans ton grimoire n'apparaissent pas.</div>`;
+  h += chips(L.picks, need.s, "sort");
+  if (need.c) h += chips(L.cpicks, need.c, "sort mineur");
+  const lvls = []; for (let lv = max; lv >= 1; lv--) lvls.push(lv); if (need.c) lvls.push(0);
+  h += `<div class="chips">${lvls.map(lv => `<button class="chip" data-a="lu-flt" data-v="${lv}" aria-pressed="${L.flt === lv}">${lv === 0 ? "Sorts mineurs" : `Niv. ${lv}${lv > maxOld ? " · nouveau" : ""}`}</button>`).join("")}</div>`;
+  const list = SPELLS.filter(s => s.l === L.flt && !owned.has(s.id)).sort((x, y) => x.n.localeCompare(y.n, "fr"));
+  const arr = L.flt === 0 ? L.cpicks : L.picks, full = arr.length >= (L.flt === 0 ? need.c : need.s);
+  h += `<div>${list.map(s => {
+    const on = arr.includes(s.id), open = L.open === s.id;
+    return `<div class="jrow lurow${on ? " on" : ""}"><div class="jline"><div class="jmain"><button class="jname" data-a="lu-row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button><span class="kps">${keyPills(s, b)}</span></div>
+    <button class="btn sm pick" data-a="lu-pick" data-id="${s.id}" aria-pressed="${on}"${!on && full ? " disabled" : ""}>${on ? "✓ Choisi" : "Choisir"}</button></div>
+    ${open ? `<div class="jbody"><div class="meta">${metaLine(s)}</div>${pillsHTML(s, b)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}</div>` : ""}</div>`;
+  }).join("") || `<p class="muted">Tous les sorts de ce niveau sont déjà dans ton grimoire.</p>`}</div>`;
+  return h;
+}
+function luStep3(g, b) {
+  const L = S.lu, to = b.level, need = luNeed(g, to), pOld = R.prepMax(g), pNew = R.prepMax(b);
+  const all = [...L.picks, ...L.cpicks];
+  let h = `<div style="display:grid;gap:6px"><span class="lusub">Ajoutés au grimoire · montée de niveau</span>`;
+  h += all.length ? `<div class="luadd">${all.map(id => { const s = BY_ID[id]; return `<div><span class="n">${esc(s.n)}</span><small>${s.l ? "niveau " + s.l : "sort mineur"}</small></div>`; }).join("")}</div>` : `<p class="muted" style="margin:0">Aucun sort choisi.</p>`;
+  const miss = need.s - L.picks.length + need.c - L.cpicks.length;
+  if (miss > 0) h += `<span class="muted" style="font-size:13.5px">${miss > 1 ? miss + " sorts non choisis : tu pourras les ajouter" : "1 sort non choisi : tu pourras l'ajouter"} plus tard depuis la Bibliothèque (Montée de niveau).</span>`;
+  h += `<button class="linkbtn" data-a="lu-edit">Modifier le choix</button></div>`;
+  const n = g.prepared.length + L.prep.length;
+  h += `<div class="luprep"><h3>Préparation</h3><span>Tu peux maintenant préparer <b>${plural(pNew, "sort")}</b>${pNew > pOld ? ` (${pNew - pOld} de plus)` : ""}. En principe, la liste change au prochain repos long : vois avec ton MJ si tu peux préparer un nouveau sort tout de suite.</span>
+  ${L.picks.map(id => `<label><input type="checkbox" data-a="lu-prep" data-id="${id}"${L.prep.includes(id) ? " checked" : ""}> Préparer <b>${esc(BY_ID[id].n)}</b></label>`).join("")}
+  <span class="${n > pNew ? "" : "muted"}" style="font-size:13px${n > pNew ? ";color:var(--warn);font-weight:700" : ""}">Préparés après validation : ${n} / ${pNew}</span></div>`;
+  const a0 = R.slots(g.level), a1 = R.slots(to), gained = a1.some((x, i) => x > (a0[i] || 0));
+  h += `<div style="display:grid;gap:4px;font-size:13.5px;color:var(--muted);line-height:1.45">
+  ${gained ? `<span>• Les nouveaux emplacements sont disponibles tout de suite.</span>` : ""}
+  <span>• DD, attaque${tier(to) > tier(g.level) ? " et dés des sorts mineurs" : ""} sont mis à jour partout, fiche imprimable comprise.</span>
+  <span>• Tu peux revenir au niveau ${g.level} avec le sélecteur de niveau : les sorts ajoutés restent au grimoire.</span></div>`;
+  return h;
+}
+
 // ---------- Actions ----------
 let toastT;
 function toast(t, undo) {
@@ -957,7 +1109,7 @@ async function offer(filename, data) {
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-a]"); if (!b || b.tagName === "FORM") return;
   const a = b.dataset.a;
-  if (["prep","arcane","xused","ftog"].includes(a)) return; // gérés par "change"
+  if (["prep","arcane","xused","ftog","lu-prep"].includes(a)) return; // gérés par "change"
   if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null;
   if (a === "tab") { S.tab = b.dataset.v; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); }
   else if (a === "new") {
@@ -1048,7 +1200,34 @@ document.addEventListener("click", e => {
   else if (a === "view") { S.view = b.dataset.v; S.openRow = null; S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); }
   else if (a === "row") { S.openRow = S.openRow === b.dataset.id ? null : b.dataset.id; S.castOpen = null; render(); }
   else if (a === "util") { S.openUtil = true; render(); }
-  else if (a === "undo") { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { u(); toast("Lancement annulé"); } }
+  else if (a === "undo") { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } }
+  else if (a === "lu-open") { const g = G(); if (!g || g.level >= 20 || S.readonly) return; luOpen(g); render(); const x = document.querySelector("#lvlup .lufoot .primary"); if (x) x.focus({ preventScroll: true }); }
+  else if (a === "lu-close") { S.lu = null; render(); }
+  else if (S.lu && a === "lu-next") { S.lu.step = Math.min(3, S.lu.step + 1); S.lu.open = null; render(); }
+  else if (S.lu && a === "lu-back") { S.lu.step = Math.max(1, S.lu.step - 1); S.lu.open = null; render(); }
+  else if (S.lu && a === "lu-edit") { S.lu.step = 2; render(); }
+  else if (S.lu && a === "lu-flt") { S.lu.flt = +b.dataset.v; S.lu.open = null; render(); }
+  else if (S.lu && a === "lu-row") { S.lu.open = S.lu.open === b.dataset.id ? null : b.dataset.id; S.luKeep = true; render(); }
+  else if (S.lu && a === "lu-pick") {
+    const L = S.lu, g = G(), s = BY_ID[b.dataset.id]; if (!g || !s) return;
+    const need = luNeed(g, L.to), k = s.l === 0 ? "cpicks" : "picks", lim = s.l === 0 ? need.c : need.s;
+    if (L[k].includes(s.id)) { L[k] = L[k].filter(x => x !== s.id); L.prep = L.prep.filter(x => x !== s.id); }
+    else if (L[k].length < lim) L[k].push(s.id);
+    S.luKeep = true; render();
+  }
+  else if (S.lu && a === "lu-go") {
+    const L = S.lu, g = G(); if (!g) return;
+    const prev = JSON.parse(JSON.stringify({ level: g.level, spells: g.spells, cantrips: g.cantrips, prepared: g.prepared })), to = L.to, fn = firstName(g);
+    S.lu = null;
+    mutate(g => {
+      g.level = to;
+      L.picks.forEach(id => { if (!g.spells.some(x => x.id === id)) g.spells.push({ id, how: "niv" }); });
+      L.cpicks.forEach(id => { if (!g.cantrips.includes(id)) g.cantrips.push(id); });
+      L.prep.forEach(id => { if (!g.prepared.includes(id)) g.prepared.push(id); });
+    });
+    toast(`<b>${esc(fn)}</b> passe au niveau ${to}${L.picks.length + L.cpicks.length ? ` · ${plural(L.picks.length + L.cpicks.length, "sort ajouté", "sorts ajoutés")}` : ""}`,
+      () => { mutate(g => Object.assign(g, prev)); return "Passage de niveau annulé"; });
+  }
   else if (a === "to-slots") { const el = document.getElementById("slots-top"); if (el) el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); }
   else if (a === "hide-ios") { try { localStorage.setItem("grimoire.iosTip", "0"); } catch (e) {} render(); }
   else if (a === "xedit") { S.openRow = null; S.editX = +b.dataset.i; S.xdraft = null; render(); const el = document.getElementById("x-ename"); if (el) { el.focus(); el.select(); } }
@@ -1059,6 +1238,7 @@ document.addEventListener("change", e => {
   if (t.id === "cur") { setCur(t.value); return; }
   if (a === "prep") return mutate(g => { const id = t.dataset.id; g.prepared = t.checked ? [...g.prepared, id] : g.prepared.filter(x => x !== id); });
   if (a === "arcane") return mutate(g => { g.arcane = t.checked; });
+  if (a === "lu-prep" && S.lu) { const id = t.dataset.id; S.lu.prep = t.checked ? [...S.lu.prep, id] : S.lu.prep.filter(x => x !== id); S.luKeep = true; render(); return; }
   if (t.classList.contains("fxnote")) return mutate(g => { const e = g.effects.find(e => e.k === t.dataset.k); if (e) e.note = t.value.trim(); }, false);
   if (a === "xused") return mutate(g => { g.extras[+t.dataset.i].used = t.checked; });
   if (a === "ftog") { S.f[t.dataset.v] = t.checked; render(); return; }
@@ -1092,6 +1272,7 @@ document.addEventListener("submit", e => {
   const n = document.getElementById("x-name").value.trim(), note = document.getElementById("x-note").value.trim();
   if (!n) return; mutate(g => g.extras.push({ name: n, note, used: false }));
 });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && S.lu) { S.lu = null; render(); } });
 // ---------- Version hébergée : installation, hors connexion, stockage persistant ----------
 function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }
 function installed() { return navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches); }
