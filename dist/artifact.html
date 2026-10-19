@@ -513,7 +513,7 @@ const firstFree = (g, s) => { for (let lv = s.l; lv <= R.maxLevel(g.level); lv++
 function castHTML(g, s, prepared) {
   let h = "";
   if (prepared) {
-    const lv = firstFree(g, s), higher = R.maxLevel(g.level) > s.l;
+    const lv = firstFree(g, s), higher = !!s.up && R.maxLevel(g.level) > s.l; // ▲ seulement si le sort gagne quelque chose à monter
     h += lv ? `<button class="btn cast-go" data-a="cast" data-id="${s.id}" data-l="${lv}">Lancer · niv. ${lv}</button>` : `<button class="btn cast-none" disabled>Plus d'emplacement</button>`;
     if (higher && lv) h += `<button class="btn cast-up" data-a="cast-open" data-id="${s.id}" aria-label="Lancer ${esc(s.n)} à un niveau supérieur" aria-expanded="${S.castOpen === s.id}">▲</button>`;
   }
