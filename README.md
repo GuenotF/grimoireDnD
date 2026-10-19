@@ -6,7 +6,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 ## Utilisation
 
-- **Adresse** : `https://<ton-pseudo>.github.io/grimoireDnD/`
+- **Adresse** : https://guenotf.github.io/grimoireDnD/
 - **Installer sur Android** : dans Chrome, menu ⋮ › *Ajouter à l'écran d'accueil* (ou *Installer l'application*).
 - **Installer sur iPhone / iPad** : dans Safari, bouton *Partager* › *Sur l'écran d'accueil*. Ouvre ensuite toujours l'atelier depuis cette icône : sur iOS, l'icône a son propre stockage, séparé de Safari.
 
@@ -14,7 +14,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 - **Sur l'appareil**, dans le stockage du navigateur (ou de l'application installée). Rien n'est envoyé à GitHub ni ailleurs.
 - Chaque appareil a ses propres grimoires : il n'y a pas de synchronisation.
-- **Sauvegarde et transfert** : onglet *Imprimer* › *Exporter (.json)*, puis *Importer un grimoire* sur l'autre appareil.
+- **Sauvegarde et transfert** : onglet *Sauvegarde* › *Exporter*, puis *Importer* sur l'autre appareil.
 - Vider les données du navigateur, utiliser la navigation privée ou désinstaller l'icône sur iOS efface les grimoires : exporte-les régulièrement.
 
 ## Organisation du dépôt
