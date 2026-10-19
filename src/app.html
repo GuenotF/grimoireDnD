@@ -634,13 +634,18 @@ function canShareFiles() {
 }
 function shareToGM(g) {
   const json = exportJSON(g), base = `Grimoire - ${g.name}`;
-  // Chrome Android refuse le .json dans le menu de partage : on retombe sur .txt (même contenu, réimportable).
-  const files = [new File([json], base + ".json", { type: "application/json" }), new File([json], base + ".txt", { type: "text/plain" })];
+  // Safari partage le .json ; Chrome (Android) n'accepte de façon fiable que le .txt (même contenu, réimportable).
+  const json1 = new File([json], base + ".json", { type: "application/json" }), txt = new File([json], base + ".txt", { type: "text/plain" });
+  const files = isIOS() ? [json1, txt] : [txt, json1];
   const file = files.find(f => { try { return navigator.canShare({ files: [f] }); } catch (e) { return false; } });
   if (!file) { offer(base + ".json", json); return; }
-  navigator.share({ files: [file], title: base })
+  navigator.share({ files: [file] })
     .then(() => toast("Fichier partagé"))
-    .catch(e => { if (!e || e.name !== "AbortError") toast("Partage impossible ici : utilise « Exporter (.json) »."); });
+    .catch(e => {
+      if (e && e.name === "AbortError") return; // menu fermé sans choisir d'application
+      offer(base + ".json", json); // jamais sans sauvegarde : téléchargement à la place
+      setTimeout(() => toast(`Partage refusé par le navigateur (${(e && e.name) || "erreur"}) : le fichier a été téléchargé à la place.`), 2700);
+    });
 }
 async function offer(filename, data) {
   if (STANDALONE) { // fichier ouvert hors de claude.ai : téléchargement direct par le navigateur
