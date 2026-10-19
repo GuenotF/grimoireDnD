@@ -265,6 +265,22 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .fxitem .sub { font-size: 13px; color: var(--muted); }
 .fxitem .sub b { color: var(--rubric); font-weight: 500; }
 .fxitem input { grid-column: 2 / 4; font-size: 14px; padding: 5px 8px; }
+.short { margin-top: 10px; background: var(--surface); border: 1.5px solid var(--gold); border-radius: 10px; padding: 12px 14px; display: grid; gap: 12px; max-width: 560px; }
+.short h3 { font-family: var(--f-display); font-size: 18px; margin: 0; }
+.short p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.4; }
+.short p b { color: var(--ink); }
+.short .lbl { font-family: var(--f-sc); font-size: 12px; letter-spacing: .05em; color: var(--muted); }
+.short .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.short .quick .btn { border-radius: 999px; }
+.short .quick .btn[aria-pressed="true"] { border-color: var(--gold); background: var(--sunk); font-weight: 700; }
+.short .step { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-top: 1px solid var(--rule); }
+.short .step:last-child { border-bottom: 1px solid var(--rule); }
+.short .step span:first-child { flex: 1; }
+.short .step .btn { width: 36px; height: 36px; padding: 0; font-size: 18px; }
+.short .step b.n { width: 18px; text-align: center; font-variant-numeric: tabular-nums; }
+.short .meter { display: flex; align-items: center; gap: 10px; }
+.short .meter .track { flex: 1; height: 8px; border-radius: 4px; background: var(--sunk); overflow: hidden; }
+.short .meter .fill { height: 100%; background: var(--gold); }
 .rubric.rit { border-bottom-color: var(--ok); } .rubric.rit h3 { color: var(--ok); }
 @media (prefers-reduced-motion: no-preference) { .pip { transition: transform .1s, background .12s; } }
 </style>
@@ -320,14 +336,14 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const fr = n => n.toLocaleString("fr-FR");
 
 // ---------- État ----------
-const S = { list: {}, cur: null, tab: "grimoire", mode: "pending", readonly: false, view: "gerer", fxOpen: false, openRow: null, openUtil: false, concWarn: null, concPanel: false,
+const S = { list: {}, cur: null, tab: "grimoire", mode: "pending", readonly: false, view: "gerer", fxOpen: false, shortOpen: false, sr: {}, openRow: null, openUtil: false, concWarn: null, concPanel: false,
   f: { q: "", lvl: "all", school: "", conc: false, rit: false, hideOwned: false, reachable: false },
   confirm: null, newForm: false };
 try { const t = localStorage.getItem("grimoire.tab"); if (t) S.tab = t; if (localStorage.getItem("grimoire.view") === "jeu") S.view = "jeu"; } catch (e) {}
 
 function blank(name) {
   return { name: name || "Nouveau magicien", level: 1, int: 16, school: "Évocation", cantrips: [], spells: [],
-    prepared: [], used: {}, arcane: false, extras: [], notes: "", updatedAt: Date.now() };
+    prepared: [], used: {}, arcane: false, extras: [], effects: [], notes: "", updatedAt: Date.now() };
 }
 const fxKey = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const NO_TRACK = ["Instantanée", "Jusqu'à dissipation", "Spéciale"]; // durées non suivies dans « En cours »
@@ -512,9 +528,10 @@ function grimoireHTML(g) {
     const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0));
     h += `<div class="slotrow"><span class="lv">Niveau ${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"${ro}></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
   });
-  h += `<div class="restbar"><button class="btn" data-a="longrest"${ro}>Repos long</button>
+  h += `<div class="restbar"><button class="btn" data-a="longrest"${ro}>Repos long</button><button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}"${ro}>Repos court ${S.shortOpen ? "▴" : "▾"}</button>
     <label class="check"><input type="checkbox" data-a="arcane"${g.arcane ? " checked" : ""}${ro}> Restauration arcanique utilisée</label>
     <span class="muted">Au repos court, 1 fois par jour : récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</span></div></div>`;
+  if (S.shortOpen && !S.readonly) h += shortHTML(g);
   if (S.view === "jeu") return h + jeuHTML(g);
 
   // Sorts mineurs
@@ -622,6 +639,37 @@ function concWarnHTML(g, s) {
   if (!w || w.id !== s.id || !cur) return "";
   return `<div class="concwarn" role="alert"><div><b>${esc(s.n)} demande ta concentration.</b> ${w.rit ? "Le lancer en rituel" : "Le lancer"} met fin à <b>${esc(cur.name)}</b>.</div>
   <div class="cast"><button class="btn cast-go" data-a="cast-force" data-id="${s.id}" data-l="${w.lv}" data-rit="${w.rit ? 1 : 0}">Lancer quand même</button><button class="btn" data-a="conc-cancel">Annuler</button></div></div>`;
+}
+// ---------- Repos court : Restauration arcanique ----------
+// Emplacements récupérables : niveaux 1 à 5, dans la limite de ceux dépensés ; budget = moitié du niveau de magicien (arrondi au supérieur).
+function arcaneLevels(g) { const out = []; for (let lv = 1; lv <= Math.min(5, R.maxLevel(g.level)); lv++) { const sp = +(g.used[lv] || 0); if (sp > 0) out.push([lv, sp]); } return out; }
+const srTotal = sr => Object.entries(sr).reduce((a, [lv, n]) => a + lv * n, 0);
+function arcaneCombos(g) {
+  const B = R.arcane(g.level), lv = arcaneLevels(g).reverse(), res = [];
+  (function walk(i, left, cur) {
+    if (i === lv.length) { if (Object.keys(cur).length) res.push({ ...cur }); return; }
+    const [l, sp] = lv[i];
+    for (let n = Math.min(sp, Math.floor(left / l)); n >= 0; n--) { if (n) cur[l] = n; else delete cur[l]; walk(i + 1, left - n * l, cur); }
+    delete cur[l];
+  })(0, B, {});
+  const best = Math.max(0, ...res.map(srTotal));
+  return res.filter(c => srTotal(c) === best).slice(0, 4);
+}
+function srLabel(sr) {
+  const parts = Object.entries(sr).filter(([, n]) => n > 0).sort((a, b) => b[0] - a[0]).map(([lv, n]) => `${n} emplacement${n > 1 ? "s" : ""} de niv. ${lv}`);
+  return parts.join(" + ");
+}
+function shortHTML(g) {
+  const B = R.arcane(g.level), lvls = arcaneLevels(g);
+  let h = `<div class="short"><div><h3>Restauration arcanique</h3><p>Une fois par jour, après un repos court : jusqu'à <b>${B} niveau${B > 1 ? "x" : ""}</b> d'emplacements au total, aucun de niveau 6 ou plus.</p></div>`;
+  if (g.arcane) return h + `<p>Déjà utilisée aujourd'hui : elle revient au prochain repos long.</p><button class="btn ghost" data-a="short-close" style="justify-self:start">Fermer</button></div>`;
+  if (!lvls.length) return h + `<p>Aucun emplacement dépensé : rien à récupérer pour l'instant.</p><button class="btn ghost" data-a="short-close" style="justify-self:start">Fermer</button></div>`;
+  const sr = S.sr, tot = srTotal(sr), combos = arcaneCombos(g), key = c => JSON.stringify(Object.entries(c).filter(([, n]) => n).sort());
+  if (combos.length) h += `<div><span class="lbl">Choix rapides</span><div class="quick">${combos.map(c => `<button class="btn" data-a="sr-pick" data-c='${esc(JSON.stringify(c))}' aria-pressed="${key(c) === key(sr)}">${srLabel(c)}</button>`).join("")}</div></div>`;
+  h += `<div>${lvls.map(([lv, sp]) => { const n = sr[lv] || 0; return `<div class="step"><span><b>Niveau ${lv}</b> <span class="muted" style="font-size:13px">· ${sp} dépensé${sp > 1 ? "s" : ""}</span></span><button class="btn" data-a="sr-dec" data-l="${lv}" aria-label="Un emplacement de niveau ${lv} en moins"${n ? "" : " disabled"}>−</button><b class="n">${n}</b><button class="btn" data-a="sr-inc" data-l="${lv}" aria-label="Un emplacement de niveau ${lv} en plus"${n < sp && tot + lv <= B ? "" : " disabled"}>+</button></div>`; }).join("")}</div>`;
+  h += `<div class="meter"><div class="track"><div class="fill" style="width:${Math.round(100 * tot / B)}%"></div></div><b>${tot} / ${B} niveau${B > 1 ? "x" : ""}</b></div>
+  <div class="cast"><button class="btn cast-go" data-a="sr-go"${tot ? "" : " disabled"}>${tot ? "Récupérer " + srLabel(sr) : "Choisis les emplacements à récupérer"}</button><button class="btn ghost" data-a="short-close">Annuler</button></div></div>`;
+  return h;
 }
 function fxSheetHTML(g) {
   const list = [...g.effects].sort((a, b) => (b.c ? 1 : 0) - (a.c ? 1 : 0));
@@ -890,7 +938,7 @@ document.addEventListener("click", e => {
     setTimeout(() => { const el = document.getElementById("f-full"); if (el) { el.focus(); el.select(); } }, 0);
   }
   else if (a === "pip") mutate(g => { const lv = +b.dataset.l, k = +b.dataset.k, u = +(g.used[lv] || 0); g.used[lv] = k < u ? k : k + 1; });
-  else if (a === "longrest") { S.concPanel = false; mutate(g => { g.used = {}; g.arcane = false; g.effects = []; g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); }
+  else if (a === "longrest") { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.arcane = false; g.effects = []; g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); }
   else if (a === "flvl") { S.f.lvl = b.dataset.v; render(); }
   else if (a === "add") mutate(g => {
     const s = BY_ID[b.dataset.id];
@@ -950,6 +998,17 @@ document.addEventListener("click", e => {
     const prev = JSON.parse(JSON.stringify(g.effects));
     mutate(g => { g.effects = g.effects.filter(e => !e.c); });
     toast(`Concentration perdue : <b>${esc(cur.name)}</b> prend fin`, () => mutate(g => { g.effects = prev; }));
+  }
+  else if (a === "short-open") { S.shortOpen = !S.shortOpen; S.sr = {}; render(); }
+  else if (a === "short-close") { S.shortOpen = false; S.sr = {}; render(); }
+  else if (a === "sr-pick") { S.sr = JSON.parse(b.dataset.c); render(); }
+  else if (a === "sr-inc" || a === "sr-dec") { const lv = +b.dataset.l; S.sr[lv] = Math.max(0, (S.sr[lv] || 0) + (a === "sr-inc" ? 1 : -1)); if (!S.sr[lv]) delete S.sr[lv]; render(); }
+  else if (a === "sr-go") {
+    const g = G(), sr = S.sr; if (!g || !srTotal(sr) || srTotal(sr) > R.arcane(g.level)) return;
+    const prev = JSON.parse(JSON.stringify({ used: g.used, arcane: g.arcane })), label = srLabel(sr);
+    S.shortOpen = false; S.sr = {};
+    mutate(g => { Object.entries(sr).forEach(([lv, n]) => { g.used[lv] = Math.max(0, (+(g.used[lv] || 0)) - n); }); g.arcane = true; });
+    toast(`Restauration arcanique : ${label} récupéré${/s de/.test(label) || label.includes("+") ? "s" : ""}`, () => mutate(g => { g.used = prev.used; g.arcane = prev.arcane; }));
   }
   else if (a === "fx-open") { S.fxOpen = true; S.concPanel = false; render(); }
   else if (a === "fx-close") { S.fxOpen = false; render(); }
