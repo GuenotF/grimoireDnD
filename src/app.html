@@ -539,11 +539,11 @@ function printHTML(g) {
 
 function saveHTML(g) {
   return `<div class="rubric" style="margin-top:4px"><h2>Exporter</h2></div>
-  <p style="max-width:65ch">Enregistre ${esc(g.name)} dans un fichier .json : c'est ta sauvegarde, et c'est ce fichier qu'on importe sur un autre appareil.</p>
-  <div class="frow"><button class="btn primary" data-a="dl-json">Exporter ${esc(g.name)} (.json)</button></div>
+  <p style="max-width:65ch">Enregistre ${esc(g.name)} dans un fichier : c'est ta sauvegarde, et c'est ce fichier qu'on importe sur un autre appareil.${canShareFiles() ? " « Envoyer au MJ » ouvre le menu de partage du téléphone avec le fichier déjà joint : choisis la conversation de ton MJ." : ""}</p>
+  <div class="frow">${canShareFiles() ? `<button class="btn primary" data-a="share-json">Envoyer au MJ</button><button class="btn" data-a="dl-json">Exporter (.json)</button>` : `<button class="btn primary" data-a="dl-json">Exporter ${esc(g.name)} (.json)</button>`}</div>
   ${S.readonly ? "" : `<div class="rubric"><h3>Importer</h3></div>
   <p style="max-width:65ch">Ajoute un grimoire à partir d'un fichier .json exporté depuis l'atelier. L'import crée un nouveau grimoire : il ne remplace pas celui qui est affiché.</p>
-  <div class="frow"><label class="btn" for="f-import">Choisir un fichier…</label><input id="f-import" type="file" accept=".json,application/json" hidden></div>
+  <div class="frow"><label class="btn" for="f-import">Choisir un fichier…</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden></div>
   <div class="rubric"><h3>Supprimer</h3></div>
   <p style="max-width:65ch">La suppression est définitive${S.mode === "local" ? " sur cet appareil" : ""}. Exporte le grimoire avant si tu veux pouvoir le récupérer.</p>
   ${S.confirm === "del" ? `<button class="btn confirm" data-a="del">Supprimer définitivement ${esc(g.name)} ?</button> <button class="btn ghost" data-a="cancel">Annuler</button>` : `<button class="btn" data-a="del">Supprimer ce grimoire</button>`}`}`;
@@ -626,6 +626,22 @@ ${g.level >= 2 ? `<p><b>Savant en ${esc(g.school)} :</b> temps et or divisés pa
 let toastT;
 function toast(t) { const el = document.getElementById("toast"); el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 2600); }
 function mutate(fn, rerender = true) { const g = G(); if (!g || S.readonly) return; fn(g); save(S.cur); if (rerender) render(); }
+const exportJSON = g => JSON.stringify({ format: "grimoire-5e", version: 1, grimoire: g }, null, 2);
+// Partage par le menu du téléphone (Web Share). Uniquement hors de claude.ai, qui le refuse.
+function canShareFiles() {
+  if (!STANDALONE || !navigator.share || !navigator.canShare) return false;
+  try { return navigator.canShare({ files: [new File(["{}"], "test.txt", { type: "text/plain" })] }); } catch (e) { return false; }
+}
+function shareToGM(g) {
+  const json = exportJSON(g), base = `Grimoire - ${g.name}`;
+  // Chrome Android refuse le .json dans le menu de partage : on retombe sur .txt (même contenu, réimportable).
+  const files = [new File([json], base + ".json", { type: "application/json" }), new File([json], base + ".txt", { type: "text/plain" })];
+  const file = files.find(f => { try { return navigator.canShare({ files: [f] }); } catch (e) { return false; } });
+  if (!file) { offer(base + ".json", json); return; }
+  navigator.share({ files: [file], title: base })
+    .then(() => toast("Fichier partagé"))
+    .catch(e => { if (!e || e.name !== "AbortError") toast("Partage impossible ici : utilise « Exporter (.json) »."); });
+}
 async function offer(filename, data) {
   if (STANDALONE) { // fichier ouvert hors de claude.ai : téléchargement direct par le navigateur
     try {
@@ -677,7 +693,8 @@ document.addEventListener("click", e => {
     if (!w) toast("Le navigateur a bloqué l'ouverture : autorise les fenêtres pour ce fichier.");
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
-  else if (a === "dl-json") { const g = G(); offer(`Grimoire - ${g.name}.json`, JSON.stringify({ format: "grimoire-5e", version: 1, grimoire: g }, null, 2)); }
+  else if (a === "dl-json") { const g = G(); offer(`Grimoire - ${g.name}.json`, exportJSON(g)); }
+  else if (a === "share-json") shareToGM(G());
   else if (a === "del") {
     if (S.confirm !== "del") { S.confirm = "del"; render(); return; }
     S.confirm = null; const id = S.cur; const n = G().name; S.cur = null; removeDoc(id).then(() => { pickCurrent(); S.tab = "grimoire"; render(); toast(`${n} supprimé`); }); render();
