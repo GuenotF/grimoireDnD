@@ -26,6 +26,10 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 - **Sorts en cours** : ajoutés automatiquement au lancement, puces dans la barre du bas, volet *En cours* avec note facultative et *Terminer*.
 - **Barre du bas** : emplacements restants toujours visibles, accès direct à la section des emplacements.
 
+**Sections repliables** (Gérer et En jeu)
+- Toucher le titre d'une section (sorts mineurs, chaque niveau, rituels, autres sorts) la replie ou la déplie ; repliée, elle affiche un résumé (« 6 sorts · 4 préparés », emplacements restants en jeu).
+- L'état est retenu sur l'appareil, pour chaque grimoire et séparément pour Gérer et En jeu.
+
 **Repos**
 - *Repos long* : emplacements, capacités et sorts en cours remis à zéro.
 - *Repos court* : assistant de Restauration arcanique (choix rapides valides, budget de niveaux, une fois par jour).

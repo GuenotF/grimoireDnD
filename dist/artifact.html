@@ -99,9 +99,16 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 
 /* Rubriques */
 .rubric { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; border-bottom: 1.5px solid var(--rubric); padding-bottom: 4px; margin: 26px 0 8px; }
-.rubric h2, .rubric h3 { font-family: var(--f-display); font-weight: 500; font-size: 22px; margin: 0; color: var(--rubric); }
+.rubric h2, .rubric h3, .rubric .h { font-family: var(--f-display); font-weight: 500; font-size: 22px; margin: 0; color: var(--rubric); }
 .rubric .aside { font-size: 13.5px; color: var(--muted); font-style: italic; }
 .rubric.locked { border-bottom-color: var(--rule); }
+button.rubric.fold { width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1.5px solid var(--rubric); border-radius: 0; padding: 0 0 4px; color: inherit; justify-content: flex-start; column-gap: 6px; }
+button.rubric.fold .aside { margin-left: auto; }
+button.rubric.fold .chev { font-size: 13px; color: var(--rubric); width: 12px; flex: none; align-self: center; }
+button.rubric.fold .sum { font-size: 13.5px; color: var(--muted); }
+button.rubric.fold.shut { background: var(--surface); border-radius: 6px 6px 0 0; padding: 7px 10px 6px; }
+button.rubric.fold.locked { border-bottom-color: var(--rule); } button.rubric.fold.locked .chev, button.rubric.fold.locked .h { color: var(--muted); }
+button.rubric.fold.rit { border-bottom-color: var(--ok); } button.rubric.fold.rit .chev, button.rubric.fold.rit .h { color: var(--ok); }
 .rubric.locked h3 { color: var(--muted); }
 
 /* Emplacements */
@@ -420,6 +427,7 @@ const fr = n => n.toLocaleString("fr-FR");
 const S = { list: {}, cur: null, tab: "grimoire", mode: "pending", readonly: false, view: "gerer", fxOpen: false, shortOpen: false, sr: {}, openRow: null, concWarn: null, concPanel: false,
   f: { q: "", lvl: "all", school: "", conc: false, rit: false, hideOwned: false, reachable: false },
   confirm: null, newForm: false };
+S.fold = {}; try { S.fold = JSON.parse(localStorage.getItem("grimoire.fold") || "{}") || {}; } catch (e) {}
 try { const t = localStorage.getItem("grimoire.tab"); if (t) S.tab = t; if (localStorage.getItem("grimoire.view") === "jeu") S.view = "jeu"; } catch (e) {}
 
 function blank(name) {
@@ -608,6 +616,13 @@ function spellBody(s, g, prefix) {
 }
 function tags(s) { return `${s.c ? `<span class="tag c" title="Concentration">C</span>` : ""}${s.ri ? `<span class="tag r" title="Rituel">R</span>` : ""}`; }
 
+// ---------- Sections repliables (par grimoire et par mode, retenues sur l'appareil) ----------
+const foldKey = k => `${S.cur}|${S.view === "jeu" ? "jeu" : "gerer"}|${k}`;
+const isFold = k => !!S.fold[foldKey(k)];
+function foldHead(k, cls, title, aside, summary) {
+  const shut = isFold(k);
+  return `<button class="rubric fold${shut ? " shut" : ""}${cls ? " " + cls : ""}" data-a="fold" data-k="${k}" aria-expanded="${!shut}"><span class="chev" aria-hidden="true">${shut ? "▸" : "▾"}</span><span class="h">${title}</span>${shut && summary ? `<span class="sum">${summary}</span>` : ""}<span class="aside">${aside}</span></button>`;
+}
 function grimoireHTML(g) {
   const ro = S.readonly ? " disabled" : "";
   const slots = R.slots(g.level), max = slots.length, pMax = R.prepMax(g);
@@ -625,9 +640,11 @@ function grimoireHTML(g) {
 
   // Sorts mineurs
   const cMax = R.cantrips(g.level);
-  h += `<div class="rubric"><h3>Sorts mineurs</h3><span class="aside">${g.cantrips.length} sur ${cMax} connus · à volonté, jamais préparés</span></div>`;
-  if (!g.cantrips.length) h += `<div class="empty">Aucun sort mineur. Choisis-en ${cMax} dans la bibliothèque (filtre « Mineurs »).</div>`;
-  g.cantrips.map(id => BY_ID[id]).sort(byName).forEach(s => { h += gererRow(g, s, null, false, false, true); });
+  h += foldHead("c", "", "Sorts mineurs", `${g.cantrips.length} sur ${cMax} connus · à volonté, jamais préparés`, plural(g.cantrips.length, "sort"));
+  if (!isFold("c")) {
+    if (!g.cantrips.length) h += `<div class="empty">Aucun sort mineur. Choisis-en ${cMax} dans la bibliothèque (filtre « Mineurs »).</div>`;
+    g.cantrips.map(id => BY_ID[id]).sort(byName).forEach(s => { h += gererRow(g, s, null, false, false, true); });
+  }
 
   // Sorts de niveau 1+
   const prepared = new Set(g.prepared);
@@ -640,7 +657,9 @@ function grimoireHTML(g) {
     const list = g.spells.filter(x => BY_ID[x.id].l === lv).map(x => [x, BY_ID[x.id]]).sort((a, b) => byName(a[1], b[1]));
     const locked = lv > max;
     if (locked && !list.length) { h += `<div class="rubric locked"><h3>Niveau ${lv}</h3><span class="aside">s'ouvre au niveau ${R.unlockAt(lv)} de magicien</span></div>`; continue; }
-    h += `<div class="rubric${locked ? " locked" : ""}"><h3>Niveau ${lv}</h3><span class="aside">${slots[lv - 1] ? `${slots[lv - 1]} emplacement${slots[lv - 1] > 1 ? "s" : ""}` : `s'ouvre au niveau ${R.unlockAt(lv)}`}</span></div>`;
+    const nP = list.filter(([x]) => prepared.has(x.id)).length;
+    h += foldHead("l" + lv, locked ? "locked" : "", `Niveau ${lv}`, slots[lv - 1] ? `${slots[lv - 1]} emplacement${slots[lv - 1] > 1 ? "s" : ""}` : `s'ouvre au niveau ${R.unlockAt(lv)}`, plural(list.length, "sort") + (locked ? "" : ` · ${nP} préparé${nP > 1 ? "s" : ""}`));
+    if (isFold("l" + lv)) continue;
     if (!list.length) h += `<div class="empty">Aucun sort de niveau ${lv}. Ajoute-en depuis la bibliothèque.</div>`;
     list.forEach(([x, s]) => { h += gererRow(g, s, x, locked, prepared.has(s.id), false); });
   }
@@ -648,7 +667,8 @@ function grimoireHTML(g) {
   if (copies.length) h += `<p class="found">Total des copies : ${copies.length} sort${copies.length > 1 ? "s" : ""}, ${fmt(copies.reduce((a, x) => a + x.h, 0))} h et ${fr(copies.reduce((a, x) => a + x.po, 0))} po.</p>`;
 
   // Autres sorts
-  h += `<div class="rubric"><h3>Autres sorts</h3><span class="aside">race, dons, objets magiques</span></div><div class="extras">`;
+  h += foldHead("x", "", "Autres sorts", "race, dons, objets magiques", plural(g.extras.length, "sort"));
+  if (!isFold("x")) { h += `<div class="extras">`;
   if (!g.extras.length) h += `<div class="empty">Rien pour l'instant. Exemple : « Représailles infernales », 1 fois par repos long (héritage tieffelin).</div>`;
   g.extras.forEach((x, i) => {
     if (S.editX === i && !S.readonly) {
@@ -661,7 +681,7 @@ function grimoireHTML(g) {
     }
     h += extraRow(x, i, true);
   });
-  h += `</div>${S.readonly ? "" : `<form class="addrow" data-a="addx"><input type="text" id="x-name" placeholder="Nom du sort" required aria-label="Nom du sort"><input type="text" id="x-note" placeholder="Usage et effet (ex. 1/repos long, 3d10 feu)" aria-label="Usage et effet"><button class="btn" type="submit">Ajouter</button></form>`}`;
+  h += `</div>${S.readonly ? "" : `<form class="addrow" data-a="addx"><input type="text" id="x-name" placeholder="Nom du sort" required aria-label="Nom du sort"><input type="text" id="x-note" placeholder="Usage et effet (ex. 1/repos long, 3d10 feu)" aria-label="Usage et effet"><button class="btn" type="submit">Ajouter</button></form>`}`; }
 
   h += `<div class="rubric"><h3>Notes</h3></div><textarea id="f-notes" placeholder="Grimoires trouvés, sorts à copier, idées…"${ro}>${esc(g.notes)}</textarea>`;
   return h;
@@ -827,21 +847,21 @@ function jeuHTML(g) {
   if (cans.length) {
     // Sorts mineurs : un par ligne, ceux qui ont un jet (attaque, sauvegarde) d'abord
     const combat = cans.filter(s => s.j), util = cans.filter(s => !s.j);
-    h += `<div class="rubric"><h3>Sorts mineurs</h3><span class="aside">à volonté</span></div>`;
-    [...combat, ...util].forEach(s => { h += jeuRow(g, s, "cantrip"); });
+    h += foldHead("c", "", "Sorts mineurs", "à volonté", plural(cans.length, "sort"));
+    if (!isFold("c")) [...combat, ...util].forEach(s => { h += jeuRow(g, s, "cantrip"); });
   }
   for (let lv = 1; lv <= max; lv++) {
     const list = g.spells.map(x => BY_ID[x.id]).filter(s => s.l === lv && prepared.has(s.id)).sort(byName);
     if (!list.length) continue;
-    h += `<div class="rubric"><h3>Niveau ${lv}</h3><span class="aside">${slotsLeft(g, lv)} / ${slots[lv - 1]} restant${slotsLeft(g, lv) > 1 ? "s" : ""}</span></div>`;
-    list.forEach(s => { h += jeuRow(g, s, "prep"); });
+    h += foldHead("l" + lv, "", `Niveau ${lv}`, `${slotsLeft(g, lv)} / ${slots[lv - 1]} restant${slotsLeft(g, lv) > 1 ? "s" : ""}`, plural(list.length, "sort"));
+    if (!isFold("l" + lv)) list.forEach(s => { h += jeuRow(g, s, "prep"); });
   }
   if (!g.prepared.length) h += `<div class="empty">Aucun sort préparé. Passe en mode « Gérer » pour cocher les sorts du jour.</div>`;
   const rits = g.spells.map(x => BY_ID[x.id]).filter(s => s.ri && !prepared.has(s.id) && s.l <= max).sort(byName);
-  if (rits.length) { h += `<div class="rubric rit"><h3>Rituels</h3><span class="aside">depuis le grimoire, +10 min, sans emplacement</span></div>`; rits.forEach(s => { h += jeuRow(g, s, "rit"); }); }
+  if (rits.length) { h += foldHead("r", "rit", "Rituels", "depuis le grimoire, +10 min, sans emplacement", plural(rits.length, "sort")); if (!isFold("r")) rits.forEach(s => { h += jeuRow(g, s, "rit"); }); }
   if (g.extras.length) {
-    h += `<div class="rubric"><h3>Autres sorts</h3></div>`;
-    g.extras.forEach((x, i) => { h += extraRow(x, i, false); });
+    h += foldHead("x", "", "Autres sorts", "", plural(g.extras.length, "sort"));
+    if (!isFold("x")) g.extras.forEach((x, i) => { h += extraRow(x, i, false); });
   }
   return h;
 }
@@ -1239,6 +1259,12 @@ document.addEventListener("click", e => {
   else if (a === "view") { S.view = b.dataset.v; S.openRow = null; S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); }
   else if (a === "row") { S.openRow = S.openRow === b.dataset.id ? null : b.dataset.id; S.castOpen = null; render(); }
   else if (a === "undo") { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } }
+  else if (a === "fold") {
+    const k = foldKey(b.dataset.k); if (S.fold[k]) delete S.fold[k]; else S.fold[k] = 1;
+    try { localStorage.setItem("grimoire.fold", JSON.stringify(S.fold)); } catch (e) {}
+    S.openRow = null; render();
+    const el = document.querySelector(`[data-a="fold"][data-k="${b.dataset.k}"]`); if (el) el.focus({ preventScroll: true });
+  }
   else if (a === "note-edit") {
     const id = b.dataset.id; S.noteEdit = S.noteEdit === id ? null : id; S.ndraft = null; render();
     if (S.noteEdit) { const el = document.getElementById("n-edit"); if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(el.value.length, el.value.length); } }
