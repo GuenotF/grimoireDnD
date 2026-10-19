@@ -281,6 +281,14 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .short .meter { display: flex; align-items: center; gap: 10px; }
 .short .meter .track { flex: 1; height: 8px; border-radius: 4px; background: var(--sunk); overflow: hidden; }
 .short .meter .fill { height: 100%; background: var(--gold); }
+.jrow.on { background: linear-gradient(90deg, var(--rubric-soft), transparent 75%); }
+.gprep { width: 20px; height: 20px; accent-color: var(--rubric); margin: 0 2px 0 0; flex: none; }
+.jbody .vo { font-size: 13px; color: var(--muted); font-style: italic; }
+.jbody .meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.jbody .rowact { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px dotted var(--rule); }
+.slotbar .prepc { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.slotbar .prepc b { color: var(--ink); font-size: 14px; }
+.slotbar .prepc.over, .slotbar .prepc.over b { color: var(--warn); }
 .rubric.rit { border-bottom-color: var(--ok); } .rubric.rit h3 { color: var(--ok); }
 @media (prefers-reduced-motion: no-preference) { .pip { transition: transform .1s, background .12s; } }
 </style>
@@ -538,10 +546,7 @@ function grimoireHTML(g) {
   const cMax = R.cantrips(g.level);
   h += `<div class="rubric"><h3>Sorts mineurs</h3><span class="aside">${g.cantrips.length} sur ${cMax} connus · à volonté, jamais préparés</span></div>`;
   if (!g.cantrips.length) h += `<div class="empty">Aucun sort mineur. Choisis-en ${cMax} dans la bibliothèque (filtre « Mineurs »).</div>`;
-  g.cantrips.map(id => BY_ID[id]).sort(byName).forEach(s => {
-    h += `<div class="spell noprep"><div><div class="name">${esc(s.n)}${tags(s)}<span class="vo">${esc(s.en)}</span></div>${spellBody(s, g)}</div>
-    <div class="actions">${removeBtn("c:" + s.id, ro)}</div></div>`;
-  });
+  g.cantrips.map(id => BY_ID[id]).sort(byName).forEach(s => { h += gererRow(g, s, null, false, false, true); });
 
   // Sorts de niveau 1+
   const prepared = new Set(g.prepared);
@@ -556,13 +561,7 @@ function grimoireHTML(g) {
     if (locked && !list.length) { h += `<div class="rubric locked"><h3>Niveau ${lv}</h3><span class="aside">s'ouvre au niveau ${R.unlockAt(lv)} de magicien</span></div>`; continue; }
     h += `<div class="rubric${locked ? " locked" : ""}"><h3>Niveau ${lv}</h3><span class="aside">${slots[lv - 1] ? `${slots[lv - 1]} emplacement${slots[lv - 1] > 1 ? "s" : ""}` : `s'ouvre au niveau ${R.unlockAt(lv)}`}</span></div>`;
     if (!list.length) h += `<div class="empty">Aucun sort de niveau ${lv}. Ajoute-en depuis la bibliothèque.</div>`;
-    list.forEach(([x, s]) => {
-      const p = prepared.has(s.id);
-      h += `<div class="spell${p ? " prepared" : ""}"><div class="prep"><input type="checkbox" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked || S.readonly ? " disabled" : ""}></div>
-      <div><div class="name">${esc(s.n)}${tags(s)}<span class="vo">${esc(s.en)}</span>${liveMark(g, s)}</div>${spellBody(s, g)}
-      ${s.ri && !p ? `<div class="meta">Rituel : se lance depuis le grimoire sans être préparé (+10 min, sans emplacement).</div>` : ""}${locked || S.readonly ? "" : castHTML(g, s, p)}${concWarnHTML(g, s)}</div>
-      <div class="actions"><span class="origin">${x.how === "copie" ? `Copié · ${fmt(x.h)} h · ${fr(x.po)} po` : "Montée de niveau"}</span>${removeBtn("s:" + s.id, ro)}</div></div>`;
-    });
+    list.forEach(([x, s]) => { h += gererRow(g, s, x, locked, prepared.has(s.id), false); });
   }
   const copies = g.spells.filter(x => x.how === "copie");
   if (copies.length) h += `<p class="found">Total des copies : ${copies.length} sort${copies.length > 1 ? "s" : ""}, ${fmt(copies.reduce((a, x) => a + x.h, 0))} h et ${fr(copies.reduce((a, x) => a + x.po, 0))} po.</p>`;
@@ -587,6 +586,20 @@ function grimoireHTML(g) {
 
   h += `<div class="rubric"><h3>Notes</h3></div><textarea id="f-notes" placeholder="Grimoires trouvés, sorts à copier, idées…"${ro}>${esc(g.notes)}</textarea>`;
   return h;
+}
+// Mode Gérer : une ligne par sort (case Préparer, nom, pastilles clés), détail complet au toucher du nom
+function gererRow(g, s, x, locked, p, cantrip) {
+  const open = S.openRow === s.id, ro = S.readonly ? " disabled" : "";
+  const box = cantrip ? "" : `<input type="checkbox" class="gprep" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked || S.readonly ? " disabled" : ""}>`;
+  let body = "";
+  if (open) {
+    const origin = cantrip ? "Sort mineur" : x && x.how === "copie" ? `Copié · ${fmt(x.h)} h · ${fr(x.po)} po` : "Montée de niveau";
+    body = `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g)}
+    ${!cantrip && s.ri && !p ? `<div class="meta">Rituel : se lance depuis le grimoire sans être préparé (+10 min, sans emplacement).</div>` : ""}
+    ${!cantrip && !locked && !S.readonly ? castHTML(g, s, p) : ""}
+    <div class="rowact"><span class="origin">${origin}</span>${removeBtn((cantrip ? "c:" : "s:") + s.id, ro)}</div></div>`;
+  }
+  return `<div class="jrow${p ? " on" : ""}"><div class="jline">${box}<div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div></div>${body}${concWarnHTML(g, s)}</div>`;
 }
 function removeBtn(key, ro) {
   if (ro) return "";
@@ -623,7 +636,7 @@ function slotbarHTML(g) {
   return `${fx}<button class="line" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g.level).map((n, i) => {
     const used = Math.min(n, +(g.used[i + 1] || 0));
     return `<span class="lv" aria-label="Niveau ${i + 1} : ${n - used} sur ${n}"><b>${i + 1}</b>${Array.from({ length: n }, (_, k) => `<span class="d${k < used ? " u" : ""}"></span>`).join("")}</span>`;
-  }).join("")}</span><span class="go">Gérer ⌃</span></button>`;
+  }).join("")}</span>${S.view !== "jeu" ? `<span class="prepc${g.prepared.length > R.prepMax(g) ? " over" : ""}">Préparés <b>${g.prepared.length}</b>/${R.prepMax(g)}</span>` : ""}<span class="go">Emplacements ⌃</span></button>`;
 }
 // ---------- Concentration ----------
 const concOf = g => (g.effects || []).find(e => e.c);
