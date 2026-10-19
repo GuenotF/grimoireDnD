@@ -4,6 +4,38 @@ Grimoire de magicien pour **D&D 5e**, en français : les 213 sorts de magicien d
 
 L'application est une seule page web. Elle s'installe sur l'écran d'accueil (Android, iPhone, iPad, ordinateur) et fonctionne hors connexion.
 
+## Fonctionnalités
+
+**Le magicien**
+- Niveau, Intelligence et tradition arcanique : DD, bonus d'attaque, emplacements, nombre de sorts préparés et de sorts mineurs calculés automatiquement.
+- Plusieurs grimoires sur le même appareil.
+
+**Onglet Grimoire, mode « Gérer »** (préparer et organiser)
+- Une ligne par sort : case *Préparer*, nom, pastilles clés (dégâts, jet ou effet). Toucher le nom déplie le détail complet, les boutons de lancement, l'origine et *Retirer*.
+- Compteur *Préparés x / y* dans la barre du bas pendant la préparation.
+- *Autres sorts* (race, dons, objets) : une ligne avec la case *utilisé*, l'usage et *Modifier* au toucher du nom.
+
+**Onglet Grimoire, mode « En jeu »** (en partie)
+- Seulement les sorts préparés, les sorts mineurs, les rituels et les autres sorts, en lignes compactes avec *Lancer* à droite.
+- *Lancer* coche un emplacement du niveau du sort (ou du premier niveau supérieur libre) ; **▲** choisit un niveau supérieur quand le sort y gagne quelque chose ; *Rituel* pour les sorts lancés en rituel. Chaque lancement peut être annulé.
+- **Concentration** : avertissement avant de remplacer un sort de concentration, panneau du jet de concentration (DD calculé à partir des dégâts subis).
+- **Sorts en cours** : ajoutés automatiquement au lancement, puces dans la barre du bas, volet *En cours* avec note facultative et *Terminer*.
+- **Barre du bas** : emplacements restants toujours visibles, accès direct à la section des emplacements.
+
+**Repos**
+- *Repos long* : emplacements, capacités et sorts en cours remis à zéro.
+- *Repos court* : assistant de Restauration arcanique (choix rapides valides, budget de niveaux, une fois par jour).
+
+**Onglet Bibliothèque**
+- Les 213 sorts, filtrables par niveau, école, concentration, rituel, accessibilité et présence au grimoire.
+- Une ligne par sort par défaut ; les résultats d'une recherche s'affichent avec leur description complète.
+- Ajout par montée de niveau ou par copie (coût calculé, moitié prix pour l'école du magicien).
+
+**Onglets Imprimer, Sauvegarde, Règles**
+- Fiche imprimable A4 (tableau de bord, grimoire à cocher, journal de copie, rappel des règles).
+- *Envoyer au MJ* (menu de partage du téléphone), export et import, suppression.
+- Rappel des règles du grimoire du magicien.
+
 ## Utilisation
 
 - **Adresse** : https://guenotf.github.io/grimoireDnD/
@@ -14,7 +46,8 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 - **Sur l'appareil**, dans le stockage du navigateur (ou de l'application installée). Rien n'est envoyé à GitHub ni ailleurs.
 - Chaque appareil a ses propres grimoires : il n'y a pas de synchronisation.
-- **Sauvegarde et transfert** : onglet *Sauvegarde* › *Exporter*, puis *Importer* sur l'autre appareil.
+- **Sauvegarde et transfert** : onglet *Sauvegarde* › *Envoyer au MJ* (ou *Exporter*), puis *Importer* sur l'autre appareil. Les fichiers sont datés (`Grimoire - Némeia - 2026-10-19.json`). Sur Android, le partage produit un `.txt` au contenu identique, que l'import accepte aussi.
+- L'import **ajoute** un grimoire : il ne remplace pas celui qui existe déjà.
 - Vider les données du navigateur, utiliser la navigation privée ou désinstaller l'icône sur iOS efface les grimoires : exporte-les régulièrement.
 
 ## Organisation du dépôt
