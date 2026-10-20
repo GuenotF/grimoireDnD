@@ -424,7 +424,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const fr = n => n.toLocaleString("fr-FR");
 
 // ---------- État ----------
-const S = { list: {}, cur: null, tab: "grimoire", mode: "pending", readonly: false, view: "gerer", fxOpen: false, shortOpen: false, sr: {}, openRow: null, concWarn: null, concPanel: false,
+const S = { list: {}, cur: null, tab: "grimoire", mode: "pending", readonly: false, view: "gerer", fxOpen: false, shortOpen: false, sr: {}, open: new Set(), concWarn: null, concPanel: false,
   f: { q: "", lvl: "all", school: "", conc: false, rit: false, hideOwned: false, reachable: false },
   confirm: null, newForm: false };
 S.fold = {}; try { S.fold = JSON.parse(localStorage.getItem("grimoire.fold") || "{}") || {}; } catch (e) {}
@@ -502,7 +502,7 @@ function pickCurrent() {
   const ids = Object.keys(S.list);
   S.cur = want && S.list[want] ? want : (ids.sort((a, b) => S.list[b].updatedAt - S.list[a].updatedAt)[0] || null);
 }
-function setCur(id) { S.cur = id; S.editX = null; S.xdraft = null; try { localStorage.setItem("grimoire.cur", id); } catch (e) {} render(); }
+function setCur(id) { S.cur = id; S.editX = null; S.xdraft = null; S.open.clear(); try { localStorage.setItem("grimoire.cur", id); } catch (e) {} render(); }
 function newId(name) { return (name || "mage").normalize("NFD").replace(/[^\w]+/g, "-").replace(/^-|-$/g, "").toLowerCase().slice(0, 30) + "-" + Math.random().toString(36).slice(2, 7); }
 
 // ---------- Rendu ----------
@@ -708,7 +708,7 @@ const noteBox = (g, s) => `<div class="nbox">${esc(noteOf(g, s))}</div>`;
 
 // Mode Gérer : une ligne par sort (case Préparer, nom, pastilles clés), détail complet au toucher du nom
 function gererRow(g, s, x, locked, p, cantrip) {
-  const open = S.openRow === s.id, ro = S.readonly ? " disabled" : "";
+  const open = S.open.has(s.id), ro = S.readonly ? " disabled" : "";
   const full = !p && !locked && g.prepared.length >= R.prepMax(g); // limite atteinte : on ne peut plus que décocher
   const box = cantrip ? "" : `<input type="checkbox" class="gprep${full ? " full" : ""}" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked || S.readonly ? " disabled" : full ? ' aria-disabled="true"' : ""}>`;
   let body = "";
@@ -724,7 +724,7 @@ function gererRow(g, s, x, locked, p, cantrip) {
 }
 // Autres sorts : une ligne (nom + « utilisé »), usage et actions au toucher du nom
 function extraRow(x, i, manage) {
-  const key = "x:" + i, open = S.openRow === key, ro = S.readonly ? " disabled" : "";
+  const key = "x:" + i, open = S.open.has(key), ro = S.readonly ? " disabled" : "";
   const body = open ? `<div class="jbody">${x.note ? `<div class="eff">${esc(x.note)}</div>` : `<div class="meta">Aucune description.${manage && !S.readonly ? " Utilise « Modifier » pour en ajouter une." : ""}</div>`}
     ${manage && !S.readonly ? `<div class="rowact"><button class="btn ghost" data-a="xedit" data-i="${i}" aria-label="Modifier ${esc(x.name)}">Modifier</button>${removeBtn(key, ro)}</div>` : ""}</div>` : "";
   return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(x.name)}<span class="chev">${open ? "▴" : "▾"}</span></button></div><label class="check"><input type="checkbox" data-a="xused" data-i="${i}"${x.used ? " checked" : ""}${ro}> utilisé</label></div>${body}</div>`;
@@ -831,7 +831,7 @@ function keyPills(s, g) {
   return h;
 }
 function jeuRow(g, s, kind) {
-  const open = S.openRow === s.id;
+  const open = S.open.has(s.id);
   let act = "";
   if (!open && !S.readonly) {
     if (kind === "prep") { const lv = firstFree(g, s); act = lv ? `<button class="btn cast-go sm" data-a="cast" data-id="${s.id}" data-l="${lv}">${lv === s.l ? "Lancer" : "Lancer · niv. " + lv}</button>` : `<button class="btn cast-none sm" disabled>Épuisé</button>`; }
@@ -901,7 +901,7 @@ function biblioHTML(g) {
   return h;
 }
 function libRow(g, s, owned, max, prefix) {
-  const key = "lib:" + s.id, open = S.openRow === key;
+  const key = "lib:" + s.id, open = S.open.has(key);
   const mark = owned.has(s.id) ? `<span class="libmark ok">Déjà appris</span>` : s.l > max ? `<span class="libmark">Niveau ${R.unlockAt(s.l)} requis</span>` : "";
   return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button><span class="kps">${keyPills(s, g)}</span></div>${mark}</div>
   ${open ? `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g, prefix)}<div class="rowact">${addBtns(g, s, owned, max)}</div></div>` : ""}</div>`;
@@ -1191,7 +1191,7 @@ document.addEventListener("click", e => {
       const [t, v] = [k.slice(0, 1), k.slice(2)];
       if (t === "c") { g.cantrips = g.cantrips.filter(id => id !== v); delete g.snotes[v]; }
       if (t === "s") { g.spells = g.spells.filter(x => x.id !== v); g.prepared = g.prepared.filter(id => id !== v); delete g.snotes[v]; }
-      if (t === "x") { g.extras.splice(+v, 1); S.editX = null; S.xdraft = null; S.openRow = null; }
+      if (t === "x") { g.extras.splice(+v, 1); S.editX = null; S.xdraft = null; [...S.open].forEach(k => { if (k.startsWith("x:")) S.open.delete(k); }); }
     });
   }
   else if (a === "dl-print") { const g = G(); offer(`Grimoire - ${g.name}.html`, printable(g)); }
@@ -1256,13 +1256,13 @@ document.addEventListener("click", e => {
     mutate(g => { g.effects = a === "fx-all" ? [] : g.effects.filter(e => e.k !== b.dataset.k); });
     toast(a === "fx-all" ? "Tous les sorts en cours sont terminés" : `<b>${esc(gone ? gone.name : "Sort")}</b> terminé`, () => mutate(g => { g.effects = prev; }));
   }
-  else if (a === "view") { S.view = b.dataset.v; S.openRow = null; S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); }
-  else if (a === "row") { S.openRow = S.openRow === b.dataset.id ? null : b.dataset.id; S.castOpen = null; render(); }
+  else if (a === "view") { S.view = b.dataset.v; S.open.clear(); S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); }
+  else if (a === "row") { const k = b.dataset.id; if (S.open.has(k)) S.open.delete(k); else S.open.add(k); S.castOpen = null; render(); }
   else if (a === "undo") { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } }
   else if (a === "fold") {
     const k = foldKey(b.dataset.k); if (S.fold[k]) delete S.fold[k]; else S.fold[k] = 1;
     try { localStorage.setItem("grimoire.fold", JSON.stringify(S.fold)); } catch (e) {}
-    S.openRow = null; render();
+    render();
     const el = document.querySelector(`[data-a="fold"][data-k="${b.dataset.k}"]`); if (el) el.focus({ preventScroll: true });
   }
   else if (a === "note-edit") {
@@ -1310,7 +1310,7 @@ document.addEventListener("click", e => {
   }
   else if (a === "to-slots") { const el = document.getElementById("slots-top"); if (el) el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); }
   else if (a === "hide-ios") { try { localStorage.setItem("grimoire.iosTip", "0"); } catch (e) {} render(); }
-  else if (a === "xedit") { S.openRow = null; S.editX = +b.dataset.i; S.xdraft = null; render(); const el = document.getElementById("x-ename"); if (el) { el.focus(); el.select(); } }
+  else if (a === "xedit") { S.open.delete("x:" + b.dataset.i); S.editX = +b.dataset.i; S.xdraft = null; render(); const el = document.getElementById("x-ename"); if (el) { el.focus(); el.select(); } }
   else if (a === "xcancel") { S.editX = null; S.xdraft = null; render(); }
 });
 document.addEventListener("change", e => {
