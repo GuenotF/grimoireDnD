@@ -303,6 +303,18 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .libmark.ok { color: var(--ok); font-weight: 500; }
 .rubric.rit { border-bottom-color: var(--ok); } .rubric.rit h3 { color: var(--ok); }
 @media (prefers-reduced-motion: no-preference) { .pip { transition: transform .1s, background .12s; } }
+/* Nouveau personnage */
+.nwsheet { z-index: 8; }
+.nwcls { display: grid; gap: 10px; }
+.nwcard { display: flex; gap: 12px; align-items: flex-start; text-align: left; padding: 12px; border-radius: 10px; border: 1.5px solid var(--rule); background: var(--surface); color: var(--ink); }
+.nwcard[aria-checked="true"] { border-color: var(--rubric); background: var(--rubric-soft); }
+.nwcard .ic { flex: none; width: 42px; height: 42px; border-radius: 8px; color: #F9FAFB; display: inline-flex; align-items: center; justify-content: center; font-family: var(--f-display); font-weight: 700; font-size: 24px; }
+.nwcard .tx { display: grid; gap: 3px; }
+.nwcard .tx b { font-family: var(--f-display); font-size: 18px; }
+.nwcard .tx > span { font-size: 13.5px; line-height: 1.35; color: var(--muted); }
+.nwcard .tg { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
+.nwcard .tg i { font-style: normal; font-size: 12px; border: 1px solid var(--pn-bd); border-radius: 4px; padding: 0 5px; color: var(--muted); }
+.nwgo { padding: 11px; font-size: 15px; font-weight: 700; }
 /* Notes par sort */
 .npen { flex: none; width: 34px; height: 34px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: var(--pn-bd); font-size: 17px; line-height: 1; padding: 0; }
 .npen:hover { border-color: var(--rule); color: var(--muted); }
@@ -387,6 +399,8 @@ body.lu-on { overflow: hidden; }
 <div class="concpanel" id="concpanel" role="dialog" aria-label="Concentration" hidden></div>
 <div class="fxback" id="fxback" data-a="fx-close" hidden></div>
 <div class="fxsheet" id="fxsheet" role="dialog" aria-label="Sorts en cours" hidden></div>
+<div class="fxback" id="nwback" data-a="nw-close" hidden></div>
+<div class="fxsheet nwsheet" id="nwsheet" role="dialog" aria-modal="true" aria-label="Nouveau personnage" hidden></div>
 <div class="lvlup" id="lvlup" role="dialog" aria-modal="true" aria-label="Passage de niveau" hidden></div>
 
 <script>
@@ -400,17 +414,37 @@ const SCHOOL_VAR = {"Abjuration":"--s-abj","Divination":"--s-div","Enchantement"
 const SLOTS = {1:[2],2:[3],3:[4,2],4:[4,3],5:[4,3,2],6:[4,3,3],7:[4,3,3,1],8:[4,3,3,2],9:[4,3,3,3,1],10:[4,3,3,3,2],
   11:[4,3,3,3,2,1],12:[4,3,3,3,2,1],13:[4,3,3,3,2,1,1],14:[4,3,3,3,2,1,1],15:[4,3,3,3,2,1,1,1],16:[4,3,3,3,2,1,1,1],
   17:[4,3,3,3,2,1,1,1,1],18:[4,3,3,3,3,1,1,1,1],19:[4,3,3,3,3,2,1,1,1],20:[4,3,3,3,3,2,2,1,1]};
+// Emplacements des demi-lanceurs (paladin), Manuel des joueurs 2014
+const HALF = {1:[],2:[2],3:[3],4:[3],5:[4,2],6:[4,2],7:[4,3],8:[4,3],9:[4,3,2],10:[4,3,2],11:[4,3,3],12:[4,3,3],13:[4,3,3,1],14:[4,3,3,1],
+  15:[4,3,3,2],16:[4,3,3,2],17:[4,3,3,3,1],18:[4,3,3,3,1],19:[4,3,3,3,2],20:[4,3,3,3,2]};
+// Serments du paladin : sorts toujours préparés, par niveau de paladin (Guide de Xanathar pour la Conquête)
+const OATHS = {
+  conquete: { n: "Conquête", full: "Serment de la conquête", sp: {3: ["armor-of-agathys", "command"], 5: ["hold-person", "spiritual-weapon"], 9: ["bestow-curse", "fear"], 13: ["dominate-beast", "stoneskin"], 17: ["cloudkill", "dominate-person"]} },
+};
+// Classes : caractéristique d'incantation, table d'emplacements, préparation, sous-classe
+const CLASSES = {
+  magicien: { n: "Magicien", ab: "int", abN: "Intelligence", slots: SLOTS, top: 9, book: true,
+    cantrips: lv => lv >= 10 ? 5 : lv >= 4 ? 4 : 3, prep: (g, m) => Math.max(1, m + g.level) },
+  paladin: { n: "Paladin", ab: "cha", abN: "Charisme", slots: HALF, top: 5, book: false,
+    cantrips: () => 0, prep: (g, m) => Math.max(1, m + Math.floor(g.level / 2)) },
+};
+const C = g => CLASSES[g && g.cls] || CLASSES.magicien;
+const isWiz = g => C(g) === CLASSES.magicien;
+const inClass = (g, s) => (s.cl || ["magicien"]).includes(g.cls || "magicien");
+const classSpells = g => SPELLS.filter(s => inClass(g, s));
+const oathSpells = g => { const o = OATHS[g.oath]; if (!o) return []; return Object.entries(o.sp).filter(([lv]) => g.level >= +lv).flatMap(([, ids]) => ids).filter(id => BY_ID[id]); };
 const LVL_NAME = ["Sorts mineurs","Niveau 1","Niveau 2","Niveau 3","Niveau 4","Niveau 5","Niveau 6","Niveau 7","Niveau 8","Niveau 9"];
 
 // ---------- Règles ----------
 const R = {
   prof: lv => 2 + Math.floor((lv - 1) / 4),
   mod: sc => Math.floor((sc - 10) / 2),
-  slots: lv => SLOTS[lv] || [],
-  maxLevel: lv => (SLOTS[lv] || []).length,
-  unlockAt: sl => 2 * sl - 1,
-  cantrips: lv => lv >= 10 ? 5 : lv >= 4 ? 4 : 3,
-  prepMax: g => Math.max(1, R.mod(g.int) + g.level),
+  am: g => R.mod(+g[C(g).ab] || 10), // modificateur de la caractéristique d'incantation
+  slots: (g, lv = g.level) => C(g).slots[lv] || [],
+  maxLevel: (g, lv = g.level) => (C(g).slots[lv] || []).length,
+  unlockAt: (g, sl) => { for (let lv = 1; lv <= 20; lv++) if ((C(g).slots[lv] || []).length >= sl) return lv; return 21; },
+  cantrips: (g, lv = g.level) => C(g).cantrips(lv),
+  prepMax: g => C(g).prep(g, R.am(g)),
   expected: lv => 6 + 2 * (lv - 1),
   arcane: lv => Math.ceil(lv / 2),
   savant: (g, s) => g.level >= 2 && s.s === g.school,
@@ -428,8 +462,9 @@ const S = { list: {}, cur: null, tab: "grimoire", mode: "pending", readonly: fal
 S.fold = {}; try { S.fold = JSON.parse(localStorage.getItem("grimoire.fold") || "{}") || {}; } catch (e) {}
 try { const t = localStorage.getItem("grimoire.tab"); if (t) S.tab = t; if (localStorage.getItem("grimoire.view") === "jeu") S.view = "jeu"; } catch (e) {}
 
-function blank(name) {
-  return { name: name || "Nouveau magicien", level: 1, int: 16, school: "Évocation", cantrips: [], spells: [],
+function blank(name, cls) {
+  cls = CLASSES[cls] ? cls : "magicien";
+  return { cls, name: name || "Nouveau " + CLASSES[cls].n.toLowerCase(), level: 1, int: 16, cha: 14, school: "Évocation", oath: "conquete", cantrips: [], spells: [],
     prepared: [], used: {}, arcane: false, extras: [], effects: [], notes: "", snotes: {}, updatedAt: Date.now() };
 }
 const fxKey = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -437,7 +472,9 @@ const NO_TRACK = ["Instantanée", "Jusqu'à dissipation", "Spéciale"]; // duré
 function norm(g) {
   // Les documents reçus de la base sont figés (lecture seule) : on travaille sur une copie profonde.
   const b = blank(); const o = Object.assign(b, JSON.parse(JSON.stringify(g || {})));
-  o.level = Math.min(20, Math.max(1, +o.level || 1)); o.int = Math.min(30, Math.max(1, +o.int || 10));
+  if (!CLASSES[o.cls]) o.cls = "magicien"; // anciens fichiers : magicien
+  o.level = Math.min(20, Math.max(1, +o.level || 1)); o.int = Math.min(30, Math.max(1, +o.int || 10)); o.cha = Math.min(30, Math.max(1, +o.cha || 10));
+  if (!OATHS[o.oath]) o.oath = "conquete";
   ["cantrips","spells","prepared","extras"].forEach(k => { if (!Array.isArray(o[k])) o[k] = []; });
   o.spells = o.spells.filter(x => x && BY_ID[x.id]); o.cantrips = o.cantrips.filter(id => BY_ID[id]);
   o.prepared = o.prepared.filter(id => o.spells.some(x => x.id === id));
@@ -516,7 +553,7 @@ function render(fromSnapshot) {
   }
   if (keep) { const el = document.getElementById(keep.id); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
   setStatus(S.statusText || "", S.statusErr);
-  const bar = document.getElementById("slotbar"), showBar = !!g && S.tab === "grimoire" && R.slots(g.level).length > 0;
+  const bar = document.getElementById("slotbar"), showBar = !!g && S.tab === "grimoire" && R.slots(g).length > 0;
   bar.hidden = !showBar; if (showBar) bar.innerHTML = slotbarHTML(g);
   document.body.classList.toggle("has-slotbar", showBar);
   document.documentElement.style.setProperty("--barh", (showBar ? bar.offsetHeight : 0) + "px");
@@ -526,6 +563,8 @@ function render(fromSnapshot) {
   const showFx = showBar && S.fxOpen && g.effects.length > 0, fs = document.getElementById("fxsheet");
   fs.hidden = !showFx; document.getElementById("fxback").hidden = !showFx; if (showFx) fs.innerHTML = fxSheetHTML(g);
   if (!showFx) S.fxOpen = false;
+  const nw = document.getElementById("nwsheet"), showNw = !!S.newOpen && !S.readonly;
+  nw.hidden = !showNw; document.getElementById("nwback").hidden = !showNw; if (showNw) nw.innerHTML = newHTML();
   const lu = document.getElementById("lvlup"), showLu = !!g && !!S.lu && !S.readonly;
   if (!showLu) S.lu = null;
   lu.hidden = !showLu; document.body.classList.toggle("lu-on", showLu);
@@ -535,45 +574,51 @@ function render(fromSnapshot) {
 function renderPicker() {
   const ids = Object.keys(S.list).sort((a, b) => S.list[a].name.localeCompare(S.list[b].name, "fr"));
   const p = document.getElementById("picker");
-  p.innerHTML = (ids.length ? `<select id="cur" aria-label="Grimoire affiché">${ids.map(id => `<option value="${esc(id)}"${id === S.cur ? " selected" : ""}>${esc(S.list[id].name)} · niv. ${S.list[id].level}</option>`).join("")}</select>` : "")
-    + (ids.length ? `<button class="btn" data-a="new"${S.readonly ? " disabled" : ""}>Nouveau magicien</button>` : "") + `<span class="status" id="status"></span>`;
+  p.innerHTML = (ids.length ? `<select id="cur" aria-label="Grimoire affiché">${ids.map(id => `<option value="${esc(id)}"${id === S.cur ? " selected" : ""}>${esc(S.list[id].name)} · ${C(S.list[id]).n} ${S.list[id].level}</option>`).join("")}</select>` : "")
+    + (ids.length ? `<button class="btn" data-a="new"${S.readonly ? " disabled" : ""}>Nouveau personnage</button>` : "") + `<span class="status" id="status"></span>`;
 }
 function welcomeHTML() {
   return `<div class="welcome"><h1><span class="initial">G</span>rimoires</h1>
-  <p>Aucun grimoire pour l'instant. Crée un magicien, choisis son école, puis ajoute ses sorts depuis la bibliothèque des 213 sorts de magicien du Manuel des joueurs. Tu as déjà un grimoire sauvegardé (fichier .json ou .txt) ? Importe-le.</p>
-  <div class="frow"><button class="btn primary" data-a="new"${S.readonly ? " disabled" : ""}>Créer un magicien</button>${S.readonly ? "" : `<label class="btn" for="f-import">Importer un grimoire</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden>`}</div></div>`;
+  <p>Aucun personnage pour l'instant. Crée un magicien ou un paladin : l'atelier calcule ses emplacements, ses sorts préparés et ses ressources d'après le Manuel des joueurs. Tu as déjà une sauvegarde (fichier .json ou .txt) ? Importe-la.</p>
+  <div class="frow"><button class="btn primary" data-a="new"${S.readonly ? " disabled" : ""}>Créer un personnage</button>${S.readonly ? "" : `<label class="btn" for="f-import">Importer une sauvegarde</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden>`}</div></div>`;
 }
 function heroHTML(g) {
-  const prof = R.prof(g.level), mod = R.mod(g.int), max = R.maxLevel(g.level);
-  const nPrep = g.prepared.length, pMax = R.prepMax(g), exp = R.expected(g.level), nSp = g.spells.length, cMax = R.cantrips(g.level);
+  const prof = R.prof(g.level), mod = R.am(g), max = R.maxLevel(g);
+  const nPrep = g.prepared.length, pMax = R.prepMax(g), exp = R.expected(g.level), nSp = g.spells.length, cMax = R.cantrips(g);
   const ro = S.readonly ? " disabled" : "";
   const first = esc(g.name.charAt(0)), rest = esc(g.name.slice(1));
   return `<section class="hero">
   <div>
     <h1 class="title" id="title"><span class="initial">${first}</span>${rest}</h1>
-    <div class="subline">Niveau ${g.level} · École ${/^[AÉEIO]/.test(g.school) ? "d'" : "de "}${esc(g.school)} · sorts jusqu'au niveau ${max}</div>
+    <div class="subline">${isWiz(g) ? `Niveau ${g.level} · École ${/^[AÉEIO]/.test(g.school) ? "d'" : "de "}${esc(g.school)}` : `${C(g).n} niveau ${g.level}${g.level >= 3 ? ` · ${esc(OATHS[g.oath].full)}` : ""}`} · ${max ? `sorts jusqu'au niveau ${max}` : `sorts au niveau ${R.unlockAt(g, 1)}`}</div>
   </div>
   <div class="setup">
     <div class="field"><label for="f-full">Nom complet</label><input id="f-full" type="text" value="${esc(g.name)}"${ro}></div>
-    <div class="field"><label for="f-level">Niveau de magicien</label><div class="lvrow"><select id="f-level"${ro}>${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select>${g.level < 20 && !S.readonly ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}</div></div>
-    <div class="field"><label for="f-int">Intelligence (valeur)</label><input id="f-int" type="number" min="1" max="30" value="${g.int}"${ro}></div>
-    <div class="field"><label for="f-school">Tradition arcanique</label><select id="f-school"${ro}>${SCHOOLS.map(s=>`<option${s===g.school?" selected":""}>${s}</option>`).join("")}</select></div>
+    <div class="field"><label for="f-level">Niveau de ${C(g).n.toLowerCase()}</label><div class="lvrow"><select id="f-level"${ro}>${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select>${g.level < 20 && !S.readonly && isWiz(g) ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}</div></div>
+    <div class="field"><label for="f-${C(g).ab}">${C(g).abN} (valeur)</label><input id="f-${C(g).ab}" data-ab="${C(g).ab}" type="number" min="1" max="30" value="${g[C(g).ab]}"${ro}></div>
+    ${isWiz(g) ? `<div class="field"><label for="f-school">Tradition arcanique</label><select id="f-school"${ro}>${SCHOOLS.map(s=>`<option${s===g.school?" selected":""}>${s}</option>`).join("")}</select></div>`
+      : `<div class="field"><label for="f-oath">Serment sacré</label><select id="f-oath"${ro}>${Object.entries(OATHS).map(([k, o]) => `<option value="${k}"${k === g.oath ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`}
   </div>
   <div class="stats" role="list">
-    <div class="stat" role="listitem"><div class="v">${signed(mod)}</div><div class="l">Mod. Intelligence</div></div>
+    <div class="stat" role="listitem"><div class="v">${signed(mod)}</div><div class="l">Mod. ${C(g).abN}</div></div>
     <div class="stat" role="listitem"><div class="v">${8 + prof + mod}</div><div class="l">DD des sorts</div></div>
     <div class="stat" role="listitem"><div class="v">${signed(prof + mod)}</div><div class="l">Attaque de sort</div></div>
     <div class="stat ${nPrep > pMax ? "alert" : nPrep === pMax ? "good" : ""}" role="listitem"><div class="v">${nPrep}<small>/${pMax}</small></div><div class="l">Sorts préparés</div></div>
-    <div class="stat ${nSp < exp ? "alert" : ""}" role="listitem"><div class="v">${nSp}<small>/${exp}</small></div><div class="l">Grimoire (min.)</div></div>
-    <div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div><div class="l">Sorts mineurs</div></div>
+    ${isWiz(g) ? `<div class="stat ${nSp < exp ? "alert" : ""}" role="listitem"><div class="v">${nSp}<small>/${exp}</small></div><div class="l">Grimoire (min.)</div></div>
+    <div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div><div class="l">Sorts mineurs</div></div>`
+    : `<div class="stat" role="listitem"><div class="v">${oathSpells(g).length}</div><div class="l">Sorts de serment</div></div>
+    <div class="stat" role="listitem"><div class="v">${5 * g.level}</div><div class="l">Imposition (PV)</div></div>`}
   </div>
   ${S.readonly ? `<div class="banner">Lecture seule : tu peux consulter ce grimoire, mais pas le modifier.</div>` : ""}
-  ${S.mode === "local" ? `<div class="banner">Tes grimoires sont enregistrés sur cet appareil, dans ce navigateur. Exporte-les de temps en temps (onglet Sauvegarde) pour les sauvegarder ou les passer sur un autre appareil.</div>` : ""}
+  ${S.mode === "local" ? `<div class="banner">Tes personnages sont enregistrés sur cet appareil, dans ce navigateur. Exporte-les de temps en temps (onglet Sauvegarde) pour les sauvegarder ou les passer sur un autre appareil.</div>` : ""}
   ${showIosTip() ? `<div class="banner">Sur iPhone ou iPad, installe l'atelier : bouton <b>Partager</b>, puis <b>Sur l'écran d'accueil</b>. Ouvre-le ensuite toujours depuis cette icône : c'est là que tes grimoires sont le mieux conservés. <button class="btn ghost" data-a="hide-ios">Masquer</button></div>` : ""}
   </section>`;
 }
 function tabsHTML(g) {
-  const t = [["grimoire","Grimoire", g.spells.length + g.cantrips.length],["biblio","Bibliothèque", SPELLS.length],["imprimer","Imprimer"],["sauvegarde","Sauvegarde"],["regles","Règles"]];
+  // Imprimer et Règles : propres au magicien pour l'instant (les autres classes suivront)
+  const t = isWiz(g) ? [["grimoire","Grimoire", g.spells.length + g.cantrips.length],["biblio","Bibliothèque", classSpells(g).length],["imprimer","Imprimer"],["sauvegarde","Sauvegarde"],["regles","Règles"]]
+    : [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["sauvegarde","Sauvegarde"]];
+  if (!t.some(x => x[0] === S.tab)) S.tab = "grimoire";
   return `<div class="tabs" role="tablist">${t.map(([k,l,c])=>`<button class="tab" role="tab" data-a="tab" data-v="${k}" aria-selected="${S.tab===k}">${l}${c!=null?`<span class="count">${c}</span>`:""}</button>`).join("")}</div>`;
 }
 function panelHTML(g) {
@@ -590,11 +635,11 @@ function metaLine(s) {
 function pillData(s, g) {
   const out = [];
   if (s.p) out.push(s.p.startsWith("d:") ? { k: "d", l: "Dégâts", v: pText(s, g.level) } : { k: "f", l: "Effet", v: pText(s, g.level) });
-  if (s.j === "atk") out.push({ k: "a", l: "Ton jet", v: `Attaque ${signed(R.prof(g.level) + R.mod(g.int))}`, sub: s.ok, short: "contre la CA" });
+  if (s.j === "atk") out.push({ k: "a", l: "Ton jet", v: `Attaque ${signed(R.prof(g.level) + R.am(g))}`, sub: s.ok, short: "contre la CA" });
   else if (s.j === "auto") out.push({ k: "n", l: "Jet", v: "Aucun", sub: s.ok });
   else if (s.j) {
     const fixed = /^DD (\d+) fixe · ?/.exec(s.ok || "");
-    out.push({ k: "s", l: "Jet de la cible", v: `JdS ${s.j} · DD ${fixed ? fixed[1] : 8 + R.prof(g.level) + R.mod(g.int)}`, sub: fixed ? s.ok.slice(fixed[0].length) : s.ok });
+    out.push({ k: "s", l: "Jet de la cible", v: `JdS ${s.j} · DD ${fixed ? fixed[1] : 8 + R.prof(g.level) + R.am(g)}`, sub: fixed ? s.ok.slice(fixed[0].length) : s.ok });
   }
   const self = /^Personnelle \((.+)\)$/.exec(s.r);
   if (self) out.push({ k: "n", l: "Zone", v: cap(self[1]) });
@@ -621,23 +666,29 @@ function foldHead(k, cls, title, aside, summary) {
   const shut = isFold(k);
   return `<button class="rubric fold${shut ? " shut" : ""}${cls ? " " + cls : ""}" data-a="fold" data-k="${k}" aria-expanded="${!shut}"><span class="chev" aria-hidden="true">${shut ? "▸" : "▾"}</span><span class="h">${title}</span>${shut && summary ? `<span class="sum">${summary}</span>` : ""}<span class="aside">${aside}</span></button>`;
 }
+// Itération 1 : la liste des sorts du paladin (préparation, serment) arrive à l'étape suivante
+function paladinSoon(g) {
+  const oath = oathSpells(g).map(id => esc(BY_ID[id].n));
+  return `<div class="note" style="margin-top:22px">Prochaine étape de l'atelier : ici, les ressources du paladin (Imposition des mains, Perception divine, Conduit divin), le <b>Châtiment divin</b>, puis la préparation des sorts${oath.length ? ` et les sorts de serment (${oath.join(", ")})` : ""}. En attendant, la Bibliothèque présente toute la liste du paladin.</div>`;
+}
 function grimoireHTML(g) {
   const ro = S.readonly ? " disabled" : "";
-  const slots = R.slots(g.level), max = slots.length, pMax = R.prepMax(g);
-  let h = `<div class="viewsw" role="group" aria-label="Affichage du grimoire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
+  const slots = R.slots(g), max = slots.length, pMax = R.prepMax(g);
+  let h = !isWiz(g) ? "" : `<div class="viewsw" role="group" aria-label="Affichage du grimoire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
   h += `<div class="rubric" id="slots-top" style="margin-top:4px"><h2>Emplacements de sorts</h2><span class="aside">touche un cercle quand tu lances un sort</span></div><div class="slots">`;
   slots.forEach((n, i) => {
     const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0));
     h += `<div class="slotrow"><span class="lv">Niveau ${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"${ro}></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
   });
-  h += `<div class="restbar"><button class="btn" data-a="longrest"${ro}>Repos long</button><button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}"${ro}>Repos court ${S.shortOpen ? "▴" : "▾"}</button>
+  h += `<div class="restbar"><button class="btn" data-a="longrest"${ro}>Repos long</button>${isWiz(g) ? `<button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}"${ro}>Repos court ${S.shortOpen ? "▴" : "▾"}</button>
     <label class="check"><input type="checkbox" data-a="arcane"${g.arcane ? " checked" : ""}${ro}> Restauration arcanique utilisée</label>
-    <span class="muted">Au repos court, 1 fois par jour : récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</span></div></div>`;
-  if (S.shortOpen && !S.readonly) h += shortHTML(g);
+    <span class="muted">Au repos court, 1 fois par jour : récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</span>` : ""}</div></div>`;
+  if (S.shortOpen && !S.readonly && isWiz(g)) h += shortHTML(g);
+  if (!isWiz(g)) return h + paladinSoon(g);
   if (S.view === "jeu") return h + jeuHTML(g);
 
   // Sorts mineurs
-  const cMax = R.cantrips(g.level);
+  const cMax = R.cantrips(g);
   h += foldHead("c", "", "Sorts mineurs", `${g.cantrips.length} sur ${cMax} connus · à volonté, jamais préparés`, plural(g.cantrips.length, "sort"));
   if (!isFold("c")) {
     if (!g.cantrips.length) h += `<div class="empty">Aucun sort mineur. Choisis-en ${cMax} dans la bibliothèque (filtre « Mineurs »).</div>`;
@@ -654,9 +705,9 @@ function grimoireHTML(g) {
   for (let lv = 1; lv <= top; lv++) {
     const list = g.spells.filter(x => BY_ID[x.id].l === lv).map(x => [x, BY_ID[x.id]]).sort((a, b) => byName(a[1], b[1]));
     const locked = lv > max;
-    if (locked && !list.length) { h += `<div class="rubric locked"><h3>Niveau ${lv}</h3><span class="aside">s'ouvre au niveau ${R.unlockAt(lv)} de magicien</span></div>`; continue; }
+    if (locked && !list.length) { h += `<div class="rubric locked"><h3>Niveau ${lv}</h3><span class="aside">s'ouvre au niveau ${R.unlockAt(g, lv)} de magicien</span></div>`; continue; }
     const nP = list.filter(([x]) => prepared.has(x.id)).length;
-    h += foldHead("l" + lv, locked ? "locked" : "", `Niveau ${lv}`, slots[lv - 1] ? `${slots[lv - 1]} emplacement${slots[lv - 1] > 1 ? "s" : ""}` : `s'ouvre au niveau ${R.unlockAt(lv)}`, plural(list.length, "sort") + (locked ? "" : ` · ${nP} préparé${nP > 1 ? "s" : ""}`));
+    h += foldHead("l" + lv, locked ? "locked" : "", `Niveau ${lv}`, slots[lv - 1] ? `${slots[lv - 1]} emplacement${slots[lv - 1] > 1 ? "s" : ""}` : `s'ouvre au niveau ${R.unlockAt(g, lv)}`, plural(list.length, "sort") + (locked ? "" : ` · ${nP} préparé${nP > 1 ? "s" : ""}`));
     if (isFold("l" + lv)) continue;
     if (!list.length) h += `<div class="empty">Aucun sort de niveau ${lv}. Ajoute-en depuis la bibliothèque.</div>`;
     list.forEach(([x, s]) => { h += gererRow(g, s, x, locked, prepared.has(s.id), false); });
@@ -734,12 +785,12 @@ function removeBtn(key, ro) {
 const byName = (a, b) => a.n.localeCompare(b.n, "fr");
 
 // ---------- Lancer un sort ----------
-const slotsLeft = (g, lv) => Math.max(0, (R.slots(g.level)[lv - 1] || 0) - (+(g.used[lv] || 0)));
-const firstFree = (g, s) => { for (let lv = s.l; lv <= R.maxLevel(g.level); lv++) if (slotsLeft(g, lv) > 0) return lv; return 0; };
+const slotsLeft = (g, lv) => Math.max(0, (R.slots(g)[lv - 1] || 0) - (+(g.used[lv] || 0)));
+const firstFree = (g, s) => { for (let lv = s.l; lv <= R.maxLevel(g); lv++) if (slotsLeft(g, lv) > 0) return lv; return 0; };
 function castHTML(g, s, prepared) {
   let h = "";
   if (prepared) {
-    const lv = firstFree(g, s), higher = !!s.up && R.maxLevel(g.level) > s.l; // ▲ seulement si le sort gagne quelque chose à monter
+    const lv = firstFree(g, s), higher = !!s.up && R.maxLevel(g) > s.l; // ▲ seulement si le sort gagne quelque chose à monter
     h += lv ? `<button class="btn cast-go" data-a="cast" data-id="${s.id}" data-l="${lv}">Lancer · niv. ${lv}</button>` : `<button class="btn cast-none" disabled>Plus d'emplacement</button>`;
     if (higher && lv) h += `<button class="btn cast-up" data-a="cast-open" data-id="${s.id}" aria-label="Lancer ${esc(s.n)} à un niveau supérieur" aria-expanded="${S.castOpen === s.id}">▲</button>`;
   }
@@ -747,7 +798,7 @@ function castHTML(g, s, prepared) {
   if (!h) return "";
   h = `<div class="cast">${h}</div>`;
   if (prepared && S.castOpen === s.id) {
-    const lvls = []; for (let lv = s.l; lv <= R.maxLevel(g.level); lv++) lvls.push(lv);
+    const lvls = []; for (let lv = s.l; lv <= R.maxLevel(g); lv++) lvls.push(lv);
     h += `<div class="chooser"><span class="lbl">Lancer avec un emplacement de</span><div class="lvls">${lvls.map(lv => {
       const left = slotsLeft(g, lv);
       return `<button class="btn" data-a="cast" data-id="${s.id}" data-l="${lv}"${left ? "" : " disabled"}><b>Niveau ${lv}</b><small>${left ? `${left} restant${left > 1 ? "s" : ""}` : "épuisé"}</small></button>`;
@@ -759,10 +810,10 @@ function slotbarHTML(g) {
   const cur = concOf(g);
   const others = g.effects.filter(e => !e.c);
   const fx = g.effects.length ? `<div class="fx">${cur ? `<button class="chip conc" data-a="conc-panel" aria-expanded="${S.concPanel}">◉ ${esc(cur.name)} · conc.</button>` : ""}${others.map(e => `<button class="chip" data-a="fx-open">${esc(e.name)} · ${esc(e.d)}</button>`).join("")}${g.effects.length > 1 || !cur ? `<button class="chip" data-a="fx-open" style="background:transparent;border-color:var(--rule);color:var(--muted)">Tout voir</button>` : ""}</div>` : "";
-  return `${fx}<button class="line" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g.level).map((n, i) => {
+  return `${fx}<button class="line" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g).map((n, i) => {
     const used = Math.min(n, +(g.used[i + 1] || 0));
     return `<span class="lv" aria-label="Niveau ${i + 1} : ${n - used} sur ${n}"><b>${i + 1}</b>${Array.from({ length: n }, (_, k) => `<span class="d${k < used ? " u" : ""}"></span>`).join("")}</span>`;
-  }).join("")}</span>${S.view !== "jeu" ? `<span class="prepc${g.prepared.length > R.prepMax(g) ? " over" : ""}">Préparés <b>${g.prepared.length}</b>/${R.prepMax(g)}</span>` : ""}<span class="go">Emplacements ⌃</span></button>`;
+  }).join("")}</span>${S.view !== "jeu" && isWiz(g) ? `<span class="prepc${g.prepared.length > R.prepMax(g) ? " over" : ""}">Préparés <b>${g.prepared.length}</b>/${R.prepMax(g)}</span>` : ""}<span class="go">Emplacements ⌃</span></button>`;
 }
 // ---------- Concentration ----------
 const concOf = g => (g.effects || []).find(e => e.c);
@@ -781,7 +832,7 @@ function concWarnHTML(g, s) {
 }
 // ---------- Repos court : Restauration arcanique ----------
 // Emplacements récupérables : niveaux 1 à 5, dans la limite de ceux dépensés ; budget = moitié du niveau de magicien (arrondi au supérieur).
-function arcaneLevels(g) { const out = []; for (let lv = 1; lv <= Math.min(5, R.maxLevel(g.level)); lv++) { const sp = +(g.used[lv] || 0); if (sp > 0) out.push([lv, sp]); } return out; }
+function arcaneLevels(g) { const out = []; for (let lv = 1; lv <= Math.min(5, R.maxLevel(g)); lv++) { const sp = +(g.used[lv] || 0); if (sp > 0) out.push([lv, sp]); } return out; }
 const srTotal = sr => Object.entries(sr).reduce((a, [lv, n]) => a + lv * n, 0);
 function arcaneCombos(g) {
   const B = R.arcane(g.level), lv = arcaneLevels(g).reverse(), res = [];
@@ -824,8 +875,8 @@ const liveMark = (g, s) => { const c = concOf(g); return c && c.id === s.id ? `<
 function keyPills(s, g) {
   let h = "";
   if (s.p) h += `<span class="kp ${s.p.startsWith("d:") ? "d" : "f"}">${esc(pText(s, g.level))}</span>`;
-  if (s.j === "atk") h += `<span class="kp a" title="Attaque de sort">${signed(R.prof(g.level) + R.mod(g.int))}</span>`;
-  else if (s.j && s.j !== "auto") { const fixed = /^DD (\d+) fixe/.exec(s.ok || ""); h += `<span class="kp s" title="Jet de sauvegarde de la cible">${s.j} ${fixed ? fixed[1] : 8 + R.prof(g.level) + R.mod(g.int)}</span>`; }
+  if (s.j === "atk") h += `<span class="kp a" title="Attaque de sort">${signed(R.prof(g.level) + R.am(g))}</span>`;
+  else if (s.j && s.j !== "auto") { const fixed = /^DD (\d+) fixe/.exec(s.ok || ""); h += `<span class="kp s" title="Jet de sauvegarde de la cible">${s.j} ${fixed ? fixed[1] : 8 + R.prof(g.level) + R.am(g)}</span>`; }
   return h;
 }
 function jeuRow(g, s, kind) {
@@ -839,7 +890,7 @@ function jeuRow(g, s, kind) {
   ${open ? `<div class="jbody">${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${noteOf(g, s) ? noteBox(g, s) : ""}${kind !== "cantrip" && !S.readonly ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
 }
 function jeuHTML(g) {
-  const prepared = new Set(g.prepared), max = R.maxLevel(g.level), slots = R.slots(g.level);
+  const prepared = new Set(g.prepared), max = R.maxLevel(g), slots = R.slots(g);
   let h = "";
   const cans = g.cantrips.map(id => BY_ID[id]).sort(byName);
   if (cans.length) {
@@ -865,16 +916,17 @@ function jeuHTML(g) {
 }
 
 function biblioHTML(g) {
-  const f = S.f, max = R.maxLevel(g.level);
-  const owned = new Set([...g.spells.map(x => x.id), ...g.cantrips]);
+  const f = S.f, max = R.maxLevel(g), wiz = isWiz(g), top = C(g).top;
+  if (!wiz && (f.lvl === "0" || +f.lvl > top)) f.lvl = "all";
+  const owned = new Set(wiz ? [...g.spells.map(x => x.id), ...g.cantrips] : []);
   const q = f.q.trim().toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
-  const list = SPELLS.filter(s => (f.lvl === "all" || s.l === +f.lvl) && (!f.school || s.s === f.school) && (!f.conc || s.c) && (!f.rit || s.ri)
+  const list = classSpells(g).filter(s => (f.lvl === "all" || s.l === +f.lvl) && (!f.school || s.s === f.school) && (!f.conc || s.c) && (!f.rit || s.ri)
     && (!f.hideOwned || !owned.has(s.id)) && (!f.reachable || s.l <= max)
     && (!q || (s.n + " " + s.en + " " + s.e + " " + (s.p || "").slice(2)).toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").includes(q)));
   let h = `<div class="filters">
     <div class="chips" role="group" aria-label="Niveau de sort">
       <button class="chip" data-a="flvl" data-v="all" aria-pressed="${f.lvl === "all"}">Tous</button>
-      ${LVL_NAME.map((n, i) => `<button class="chip${i > max ? " dim" : ""}" data-a="flvl" data-v="${i}" aria-pressed="${f.lvl === String(i)}">${i === 0 ? "Mineurs" : i}</button>`).join("")}
+      ${LVL_NAME.map((n, i) => (i === 0 && !wiz) || i > top ? "" : `<button class="chip${i > max ? " dim" : ""}" data-a="flvl" data-v="${i}" aria-pressed="${f.lvl === String(i)}">${i === 0 ? "Mineurs" : i}</button>`).join("")}
     </div>
     <div class="frow">
       <div class="field"><label for="f-q">Recherche</label><input id="f-q" type="search" value="${esc(f.q)}" placeholder="Nom français, anglais ou effet (ex. « feu »)"></div>
@@ -884,12 +936,12 @@ function biblioHTML(g) {
       <label class="check"><input type="checkbox" data-a="ftog" data-v="conc"${f.conc ? " checked" : ""}> Concentration</label>
       <label class="check"><input type="checkbox" data-a="ftog" data-v="rit"${f.rit ? " checked" : ""}> Rituel</label>
       <label class="check"><input type="checkbox" data-a="ftog" data-v="reachable"${f.reachable ? " checked" : ""}> Accessibles à son niveau</label>
-      <label class="check"><input type="checkbox" data-a="ftog" data-v="hideOwned"${f.hideOwned ? " checked" : ""}> Masquer les sorts déjà appris</label>
+      ${wiz ? `<label class="check"><input type="checkbox" data-a="ftog" data-v="hideOwned"${f.hideOwned ? " checked" : ""}> Masquer les sorts déjà appris</label>` : ""}
     </div></div>
-    <p class="found">${list.length} sort${list.length > 1 ? "s" : ""}${R.savant(g, {s: g.school}) ? ` · ${esc(g.school)} : copie à moitié prix (Savant en ${esc(g.school)})` : ""}${q ? "" : " · touche un sort pour voir sa description, ou fais une recherche pour tout afficher"}</p>`;
+    <p class="found">${list.length} sort${list.length > 1 ? "s" : ""}${wiz && R.savant(g, {s: g.school}) ? ` · ${esc(g.school)} : copie à moitié prix (Savant en ${esc(g.school)})` : ""}${q ? "" : " · touche un sort pour voir sa description, ou fais une recherche pour tout afficher"}</p>`;
   let cur = -1;
   list.forEach(s => {
-    if (f.lvl === "all" && s.l !== cur) { cur = s.l; h += `<div class="rubric${s.l > max ? " locked" : ""}"><h3>${LVL_NAME[s.l]}</h3><span class="aside">${s.l === 0 ? `${g.cantrips.length} sur ${R.cantrips(g.level)} connus` : s.l > max ? `s'ouvre au niveau ${R.unlockAt(s.l)} de magicien` : `accessible`}</span></div>`; }
+    if (f.lvl === "all" && s.l !== cur) { cur = s.l; h += `<div class="rubric${s.l > max ? " locked" : ""}"><h3>${LVL_NAME[s.l]}</h3><span class="aside">${s.l === 0 ? `${g.cantrips.length} sur ${R.cantrips(g)} connus` : s.l > max ? `s'ouvre au niveau ${R.unlockAt(g, s.l)} de ${C(g).n.toLowerCase()}` : `accessible`}</span></div>`; }
     // Sans recherche : une ligne par sort, dépliable. Avec une recherche : résultats affichés en entier.
     if (!q) { h += libRow(g, s, owned, max, f.lvl === "all" ? "" : LVL_NAME[s.l] + " · "); return; }
     h += `<div class="spell noprep"><div><div class="name">${esc(s.n)}${tags(s)}<span class="vo">${esc(s.en)}</span></div>${spellBody(s, g, f.lvl === "all" ? "" : LVL_NAME[s.l] + " · ")}</div>
@@ -900,15 +952,16 @@ function biblioHTML(g) {
 }
 function libRow(g, s, owned, max, prefix) {
   const key = "lib:" + s.id, open = S.open.has(key);
-  const mark = owned.has(s.id) ? `<span class="libmark ok">Déjà appris</span>` : s.l > max ? `<span class="libmark">Niveau ${R.unlockAt(s.l)} requis</span>` : "";
+  const mark = owned.has(s.id) ? `<span class="libmark ok">Déjà appris</span>` : s.l > max ? `<span class="libmark">Niveau ${R.unlockAt(g, s.l)} requis</span>` : "";
   return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button><span class="kps">${keyPills(s, g)}</span></div>${mark}</div>
   ${open ? `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g, prefix)}<div class="rowact">${addBtns(g, s, owned, max)}</div></div>` : ""}</div>`;
 }
 function addBtns(g, s, owned, max) {
+  if (!isWiz(g)) return s.l > max ? `<span class="origin">Niveau ${R.unlockAt(g, s.l)} requis</span>` : `<span class="origin">Liste du ${C(g).n.toLowerCase()}</span>`;
   if (owned.has(s.id)) return `<span class="origin">Déjà appris</span>`;
   if (S.readonly) return "";
   if (s.l === 0) return `<button class="btn" data-a="add" data-id="${s.id}" data-how="mineur">Apprendre</button>`;
-  if (s.l > max) return `<span class="origin">Niveau ${R.unlockAt(s.l)} requis</span>`;
+  if (s.l > max) return `<span class="origin">Niveau ${R.unlockAt(g, s.l)} requis</span>`;
   const c = R.copy(g, s);
   return `<button class="btn" data-a="add" data-id="${s.id}" data-how="niv" title="Un des 2 sorts gratuits gagnés à chaque niveau">Montée de niveau</button>
     <button class="btn" data-a="add" data-id="${s.id}" data-how="copie" title="Copié depuis un parchemin ou un autre grimoire">Copier · ${fmt(c.h)} h · ${fr(c.po)} po</button>`;
@@ -944,16 +997,16 @@ function saveHTML(g) {
   <p style="max-width:65ch">Enregistre ${esc(g.name)} dans un fichier : c'est ta sauvegarde, et c'est ce fichier qu'on importe sur un autre appareil.${canShareFiles() ? " « Envoyer au MJ » ouvre le menu de partage du téléphone avec le fichier déjà joint : choisis la conversation de ton MJ." : ""}</p>
   <div class="frow">${canShareFiles() ? `<button class="btn primary" data-a="share-json">Envoyer au MJ</button><button class="btn" data-a="dl-json">Exporter (.json)</button>` : `<button class="btn primary" data-a="dl-json">Exporter ${esc(g.name)} (.json)</button>`}</div>
   ${S.readonly ? "" : `<div class="rubric"><h3>Importer</h3></div>
-  <p style="max-width:65ch">Ajoute un grimoire à partir d'un fichier .json exporté depuis l'atelier. L'import crée un nouveau grimoire : il ne remplace pas celui qui est affiché.</p>
+  <p style="max-width:65ch">Ajoute un personnage à partir d'un fichier .json ou .txt exporté depuis l'atelier ; sa classe est reconnue d'elle-même. L'import crée un nouveau personnage : il ne remplace pas celui qui est affiché.</p>
   <div class="frow"><label class="btn" for="f-import">Choisir un fichier…</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden></div>
   <div class="rubric"><h3>Supprimer</h3></div>
   <p style="max-width:65ch">La suppression est définitive${S.mode === "local" ? " sur cet appareil" : ""}. Exporte le grimoire avant si tu veux pouvoir le récupérer.</p>
-  ${S.confirm === "del" ? `<button class="btn confirm" data-a="del">Supprimer définitivement ${esc(g.name)} ?</button> <button class="btn ghost" data-a="cancel">Annuler</button>` : `<button class="btn" data-a="del">Supprimer ce grimoire</button>`}`}`;
+  ${S.confirm === "del" ? `<button class="btn confirm" data-a="del">Supprimer définitivement ${esc(g.name)} ?</button> <button class="btn ghost" data-a="cancel">Annuler</button>` : `<button class="btn" data-a="del">Supprimer ${isWiz(g) ? "ce grimoire" : "ce personnage"}</button>`}`}`;
 }
 
 // ---------- Fiche imprimable ----------
 function printable(g) {
-  const prof = R.prof(g.level), mod = R.mod(g.int), slots = R.slots(g.level), max = slots.length, pMax = R.prepMax(g);
+  const prof = R.prof(g.level), mod = R.am(g), slots = R.slots(g), max = slots.length, pMax = R.prepMax(g);
   const next = Math.min(9, max + 1);
   const can = g.cantrips.map(id => BY_ID[id]).sort(byName);
   const sp = lv => g.spells.map(x => BY_ID[x.id]).filter(s => s.l === lv).sort(byName);
@@ -962,11 +1015,11 @@ function printable(g) {
   const pn = s => g.snotes && g.snotes[s.id] ? `<div style="margin-top:2px;padding-left:6px;border-left:2px solid #8A6516;font-style:italic">✎ ${esc(g.snotes[s.id])}</div>` : "";
   const pl = s => `<div class="pls">${pillData(s, g).map(p => `<span class="pl ${p.k}">${esc(p.l === "Jet" ? cap(p.sub) : p.v)}${p.k === "s" && p.sub ? ` <i>(${esc(short(p.sub))})</i>` : p.k === "a" ? " <i>/ CA</i>" : ""}${p.conc ? " <i>(conc.)</i>" : ""}</span>`).join("")}</div>`;
   const dots = (n, fut) => Array.from({length: n}, () => `<span class="dot${fut ? " fut" : ""}"></span>`).join("");
-  const futSlots = next > max ? (SLOTS[R.unlockAt(next)] || [])[next - 1] || 0 : 0;
+  const futSlots = next > max ? (SLOTS[R.unlockAt(g, next)] || [])[next - 1] || 0 : 0;
   let rows = "";
   for (let lv = 1; lv <= next; lv++) {
     const locked = lv > max, list = sp(lv);
-    rows += `<tr class="lvl"><td colspan="4">Niveau ${lv}<span>${locked ? `s'ouvre au niveau ${R.unlockAt(lv)}` : `${slots[lv - 1]} emplacement${slots[lv - 1] > 1 ? "s" : ""}`}</span></td></tr>`;
+    rows += `<tr class="lvl"><td colspan="4">Niveau ${lv}<span>${locked ? `s'ouvre au niveau ${R.unlockAt(g, lv)}` : `${slots[lv - 1]} emplacement${slots[lv - 1] > 1 ? "s" : ""}`}</span></td></tr>`;
     list.forEach(s => { rows += `<tr><td class="c"><span class="box"></span></td><td class="n">${esc(s.n)} ${t(s)}</td><td class="m">${esc(s.t)} · ${esc(s.v.replace(/,/g, ", "))}</td><td>${pl(s)}${esc(s.e)}${pn(s)}${s.up ? ` <i style="color:#5a6176">${esc(s.up)}.</i>` : ""}</td></tr>`; });
     for (let i = 0; i < (locked ? 3 : 2); i++) rows += `<tr class="blank"><td class="c"><span class="box"></span></td><td></td><td></td><td></td></tr>`;
   }
@@ -995,15 +1048,15 @@ tr.lvl td span{float:right;font-family:"Alegreya Sans",Arial,sans-serif;font-wei
 </style></head><body>
 <h1><b>${esc(g.name.charAt(0))}</b>${esc(g.name.slice(1))}</h1>
 <div class="sub">Magicien, niveau ${g.level} · École ${/^[AÉEIO]/.test(g.school) ? "d'" : "de "}${esc(g.school)} · Remplir au crayon, effacer au repos long</div>
-<div class="stats"><div><b>${signed(mod)}</b><span>MOD. INTELLIGENCE</span></div><div><b>${8 + prof + mod}</b><span>DD DES SORTS</span></div><div><b>${signed(prof + mod)}</b><span>ATTAQUE DE SORT</span></div><div><b>${pMax}</b><span>SORTS PRÉPARÉS</span></div><div><b>${R.cantrips(g.level)}</b><span>SORTS MINEURS</span></div></div>
+<div class="stats"><div><b>${signed(mod)}</b><span>MOD. INTELLIGENCE</span></div><div><b>${8 + prof + mod}</b><span>DD DES SORTS</span></div><div><b>${signed(prof + mod)}</b><span>ATTAQUE DE SORT</span></div><div><b>${pMax}</b><span>SORTS PRÉPARÉS</span></div><div><b>${R.cantrips(g)}</b><span>SORTS MINEURS</span></div></div>
 <h2>Emplacements de sorts <small>cocher un cercle à chaque sort lancé</small></h2>
 ${slots.map((n, i) => `<div class="slot"><span class="l">Niveau ${i + 1}</span>${dots(n)}<span class="r">${n} emplacement${n > 1 ? "s" : ""}</span></div>`).join("")}
-${next > max ? `<div class="slot"><span class="l" style="color:#9aa0ae">Niveau ${next}</span>${dots(futSlots, true)}<span class="r">s'ouvre au niveau ${R.unlockAt(next)}</span></div>` : ""}
+${next > max ? `<div class="slot"><span class="l" style="color:#9aa0ae">Niveau ${next}</span>${dots(futSlots, true)}<span class="r">s'ouvre au niveau ${R.unlockAt(g, next)}</span></div>` : ""}
 <div class="callout"><span class="box"></span> <b>Restauration arcanique</b> : une fois par jour, après un repos court, récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</div>
 <h2>Sorts mineurs <small>à volonté · jamais préparés</small></h2>
 <table><tr><th>Sort</th><th>Incantation · composantes</th><th>Effet</th></tr>
 ${can.map(s => `<tr><td class="n">${esc(s.n)} ${t(s)}</td><td class="m">${esc(s.t)} · ${esc(s.v.replace(/,/g, ", "))}</td><td>${pl(s)}${esc(s.e)}${pn(s)}${s.up ? ` <i style="color:#5a6176">${esc(s.up)}.</i>` : ""}</td></tr>`).join("")}
-${Array.from({length: Math.max(0, R.cantrips(g.level) - can.length) || 1}, () => `<tr class="blank"><td></td><td></td><td></td></tr>`).join("")}</table>
+${Array.from({length: Math.max(0, R.cantrips(g) - can.length) || 1}, () => `<tr class="blank"><td></td><td></td><td></td></tr>`).join("")}</table>
 ${g.extras.length ? `<h2>Autres sorts <small>race, dons, objets</small></h2><table><tr><th>Sort</th><th>Utilisé</th><th>Usage et effet</th></tr>${extras}</table>` : ""}
 <div class="callout"><b>Concentration : un seul sort à la fois.</b> Dégâts subis : JdS de Constitution, DD 10 ou la moitié des dégâts (le plus élevé).</div>
 <div class="brk"></div>
@@ -1025,11 +1078,26 @@ ${g.level >= 2 ? `<p><b>Savant en ${esc(g.school)} :</b> temps et or divisés pa
 </body></html>`;
 }
 
+// ---------- Nouveau personnage : choix de la classe ----------
+const CLASS_INFO = {
+  magicien: { i: "M", col: "#2D4A9A", d: "Grimoire, sorts copiés, Restauration arcanique. Caractéristique : Intelligence.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },
+  paladin: { i: "P", col: "#A2261C", d: "Sorts préparés dans toute la liste, sorts de serment, Imposition des mains, Châtiment divin. Caractéristique : Charisme.", tags: ["Demi-lanceur", "Sorts niv. 1 à 5"] },
+};
+function newHTML() {
+  const k = S.newCls;
+  return `<div class="grab"></div><div class="head"><h2>Nouveau personnage</h2><button class="btn ghost" data-a="nw-close" aria-label="Fermer">✕</button></div>
+  <p class="help">Choisis sa classe : l'atelier adapte les règles, les sorts et les ressources.</p>
+  <div class="nwcls" role="radiogroup" aria-label="Classe">${Object.entries(CLASS_INFO).map(([c, x]) => `<button class="nwcard" role="radio" data-a="nw-cls" data-v="${c}" aria-checked="${k === c}"><span class="ic" style="background:${x.col}">${x.i}</span><span class="tx"><b>${CLASSES[c].n}</b><span>${x.d}</span><span class="tg">${x.tags.map(z => `<i>${z}</i>`).join("")}</span></span></button>`).join("")}</div>
+  <div class="field"><label for="nw-name">Nom</label><input id="nw-name" type="text" value="${esc(S.newName || "")}" placeholder="${k ? "Nom du " + CLASSES[k].n.toLowerCase() : "Nom du personnage"}" autocomplete="off"></div>
+  <button class="btn primary nwgo" data-a="nw-go"${k ? "" : " disabled"}>${k ? "Créer le " + CLASSES[k].n.toLowerCase() : "Choisis une classe"}</button>
+  <p class="help" style="text-align:center;margin:0">D'autres classes viendront (druide…). Un fichier importé garde sa classe.</p>`;
+}
+
 // ---------- Passage de niveau ----------
 // Assistant ouvert par le bouton « ↑ Niveau N » : ce qui change, sorts gratuits, validation.
 // Le sélecteur de niveau reste un réglage direct (création, correction), sans assistant.
-function luOpen(g) { S.lu = { step: 1, to: g.level + 1, picks: [], cpicks: [], prep: [], flt: R.maxLevel(g.level + 1), open: null }; S.concPanel = false; S.fxOpen = false; S.shortOpen = false; }
-const luNeed = (g, to) => ({ s: 2, c: Math.max(0, R.cantrips(to) - R.cantrips(g.level)) });
+function luOpen(g) { S.lu = { step: 1, to: g.level + 1, picks: [], cpicks: [], prep: [], flt: R.maxLevel(g, g.level + 1), open: null }; S.concPanel = false; S.fxOpen = false; S.shortOpen = false; }
+const luNeed = (g, to) => ({ s: 2, c: Math.max(0, R.cantrips(g, to) - R.cantrips(g)) });
 const firstName = g => g.name.trim().split(/\s+/)[0] || g.name;
 const plural = (n, w, ws) => `${n} ${n > 1 ? (ws || w + "s") : w}`;
 function luHTML(g) {
@@ -1045,7 +1113,7 @@ function luHTML(g) {
   return `<div class="lubox">${head}<div class="lubody">${body}</div><div class="lufoot">${foot}</div></div>`;
 }
 function luStep1(g, b) {
-  const from = g.level, to = b.level, a0 = R.slots(from), a1 = R.slots(to), mod = R.mod(g.int);
+  const from = g.level, to = b.level, a0 = R.slots(g, from), a1 = R.slots(g, to), mod = R.am(g);
   let h = "";
   if (a1.length > a0.length) {
     const lv = a1.length, n = a1[lv - 1];
@@ -1061,7 +1129,7 @@ function luStep1(g, b) {
   ${row("Sorts préparés", R.prepMax(g), R.prepMax(b))}
   ${row("Restauration arcanique", R.arcane(from) + " niv.", R.arcane(to) + " niv.")}
   <div><span>Sorts gratuits à choisir</span><span></span><span></span><b style="color:var(--rubric)">+${need.s}</b></div>
-  ${row("Sorts mineurs connus", R.cantrips(from), R.cantrips(to), "--rubric")}</div>`;
+  ${row("Sorts mineurs connus", R.cantrips(g, from), R.cantrips(g, to), "--rubric")}</div>`;
   if (tier(to) > tier(from)) {
     const up = g.cantrips.map(id => BY_ID[id]).filter(s => s && s.p && s.p.startsWith("d:") && s.up);
     if (up.length) h += `<div style="display:grid;gap:6px"><span class="lusub">Tes sorts mineurs gagnent un dé</span>${up.map(s => `<div class="lucan"><span class="n">${esc(s.n)}</span><s>${esc(pText(s, from).split(" ")[0])}</s><span class="kp d">${esc(pText(s, to))}</span></div>`).join("")}</div>`;
@@ -1076,7 +1144,7 @@ function luStep1(g, b) {
   return h + `<div class="lunote">${notes.join("")}</div>`;
 }
 function luStep2(g, b) {
-  const L = S.lu, to = b.level, max = R.maxLevel(to), need = luNeed(g, to), maxOld = R.maxLevel(g.level);
+  const L = S.lu, to = b.level, max = R.maxLevel(g, to), need = luNeed(g, to), maxOld = R.maxLevel(g);
   const owned = new Set([...g.spells.map(x => x.id), ...g.cantrips]);
   const chips = (arr, n, word) => `<div class="lupicks"><b>${arr.length} / ${n}</b>${arr.map(id => `<button class="lupick" data-a="lu-pick" data-id="${id}" aria-label="Retirer ${esc(BY_ID[id].n)}">${esc(BY_ID[id].n)}<span aria-hidden="true">✕</span></button>`).join("")}${arr.length < n ? `<span class="luempty">${arr.length ? (arr.length + 1) + "e" : n > 1 ? "1er" : ""} ${word}…</span>` : ""}</div>`;
   let h = `<div style="font-size:14px;line-height:1.4">Choisis <b>${plural(need.s, "sort")} de magicien</b> de niveau 1${max > 1 ? " à " + max : ""}, gratuits${need.c ? `, et <b>${plural(need.c, "sort mineur", "sorts mineurs")}</b>` : ""}. Ceux déjà dans ton grimoire n'apparaissent pas.</div>`;
@@ -1106,7 +1174,7 @@ function luStep3(g, b) {
   h += `<div class="luprep"><h3>Préparation</h3><span>Tu peux maintenant préparer <b>${plural(pNew, "sort")}</b>${pNew > pOld ? ` (${pNew - pOld} de plus)` : ""}. En principe, la liste change au prochain repos long : vois avec ton MJ si tu peux préparer un nouveau sort tout de suite.</span>
   ${L.picks.map(id => { const on = L.prep.includes(id), full = !on && n >= pNew; return `<label><input type="checkbox" data-a="lu-prep" data-id="${id}"${on ? " checked" : ""}${full ? ' class="full" aria-disabled="true"' : ""}> Préparer <b>${esc(BY_ID[id].n)}</b></label>`; }).join("")}
   <span class="${n > pNew ? "" : "muted"}" style="font-size:13px${n > pNew ? ";color:var(--warn);font-weight:700" : ""}">Préparés après validation : ${n} / ${pNew}</span></div>`;
-  const a0 = R.slots(g.level), a1 = R.slots(to), gained = a1.some((x, i) => x > (a0[i] || 0));
+  const a0 = R.slots(g), a1 = R.slots(g, to), gained = a1.some((x, i) => x > (a0[i] || 0));
   h += `<div style="display:grid;gap:4px;font-size:13.5px;color:var(--muted);line-height:1.45">
   ${gained ? `<span>• Les nouveaux emplacements sont disponibles tout de suite.</span>` : ""}
   <span>• DD, attaque${tier(to) > tier(g.level) ? " et dés des sorts mineurs" : ""} sont mis à jour partout, fiche imprimable comprise.</span>
@@ -1126,7 +1194,7 @@ function mutate(fn, rerender = true) { const g = G(); if (!g || S.readonly) retu
 // Nom des fichiers de sauvegarde, datés pour qu'ils se rangent d'eux-mêmes : « Grimoire - Némeia - 2026-10-19 »
 function backupName(g) {
   const d = new Date(), p = n => String(n).padStart(2, "0");
-  return `Grimoire - ${g.name} - ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  return `${isWiz(g) ? "Grimoire" : C(g).n} - ${g.name} - ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 const exportJSON = g => JSON.stringify({ format: "grimoire-5e", version: 1, grimoire: g }, null, 2);
 // Partage par le menu du téléphone (Web Share). Uniquement hors de claude.ai, qui le refuse.
@@ -1169,16 +1237,20 @@ document.addEventListener("click", e => {
   if (["prep","arcane","xused","ftog","lu-prep"].includes(a)) return; // gérés par "change"
   if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null;
   if (a === "tab") { S.tab = b.dataset.v; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); }
-  else if (a === "new") {
-    if (S.readonly) return; const id = newId("mage"); S.list[id] = blank(); S.tab = "grimoire"; setCur(id); save(id);
-    setTimeout(() => { const el = document.getElementById("f-full"); if (el) { el.focus(); el.select(); } }, 0);
+  else if (a === "new") { if (S.readonly) return; S.newOpen = true; S.newCls = null; S.newName = ""; render(); }
+  else if (a === "nw-close") { S.newOpen = false; render(); }
+  else if (a === "nw-cls") { S.newCls = b.dataset.v; render(); const el = document.getElementById("nw-name"); if (el) el.focus({ preventScroll: true }); }
+  else if (a === "nw-go") {
+    if (S.readonly || !CLASSES[S.newCls]) return;
+    const g = blank((S.newName || "").trim(), S.newCls), id = newId(g.name);
+    S.list[id] = g; S.newOpen = false; S.tab = "grimoire"; setCur(id); save(id); toast(`${esc(g.name)} créé`);
   }
   else if (a === "pip") mutate(g => { const lv = +b.dataset.l, k = +b.dataset.k, u = +(g.used[lv] || 0); g.used[lv] = k < u ? k : k + 1; });
   else if (a === "longrest") { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.arcane = false; g.effects = []; g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); }
   else if (a === "flvl") { S.f.lvl = b.dataset.v; render(); }
   else if (a === "add") mutate(g => {
     const s = BY_ID[b.dataset.id];
-    if (b.dataset.how === "mineur") { g.cantrips.push(s.id); if (g.cantrips.length > R.cantrips(g.level)) toast(`Attention : ${g.cantrips.length} sorts mineurs pour ${R.cantrips(g.level)} connus à ce niveau.`); else toast(`${esc(s.n)} appris`); }
+    if (b.dataset.how === "mineur") { g.cantrips.push(s.id); if (g.cantrips.length > R.cantrips(g)) toast(`Attention : ${g.cantrips.length} sorts mineurs pour ${R.cantrips(g)} connus à ce niveau.`); else toast(`${esc(s.n)} appris`); }
     else { const c = R.copy(g, s); g.spells.push(b.dataset.how === "copie" ? { id: s.id, how: "copie", h: c.h, po: c.po } : { id: s.id, how: "niv" }); toast(`${esc(s.n)} ajouté au grimoire`); }
   });
   else if (a === "rm") {
@@ -1325,7 +1397,8 @@ document.addEventListener("change", e => {
   if (a === "xused") return mutate(g => { g.extras[+t.dataset.i].used = t.checked; });
   if (a === "ftog") { S.f[t.dataset.v] = t.checked; render(); return; }
   if (t.id === "f-level") return mutate(g => { g.level = +t.value; });
-  if (t.id === "f-int") return mutate(g => { g.int = Math.min(30, Math.max(1, +t.value || 10)); });
+  if (t.dataset.ab) return mutate(g => { g[t.dataset.ab] = Math.min(30, Math.max(1, +t.value || 10)); });
+  if (t.id === "f-oath") return mutate(g => { g.oath = t.value; });
   if (t.id === "f-school") return mutate(g => { g.school = t.value; });
   if (t.id === "f-sch") { S.f.school = t.value; render(); return; }
   if (t.id === "f-full") { renderPicker(); return; }
@@ -1340,6 +1413,7 @@ document.addEventListener("input", e => {
   if (t.id === "f-full") { mutate(g => { g.name = t.value || "Sans nom"; }, false); const g = G(), h = document.getElementById("title"); if (h && g) h.innerHTML = `<span class="initial">${esc(g.name.charAt(0))}</span>${esc(g.name.slice(1))}`; }
   else if (t.id === "f-notes") mutate(g => { g.notes = t.value; }, false);
   else if (t.id === "n-edit") S.ndraft = t.value;
+  else if (t.id === "nw-name") S.newName = t.value;
   else if (t.id === "conc-dmg") { const el = document.getElementById("conc-dd"); if (el) el.textContent = `JdS CON · DD ${concDD(t.value)}`; }
   else if (t.id === "x-ename" || t.id === "x-enote") S.xdraft = { name: document.getElementById("x-ename").value, note: document.getElementById("x-enote").value };
   else if (t.id === "f-q") { S.f.q = t.value; const p = document.getElementById("panel"); if (p) { p.innerHTML = biblioHTML(G()); const q = document.getElementById("f-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); } }
@@ -1355,7 +1429,11 @@ document.addEventListener("submit", e => {
   const n = document.getElementById("x-name").value.trim(), note = document.getElementById("x-note").value.trim();
   if (!n) return; mutate(g => g.extras.push({ name: n, note, used: false }));
 });
-document.addEventListener("keydown", e => { if (e.key === "Escape" && S.lu) { S.lu = null; render(); } });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && S.lu) { S.lu = null; render(); }
+  else if (e.key === "Escape" && S.newOpen) { S.newOpen = false; render(); }
+  else if (e.key === "Enter" && S.newOpen && e.target.id === "nw-name" && S.newCls) document.querySelector('[data-a="nw-go"]').click();
+});
 // ---------- Version hébergée : installation, hors connexion, stockage persistant ----------
 function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }
 function installed() { return navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches); }

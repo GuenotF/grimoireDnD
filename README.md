@@ -1,10 +1,15 @@
 # Atelier du Grimoire
 
-Grimoire de magicien pour **D&D 5e**, en français : les 213 sorts de magicien du *Manuel des joueurs* (2014), la préparation des sorts, le suivi des emplacements et une fiche imprimable A4.
+Grimoire et fiche de sorts pour **D&D 5e**, en français : les 213 sorts de magicien et les 45 sorts de paladin du *Manuel des joueurs* (2014), la préparation des sorts, le suivi des emplacements et une fiche imprimable A4.
 
 L'application est une seule page web. Elle s'installe sur l'écran d'accueil (Android, iPhone, iPad, ordinateur) et fonctionne hors connexion.
 
 ## Fonctionnalités
+
+**Classes**
+- **Magicien** : toutes les fonctionnalités ci-dessous.
+- **Paladin** (en cours) : création, Charisme, serment (Conquête), emplacements de demi-lanceur, compteurs (sorts préparés, sorts de serment, Imposition des mains), bibliothèque des 45 sorts de paladin. La préparation des sorts, les ressources et le Châtiment divin arrivent à l'étape suivante.
+- *Nouveau personnage* : choix de la classe à la création. Un fichier importé garde sa classe ; les anciens fichiers sans classe sont des magiciens.
 
 **Le magicien**
 - Niveau, Intelligence et tradition arcanique : DD, bonus d'attaque, emplacements, nombre de sorts préparés et de sorts mineurs calculés automatiquement.
@@ -35,7 +40,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 - *Repos court* : assistant de Restauration arcanique (choix rapides valides, budget de niveaux, une fois par jour).
 
 **Onglet Bibliothèque**
-- Les 213 sorts, filtrables par niveau, école, concentration, rituel, accessibilité et sorts déjà appris.
+- Les sorts de la classe (213 pour le magicien, 45 pour le paladin), filtrables par niveau, école, concentration, rituel, accessibilité et sorts déjà appris.
 - Une ligne par sort par défaut ; les résultats d'une recherche s'affichent avec leur description complète.
 - Ajout par montée de niveau ou par copie (coût calculé, moitié prix pour l'école du magicien).
 
@@ -63,7 +68,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 | Fichier | Rôle |
 |---|---|
 | `src/app.html` | L'application (interface, règles, stockage, fiche imprimable). **À modifier ici.** |
-| `data/spells.json` | Les 213 sorts, un par ligne. **À modifier ici.** |
+| `data/spells.json` | Les 251 sorts (magicien, paladin, sorts de serment), un par ligne. **À modifier ici.** |
 | `src/sw.js` | Modèle du service worker (cache hors connexion). |
 | `build.py` | Assemble les sources. |
 | `index.html`, `sw.js` | **Générés** par `build.py`, publiés par GitHub Pages. Ne pas modifier à la main. |
@@ -97,6 +102,7 @@ Pour tester en local : `python3 -m http.server 8000` dans le dossier, puis ouvri
 | `z` | Zone, quand elle s'ajoute à la portée | `sphère de 6 m` |
 | `up` | Emplacement plus élevé, ou progression d'un sort mineur | `2d10 au niveau 5, …` |
 | `e` | Description courte | |
+| `cl` | Classes qui ont le sort dans leur liste (vide pour un sort de serment hors liste) | `["magicien", "paladin"]` |
 
 Le DD et le bonus d'attaque ne sont pas stockés : l'application les calcule pour le magicien affiché.
 
