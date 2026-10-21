@@ -1,6 +1,8 @@
 // Format d'un personnage : valeurs par défaut, contrôle à l'ouverture, version et migrations.
-import { BY_ID, BEAST } from "../data.js";
-import { CLASSES, OATHS, CIRCLES } from "../rules/common.js";
+import { CIRCLES } from "../classes/druide.js";
+import { OATHS } from "../classes/paladin.js";
+import { BEAST, BY_ID } from "../data.js";
+import { CLASSES } from "../rules/common.js";
 
 /** Version actuelle du format. Les fichiers sans numéro sont la version 1. */
 export const VERSION = 2;
