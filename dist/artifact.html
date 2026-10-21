@@ -787,7 +787,8 @@ function palGererHTML(g) {
   for (let lv = 1; lv <= Math.min(C(g).top, max + 1); lv++) {
     if (lv > max) { h += `<div class="rubric locked"><h3>Niveau ${lv}</h3><span class="aside">s'ouvre au niveau ${R.unlockAt(g, lv)} de paladin</span></div>`; break; }
     const list = all.filter(s => s.l === lv).sort(byName), nP = list.filter(s => prepared.has(s.id)).length;
-    h += foldHead("l" + lv, "", `Niveau ${lv}`, `${nP} préparé${nP > 1 ? "s" : ""} sur ${list.length}`, plural(list.length, "sort") + ` · ${nP} préparé${nP > 1 ? "s" : ""}`);
+    const ns = R.slots(g)[lv - 1];
+    h += foldHead("l" + lv, "", `Niveau ${lv}`, `${ns} emplacement${ns > 1 ? "s" : ""}`, plural(list.length, "sort") + ` · ${nP} préparé${nP > 1 ? "s" : ""}`);
     if (!isFold("l" + lv)) list.forEach(s => { h += gererRow(g, s, null, false, prepared.has(s.id), false); });
   }
   return h + extrasNotesHTML(g);
