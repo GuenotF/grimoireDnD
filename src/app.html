@@ -443,6 +443,9 @@ body.lu-on, body.ws-on { overflow: hidden; }
 .lutab .old { color: var(--muted); } .lutab .ar { color: var(--pn-bd); }
 .lutab .same { color: var(--muted); } .lutab .same b { font-weight: 400; }
 .lusub { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+.lunames { font-size: 13.5px; line-height: 1.5; font-family: var(--f-display); }
+.lufav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lufav .n { font-family: var(--f-display); font-weight: 700; }
 .lucan { display: flex; align-items: center; gap: 8px; font-size: 14.5px; }
 .lucan .n { flex: 1; font-family: var(--f-display); font-weight: 700; }
 .lucan s { color: var(--muted); }
@@ -1514,7 +1517,7 @@ function newHTML() {
 // Assistant ouvert par le bouton « ↑ Niveau N » : ce qui change, sorts gratuits, validation.
 // Le sélecteur de niveau reste un réglage direct (création, correction), sans assistant.
 function luOpen(g) { S.lu = isWiz(g) ? { step: 1, to: g.level + 1, picks: [], cpicks: [], prep: [], flt: R.maxLevel(g, g.level + 1), open: null }
-    : { step: 1, to: g.level + 1, style: g.style || "", prep: [...g.prepared], cpicks: [], open: null }; S.concPanel = false; S.fxOpen = false; S.shortOpen = false; }
+    : { step: 1, to: g.level + 1, style: g.style || "", prep: [...g.prepared], cpicks: [], wsfav: [], open: null }; S.concPanel = false; S.fxOpen = false; S.shortOpen = false; }
 const luNeed = (g, to) => ({ s: 2, c: Math.max(0, R.cantrips(g, to) - R.cantrips(g)) });
 const firstName = g => g.name.trim() || g.name; // nom complet (« Ser Kael », pas « Ser »)
 const plural = (n, w, ws) => `${n} ${n > 1 ? (ws || w + "s") : w}`;
@@ -1555,17 +1558,28 @@ function palLu1(g, b) {
   if (feats.length) h += `<div style="display:grid;gap:6px"><span class="lusub">Nouvelle capacité</span>${feats.map(f => `<div class="lucan"><span class="n">${f.n}</span><span class="kp ${f.k}">${esc(f.pill(b))}</span></div>`).join("")}</div>`;
   const newOath = oathSpells(b).filter(id => !oathSpells(g).includes(id));
   if (newOath.length) h += `<div style="display:grid;gap:6px"><span class="lusub" style="color:var(--gold)">Nouveaux sorts de serment · toujours préparés</span>${newOath.map(id => BY_ID[id]).map(s => `<div class="lucan"><span style="color:var(--gold)">★</span><span class="n">${esc(s.n)}</span><span class="kps">${keyPills(s, b)}</span></div>`).join("")}</div>`;
-  if (isDru(g) && to === 4) h += `<div class="lunote"><span><b>Forme sauvage</b> : les bêtes avec une vitesse de nage deviennent possibles.</span></div>`;
-  if (isDru(g) && to === 8) h += `<div class="lunote"><span><b>Forme sauvage</b> : les bêtes avec une vitesse de vol deviennent possibles.</span></div>`;
+  const nf = isDru(g) ? newForms(g, b) : [];
+  if (nf.length) {
+    const why = to === 2 ? "Forme sauvage : premières transformations" : [DRU.fp(b) > DRU.fp(g) ? `bêtes de FP ${fpLabel(DRU.fp(b))}` : "", to === 4 ? "bêtes qui nagent" : "", to === 8 ? "bêtes qui volent" : ""].filter(Boolean).join(" et ");
+    h += `<div class="lunew"><span class="k">Nouvelles formes</span><b class="h">${plural(nf.length, "bête")} de plus</b><span style="font-size:13.5px">${cap(why)}${to === 2 ? "" : " deviennent possibles"}.</span>
+      <div class="lunames">${nf.map(x => esc(x.n)).join(" · ")}</div><span class="muted" style="font-size:12.5px">Tu pourras les ajouter à tes formes ★ à l'étape suivante.</span></div>`;
+  }
   const notes = [`<span>Hors appli, à vérifier sur ta fiche : points de vie (${isDru(g) ? "1d8" : "1d10"} + mod. CON)${R.prof(to) > R.prof(from) ? ` et bonus de maîtrise (${signed(R.prof(to))}), qui monte aussi le toucher de tes armes` : ""}.</span>`];
   if ([4, 8, 12, 16, 19].includes(to)) notes.unshift(`<span><b>Amélioration de caractéristiques</b> : si tu augmentes ${isDru(g) ? "la Sagesse" : "le Charisme"}, change sa valeur dans la fiche, le DD et l'attaque suivront.</span>`);
   if (isDru(g) && to === 2) notes.unshift(`<span><b>Cercle druidique</b> : vérifie le cercle choisi dans la fiche (${esc(CIRCLES[g.circle].n)}).</span>`);
   if (isPal(g) && to === 3) notes.unshift(`<span><b>Serment sacré</b> : vérifie le serment choisi dans la fiche (${esc(OATHS[g.oath].n)}).</span>`);
   return h + `<div class="lunote">${notes.join("")}</div>`;
 }
+const newForms = (g, b) => BEASTS.filter(x => wsAllowed(b, x) && !wsAllowed(g, x));
 function palLu2(g, b) {
   const L = S.lu, max = R.maxLevel(b), pMax = max ? R.prepMax(b) : 0, oath = oathSpells(b);
   let h = "";
+  const nf = isDru(g) ? newForms(g, b) : [];
+  if (nf.length) {
+    const fav = L.wsfav || [];
+    h += `<div class="rubric"><h3>Nouvelles formes</h3><span class="aside">${fav.length ? `${fav.length} ★ ajoutée${fav.length > 1 ? "s" : ""}` : "touche ☆ pour l'ajouter à tes formes"}</span></div><div class="luplist">${nf.map(x => { const on = fav.includes(x.id);
+      return `<div class="lurowp lufav${on ? " on" : ""}"><button class="wsfav${on ? " on" : ""}" data-a="lu-wsfav" data-id="${x.id}" aria-pressed="${on}" aria-label="${on ? "Retirer des" : "Ajouter aux"} formes favorites">${on ? "★" : "☆"}</button><span class="n">${esc(x.n)}</span><span class="flv">FP ${esc(x.fp)}</span><span class="wsmini">PV ${x.pv} · CA ${x.ca}${Object.keys(MV).filter(k => x.v[k]).map(k => ` · ${k} ${x.v[k]} m`).join("")}</span></div>`; }).join("")}</div>`;
+  }
   const needC = Math.max(0, R.cantrips(b) - R.cantrips(g));
   if (needC) {
     const known = new Set(g.cantrips), list = classSpells(b).filter(s => s.l === 0 && !known.has(s.id)).sort(byName), fullC = L.cpicks.length >= needC;
@@ -1598,7 +1612,8 @@ function palLu3(g, b) {
     ${L.cpicks && L.cpicks.length ? `<div><span class="n">Sort${L.cpicks.length > 1 ? "s" : ""} mineur${L.cpicks.length > 1 ? "s" : ""}</span><small>${L.cpicks.map(id => esc(BY_ID[id].n)).join(", ")}</small></div>` : ""}
     ${isPal(g) && !g.style && b.level >= 2 ? `<div><span class="n">Style de combat</span><small>${L.style ? esc(STYLES[L.style].n) : "pas encore choisi"}</small></div>` : ""}
     ${max ? `<div><span class="n">Sorts préparés</span><small>${prep.length} / ${R.prepMax(b)}${same ? " · inchangés" : ""}</small></div>` : ""}
-    ${nOath ? `<div><span class="n">Sorts de serment</span><small>+ ${nOath}</small></div>` : ""}</div>
+    ${nOath ? `<div><span class="n">Sorts de serment</span><small>+ ${nOath}</small></div>` : ""}
+    ${isDru(g) && newForms(g, b).length ? `<div><span class="n">Nouvelles formes</span><small>${plural(newForms(g, b).length, "bête")}${L.wsfav && L.wsfav.length ? ` · ★ ${L.wsfav.map(id => esc(BEAST[id].n)).join(", ")}` : ""}</small></div>` : ""}</div>
     <button class="linkbtn" data-a="lu-edit">Modifier</button></div>
   <div style="display:grid;gap:4px;font-size:13.5px;color:var(--muted);line-height:1.45">
     ${gained.length ? `<span>• ${cap(gained.map(([lv, d]) => `${d > 1 ? `les ${d} emplacements` : "le nouvel emplacement"} de niveau ${lv}`).join(" et "))} ${gained.length > 1 || gained[0][1] > 1 ? "sont disponibles" : "est disponible"} tout de suite.</span>` : ""}
@@ -1925,10 +1940,11 @@ document.addEventListener("click", e => {
   else if (S.lu && a === "lu-style") { S.lu.style = b.dataset.v; S.luKeep = true; render(); }
   else if (S.lu && a === "lu-go" && !isWiz(G())) {
     const L = S.lu, g = G(), to = L.to, fn = firstName(g), max = R.maxLevel(g, to), oath = oathSpells({ ...g, level: to });
-    const prev = JSON.parse(JSON.stringify({ level: g.level, style: g.style, prepared: g.prepared, cantrips: g.cantrips })); S.lu = null;
-    mutate(g => { g.level = to; if (L.style) g.style = L.style; (L.cpicks || []).forEach(id => { if (!g.cantrips.includes(id)) g.cantrips.push(id); }); g.prepared = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id)); });
+    const prev = JSON.parse(JSON.stringify({ level: g.level, style: g.style, prepared: g.prepared, cantrips: g.cantrips, favs: g.favs })); S.lu = null;
+    mutate(g => { g.level = to; if (L.style) g.style = L.style; (L.wsfav || []).forEach(id => { if (!g.favs.includes(id)) g.favs.push(id); }); (L.cpicks || []).forEach(id => { if (!g.cantrips.includes(id)) g.cantrips.push(id); }); g.prepared = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id)); });
     toast(`<b>${esc(fn)}</b> passe au niveau ${to}`, () => { mutate(g => Object.assign(g, prev)); return "Passage de niveau annulé"; });
   }
+  else if (S.lu && a === "lu-wsfav") { const id = b.dataset.id, f = S.lu.wsfav || (S.lu.wsfav = []); S.lu.wsfav = f.includes(id) ? f.filter(x => x !== id) : [...f, id]; S.luKeep = true; render(); }
   else if (S.lu && a === "lu-go") {
     const L = S.lu, g = G(); if (!g) return;
     const prev = JSON.parse(JSON.stringify({ level: g.level, spells: g.spells, cantrips: g.cantrips, prepared: g.prepared })), to = L.to, fn = firstName(g);
