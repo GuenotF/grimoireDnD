@@ -260,6 +260,7 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .kp.f { background: var(--pf-bg); border-color: var(--pf-bd); color: var(--pf-fg); }
 .concwarn { margin-top: 8px; background: var(--surface); border: 1.5px solid var(--warn); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; max-width: 520px; font-size: 14.5px; line-height: 1.4; }
 .concwarn .cast { margin-top: 4px; }
+.wsactive .wsconc { margin-top: 0; max-width: none; }
 .live { font-size: 12.5px; font-weight: 700; color: var(--rubric); white-space: nowrap; margin-left: 6px; }
 /* Bascule Gérer / En jeu */
 .viewsw { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); background: var(--sunk); border-radius: 8px; padding: 3px; max-width: 360px; margin-bottom: 6px; }
@@ -1026,6 +1027,13 @@ function bstRow(g, b, full) {
   return `<div class="jrow wsrow${ok ? "" : " locked"}"><div class="jline">${star}<div class="jmain">${full ? `<span class="jname">${esc(b.n)}</span>` : `<button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(b.n)}<span class="chev">${open ? "▴" : "▾"}</span></button>`}<span class="flv">FP ${esc(b.fp)}</span><span class="wsmini">PV ${b.pv}</span><span class="wsmini">CA ${b.ca}</span>${Object.keys(MV).filter(k => b.v[k]).map(k => `<span class="wsmini">${k} ${b.v[k]} m</span>`).join("")}</div>${mark}</div>
   ${open ? beastCard(g, b) : ""}</div>`;
 }
+// Rappel du jet de concentration après des dégâts en forme de bête (la concentration continue en Forme sauvage)
+function wsConcHTML(g) {
+  const w = S.wsConc, cur = concOf(g); if (!w || !cur || S.readonly) { S.wsConc = null; return ""; }
+  const con = w.con != null ? `avec la CON de la bête (${signed(w.con)})` : "avec ta propre CON (tu as repris ta forme)";
+  return `<div class="concwarn wsconc" role="alert"><div><b>◉ ${esc(cur.name)}</b> : jet de sauvegarde de Constitution, <b>DD ${w.dd}</b> (${plural(w.n, "dégât")}), ${con}.</div>
+  <div class="cast"><button class="btn" data-a="wsconc-ok">Réussi</button><button class="btn" data-a="conc-end" style="border-color:var(--rubric);color:var(--pa-fg)">Raté : concentration perdue</button></div></div>`;
+}
 function wsActiveHTML(g) {
   const f = g.wsForm, b = f && BEAST[f.id]; if (!b) return "";
   const pct = Math.round(100 * Math.max(0, f.hp) / f.max), ro = !!S.readonly;
@@ -1035,7 +1043,7 @@ function wsActiveHTML(g) {
   <div class="wsn"><b>${esc(b.n)}${shut ? `<small> · CA ${b.ca}</small>` : ""}</b><span class="hp">${f.hp}<small>/${f.max} PV</small></span></div>
   <div class="bar"><span style="width:${pct}%"></span></div>
   ${ro ? "" : `<div class="wsdmg"><label for="ws-n">PV</label><input id="ws-n" type="number" inputmode="numeric" min="0" placeholder="${S.wsDice ? S.wsDice : "0"}"><button class="btn cast-go sm" data-a="ws-dmg">Dégâts</button><button class="btn sm" data-a="ws-heal">Soins</button></div>
-  ${S.wsDice ? `<div class="muted" style="font-size:13px">Lance <b>${S.wsDice}</b>, tape le résultat puis « Soins ».</div>` : ""}`}
+  ${S.wsDice ? `<div class="muted" style="font-size:13px">Lance <b>${S.wsDice}</b>, tape le résultat puis « Soins ».</div>` : ""}${wsConcHTML(g)}`}
   ${shut ? "" : `${beastCard(g, b)}
   ${ro ? "" : `<div class="wscf"><span class="lusub">Changeforme de combat · action bonus</span>
     ${slots.length ? `<div class="cast"><button class="btn cast-go" data-a="ws-cf" data-l="${slots[0][0]}">Soin · niv. ${slots[0][0]} = ${slots[0][0]}d8 PV</button>${R.slots(g).length > 1 ? `<button class="btn cast-up" data-a="cast-open" data-id="ws-cf" aria-label="Se soigner avec un emplacement plus élevé" aria-expanded="${S.castOpen === "ws-cf"}">▲</button>` : ""}</div>
@@ -1110,6 +1118,7 @@ function grimoireHTML(g) {
   const slots = R.slots(g), max = slots.length, pMax = R.prepMax(g);
   let h = `<div class="viewsw" role="group" aria-label="Affichage du grimoire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
   if (isDru(g) && g.wsForm) h += wsActiveHTML(g);
+  else if (isDru(g)) h += wsConcHTML(g);   // forme terminée par des dégâts : le rappel de concentration reste visible
   h += `<div class="rubric" id="slots-top" style="margin-top:4px"><h2>Emplacements de sorts</h2><span class="aside">touche un cercle quand tu lances un sort</span></div><div class="slots">`;
   if (!slots.length) h += `<p class="muted" style="margin:0 0 6px">Pas encore d'emplacement : les sorts arrivent au niveau ${R.unlockAt(g, 1)}.</p>`;
   slots.forEach((n, i) => {
@@ -1752,7 +1761,7 @@ document.addEventListener("click", e => {
     S.list[id] = g; S.newOpen = false; S.tab = "grimoire"; setCur(id); save(id); toast(`${esc(g.name)} créé`);
   }
   else if (a === "pip") mutate(g => { const lv = +b.dataset.l, k = +b.dataset.k, u = +(g.used[lv] || 0); g.used[lv] = k < u ? k : k + 1; });
-  else if (a === "longrest") { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.arcane = false; g.effects = []; g.loh = 0; g.dsU = 0; g.cdU = 0; g.wsU = 0; g.wsForm = null; S.wsDice = ""; g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); }
+  else if (a === "longrest") { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.arcane = false; g.effects = []; g.loh = 0; g.dsU = 0; g.cdU = 0; g.wsU = 0; g.wsForm = null; S.wsDice = ""; S.wsConc = null; g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); }
   else if (a === "flvl") { S.f.lvl = b.dataset.v; render(); }
   else if (a === "bst-f") { const k = b.dataset.k, v = b.dataset.v; S.bf[k] = S.bf[k] === v && k !== "fp" ? "" : v; render(); }
   else if (a === "add") mutate(g => {
@@ -1808,8 +1817,9 @@ document.addEventListener("click", e => {
   else if (a === "conc-cancel") { S.concWarn = null; render(); }
   else if (a === "conc-panel") { S.concPanel = !S.concPanel; render(); if (S.concPanel) { const i = document.getElementById("conc-dmg"); if (i) i.focus(); } }
   else if (a === "conc-close") { S.concPanel = false; render(); }
+  else if (a === "wsconc-ok") { const w = S.wsConc; S.wsConc = null; render(); if (w) toast(`Concentration maintenue : <b>${esc((concOf(G()) || {}).name || "")}</b>`); }
   else if (a === "conc-end") {
-    const g = G(), cur = g && concOf(g); if (!cur) return; S.concPanel = false;
+    const g = G(), cur = g && concOf(g); if (!cur) return; S.concPanel = false; S.wsConc = null;
     const prev = JSON.parse(JSON.stringify(g.effects));
     mutate(g => { g.effects = g.effects.filter(e => !e.c); });
     toast(`Concentration perdue : <b>${esc(cur.name)}</b> prend fin`, () => mutate(g => { g.effects = prev; }));
@@ -1854,7 +1864,7 @@ document.addEventListener("click", e => {
   else if (a === "ws-fav") { const id = b.dataset.id, g0 = G(); if (!g0 || !BEAST[id] || (!wsAllowed(g0, BEAST[id]) && !g0.favs.includes(id))) return; mutate(g => { g.favs = g.favs.includes(id) ? g.favs.filter(x => x !== id) : [...g.favs, id]; }); }
   else if (a === "ws-go") {
     const g = G(), bt = BEAST[b.dataset.id]; if (!g || !bt || g.wsU >= DRU.ws(g)) return;
-    const prev = { wsU: g.wsU, wsForm: g.wsForm }; S.ws = null; S.wsDice = "";
+    const prev = { wsU: g.wsU, wsForm: g.wsForm }; S.ws = null; S.wsDice = ""; S.wsConc = null;
     mutate(g => { g.wsU += 1; g.wsForm = { id: bt.id, hp: bt.pv, max: bt.pv }; });
     window.scrollTo({ top: 0, behavior: "smooth" });
     toast(`<b>Forme sauvage</b> : ${esc(bt.n)} · ${bt.pv} PV · reste ${Math.max(0, DRU.ws(g) - prev.wsU - 1)}`, () => { mutate(g => { g.wsU = prev.wsU; g.wsForm = prev.wsForm; }); return "Transformation annulée"; });
@@ -1862,9 +1872,10 @@ document.addEventListener("click", e => {
   else if (a === "ws-dmg" || a === "ws-heal") {
     const g = G(), el = document.getElementById("ws-n"), n = Math.floor(+(el && el.value) || 0); if (!g || !g.wsForm || n < 1) { if (el) el.focus(); return; }
     const prev = { ...g.wsForm }, bt = BEAST[prev.id]; S.wsDice = "";
+    const cc = a === "ws-dmg" && concOf(g); S.wsConc = cc ? { dd: concDD(n), n, beast: bt.n, con: n < prev.hp ? Math.floor((bt.st[2] - 10) / 2) : null } : S.wsConc;
     if (a === "ws-heal") { const hp = Math.min(prev.max, prev.hp + n); mutate(g => { g.wsForm.hp = hp; }); toast(`${esc(bt.n)} : +${hp - prev.hp} PV (${hp}/${prev.max})`, () => { mutate(g => { g.wsForm = prev; }); return "Soin annulé"; }); }
-    else if (n < prev.hp) { mutate(g => { g.wsForm.hp = prev.hp - n; }); toast(`${esc(bt.n)} : −${n} PV (${prev.hp - n}/${prev.max})`, () => { mutate(g => { g.wsForm = prev; }); return "Dégâts annulés"; }); }
-    else { const over = n - prev.hp; mutate(g => { g.wsForm = null; }); toast(`${esc(bt.n)} à 0 PV : tu reprends ta forme${over ? `. <b>${over} dégât${over > 1 ? "s" : ""}</b> à retirer de tes PV` : ", sans dégât en plus"}`, () => { mutate(g => { g.wsForm = prev; }); return "Forme rétablie"; }); }
+    else if (n < prev.hp) { mutate(g => { g.wsForm.hp = prev.hp - n; }); toast(`${esc(bt.n)} : −${n} PV (${prev.hp - n}/${prev.max})${cc ? ` · concentration : DD ${concDD(n)}` : ""}`, () => { S.wsConc = null; mutate(g => { g.wsForm = prev; }); return "Dégâts annulés"; }); }
+    else { const over = n - prev.hp; mutate(g => { g.wsForm = null; }); toast(`${esc(bt.n)} à 0 PV : tu reprends ta forme${over ? `. <b>${over} dégât${over > 1 ? "s" : ""}</b> à retirer de tes PV` : ", sans dégât en plus"}`, () => { S.wsConc = null; mutate(g => { g.wsForm = prev; }); return "Forme rétablie"; }); }
   }
   else if (a === "ws-cf") {
     const g = G(), lv = +b.dataset.l; if (!g || !g.wsForm || slotsLeft(g, lv) < 1) return;
@@ -1872,7 +1883,7 @@ document.addEventListener("click", e => {
     const el = document.getElementById("ws-n"); if (el) el.focus({ preventScroll: true });
     toast(`Changeforme de combat : emplacement niv. ${lv} dépensé · lance <b>${lv}d8</b>`, () => { S.wsDice = ""; mutate(g => { g.used[lv] = Math.max(0, (+(g.used[lv] || 0)) - 1); }); return "Emplacement rendu"; });
   }
-  else if (a === "ws-end") { const g = G(); if (!g || !g.wsForm) return; const prev = g.wsForm; S.wsDice = ""; mutate(g => { g.wsForm = null; }); toast(`Tu reprends ta forme de druide`, () => { mutate(g => { g.wsForm = prev; }); return "Forme rétablie"; }); }
+  else if (a === "ws-end") { const g = G(); if (!g || !g.wsForm) return; const prev = g.wsForm; S.wsDice = ""; S.wsConc = null; mutate(g => { g.wsForm = null; }); toast(`Tu reprends ta forme de druide`, () => { mutate(g => { g.wsForm = prev; }); return "Forme rétablie"; }); }
   else if (a === "ws-top") { const el = document.getElementById("ws-active"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); else { S.tab = "grimoire"; render(); } }
   else if (a === "short-pal") {
     const g = G(); if (!g) return; const f = isDru(g) ? "wsU" : "cdU", prev = g[f];
