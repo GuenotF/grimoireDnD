@@ -303,6 +303,35 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .libmark.ok { color: var(--ok); font-weight: 500; }
 .rubric.rit { border-bottom-color: var(--ok); } .rubric.rit h3 { color: var(--ok); }
 @media (prefers-reduced-motion: no-preference) { .pip { transition: transform .1s, background .12s; } }
+/* Paladin */
+.slots.res { display: grid; gap: 8px; }
+.resrow { display: flex; align-items: center; gap: 10px; }
+.resrow .rn { flex: 1; min-width: 0; display: grid; }
+.resrow .rn b { font-family: var(--f-display); font-size: 16.5px; }
+.resrow .rn small { font-size: 12.5px; color: var(--muted); }
+.resrow .rv { font-family: var(--f-display); font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.resrow .rv small { font-size: 14px; color: var(--muted); font-weight: 500; }
+.resrow.sep { border-top: 1px dashed var(--rule); padding-top: 8px; }
+.slots.res .bar, .fxsheet .bar { height: 6px; border-radius: 3px; background: var(--sunk); overflow: hidden; }
+.slots.res .bar span, .fxsheet .bar span { display: block; height: 100%; background: var(--ok); border-radius: 3px; }
+.gstar { width: 20px; height: 20px; border-radius: 4px; background: var(--gold); color: var(--surface); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex: none; margin: 0 2px 0 0; }
+.jrow.on.oath { background: linear-gradient(90deg, var(--note-bg), transparent 75%); }
+button.rubric.fold.oath { border-bottom-color: var(--gold); } button.rubric.fold.oath .chev, button.rubric.fold.oath .h { color: var(--gold); }
+.ostar { color: var(--gold); font-size: 12px; margin-left: 4px; }
+.smite { margin-top: 18px; background: var(--surface); border: 1.5px solid var(--rubric); border-radius: 10px; padding: 10px 12px; display: grid; gap: 8px; }
+.smite .sh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.smite .sh b { font-family: var(--f-display); font-size: 18px; color: var(--pa-fg); }
+.smite .sh .muted { font-size: 13px; }
+.smite .sb { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+.smite .sb .btn { display: flex; flex-direction: column; align-items: center; line-height: 1.25; padding: 7px 6px; }
+.smite .sb .btn small { font-size: 12px; font-weight: 400; }
+.smite .check { font-size: 13.5px; }
+.lohv { font-size: 15px; color: var(--muted); } .lohv b { font-family: var(--f-display); font-size: 30px; color: var(--ink); }
+.lohrow { display: flex; align-items: center; gap: 8px; }
+.lohrow .btn:not(.cast-go) { width: 40px; height: 38px; padding: 0; font-size: 18px; }
+.lohn { font-family: var(--f-display); font-size: 26px; font-weight: 700; min-width: 46px; text-align: center; border-bottom: 2px solid var(--rubric); font-variant-numeric: tabular-nums; }
+.lohcure { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--rule); padding-top: 10px; font-size: 14px; }
+.lohcure span { flex: 1; }
 /* Nouveau personnage */
 .nwsheet { z-index: 8; }
 .nwcls { display: grid; gap: 10px; }
@@ -399,6 +428,8 @@ body.lu-on { overflow: hidden; }
 <div class="concpanel" id="concpanel" role="dialog" aria-label="Concentration" hidden></div>
 <div class="fxback" id="fxback" data-a="fx-close" hidden></div>
 <div class="fxsheet" id="fxsheet" role="dialog" aria-label="Sorts en cours" hidden></div>
+<div class="fxback" id="lohback" data-a="loh-close" hidden></div>
+<div class="fxsheet" id="lohsheet" role="dialog" aria-modal="true" aria-label="Imposition des mains" hidden></div>
 <div class="fxback" id="nwback" data-a="nw-close" hidden></div>
 <div class="fxsheet nwsheet" id="nwsheet" role="dialog" aria-modal="true" aria-label="Nouveau personnage" hidden></div>
 <div class="lvlup" id="lvlup" role="dialog" aria-modal="true" aria-label="Passage de niveau" hidden></div>
@@ -433,6 +464,19 @@ const isWiz = g => C(g) === CLASSES.magicien;
 const inClass = (g, s) => (s.cl || ["magicien"]).includes(g.cls || "magicien");
 const classSpells = g => SPELLS.filter(s => inClass(g, s));
 const oathSpells = g => { const o = OATHS[g.oath]; if (!o) return []; return Object.entries(o.sp).filter(([lv]) => g.level >= +lv).flatMap(([, ids]) => ids).filter(id => BY_ID[id]); };
+const isOath = (g, s) => !isWiz(g) && oathSpells(g).includes(s.id);
+// Sorts lançables en jeu : préparés (+ sorts de serment pour le paladin)
+function castable(g) {
+  if (isWiz(g)) { const pr = new Set(g.prepared); return g.spells.map(x => BY_ID[x.id]).filter(s => s && pr.has(s.id)); }
+  const ids = [...new Set([...oathSpells(g), ...g.prepared])];
+  return ids.map(id => BY_ID[id]).filter(s => s && s.l <= R.maxLevel(g));
+}
+const PAL = {
+  loh: g => 5 * g.level,                                   // Imposition des mains : réserve de PV
+  ds: g => Math.max(1, 1 + R.am(g)),                       // Perception divine : 1 + mod. CHA, repos long
+  cd: g => g.level >= 3 ? 1 : 0,                           // Conduit divin : 1, repos court
+  smite: lv => Math.min(5, lv + 1),                        // Châtiment divin : 2d8 au niv. 1, +1d8 par niveau, 5d8 max
+};
 const LVL_NAME = ["Sorts mineurs","Niveau 1","Niveau 2","Niveau 3","Niveau 4","Niveau 5","Niveau 6","Niveau 7","Niveau 8","Niveau 9"];
 
 // ---------- Règles ----------
@@ -475,6 +519,7 @@ function norm(g) {
   if (!CLASSES[o.cls]) o.cls = "magicien"; // anciens fichiers : magicien
   o.level = Math.min(20, Math.max(1, +o.level || 1)); o.int = Math.min(30, Math.max(1, +o.int || 10)); o.cha = Math.min(30, Math.max(1, +o.cha || 10));
   if (!OATHS[o.oath]) o.oath = "conquete";
+  ["loh", "dsU", "cdU"].forEach(k => { o[k] = Math.max(0, +o[k] || 0); }); // paladin : PV d'Imposition dépensés, Perception divine et Conduit divin utilisés
   ["cantrips","spells","prepared","extras"].forEach(k => { if (!Array.isArray(o[k])) o[k] = []; });
   o.spells = o.spells.filter(x => x && BY_ID[x.id]); o.cantrips = o.cantrips.filter(id => BY_ID[id]);
   o.prepared = o.prepared.filter(id => o.spells.some(x => x.id === id));
@@ -563,13 +608,16 @@ function render(fromSnapshot) {
   const showFx = showBar && S.fxOpen && g.effects.length > 0, fs = document.getElementById("fxsheet");
   fs.hidden = !showFx; document.getElementById("fxback").hidden = !showFx; if (showFx) fs.innerHTML = fxSheetHTML(g);
   if (!showFx) S.fxOpen = false;
+  const lh = document.getElementById("lohsheet"), showLh = !!g && !!S.lohOpen && !isWiz(g) && !S.readonly;
+  if (!showLh) S.lohOpen = false;
+  lh.hidden = !showLh; document.getElementById("lohback").hidden = !showLh; if (showLh) lh.innerHTML = lohHTML(g);
   const nw = document.getElementById("nwsheet"), showNw = !!S.newOpen && !S.readonly;
   nw.hidden = !showNw; document.getElementById("nwback").hidden = !showNw; if (showNw) nw.innerHTML = newHTML();
   const lu = document.getElementById("lvlup"), showLu = !!g && !!S.lu && !S.readonly;
   if (!showLu) S.lu = null;
   lu.hidden = !showLu; document.body.classList.toggle("lu-on", showLu);
   if (showLu) { const sc = lu.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; lu.innerHTML = luHTML(g); const nb = lu.querySelector(".lubody"); if (nb && S.luKeep) nb.scrollTop = top; S.luKeep = false; }
-  document.getElementById("toast").classList.toggle("on-top", showFx || showLu);
+  document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showLh || showNw);
 }
 function renderPicker() {
   const ids = Object.keys(S.list).sort((a, b) => S.list[a].name.localeCompare(S.list[b].name, "fr"));
@@ -666,25 +714,98 @@ function foldHead(k, cls, title, aside, summary) {
   const shut = isFold(k);
   return `<button class="rubric fold${shut ? " shut" : ""}${cls ? " " + cls : ""}" data-a="fold" data-k="${k}" aria-expanded="${!shut}"><span class="chev" aria-hidden="true">${shut ? "▸" : "▾"}</span><span class="h">${title}</span>${shut && summary ? `<span class="sum">${summary}</span>` : ""}<span class="aside">${aside}</span></button>`;
 }
-// Itération 1 : la liste des sorts du paladin (préparation, serment) arrive à l'étape suivante
-function paladinSoon(g) {
-  const oath = oathSpells(g).map(id => esc(BY_ID[id].n));
-  return `<div class="note" style="margin-top:22px">Prochaine étape de l'atelier : ici, les ressources du paladin (Imposition des mains, Perception divine, Conduit divin), le <b>Châtiment divin</b>, puis la préparation des sorts${oath.length ? ` et les sorts de serment (${oath.join(", ")})` : ""}. En attendant, la Bibliothèque présente toute la liste du paladin.</div>`;
+// ---------- Paladin : ressources ----------
+function palResHTML(g) {
+  const ro = S.readonly ? " disabled" : "", pool = PAL.loh(g), left = Math.max(0, pool - g.loh), ds = PAL.ds(g), cd = PAL.cd(g);
+  const pips = (r, n, u, lbl) => Array.from({ length: n }, (_, k) => `<button class="pip${k < u ? " used" : ""}" data-a="res-pip" data-r="${r}" data-k="${k}" aria-label="${lbl} ${k + 1}, ${k < u ? "utilisée" : "disponible"}"${ro}></button>`).join("");
+  return `<div class="rubric"><h2>Ressources du paladin</h2></div><div class="slots res">
+  <div class="resrow"><span class="rn"><b>Imposition des mains</b><small>réserve · repos long</small></span><span class="rv">${left}<small>/${pool}</small></span><button class="btn cast-go sm" data-a="loh-open"${ro || (left ? "" : " disabled")}>Soigner</button></div>
+  <div class="bar"><span style="width:${pool ? Math.round(100 * left / pool) : 0}%"></span></div>
+  <div class="resrow sep"><span class="rn"><b>Perception divine</b><small>repos long</small></span><span class="pips">${pips("ds", ds, Math.min(ds, g.dsU), "Perception divine")}</span></div>
+  ${cd ? `<div class="resrow"><span class="rn"><b>Conduit divin</b><small>${g.oath === "conquete" ? "Présence conquérante ou Frappe guidée · " : ""}repos court</small></span><span class="pips">${pips("cd", cd, Math.min(cd, g.cdU), "Conduit divin")}</span></div>` : ""}
+  </div>`;
+}
+// Volet Imposition des mains
+function lohHTML(g) {
+  const pool = PAL.loh(g), left = Math.max(0, pool - g.loh), n = Math.max(0, Math.min(left, S.lohAmt || 0));
+  return `<div class="grab"></div><div class="head"><h2>Imposition des mains</h2><button class="btn ghost" data-a="loh-close" aria-label="Fermer">✕</button></div>
+  <div class="lohv"><b>${left}</b> / ${pool} PV dans la réserve</div><div class="bar"><span style="width:${pool ? Math.round(100 * left / pool) : 0}%"></span></div>
+  <span class="lusub">Soigner (action, au contact)</span>
+  <div class="lohrow"><button class="btn" data-a="loh-dec" aria-label="Un PV de moins"${n > 1 ? "" : " disabled"}>−</button><span class="lohn" aria-live="polite">${n}</span><button class="btn" data-a="loh-inc" aria-label="Un PV de plus"${n < left ? "" : " disabled"}>+</button><span style="flex:1"></span><button class="btn cast-go" data-a="loh-go"${n ? "" : " disabled"}>Soigner ${n} PV</button></div>
+  <div class="chips">${[5, 10].filter(v => v < left).map(v => `<button class="chip" data-a="loh-set" data-v="${v}">${v}</button>`).join("")}${left ? `<button class="chip" data-a="loh-set" data-v="${left}">Tout (${left})</button>` : ""}</div>
+  <div class="lohcure"><span>Guérir une maladie ou neutraliser un poison</span><button class="btn" data-a="loh-cure"${left >= 5 ? "" : " disabled"}>−5 PV</button></div>
+  <p class="help">Sans effet sur les morts-vivants et les artificiels. La réserve revient au repos long.</p>`;
+}
+// ---------- Paladin : préparation (Gérer) ----------
+function palGererHTML(g) {
+  const max = R.maxLevel(g), pMax = R.prepMax(g), prepared = new Set(g.prepared), oath = oathSpells(g);
+  let h = "";
+  if (oath.length) {
+    const list = oath.map(id => BY_ID[id]).sort(byName);
+    h += foldHead("o", "oath", "Sorts de serment", `toujours préparés · ${esc(OATHS[g.oath].n)}`, plural(list.length, "sort"));
+    if (!isFold("o")) list.forEach(s => { h += gererRow(g, s, null, s.l > max, true, false, true); });
+  }
+  const conc = castable(g).filter(s => s.c);
+  h += `<div class="rubric"><h2>Sorts préparés</h2><span class="aside">${g.prepared.length > pMax ? `<span class="lim">Trop de sorts préparés : ${g.prepared.length} / ${pMax}</span> · décoche-en ${g.prepared.length - pMax}` : g.prepared.length === pMax ? `<span class="lim">Limite atteinte : ${pMax} / ${pMax}</span> · décoche un sort pour en préparer un autre` : `${g.prepared.length} préparé${g.prepared.length > 1 ? "s" : ""} sur ${pMax} · toute la liste du paladin, à changer après un repos long`}</span></div>`;
+  if (!max) h += `<div class="empty">Le paladin prépare ses sorts à partir du niveau ${R.unlockAt(g, 1)}.</div>`;
+  if (conc.length > 1) h += `<div class="note">Sorts de concentration préparés : ${conc.map(s => esc(s.n)).join(", ")}. Un seul peut être actif à la fois.</div>`;
+  const all = classSpells(g).filter(s => !oath.includes(s.id));
+  for (let lv = 1; lv <= Math.min(C(g).top, max + 1); lv++) {
+    if (lv > max) { h += `<div class="rubric locked"><h3>Niveau ${lv}</h3><span class="aside">s'ouvre au niveau ${R.unlockAt(g, lv)} de paladin</span></div>`; break; }
+    const list = all.filter(s => s.l === lv).sort(byName), nP = list.filter(s => prepared.has(s.id)).length;
+    h += foldHead("l" + lv, "", `Niveau ${lv}`, `${nP} préparé${nP > 1 ? "s" : ""} sur ${list.length}`, plural(list.length, "sort") + ` · ${nP} préparé${nP > 1 ? "s" : ""}`);
+    if (!isFold("l" + lv)) list.forEach(s => { h += gererRow(g, s, null, false, prepared.has(s.id), false); });
+  }
+  return h + extrasNotesHTML(g);
+}
+// ---------- Paladin : Châtiment divin (En jeu) ----------
+function smiteHTML(g) {
+  const slots = R.slots(g); if (!slots.length) return "";
+  const ud = !!S.smiteUndead;
+  return `<div class="smite"><div class="sh"><b>Châtiment divin</b><span class="muted">après un coup au corps à corps · radiant</span></div>
+  <div class="sb">${slots.map((n, i) => { const lv = i + 1, left = slotsLeft(g, lv), d = PAL.smite(lv) + (ud ? 1 : 0);
+    return `<button class="btn cast-go" data-a="smite" data-l="${lv}"${left && !S.readonly ? "" : " disabled"}><b>Niv. ${lv} · ${d}d8</b><small>${left ? `${left} restant${left > 1 ? "s" : ""}` : "épuisé"}</small></button>`; }).join("")}</div>
+  <label class="check"><input type="checkbox" data-a="smite-ud"${ud ? " checked" : ""}> Mort-vivant ou fiélon : +1d8 · critique : dés doublés</label></div>`;
+}
+function extrasNotesHTML(g) {
+  const ro = S.readonly ? " disabled" : "";
+  let h = "";
+  // Autres sorts
+  h += foldHead("x", "", "Autres sorts", "race, dons, objets magiques", plural(g.extras.length, "sort"));
+  if (!isFold("x")) { h += `<div class="extras">`;
+  if (!g.extras.length) h += `<div class="empty">Rien pour l'instant. Exemple : « Représailles infernales », 1 fois par repos long (héritage tieffelin).</div>`;
+  g.extras.forEach((x, i) => {
+    if (S.editX === i && !S.readonly) {
+      const d = S.xdraft || { name: x.name, note: x.note || "" };
+      h += `<form class="extra edit" data-a="editx" data-i="${i}">
+      <div class="fields"><div class="field"><label for="x-ename">Nom</label><input type="text" id="x-ename" value="${esc(d.name)}" required></div>
+      <div class="field"><label for="x-enote">Usage et effet</label><textarea id="x-enote" rows="2">${esc(d.note)}</textarea></div></div>
+      <div class="bar"><button class="btn ghost" type="button" data-a="xcancel">Annuler</button><button class="btn primary" type="submit">Enregistrer</button></div></form>`;
+      return;
+    }
+    h += extraRow(x, i, true);
+  });
+  h += `</div>${S.readonly ? "" : `<form class="addrow" data-a="addx"><input type="text" id="x-name" placeholder="Nom du sort" required aria-label="Nom du sort"><input type="text" id="x-note" placeholder="Usage et effet (ex. 1/repos long, 3d10 feu)" aria-label="Usage et effet"><button class="btn" type="submit">Ajouter</button></form>`}`; }
+
+  h += `<div class="rubric"><h3>Notes</h3></div><textarea id="f-notes" placeholder="Grimoires trouvés, sorts à copier, idées…"${ro}>${esc(g.notes)}</textarea>`;
+  return h;
 }
 function grimoireHTML(g) {
   const ro = S.readonly ? " disabled" : "";
   const slots = R.slots(g), max = slots.length, pMax = R.prepMax(g);
-  let h = !isWiz(g) ? "" : `<div class="viewsw" role="group" aria-label="Affichage du grimoire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
+  let h = `<div class="viewsw" role="group" aria-label="Affichage du grimoire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
   h += `<div class="rubric" id="slots-top" style="margin-top:4px"><h2>Emplacements de sorts</h2><span class="aside">touche un cercle quand tu lances un sort</span></div><div class="slots">`;
+  if (!slots.length) h += `<p class="muted" style="margin:0 0 6px">Pas encore d'emplacement : les sorts arrivent au niveau ${R.unlockAt(g, 1)}.</p>`;
   slots.forEach((n, i) => {
     const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0));
     h += `<div class="slotrow"><span class="lv">Niveau ${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"${ro}></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
   });
   h += `<div class="restbar"><button class="btn" data-a="longrest"${ro}>Repos long</button>${isWiz(g) ? `<button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}"${ro}>Repos court ${S.shortOpen ? "▴" : "▾"}</button>
     <label class="check"><input type="checkbox" data-a="arcane"${g.arcane ? " checked" : ""}${ro}> Restauration arcanique utilisée</label>
-    <span class="muted">Au repos court, 1 fois par jour : récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</span>` : ""}</div></div>`;
+    <span class="muted">Au repos court, 1 fois par jour : récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</span>`
+    : `<button class="btn" data-a="short-pal"${ro}>Repos court</button><span class="muted">Repos court : Conduit divin. Repos long : tout.</span>`}</div></div>`;
   if (S.shortOpen && !S.readonly && isWiz(g)) h += shortHTML(g);
-  if (!isWiz(g)) return h + paladinSoon(g);
+  if (!isWiz(g)) { h += palResHTML(g); return h + (S.view === "jeu" ? jeuHTML(g) : palGererHTML(g)); }
   if (S.view === "jeu") return h + jeuHTML(g);
 
   // Sorts mineurs
@@ -715,24 +836,7 @@ function grimoireHTML(g) {
   const copies = g.spells.filter(x => x.how === "copie");
   if (copies.length) h += `<p class="found">Total des copies : ${copies.length} sort${copies.length > 1 ? "s" : ""}, ${fmt(copies.reduce((a, x) => a + x.h, 0))} h et ${fr(copies.reduce((a, x) => a + x.po, 0))} po.</p>`;
 
-  // Autres sorts
-  h += foldHead("x", "", "Autres sorts", "race, dons, objets magiques", plural(g.extras.length, "sort"));
-  if (!isFold("x")) { h += `<div class="extras">`;
-  if (!g.extras.length) h += `<div class="empty">Rien pour l'instant. Exemple : « Représailles infernales », 1 fois par repos long (héritage tieffelin).</div>`;
-  g.extras.forEach((x, i) => {
-    if (S.editX === i && !S.readonly) {
-      const d = S.xdraft || { name: x.name, note: x.note || "" };
-      h += `<form class="extra edit" data-a="editx" data-i="${i}">
-      <div class="fields"><div class="field"><label for="x-ename">Nom</label><input type="text" id="x-ename" value="${esc(d.name)}" required></div>
-      <div class="field"><label for="x-enote">Usage et effet</label><textarea id="x-enote" rows="2">${esc(d.note)}</textarea></div></div>
-      <div class="bar"><button class="btn ghost" type="button" data-a="xcancel">Annuler</button><button class="btn primary" type="submit">Enregistrer</button></div></form>`;
-      return;
-    }
-    h += extraRow(x, i, true);
-  });
-  h += `</div>${S.readonly ? "" : `<form class="addrow" data-a="addx"><input type="text" id="x-name" placeholder="Nom du sort" required aria-label="Nom du sort"><input type="text" id="x-note" placeholder="Usage et effet (ex. 1/repos long, 3d10 feu)" aria-label="Usage et effet"><button class="btn" type="submit">Ajouter</button></form>`}`; }
-
-  h += `<div class="rubric"><h3>Notes</h3></div><textarea id="f-notes" placeholder="Grimoires trouvés, sorts à copier, idées…"${ro}>${esc(g.notes)}</textarea>`;
+  h += extrasNotesHTML(g);
   return h;
 }
 // ---------- Notes personnelles par sort ----------
@@ -756,20 +860,20 @@ const noteMark = (g, s) => noteOf(g, s) ? `<span class="nmark" title="Ce sort a 
 const noteBox = (g, s) => `<div class="nbox">${esc(noteOf(g, s))}</div>`;
 
 // Mode Gérer : une ligne par sort (case Préparer, nom, pastilles clés), détail complet au toucher du nom
-function gererRow(g, s, x, locked, p, cantrip) {
-  const open = S.open.has(s.id), ro = S.readonly ? " disabled" : "";
+function gererRow(g, s, x, locked, p, cantrip, oath) {
+  const open = S.open.has(s.id), ro = S.readonly ? " disabled" : "", wiz = isWiz(g);
   const full = !p && !locked && g.prepared.length >= R.prepMax(g); // limite atteinte : on ne peut plus que décocher
-  const box = cantrip ? "" : `<input type="checkbox" class="gprep${full ? " full" : ""}" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked || S.readonly ? " disabled" : full ? ' aria-disabled="true"' : ""}>`;
+  const box = cantrip ? "" : oath ? `<span class="gstar" title="Sort de serment : toujours préparé, hors limite" aria-label="Sort de serment, toujours préparé">★</span>` : `<input type="checkbox" class="gprep${full ? " full" : ""}" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked || S.readonly ? " disabled" : full ? ' aria-disabled="true"' : ""}>`;
   let body = "";
   if (open) {
-    const origin = cantrip ? "Sort mineur" : x && x.how === "copie" ? `Copié · ${fmt(x.h)} h · ${fr(x.po)} po` : "Montée de niveau";
+    const origin = !wiz ? (oath ? `Sort de serment · ${esc(OATHS[g.oath].full)}` : "Liste du paladin") : cantrip ? "Sort mineur" : x && x.how === "copie" ? `Copié · ${fmt(x.h)} h · ${fr(x.po)} po` : "Montée de niveau";
     body = `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g)}
-    ${!cantrip && s.ri && !p ? `<div class="meta">Rituel : se lance depuis le grimoire sans être préparé (+10 min, sans emplacement).</div>` : ""}
+    ${wiz && !cantrip && s.ri && !p ? `<div class="meta">Rituel : se lance depuis le grimoire sans être préparé (+10 min, sans emplacement).</div>` : ""}
     ${noteOf(g, s) && S.noteEdit !== s.id ? noteBox(g, s) : ""}
     ${!cantrip && !locked && !S.readonly ? castHTML(g, s, p) : ""}
-    <div class="rowact"><span class="origin">${origin}</span>${removeBtn((cantrip ? "c:" : "s:") + s.id, ro)}</div></div>`;
+    <div class="rowact"><span class="origin">${origin}</span>${wiz ? removeBtn((cantrip ? "c:" : "s:") + s.id, ro) : ""}</div></div>`;
   }
-  return `<div class="jrow${p ? " on" : ""}"><div class="jline">${box}<div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${notePen(g, s)}</div>${noteGerer(g, s)}${body}${concWarnHTML(g, s)}</div>`;
+  return `<div class="jrow${p ? (oath ? " on oath" : " on") : ""}"><div class="jline">${box}<div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${notePen(g, s)}</div>${noteGerer(g, s)}${body}${concWarnHTML(g, s)}</div>`;
 }
 // Autres sorts : une ligne (nom + « utilisé »), usage et actions au toucher du nom
 function extraRow(x, i, manage) {
@@ -794,7 +898,7 @@ function castHTML(g, s, prepared) {
     h += lv ? `<button class="btn cast-go" data-a="cast" data-id="${s.id}" data-l="${lv}">Lancer · niv. ${lv}</button>` : `<button class="btn cast-none" disabled>Plus d'emplacement</button>`;
     if (higher && lv) h += `<button class="btn cast-up" data-a="cast-open" data-id="${s.id}" aria-label="Lancer ${esc(s.n)} à un niveau supérieur" aria-expanded="${S.castOpen === s.id}">▲</button>`;
   }
-  if (s.ri) h += `<button class="btn cast-rit" data-a="cast-rit" data-id="${s.id}">Rituel · +10 min</button>`;
+  if (s.ri && isWiz(g)) h += `<button class="btn cast-rit" data-a="cast-rit" data-id="${s.id}">Rituel · +10 min</button>`;
   if (!h) return "";
   h = `<div class="cast">${h}</div>`;
   if (prepared && S.castOpen === s.id) {
@@ -813,7 +917,7 @@ function slotbarHTML(g) {
   return `${fx}<button class="line" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g).map((n, i) => {
     const used = Math.min(n, +(g.used[i + 1] || 0));
     return `<span class="lv" aria-label="Niveau ${i + 1} : ${n - used} sur ${n}"><b>${i + 1}</b>${Array.from({ length: n }, (_, k) => `<span class="d${k < used ? " u" : ""}"></span>`).join("")}</span>`;
-  }).join("")}</span>${S.view !== "jeu" && isWiz(g) ? `<span class="prepc${g.prepared.length > R.prepMax(g) ? " over" : ""}">Préparés <b>${g.prepared.length}</b>/${R.prepMax(g)}</span>` : ""}<span class="go">Emplacements ⌃</span></button>`;
+  }).join("")}</span>${S.view !== "jeu" && R.maxLevel(g) ? `<span class="prepc${g.prepared.length > R.prepMax(g) ? " over" : ""}">Préparés <b>${g.prepared.length}</b>/${R.prepMax(g)}</span>` : ""}<span class="go">Emplacements ⌃</span></button>`;
 }
 // ---------- Concentration ----------
 const concOf = g => (g.effects || []).find(e => e.c);
@@ -886,12 +990,12 @@ function jeuRow(g, s, kind) {
     if (kind === "prep") { const lv = firstFree(g, s); act = lv ? `<button class="btn cast-go sm" data-a="cast" data-id="${s.id}" data-l="${lv}">${lv === s.l ? "Lancer" : "Lancer · niv. " + lv}</button>` : `<button class="btn cast-none sm" disabled>Épuisé</button>`; }
     else if (kind === "rit") act = `<button class="btn cast-rit sm" data-a="cast-rit" data-id="${s.id}">Rituel</button>`;
   }
-  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${noteMark(g, s)}${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${act}</div>
+  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${isOath(g, s) ? `<span class="ostar" title="Sort de serment">★</span>` : ""}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${noteMark(g, s)}${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${act}</div>
   ${open ? `<div class="jbody">${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${noteOf(g, s) ? noteBox(g, s) : ""}${kind !== "cantrip" && !S.readonly ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
 }
 function jeuHTML(g) {
-  const prepared = new Set(g.prepared), max = R.maxLevel(g), slots = R.slots(g);
-  let h = "";
+  const prepared = new Set(g.prepared), max = R.maxLevel(g), slots = R.slots(g), ready = castable(g);
+  let h = isWiz(g) ? "" : smiteHTML(g);
   const cans = g.cantrips.map(id => BY_ID[id]).sort(byName);
   if (cans.length) {
     // Sorts mineurs : un par ligne, ceux qui ont un jet (attaque, sauvegarde) d'abord
@@ -900,12 +1004,12 @@ function jeuHTML(g) {
     if (!isFold("c")) [...combat, ...util].forEach(s => { h += jeuRow(g, s, "cantrip"); });
   }
   for (let lv = 1; lv <= max; lv++) {
-    const list = g.spells.map(x => BY_ID[x.id]).filter(s => s.l === lv && prepared.has(s.id)).sort(byName);
+    const list = ready.filter(s => s.l === lv).sort(byName);
     if (!list.length) continue;
     h += foldHead("l" + lv, "", `Niveau ${lv}`, `${slotsLeft(g, lv)} / ${slots[lv - 1]} restant${slotsLeft(g, lv) > 1 ? "s" : ""}`, plural(list.length, "sort"));
     if (!isFold("l" + lv)) list.forEach(s => { h += jeuRow(g, s, "prep"); });
   }
-  if (!g.prepared.length) h += `<div class="empty">Aucun sort préparé. Passe en mode « Gérer » pour cocher les sorts du jour.</div>`;
+  if (!ready.length && max) h += `<div class="empty">Aucun sort préparé. Passe en mode « Gérer » pour cocher les sorts du jour.</div>`;
   const rits = g.spells.map(x => BY_ID[x.id]).filter(s => s.ri && !prepared.has(s.id) && s.l <= max).sort(byName);
   if (rits.length) { h += foldHead("r", "rit", "Rituels", "depuis le grimoire, +10 min, sans emplacement", plural(rits.length, "sort")); if (!isFold("r")) rits.forEach(s => { h += jeuRow(g, s, "rit"); }); }
   if (g.extras.length) {
@@ -1234,7 +1338,7 @@ async function offer(filename, data) {
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-a]"); if (!b || b.tagName === "FORM") return;
   const a = b.dataset.a;
-  if (["prep","arcane","xused","ftog","lu-prep"].includes(a)) return; // gérés par "change"
+  if (["prep","arcane","xused","ftog","lu-prep","smite-ud"].includes(a)) return; // gérés par "change"
   if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null;
   if (a === "tab") { S.tab = b.dataset.v; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); }
   else if (a === "new") { if (S.readonly) return; S.newOpen = true; S.newCls = null; S.newName = ""; render(); }
@@ -1246,7 +1350,7 @@ document.addEventListener("click", e => {
     S.list[id] = g; S.newOpen = false; S.tab = "grimoire"; setCur(id); save(id); toast(`${esc(g.name)} créé`);
   }
   else if (a === "pip") mutate(g => { const lv = +b.dataset.l, k = +b.dataset.k, u = +(g.used[lv] || 0); g.used[lv] = k < u ? k : k + 1; });
-  else if (a === "longrest") { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.arcane = false; g.effects = []; g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); }
+  else if (a === "longrest") { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.arcane = false; g.effects = []; g.loh = 0; g.dsU = 0; g.cdU = 0; g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); }
   else if (a === "flvl") { S.f.lvl = b.dataset.v; render(); }
   else if (a === "add") mutate(g => {
     const s = BY_ID[b.dataset.id];
@@ -1329,6 +1433,24 @@ document.addEventListener("click", e => {
   else if (a === "view") { S.view = b.dataset.v; S.open.clear(); S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); }
   else if (a === "row") { const k = b.dataset.id; if (S.open.has(k)) S.open.delete(k); else S.open.add(k); S.castOpen = null; render(); }
   else if (a === "undo") { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } }
+  else if (a === "res-pip") mutate(g => { const f = b.dataset.r === "ds" ? "dsU" : "cdU", k = +b.dataset.k, u = Math.min(g[f], b.dataset.r === "ds" ? PAL.ds(g) : PAL.cd(g)); g[f] = k < u ? k : k + 1; });
+  else if (a === "short-pal") { const g = G(); if (!g) return; const prev = g.cdU; mutate(g => { g.cdU = 0; }); toast("Repos court : Conduit divin récupéré", () => { mutate(g => { g.cdU = prev; }); return "Repos court annulé"; }); }
+  else if (a === "loh-open") { const g = G(); if (!g) return; const left = PAL.loh(g) - g.loh; S.lohAmt = Math.min(5, left); S.lohOpen = true; render(); }
+  else if (a === "loh-close") { S.lohOpen = false; render(); }
+  else if (a === "loh-inc" || a === "loh-dec") { const g = G(), left = PAL.loh(g) - g.loh; S.lohAmt = Math.max(1, Math.min(left, (S.lohAmt || 0) + (a === "loh-inc" ? 1 : -1))); render(); }
+  else if (a === "loh-set") { S.lohAmt = +b.dataset.v; render(); }
+  else if (a === "loh-go" || a === "loh-cure") {
+    const g = G(); if (!g) return; const left = PAL.loh(g) - g.loh, n = a === "loh-cure" ? 5 : Math.min(left, S.lohAmt || 0); if (n < 1 || n > left) return;
+    const prev = g.loh; S.lohOpen = false;
+    mutate(g => { g.loh += n; });
+    toast(a === "loh-cure" ? "Imposition des mains : maladie ou poison neutralisé (−5 PV de réserve)" : `Imposition des mains : <b>${n} PV</b> soignés · reste ${left - n}`, () => { mutate(g => { g.loh = prev; }); return "Soin annulé"; });
+  }
+  else if (a === "smite") {
+    const g = G(), lv = +b.dataset.l; if (!g || slotsLeft(g, lv) < 1) return;
+    const d = PAL.smite(lv) + (S.smiteUndead ? 1 : 0), prev = JSON.parse(JSON.stringify(g.used));
+    mutate(g => { g.used[lv] = (+(g.used[lv] || 0)) + 1; });
+    toast(`<b>Châtiment divin</b> · niv. ${lv} : <b>${d}d8</b> radiants (critique : ${2 * d}d8)`, () => { mutate(g => { g.used = prev; }); return "Châtiment annulé"; });
+  }
   else if (a === "fold") {
     const k = foldKey(b.dataset.k); if (S.fold[k]) delete S.fold[k]; else S.fold[k] = 1;
     try { localStorage.setItem("grimoire.fold", JSON.stringify(S.fold)); } catch (e) {}
@@ -1392,6 +1514,7 @@ document.addEventListener("change", e => {
   }
   if (a === "prep") return mutate(g => { const id = t.dataset.id; g.prepared = t.checked ? [...g.prepared, id] : g.prepared.filter(x => x !== id); });
   if (a === "arcane") return mutate(g => { g.arcane = t.checked; });
+  if (a === "smite-ud") { S.smiteUndead = t.checked; render(); return; }
   if (a === "lu-prep" && S.lu) { const id = t.dataset.id; S.lu.prep = t.checked ? [...S.lu.prep, id] : S.lu.prep.filter(x => x !== id); S.luKeep = true; render(); return; }
   if (t.classList.contains("fxnote")) return mutate(g => { const e = g.effects.find(e => e.k === t.dataset.k); if (e) e.note = t.value.trim(); }, false);
   if (a === "xused") return mutate(g => { g.extras[+t.dataset.i].used = t.checked; });
@@ -1432,6 +1555,7 @@ document.addEventListener("submit", e => {
 document.addEventListener("keydown", e => {
   if (e.key === "Escape" && S.lu) { S.lu = null; render(); }
   else if (e.key === "Escape" && S.newOpen) { S.newOpen = false; render(); }
+  else if (e.key === "Escape" && S.lohOpen) { S.lohOpen = false; render(); }
   else if (e.key === "Enter" && S.newOpen && e.target.id === "nw-name" && S.newCls) document.querySelector('[data-a="nw-go"]').click();
 });
 // ---------- Version hébergée : installation, hors connexion, stockage persistant ----------
