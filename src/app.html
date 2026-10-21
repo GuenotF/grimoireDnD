@@ -968,7 +968,10 @@ function wsActiveHTML(g) {
   ${S.wsDice ? `<div class="muted" style="font-size:13px">Lance <b>${S.wsDice}</b>, tape le résultat puis « Soins ».</div>` : ""}`}
   ${shut ? "" : `${beastCard(g, b)}
   ${ro ? "" : `<div class="wscf"><span class="lusub">Changeforme de combat · action bonus</span>
-    ${slots.length ? `<div class="chips">${slots.map(([lv, l]) => `<button class="chip" data-a="ws-cf" data-l="${lv}">Soin · 1 emplacement niv. ${lv} = ${lv}d8 PV <small>(${l})</small></button>`).join("")}</div>` : `<span class="muted" style="font-size:13px">Plus d'emplacement pour te soigner.</span>`}</div>
+    ${slots.length ? `<div class="cast"><button class="btn cast-go" data-a="ws-cf" data-l="${slots[0][0]}">Soin · niv. ${slots[0][0]} = ${slots[0][0]}d8 PV</button>${R.slots(g).length > 1 ? `<button class="btn cast-up" data-a="cast-open" data-id="ws-cf" aria-label="Se soigner avec un emplacement plus élevé" aria-expanded="${S.castOpen === "ws-cf"}">▲</button>` : ""}</div>
+    ${S.castOpen === "ws-cf" ? `<div class="chooser"><span class="lbl">Dépenser un emplacement de</span><div class="lvls">${R.slots(g).map((n, i) => { const lv = i + 1, left = slotsLeft(g, lv);
+      return `<button class="btn" data-a="ws-cf" data-l="${lv}"${left ? "" : " disabled"}><b>Niveau ${lv} · ${lv}d8</b><small>${left ? `${left} restant${left > 1 ? "s" : ""}` : "épuisé"}</small></button>`; }).join("")}</div><div class="hint">1d8 PV par niveau d'emplacement.</div><button class="btn ghost" data-a="cast-close" style="justify-self:start">Fermer</button></div>` : ""}`
+    : `<span class="muted" style="font-size:13px">Plus d'emplacement pour te soigner.</span>`}</div>
   <div class="cast"><button class="btn sm" data-a="ws-end">Reprendre ma forme</button><button class="btn ghost sm" data-a="ws-open">Changer de forme</button></div>`}
   <p class="muted" style="font-size:12.5px;margin:0">À 0 PV, tu reprends ta forme et l'excédent de dégâts passe sur tes PV. Pas de sort dans cette forme ; la concentration continue.</p>`}</section>`;
 }
@@ -1794,7 +1797,7 @@ document.addEventListener("click", e => {
   }
   else if (a === "ws-cf") {
     const g = G(), lv = +b.dataset.l; if (!g || !g.wsForm || slotsLeft(g, lv) < 1) return;
-    mutate(g => { g.used[lv] = (+(g.used[lv] || 0)) + 1; }); S.wsDice = `${lv}d8`; render();
+    S.castOpen = null; mutate(g => { g.used[lv] = (+(g.used[lv] || 0)) + 1; }); S.wsDice = `${lv}d8`; render();
     const el = document.getElementById("ws-n"); if (el) el.focus({ preventScroll: true });
     toast(`Changeforme de combat : emplacement niv. ${lv} dépensé · lance <b>${lv}d8</b>`, () => { S.wsDice = ""; mutate(g => { g.used[lv] = Math.max(0, (+(g.used[lv] || 0)) - 1); }); return "Emplacement rendu"; });
   }
