@@ -3,7 +3,7 @@
 
     python3 build.py
 
-Entrées : src/app.html (l'application), data/spells.json (les 213 sorts), src/sw.js (cache hors connexion).
+Entrées : src/app.html (l'application), data/spells.json (les sorts), data/beasts.json (les bêtes de la Forme sauvage), src/sw.js (cache hors connexion).
 Sorties :
   index.html          la page publiée par GitHub Pages
   sw.js               le service worker, avec un numéro de version recalculé
@@ -23,7 +23,9 @@ app = read("src/app.html")
 spells = json.loads(read("data/spells.json"))
 ids = [s["id"] for s in spells]
 assert len(ids) == len(set(ids)), "identifiants de sorts en double"
-body = app.replace("/*SPELLS*/[]", json.dumps(spells, ensure_ascii=False, separators=(",", ":")))
+beasts = json.loads(read("data/beasts.json"))
+assert len({b["id"] for b in beasts}) == len(beasts), "identifiants de bêtes en double"
+body = app.replace("/*SPELLS*/[]", json.dumps(spells, ensure_ascii=False, separators=(",", ":"))).replace("/*BEASTS*/[]", json.dumps(beasts, ensure_ascii=False, separators=(",", ":")))
 
 # --- index.html pour GitHub Pages ---
 title = re.search(r"<title>.*?</title>", body).group(0)
