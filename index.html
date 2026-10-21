@@ -413,7 +413,10 @@ body.lu-on, body.ws-on { overflow: hidden; }
 .rchg { font-size: 11.5px; padding: 0 5px; margin-left: 6px; font-weight: 600; }
 .brest { flex-basis: 100%; font-size: 13px; color: var(--muted); }
 .wsactive { background: var(--rubric-soft); border: 1.5px solid var(--rubric); border-radius: 10px; padding: 12px 14px; display: grid; gap: 9px; margin: 6px 0 14px; scroll-margin-top: 12px; }
-.wsh { display: flex; justify-content: space-between; align-items: baseline; }
+.wsh { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; background: transparent; border: 0; padding: 2px 0; margin: 0; font: inherit; color: inherit; text-align: left; width: 100%; cursor: pointer; }
+.wsh .muted { font-size: 13px; }
+.wsn small { font-family: var(--f-body, inherit); font-size: 15px; font-weight: 400; color: var(--muted); }
+.wsactive .bcard { border-top: 1px solid var(--rule); padding-top: 9px; }
 .wsh .k { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--pa-fg); }
 .wsn { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .wsn b { font-family: var(--f-display); font-size: 21px; font-weight: 600; }
@@ -936,7 +939,10 @@ const rchg = r => r ? `<span class="kp f rchg">${/repos/.test(r) ? "1 fois par r
 function beastActs(b, compact) {
   return b.ac.map(a => {
     if (a.b != null && a.d) {
-      const rest = a.t.replace(/^.*?Touché ?: ?[^.]*\.\s*/, "");
+      const reach = (a.t.match(/(?:allonge|portée) [\d,\/ ]+m(?:, [^.]+)?/) || [""])[0];
+      let after = a.t.replace(/^.*?Touché ?: ?\d+(?: \([^)]*\))? dégâts? \S+/, "").replace(/^[,.]?\s*(?:et\s+)?/, "");
+      if (after === a.t) after = "";
+      const rest = [reach && cap(reach) + ".", after && cap(after)].filter(Boolean).join(" ");
       return `<div class="bact"><b>${esc(a.n)}</b>${rchg(a.r)}<span class="kp a">${signed(a.b)}</span><span class="kp d">${esc(a.d)}</span>${!compact && rest ? `<span class="brest">${esc(rest)}</span>` : ""}</div>`;
     }
     return `<div class="bact txt"><b>${esc(a.n)}</b>${rchg(a.r)} <span>${esc(compact && a.t.length > 90 ? a.t.slice(0, a.t.indexOf(".", 40) + 1 || 90) : a.t)}</span></div>`;
@@ -977,17 +983,17 @@ function wsActiveHTML(g) {
   const f = g.wsForm, b = f && BEAST[f.id]; if (!b) return "";
   const pct = Math.round(100 * Math.max(0, f.hp) / f.max), ro = !!S.readonly;
   const slots = R.slots(g).map((n, i) => [i + 1, slotsLeft(g, i + 1)]).filter(([, l]) => l > 0);
-  return `<section class="wsactive" id="ws-active"><div class="wsh"><span class="k">Forme active</span><span class="muted">jusqu'à ${DRU.hours(g)} h</span></div>
-  <div class="wsn"><b>${esc(b.n)}</b><span class="hp">${f.hp}<small>/${f.max} PV</small></span></div>
+  const shut = isFold("ws");
+  return `<section class="wsactive${shut ? " shut" : ""}" id="ws-active"><button class="wsh" data-a="fold" data-k="ws" aria-expanded="${!shut}"><span class="k"><span class="chev" aria-hidden="true">${shut ? "▸" : "▾"}</span> Forme active</span><span class="muted">${shut ? "déplier la fiche" : `jusqu'à ${DRU.hours(g)} h · replier`}</span></button>
+  <div class="wsn"><b>${esc(b.n)}${shut ? `<small> · CA ${b.ca}</small>` : ""}</b><span class="hp">${f.hp}<small>/${f.max} PV</small></span></div>
   <div class="bar"><span style="width:${pct}%"></span></div>
   ${ro ? "" : `<div class="wsdmg"><label for="ws-n">PV</label><input id="ws-n" type="number" inputmode="numeric" min="0" placeholder="${S.wsDice ? S.wsDice : "0"}"><button class="btn cast-go sm" data-a="ws-dmg">Dégâts</button><button class="btn sm" data-a="ws-heal">Soins</button></div>
   ${S.wsDice ? `<div class="muted" style="font-size:13px">Lance <b>${S.wsDice}</b>, tape le résultat puis « Soins ».</div>` : ""}`}
-  <div class="kps"><span class="kp">CA ${b.ca}</span><span class="kp">${esc(spdTxt(b))}</span><span class="kp">FOR ${b.st[0]} · DEX ${b.st[1]} · CON ${b.st[2]}</span></div>
-  <div class="wsacts">${beastActs(b, true)}</div>
+  ${shut ? "" : `${beastCard(g, b)}
   ${ro ? "" : `<div class="wscf"><span class="lusub">Changeforme de combat · action bonus</span>
     ${slots.length ? `<div class="chips">${slots.map(([lv, l]) => `<button class="chip" data-a="ws-cf" data-l="${lv}">Soin · 1 emplacement niv. ${lv} = ${lv}d8 PV <small>(${l})</small></button>`).join("")}</div>` : `<span class="muted" style="font-size:13px">Plus d'emplacement pour te soigner.</span>`}</div>
   <div class="cast"><button class="btn sm" data-a="ws-end">Reprendre ma forme</button><button class="btn ghost sm" data-a="ws-open">Changer de forme</button></div>`}
-  <p class="muted" style="font-size:12.5px;margin:0">À 0 PV, tu reprends ta forme et l'excédent de dégâts passe sur tes PV. Pas de sort dans cette forme ; la concentration continue.</p></section>`;
+  <p class="muted" style="font-size:12.5px;margin:0">À 0 PV, tu reprends ta forme et l'excédent de dégâts passe sur tes PV. Pas de sort dans cette forme ; la concentration continue.</p>`}</section>`;
 }
 // ---------- Paladin et druide : préparation (Gérer) ----------
 function palGererHTML(g) {
