@@ -699,7 +699,7 @@ function render(fromSnapshot) {
   const ws = document.getElementById("wssheet"), showWs = !!g && !!S.ws && isDru(g) && !S.readonly && !showLu;
   if (!showWs) S.ws = null;
   ws.hidden = !showWs; document.body.classList.toggle("ws-on", showWs);
-  if (showWs) { const sc = ws.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; ws.innerHTML = wsSheetHTML(g); const nb = ws.querySelector(".lubody"); if (nb && S.wsKeep) nb.scrollTop = top; S.wsKeep = false; }
+  if (showWs) { const sc = ws.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; ws.innerHTML = wsSheetHTML(g); const nb = ws.querySelector(".lubody"); if (nb && !S.wsTop) nb.scrollTop = top; S.wsTop = false; } // la liste garde sa position (sauf changement de filtre)
   document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showLh || showNw || showWs);
 }
 function renderPicker() {
@@ -1779,8 +1779,8 @@ document.addEventListener("click", e => {
   }
   else if (a === "ws-open") { S.ws = { fp: "all", mv: "", q: "" }; render(); const x = document.querySelector("#wssheet .x"); if (x) x.focus({ preventScroll: true }); }
   else if (a === "ws-close") { S.ws = null; render(); }
-  else if (S.ws && (a === "ws-fp" || a === "ws-mv")) { const k = a === "ws-fp" ? "fp" : "mv", v = b.dataset.v; S.ws[k] = S.ws[k] === v ? (k === "fp" ? "all" : "") : v; render(); }
-  else if (a === "ws-fav") { const id = b.dataset.id; S.wsKeep = true; mutate(g => { g.favs = g.favs.includes(id) ? g.favs.filter(x => x !== id) : [...g.favs, id]; }); }
+  else if (S.ws && (a === "ws-fp" || a === "ws-mv")) { const k = a === "ws-fp" ? "fp" : "mv", v = b.dataset.v; S.ws[k] = S.ws[k] === v ? (k === "fp" ? "all" : "") : v; S.wsTop = true; render(); }
+  else if (a === "ws-fav") { const id = b.dataset.id; mutate(g => { g.favs = g.favs.includes(id) ? g.favs.filter(x => x !== id) : [...g.favs, id]; }); }
   else if (a === "ws-go") {
     const g = G(), bt = BEAST[b.dataset.id]; if (!g || !bt || g.wsU >= DRU.ws(g)) return;
     const prev = { wsU: g.wsU, wsForm: g.wsForm }; S.ws = null; S.wsDice = "";
