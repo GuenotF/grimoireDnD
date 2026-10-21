@@ -320,6 +320,12 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .capbody .eff { font-size: 14px; line-height: 1.4; }
 .capopt { display: grid; gap: 6px; border-left: 3px solid var(--pf-bd); padding-left: 10px; }
 .capopt + .capopt { border-left-color: var(--rubric); }
+.jrow.feat .jline { gap: 8px; }
+.flv { flex: none; font-family: var(--f-sc); font-size: 11.5px; letter-spacing: .04em; color: var(--muted); border: 1px solid var(--pn-bd); border-radius: 4px; padding: 0 5px; }
+.jrow.feat select { flex: none; max-width: 48%; padding: 4px 6px; font-size: 14px; }
+.jrow.feat.dim .jname, .jrow.feat.dim .flv, .jrow.feat.dim .fsum { color: var(--pn-bd); border-color: var(--rule); }
+.fsum { font-size: 12.5px; text-align: right; }
+.featnext { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--pn-bd); margin: 10px 0 0; }
 .capopt > b { font-family: var(--f-display); font-size: 15.5px; }
 .slots.res .bar, .fxsheet .bar { height: 6px; border-radius: 3px; background: var(--sunk); overflow: hidden; }
 .slots.res .bar span, .fxsheet .bar span { display: block; height: 100%; background: var(--ok); border-radius: 3px; }
@@ -534,6 +540,7 @@ function norm(g) {
   if (!CLASSES[o.cls]) o.cls = "magicien"; // anciens fichiers : magicien
   o.level = Math.min(20, Math.max(1, +o.level || 1)); o.int = Math.min(30, Math.max(1, +o.int || 10)); o.cha = Math.min(30, Math.max(1, +o.cha || 10));
   if (!OATHS[o.oath]) o.oath = "conquete";
+  if (typeof o.style !== "string") o.style = ""; // paladin : style de combat
   ["loh", "dsU", "cdU"].forEach(k => { o[k] = Math.max(0, +o[k] || 0); }); // paladin : PV d'Imposition dépensés, Perception divine et Conduit divin utilisés
   ["cantrips","spells","prepared","extras"].forEach(k => { if (!Array.isArray(o[k])) o[k] = []; });
   o.spells = o.spells.filter(x => x && BY_ID[x.id]); o.cantrips = o.cantrips.filter(id => BY_ID[id]);
@@ -741,6 +748,47 @@ function palResHTML(g) {
   ${cd ? capRow(g, "cd", "Conduit divin", "repos court", pips("cd", cd, Math.min(cd, g.cdU), "Conduit divin")) : ""}
   </div>`;
 }
+// ---------- Paladin : capacités de classe (passives, auras) ----------
+const STYLES = {
+  defense: { n: "Défense", k: "+1 CA", d: "+1 à la CA quand tu portes une armure." },
+  duel: { n: "Duel", k: "+2 dégâts à une main", d: "+2 aux dégâts avec une arme de corps à corps tenue à une main, sans autre arme." },
+  deuxmains: { n: "Arme à deux mains", k: "relance 1 et 2", d: "Avec une arme à deux mains ou polyvalente tenue à deux mains, relance les 1 et 2 des dés de dégâts (une fois)." },
+  protection: { n: "Protection", k: "réaction, bouclier", d: "Avec un bouclier, réaction : désavantage à une attaque contre une créature à 1,5 m de toi." },
+};
+const auraR = g => g.level >= 18 ? "9 m" : "3 m";
+const PAL_FEATS = [
+  { id: "style", lv: 2, n: "Style de combat", pill: g => STYLES[g.style] ? `${STYLES[g.style].n} · ${STYLES[g.style].k}` : "à choisir", k: "f", d: g => STYLES[g.style] ? STYLES[g.style].d : "Choisis-le en mode Gérer : Défense, Duel, Arme à deux mains ou Protection." },
+  { id: "health", lv: 3, n: "Santé divine", pill: () => "Immunisé aux maladies", k: "f", d: () => "La magie divine qui t'habite te rend immunisé contre les maladies." },
+  { id: "extra", lv: 5, n: "Attaque supplémentaire", pill: () => "2 attaques par action", k: "f", d: () => "Quand tu prends l'action Attaquer, tu attaques deux fois au lieu d'une." },
+  { id: "aprot", lv: 6, n: "Aura de protection", pill: g => `${signed(Math.max(1, R.am(g)))} aux JdS · ${auraR(g)}`, k: "s", d: g => `Toi et les créatures amicales à ${auraR(g)} ou moins ajoutez ton mod. de Charisme (${signed(Math.max(1, R.am(g)))}) à vos jets de sauvegarde, tant que tu es conscient.${g.level < 18 ? " 9 m au niveau 18." : ""}` },
+  { id: "aconq", lv: 7, oath: "conquete", n: "Aura de conquête", pill: g => `${Math.floor(g.level / 2)} psychiques · ${auraR(g)}`, k: "d", d: g => `Une créature effrayée par toi qui commence son tour à ${auraR(g)} ou moins a une vitesse de 0 et subit ${Math.floor(g.level / 2)} dégâts psychiques (moitié de ton niveau de paladin). Se combine avec Présence conquérante.` },
+  { id: "acour", lv: 10, n: "Aura de courage", pill: g => `pas d'effroi · ${auraR(g)}`, k: "s", d: g => `Toi et les créatures amicales à ${auraR(g)} ou moins ne pouvez pas être effrayés tant que tu es conscient.` },
+  { id: "ismite", lv: 11, n: "Châtiment divin amélioré", pill: () => "+1d8 radiant à chaque coup", k: "d", d: () => "Chaque coup au corps à corps avec une arme inflige 1d8 dégâts radiants de plus (cumulable avec le Châtiment divin)." },
+  { id: "cleanse", lv: 14, n: "Contact purifiant", pill: g => `${Math.max(1, R.am(g))} fois · repos long`, k: "f", d: g => `Action : mets fin à un sort qui affecte toi ou une créature consentante que tu touches. ${Math.max(1, R.am(g))} fois par repos long (mod. de Charisme).` },
+  { id: "rebuke", lv: 15, oath: "conquete", n: "Réprimande méprisante", pill: g => `${Math.max(1, R.am(g))} psychiques à qui te frappe`, k: "d", d: g => `Quand une créature te touche avec une attaque, elle subit ${Math.max(1, R.am(g))} dégâts psychiques (mod. de Charisme), si tu n'es pas neutralisé.` },
+  { id: "aura18", lv: 18, n: "Améliorations des auras", pill: () => "auras à 9 m", k: "f", d: () => "La portée de tes auras passe à 9 m." },
+  { id: "invinc", lv: 20, oath: "conquete", n: "Conquérant invincible", pill: () => "1 fois · repos long", k: "f", d: () => "Action, 1 minute : résistance à tous les dégâts, une attaque de plus par action Attaquer, critique sur 19 ou 20. Une fois par repos long." },
+];
+function palFeatsHTML(g) {
+  const feats = PAL_FEATS.filter(f => !f.oath || f.oath === g.oath), have = feats.filter(f => f.lv <= g.level), next = feats.filter(f => f.lv > g.level).slice(0, 2);
+  if (!have.length && !next.length) return "";
+  const gerer = S.view !== "jeu", ro = S.readonly ? " disabled" : "";
+  let h = foldHead("k", "", "Capacités de classe", `${esc(g.name)} · niveau ${g.level}`, plural(have.length, "capacité"));
+  if (isFold("k")) return h;
+  if (!have.length) h += `<div class="empty">Première capacité au niveau ${next[0].lv}.</div>`;
+  have.forEach(f => {
+    const key = "feat:" + f.id, open = S.open.has(key);
+    const right = f.id === "style" && gerer && !S.readonly
+      ? `<select id="f-style" aria-label="Style de combat"${ro}><option value="">À choisir</option>${Object.entries(STYLES).map(([k, s]) => `<option value="${k}"${g.style === k ? " selected" : ""}>${s.n}</option>`).join("")}</select>`
+      : `<span class="kp ${f.k}">${esc(f.pill(g))}</span>`;
+    h += `<div class="jrow feat"><div class="jline"><span class="flv">niv. ${f.lv}</span><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${f.n}<span class="chev">${open ? "▴" : "▾"}</span></button></div>${right}</div>${open ? `<div class="jbody"><div class="eff">${esc(f.d(g))}</div></div>` : ""}</div>`;
+  });
+  if (gerer && next.length) {
+    h += `<div class="featnext">À venir</div>`;
+    next.forEach(f => { h += `<div class="jrow feat dim"><div class="jline"><span class="flv">niv. ${f.lv}</span><div class="jmain"><span class="jname">${f.n}</span></div><span class="fsum">${esc(f.pill({ ...g, level: f.lv }))}</span></div></div>`; });
+  }
+  return h;
+}
 // Volet Imposition des mains
 function lohHTML(g) {
   const pool = PAL.loh(g), left = Math.max(0, pool - g.loh), n = Math.max(0, Math.min(left, S.lohAmt || 0));
@@ -840,7 +888,7 @@ function grimoireHTML(g) {
     <span class="muted">Au repos court, 1 fois par jour : récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</span>`
     : `<button class="btn" data-a="short-pal"${ro}>Repos court</button><span class="muted">Repos court : Conduit divin. Repos long : tout.</span>`}</div></div>`;
   if (S.shortOpen && !S.readonly && isWiz(g)) h += shortHTML(g);
-  if (!isWiz(g)) { h += palResHTML(g); return h + (S.view === "jeu" ? jeuHTML(g) : palGererHTML(g)); }
+  if (!isWiz(g)) { h += palResHTML(g) + palFeatsHTML(g); return h + (S.view === "jeu" ? jeuHTML(g) : palGererHTML(g)); }
   if (S.view === "jeu") return h + jeuHTML(g);
 
   // Sorts mineurs
@@ -1571,6 +1619,7 @@ document.addEventListener("change", e => {
   if (t.id === "f-level") return mutate(g => { g.level = +t.value; });
   if (t.dataset.ab) return mutate(g => { g[t.dataset.ab] = Math.min(30, Math.max(1, +t.value || 10)); });
   if (t.id === "f-oath") return mutate(g => { g.oath = t.value; });
+  if (t.id === "f-style") return mutate(g => { g.style = t.value; });
   if (t.id === "f-school") return mutate(g => { g.school = t.value; });
   if (t.id === "f-sch") { S.f.school = t.value; render(); return; }
   if (t.id === "f-full") { renderPicker(); return; }
