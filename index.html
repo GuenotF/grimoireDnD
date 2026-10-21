@@ -1085,7 +1085,7 @@ function biblioHTML(g) {
   const q = f.q.trim().toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
   const list = classSpells(g).filter(s => (f.lvl === "all" || s.l === +f.lvl) && (!f.school || s.s === f.school) && (!f.conc || s.c) && (!f.rit || s.ri)
     && (!f.hideOwned || !owned.has(s.id)) && (!f.reachable || s.l <= max)
-    && (!q || (s.n + " " + s.en + " " + s.e + " " + (s.p || "").slice(2)).toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").includes(q)));
+    && (!q || (s.n + " " + s.en + " " + s.e + " " + (s.p || "").slice(2)).toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").includes(q))).sort((a, b) => a.l - b.l || byName(a, b)); // une section par niveau, sorts dans l'ordre alphabétique
   let h = `<div class="filters">
     <div class="chips" role="group" aria-label="Niveau de sort">
       <button class="chip" data-a="flvl" data-v="all" aria-pressed="${f.lvl === "all"}">Tous</button>
