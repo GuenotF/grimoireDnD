@@ -260,6 +260,8 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .kp.f { background: var(--pf-bg); border-color: var(--pf-bd); color: var(--pf-fg); }
 .concwarn { margin-top: 8px; background: var(--surface); border: 1.5px solid var(--warn); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; max-width: 520px; font-size: 14.5px; line-height: 1.4; }
 .concwarn .cast { margin-top: 4px; }
+.wsprimal { font-size: 13.5px; line-height: 1.45; }
+.wsprimal .kp { margin-right: 4px; }
 .wsactive .wsconc { margin-top: 0; max-width: none; }
 .live { font-size: 12.5px; font-weight: 700; color: var(--rubric); white-space: nowrap; margin-left: 6px; }
 /* Bascule Gérer / En jeu */
@@ -1047,14 +1049,14 @@ function wsActiveHTML(g) {
   <div class="bar"><span style="width:${pct}%"></span></div>
   ${ro ? "" : `<div class="wsdmg"><label for="ws-n">PV</label><input id="ws-n" type="number" inputmode="numeric" min="0" placeholder="${S.wsDice ? S.wsDice : "0"}"><button class="btn cast-go sm" data-a="ws-dmg">Dégâts</button><button class="btn sm" data-a="ws-heal">Soins</button></div>
   ${S.wsDice ? `<div class="muted" style="font-size:13px">Lance <b>${S.wsDice}</b>, tape le résultat puis « Soins ».</div>` : ""}${wsConcHTML(g)}`}
-  ${shut ? "" : `${beastCard(g, b)}
+  ${shut ? "" : `${g.level >= 6 ? `<div class="wsprimal"><span class="kp f">Frappe primitive</span> Tes attaques de bête comptent comme magiques (résistances et immunités aux attaques non magiques).</div>` : ""}${beastCard(g, b)}
   ${ro ? "" : `<div class="wscf"><span class="lusub">Changeforme de combat · action bonus</span>
     ${slots.length ? `<div class="cast"><button class="btn cast-go" data-a="ws-cf" data-l="${slots[0][0]}">Soin · niv. ${slots[0][0]} = ${slots[0][0]}d8 PV</button>${R.slots(g).length > 1 ? `<button class="btn cast-up" data-a="cast-open" data-id="ws-cf" aria-label="Se soigner avec un emplacement plus élevé" aria-expanded="${S.castOpen === "ws-cf"}">▲</button>` : ""}</div>
     ${S.castOpen === "ws-cf" ? `<div class="chooser"><span class="lbl">Dépenser un emplacement de</span><div class="lvls">${R.slots(g).map((n, i) => { const lv = i + 1, left = slotsLeft(g, lv);
       return `<button class="btn" data-a="ws-cf" data-l="${lv}"${left ? "" : " disabled"}><b>Niveau ${lv} · ${lv}d8</b><small>${left ? `${left} restant${left > 1 ? "s" : ""}` : "épuisé"}</small></button>`; }).join("")}</div><div class="hint">1d8 PV par niveau d'emplacement.</div><button class="btn ghost" data-a="cast-close" style="justify-self:start">Fermer</button></div>` : ""}`
     : `<span class="muted" style="font-size:13px">Plus d'emplacement pour te soigner.</span>`}</div>
   <div class="cast"><button class="btn sm" data-a="ws-end">Reprendre ma forme</button><button class="btn ghost sm" data-a="ws-open">Changer de forme</button></div>`}
-  <p class="muted" style="font-size:12.5px;margin:0">À 0 PV, tu reprends ta forme et l'excédent de dégâts passe sur tes PV. Pas de sort dans cette forme ; la concentration continue.</p>`}</section>`;
+  <p class="muted" style="font-size:12.5px;margin:0">À 0 PV, tu reprends ta forme et l'excédent de dégâts passe sur tes PV. ${g.level >= 18 ? "Sorts bestiaux : tu peux lancer tes sorts à composantes verbales et somatiques (pas de composante matérielle)" : "Pas de sort dans cette forme"} ; la concentration continue.</p>`}</section>`;
 }
 // ---------- Paladin et druide : préparation (Gérer) ----------
 function palGererHTML(g) {
