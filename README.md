@@ -1,6 +1,6 @@
 # Atelier du Grimoire
 
-Grimoire et fiche de sorts pour **D&D 5e**, en français : les 213 sorts de magicien et les 45 sorts de paladin du *Manuel des joueurs* (2014), la préparation des sorts, le suivi des emplacements et une fiche imprimable A4.
+Grimoire et fiche de sorts pour **D&D 5e**, en français : les sorts de magicien, de paladin et de druide du *Manuel des joueurs* (2014), la préparation des sorts, le suivi des emplacements et une fiche imprimable A4.
 
 L'application est une seule page web. Elle s'installe sur l'écran d'accueil (Android, iPhone, iPad, ordinateur) et fonctionne hors connexion.
 
@@ -9,6 +9,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 **Classes**
 - **Magicien** : toutes les fonctionnalités ci-dessous.
 - **Paladin** : Charisme, serment (Conquête), emplacements de demi-lanceur. *Gérer* : sorts de serment (★, toujours préparés), toute la liste du paladin à cocher avec la limite (mod. CHA + moitié du niveau). Ressources : Imposition des mains (volet de soin, maladie/poison) ; Perception divine et Conduit divin dépliables comme un sort (effet, DD, boutons Utiliser, Présence conquérante, Frappe guidée ; Présence conquérante rejoint les sorts actifs) ; repos court et long. *En jeu* : Châtiment divin (dés par niveau d'emplacement, +1d8 contre morts-vivants et fiélons), section *Sorts de serment* puis sorts préparés par niveau, avec *Lancer*, même barre du bas que le magicien. *Capacités de classe* (Gérer et En jeu, même ordre) : style de combat au choix, Santé divine, Attaque supplémentaire, auras de protection et de conquête, etc., valeurs calculées selon le Charisme et le niveau ; les deux prochaines capacités en grisé dans Gérer. *Passage de niveau* (bouton ↑) : ce qui change, nouvelles capacités et sorts de serment, style de combat et sorts préparés, validation annulable. Impression et règles : magicien seulement pour l'instant.
+- **Druide** (Cercle de la Lune) : Sagesse, lanceur complet, sorts mineurs (dont Embrasement, Xanathar), préparation dans toute la liste du druide (mod. SAG + niveau), rituels préparés, Forme sauvage (2 utilisations par repos court, FP maximum, nage/vol selon le niveau), capacités du cercle, passage de niveau. La liste des formes animales et le suivi de la forme active arrivent à l'étape suivante.
 - *Nouveau personnage* : choix de la classe à la création. Un fichier importé garde sa classe ; les anciens fichiers sans classe sont des magiciens.
 
 **Le magicien**
@@ -40,7 +41,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 - *Repos court* : assistant de Restauration arcanique (choix rapides valides, budget de niveaux, une fois par jour).
 
 **Onglet Bibliothèque**
-- Les sorts de la classe (213 pour le magicien, 45 pour le paladin), filtrables par niveau, école, concentration, rituel, accessibilité et sorts déjà appris.
+- Les sorts de la classe (213 pour le magicien, 45 pour le paladin, 111 pour le druide), filtrables par niveau, école, concentration, rituel, accessibilité et sorts déjà appris.
 - Une ligne par sort par défaut ; les résultats d'une recherche s'affichent avec leur description complète.
 - Ajout par montée de niveau ou par copie (coût calculé, moitié prix pour l'école du magicien).
 
@@ -68,7 +69,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 | Fichier | Rôle |
 |---|---|
 | `src/app.html` | L'application (interface, règles, stockage, fiche imprimable). **À modifier ici.** |
-| `data/spells.json` | Les 251 sorts (magicien, paladin, sorts de serment), un par ligne. **À modifier ici.** |
+| `data/spells.json` | Les 310 sorts (magicien, paladin, druide, sorts de serment), un par ligne. **À modifier ici.** |
 | `src/sw.js` | Modèle du service worker (cache hors connexion). |
 | `build.py` | Assemble les sources. |
 | `index.html`, `sw.js` | **Générés** par `build.py`, publiés par GitHub Pages. Ne pas modifier à la main. |
