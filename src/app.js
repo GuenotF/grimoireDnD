@@ -1097,7 +1097,7 @@ document.addEventListener("click", e => {
   else if (a === "share-json") shareToGM(G());
   else if (a === "del") {
     if (S.confirm !== "del") { S.confirm = "del"; render(); return; }
-    S.confirm = null; const id = S.cur; const n = G().name; S.cur = null; removeDoc(id).then(() => { pickCurrent(); S.tab = "grimoire"; render(); toast(`${esc(n)} supprimé`); }); render();
+    S.confirm = null; const id = S.cur; const n = G().name; S.cur = null; removeDoc(id); pickCurrent(); S.tab = "grimoire"; render(); toast(`${esc(n)} supprimé`);
   }
   else if (a === "cancel") { S.confirm = null; render(); }
   else if (a === "cast" || a === "cast-rit" || a === "cast-force") {

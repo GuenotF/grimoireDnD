@@ -41,6 +41,14 @@ def test_export_import_conserve_tout(browser, devices, url):
     b.close()
 
 
+def test_suppression(browser, devices, url):
+    a = App(browser, devices, url, char=NEMEIA, tab="sauvegarde")
+    a.click('[data-a="del"]'); a.click('[data-a="del"]')
+    check(a.js("Object.keys(S.list).length") == 0 and "supprimé" in a.toast(), "personnage supprimé")
+    check(a.count('.welcome [data-a="new"]') == 1, "retour à l'accueil")
+    a.close()
+
+
 def test_ancien_fichier_sans_classe_est_magicien(browser, devices, url):
     old = {k: v for k, v in NEMEIA.items() if k != "cls"}
     a = App(browser, devices, url, char=old)
