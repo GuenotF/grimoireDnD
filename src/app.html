@@ -380,6 +380,8 @@ body.lu-on, body.ws-on { overflow: hidden; }
 .wsrow .jmain { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; flex: 1; }
 .wsfav { flex: none; background: transparent; border: 0; font-size: 20px; line-height: 1; color: var(--pn-bd); padding: 4px 2px; min-width: 32px; min-height: 32px; }
 .wsfav.on { color: var(--rubric); }
+.wsfav.off { color: var(--rule); display: inline-flex; align-items: center; justify-content: center; }
+.wsrow.locked .jname, .wsrow.locked .flv { color: var(--muted); }
 .wsmini { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .bcard { display: grid; gap: 7px; padding: 8px 0 4px; }
 .bstats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
@@ -576,6 +578,7 @@ const fr = n => n.toLocaleString("fr-FR");
 // ---------- État ----------
 const S = { list: {}, cur: null, tab: "grimoire", mode: "pending", readonly: false, view: "gerer", fxOpen: false, shortOpen: false, sr: {}, open: new Set(), concWarn: null, concPanel: false,
   f: { q: "", lvl: "all", school: "", conc: false, rit: false, hideOwned: false, reachable: false },
+  bf: { q: "", fp: "all", mv: "", sz: "", reach: false, fav: false },
   confirm: null, newForm: false };
 S.fold = {}; try { S.fold = JSON.parse(localStorage.getItem("grimoire.fold") || "{}") || {}; } catch (e) {}
 try { const t = localStorage.getItem("grimoire.tab"); if (t) S.tab = t; if (localStorage.getItem("grimoire.view") === "jeu") S.view = "jeu"; } catch (e) {}
@@ -751,12 +754,13 @@ function heroHTML(g) {
 function tabsHTML(g) {
   // Imprimer et Règles : propres au magicien pour l'instant (les autres classes suivront)
   const t = isWiz(g) ? [["grimoire","Grimoire", g.spells.length + g.cantrips.length],["biblio","Bibliothèque", classSpells(g).length],["imprimer","Imprimer"],["sauvegarde","Sauvegarde"],["regles","Règles"]]
-    : [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["sauvegarde","Sauvegarde"]];
+    : [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length], ...(isDru(g) ? [["bestiaire","Bestiaire", BEASTS.filter(b => wsAllowed(g, b)).length]] : []),["sauvegarde","Sauvegarde"]];
   if (!t.some(x => x[0] === S.tab)) S.tab = "grimoire";
   return `<div class="tabs" role="tablist">${t.map(([k,l,c])=>`<button class="tab" role="tab" data-a="tab" data-v="${k}" aria-selected="${S.tab===k}">${l}${c!=null?`<span class="count">${c}</span>`:""}</button>`).join("")}</div>`;
 }
 function panelHTML(g) {
   if (S.tab === "biblio") return biblioHTML(g);
+  if (S.tab === "bestiaire") return bestiaryHTML(g);
   if (S.tab === "imprimer") return printHTML(g);
   if (S.tab === "sauvegarde") return saveHTML(g);
   if (S.tab === "regles") return rulesHTML(g);
@@ -909,7 +913,12 @@ function druResHTML(g) {
 // ---------- Druide : Forme sauvage ----------
 const SIZES = { TP: "Très petite", P: "Petite", M: "Moyenne", G: "Grande", TG: "Très grande", Gig: "Gigantesque" };
 const MV = { nage: "nage", escalade: "escalade", vol: "vol", creusement: "creusement" };
-const wsAllowed = (g, b) => b.fpn <= DRU.fp(g) && !(b.v.nage && g.level < 4) && !(b.v.vol && g.level < 8);
+// Niveau de druide (Cercle de la Lune) qui ouvre une bête : Forme sauvage au niveau 2, FP 1 jusqu'au niveau 5 puis niveau ÷ 3, nage au niveau 4, vol au niveau 8
+function wsNeed(b) {
+  const c = [[2, "Forme sauvage"], [b.fpn > 1 ? 3 * b.fpn : 2, "FP " + b.fp], [b.v.nage ? 4 : 2, "Nage"], [b.v.vol ? 8 : 2, "Vol"]];
+  return c.reduce((m, x) => x[0] > m[0] ? x : m);
+}
+const wsAllowed = (g, b) => g.level >= wsNeed(b)[0];
 const spdTxt = b => [b.v.marche && b.v.marche !== "0" ? `${b.v.marche} m` : "", ...Object.keys(MV).filter(k => b.v[k]).map(k => `${k} ${b.v[k]} m`)].filter(Boolean).join(" · ");
 const modOf = n => signed(Math.floor((n - 10) / 2));
 const rchg = r => r ? `<span class="kp f rchg">${/repos/.test(r) ? "1 fois par repos" : esc(r.replace(/^Recharge/, "recharge"))}</span>` : "";
@@ -955,6 +964,41 @@ function wsSheetHTML(g) {
     <div class="chips"><button class="chip" data-a="ws-fp" data-v="all" aria-pressed="${F.fp === "all"}">Toutes</button>${fps.filter(n => n > 0.125).map(n => `<button class="chip" data-a="ws-fp" data-v="${n}" aria-pressed="${F.fp === String(n)}">FP ${fpLbl(n)}</button>`).join("")}<button class="chip" data-a="ws-fp" data-v="low" aria-pressed="${F.fp === "low"}">FP ≤ 1/8</button></div>
     <div class="chips">${["nage", "escalade", "creusement", "vol"].filter(k => all.some(b => b.v[k])).map(k => `<button class="chip" data-a="ws-mv" data-v="${k}" aria-pressed="${F.mv === k}">${cap(k)}</button>`).join("")}<input id="ws-q" type="search" placeholder="Rechercher" value="${esc(F.q || "")}" aria-label="Rechercher une bête"></div></div>
     <div class="lubody wsbody">${body}<p class="muted" style="font-size:12.5px">Il faut avoir déjà vu la bête : c'est au MJ d'en juger. ★ garde tes formes en tête de liste.</p></div></div>`;
+}
+// ---------- Druide : Bestiaire (consultation, comme la Bibliothèque) ----------
+const fpLabel = n => n === 0.125 ? "1/8" : n === 0.25 ? "1/4" : n === 0.5 ? "1/2" : String(n);
+const SZ_ORDER = ["TP", "P", "M", "G", "TG", "Gig"];
+function bestiaryHTML(g) {
+  const f = S.bf, nrm = s => s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
+  const q = nrm(f.q.trim());
+  const fps = [...new Set(BEASTS.map(b => b.fpn))].sort((a, b) => a - b), sizes = SZ_ORDER.filter(s => BEASTS.some(b => b.sz === s));
+  const list = BEASTS.filter(b => (f.fp === "all" || b.fpn === +f.fp) && (!f.mv || b.v[f.mv]) && (!f.sz || b.sz === f.sz) && (!f.reach || wsAllowed(g, b)) && (!f.fav || g.favs.includes(b.id))
+    && (!q || nrm([b.n, ...b.tr.map(x => x[0]), ...b.ac.map(a => a.n)].join(" ")).includes(q))).sort((a, b) => a.fpn - b.fpn || a.n.localeCompare(b.n, "fr"));
+  const fpOpen = n => n > 1 ? 3 * n : 2;
+  let h = `<div class="filters">
+    <div class="chips" role="group" aria-label="Facteur de puissance"><button class="chip" data-a="bst-f" data-k="fp" data-v="all" aria-pressed="${f.fp === "all"}">Tous</button>${fps.map(n => `<button class="chip${g.level < fpOpen(n) ? " dim" : ""}" data-a="bst-f" data-k="fp" data-v="${n}" aria-pressed="${f.fp === String(n)}">FP ${fpLabel(n)}</button>`).join("")}</div>
+    <div class="chips" role="group" aria-label="Déplacement">${["nage", "vol", "escalade", "creusement"].map(k => `<button class="chip" data-a="bst-f" data-k="mv" data-v="${k}" aria-pressed="${f.mv === k}">${cap(k)}</button>`).join("")}</div>
+    <div class="chips" role="group" aria-label="Taille">${sizes.map(s => `<button class="chip" data-a="bst-f" data-k="sz" data-v="${s}" aria-pressed="${f.sz === s}">${SIZES[s]}</button>`).join("")}</div>
+    <div class="frow"><div class="field"><label for="b-q">Recherche</label><input id="b-q" type="search" value="${esc(f.q)}" placeholder="Nom ou capacité (ex. « encre »)"></div></div>
+    <div class="frow">
+      <label class="check"><input type="checkbox" data-a="btog" data-v="reach"${f.reach ? " checked" : ""}> Accessibles à son niveau</label>
+      <label class="check"><input type="checkbox" data-a="btog" data-v="fav"${f.fav ? " checked" : ""}> ★ Mes formes</label>
+    </div></div>
+    <p class="found">${plural(list.length, "bête")} · ${plural(BEASTS.filter(b => wsAllowed(g, b)).length, "forme accessible", "formes accessibles")} au niveau ${g.level}${q ? "" : " · touche une bête pour voir sa fiche, ou fais une recherche pour tout afficher"}</p>`;
+  let cur = -1;
+  list.forEach(b => {
+    if (f.fp === "all" && b.fpn !== cur) { cur = b.fpn; const lk = g.level < fpOpen(b.fpn); h += `<div class="rubric${lk ? " locked" : ""}"><h3>FP ${fpLabel(b.fpn)}</h3><span class="aside">${!lk ? "accessible" : fpOpen(b.fpn) > 20 ? "au-delà du niveau 20 de druide" : `s'ouvre au niveau ${fpOpen(b.fpn)} de druide`}</span></div>`; }
+    h += bstRow(g, b, !!q);
+  });
+  if (!list.length) h += `<div class="empty">Aucune bête ne correspond à ces filtres.</div>`;
+  return h;
+}
+function bstRow(g, b, full) {
+  const key = "bst:" + b.id, open = full || S.open.has(key), fav = g.favs.includes(b.id), ok = wsAllowed(g, b), need = wsNeed(b);
+  const star = S.readonly || (!ok && !fav) ? `<span class="wsfav off" aria-hidden="true">☆</span>` : `<button class="wsfav${fav ? " on" : ""}" data-a="ws-fav" data-id="${b.id}" aria-pressed="${fav}" aria-label="${fav ? "Retirer des" : "Ajouter aux"} formes favorites">${fav ? "★" : "☆"}</button>`;
+  const mark = ok ? "" : `<span class="libmark">${need[0] > 20 ? "Hors de portée" : `${need[1]} : niveau ${need[0]}`}</span>`;
+  return `<div class="jrow wsrow${ok ? "" : " locked"}"><div class="jline">${star}<div class="jmain">${full ? `<span class="jname">${esc(b.n)}</span>` : `<button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(b.n)}<span class="chev">${open ? "▴" : "▾"}</span></button>`}<span class="flv">FP ${esc(b.fp)}</span><span class="wsmini">PV ${b.pv}</span><span class="wsmini">CA ${b.ca}</span>${Object.keys(MV).filter(k => b.v[k]).map(k => `<span class="wsmini">${k} ${b.v[k]} m</span>`).join("")}</div>${mark}</div>
+  ${open ? beastCard(g, b) : ""}</div>`;
 }
 function wsActiveHTML(g) {
   const f = g.wsForm, b = f && BEAST[f.id]; if (!b) return "";
@@ -1670,7 +1714,7 @@ async function offer(filename, data) {
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-a]"); if (!b || b.tagName === "FORM") return;
   const a = b.dataset.a;
-  if (["prep","arcane","xused","ftog","lu-prep","lu-pprep","lu-cpick","smite-ud"].includes(a)) return; // gérés par "change"
+  if (["prep","arcane","xused","ftog","btog","lu-prep","lu-pprep","lu-cpick","smite-ud"].includes(a)) return; // gérés par "change"
   if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null;
   if (a === "tab") { S.tab = b.dataset.v; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); }
   else if (a === "new") { if (S.readonly) return; S.newOpen = true; S.newCls = null; S.newName = ""; render(); }
@@ -1684,6 +1728,7 @@ document.addEventListener("click", e => {
   else if (a === "pip") mutate(g => { const lv = +b.dataset.l, k = +b.dataset.k, u = +(g.used[lv] || 0); g.used[lv] = k < u ? k : k + 1; });
   else if (a === "longrest") { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.arcane = false; g.effects = []; g.loh = 0; g.dsU = 0; g.cdU = 0; g.wsU = 0; g.wsForm = null; S.wsDice = ""; g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); }
   else if (a === "flvl") { S.f.lvl = b.dataset.v; render(); }
+  else if (a === "bst-f") { const k = b.dataset.k, v = b.dataset.v; S.bf[k] = S.bf[k] === v && k !== "fp" ? "" : v; render(); }
   else if (a === "add") mutate(g => {
     const s = BY_ID[b.dataset.id];
     if (b.dataset.how === "mineur") { g.cantrips.push(s.id); if (g.cantrips.length > R.cantrips(g)) toast(`Attention : ${g.cantrips.length} sorts mineurs pour ${R.cantrips(g)} connus à ce niveau.`); else toast(`${esc(s.n)} appris`); }
@@ -1780,7 +1825,7 @@ document.addEventListener("click", e => {
   else if (a === "ws-open") { S.ws = { fp: "all", mv: "", q: "" }; render(); const x = document.querySelector("#wssheet .x"); if (x) x.focus({ preventScroll: true }); }
   else if (a === "ws-close") { S.ws = null; render(); }
   else if (S.ws && (a === "ws-fp" || a === "ws-mv")) { const k = a === "ws-fp" ? "fp" : "mv", v = b.dataset.v; S.ws[k] = S.ws[k] === v ? (k === "fp" ? "all" : "") : v; S.wsTop = true; render(); }
-  else if (a === "ws-fav") { const id = b.dataset.id; mutate(g => { g.favs = g.favs.includes(id) ? g.favs.filter(x => x !== id) : [...g.favs, id]; }); }
+  else if (a === "ws-fav") { const id = b.dataset.id, g0 = G(); if (!g0 || !BEAST[id] || (!wsAllowed(g0, BEAST[id]) && !g0.favs.includes(id))) return; mutate(g => { g.favs = g.favs.includes(id) ? g.favs.filter(x => x !== id) : [...g.favs, id]; }); }
   else if (a === "ws-go") {
     const g = G(), bt = BEAST[b.dataset.id]; if (!g || !bt || g.wsU >= DRU.ws(g)) return;
     const prev = { wsU: g.wsU, wsForm: g.wsForm }; S.ws = null; S.wsDice = "";
@@ -1910,6 +1955,7 @@ document.addEventListener("change", e => {
   if (t.classList.contains("fxnote")) return mutate(g => { const e = g.effects.find(e => e.k === t.dataset.k); if (e) e.note = t.value.trim(); }, false);
   if (a === "xused") return mutate(g => { g.extras[+t.dataset.i].used = t.checked; });
   if (a === "ftog") { S.f[t.dataset.v] = t.checked; render(); return; }
+  if (a === "btog") { S.bf[t.dataset.v] = t.checked; render(); return; }
   if (t.id === "f-level") return mutate(g => { g.level = +t.value; });
   if (t.dataset.ab) return mutate(g => { g[t.dataset.ab] = Math.min(30, Math.max(1, +t.value || 10)); });
   if (t.id === "f-oath") return mutate(g => { g.oath = t.value; });
@@ -1933,6 +1979,7 @@ document.addEventListener("input", e => {
   else if (t.id === "conc-dmg") { const el = document.getElementById("conc-dd"); if (el) el.textContent = `JdS CON · DD ${concDD(t.value)}`; }
   else if (t.id === "x-ename" || t.id === "x-enote") S.xdraft = { name: document.getElementById("x-ename").value, note: document.getElementById("x-enote").value };
   else if (t.id === "ws-q" && S.ws) { S.ws.q = t.value; const box = document.getElementById("wssheet"); box.innerHTML = wsSheetHTML(G()); const q = document.getElementById("ws-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); }
+  else if (t.id === "b-q") { S.bf.q = t.value; const p = document.getElementById("panel"); if (p) { p.innerHTML = bestiaryHTML(G()); const q = document.getElementById("b-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); } }
   else if (t.id === "f-q") { S.f.q = t.value; const p = document.getElementById("panel"); if (p) { p.innerHTML = biblioHTML(G()); const q = document.getElementById("f-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); } }
 });
 document.addEventListener("submit", e => {
