@@ -40,11 +40,12 @@ class App:
 
     # Raccourcis
     def js(self, expr):
-        return self.pg.evaluate(expr)
+        """Évalue une expression avec accès aux variables de l'application exposées pour les tests (window.__t)."""
+        return self.pg.evaluate("() => { with (window.__t) { return (" + expr + "); } }")
 
     def g(self, expr):
         """Valeur calculée sur le personnage en cours, ex. g('level')."""
-        return self.pg.evaluate("(() => { const g = G(); return g." + expr + "; })()")
+        return self.js("(() => { const g = G(); return g." + expr + "; })()")
 
     def click(self, sel, **kw):
         self.pg.click(sel, **kw)

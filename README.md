@@ -69,24 +69,27 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 | Fichier | Rôle |
 |---|---|
-| `src/app.html` | L'application (interface, règles, stockage, fiche imprimable). **À modifier ici.** |
-| `data/beasts.json` | Les 82 bêtes du *Manuel des monstres* utilisables en Forme sauvage (FP 1 maximum). |
-| `data/spells.json` | Les 310 sorts (magicien, paladin, druide, sorts de serment), un par ligne. **À modifier ici.** |
+| `src/app.js` | Le code de l'application (interface, règles, stockage, fiche imprimable). **À modifier ici.** |
+| `src/app.html` | Le gabarit : styles et structure de la page. **À modifier ici.** |
+| `data/spells.json` | Les 310 sorts (magicien, paladin, druide, sorts de serment), un par ligne. |
+| `data/beasts.json` | Les 82 bêtes du *Manuel des monstres* utilisables en Forme sauvage. |
 | `src/sw.js` | Modèle du service worker (cache hors connexion). |
-| `build.py` | Assemble les sources. |
+| `build.py`, `package.json` | Assemblage : esbuild réunit et minifie le code, `build.py` produit la page. |
+| `index.html`, `sw.js`, `app.js.map` | **Générés** par `build.py`, publiés par GitHub Pages. Ne pas modifier à la main. |
 | `tests/` | Tests automatiques (téléphone simulé) : `python3 tests/run.py`. |
 | `outils/` | Scripts d'extraction des données (OCR des exports AideDD, bêtes, sorts) et des maquettes. |
 | `docs/ARCHITECTURE.md` | Architecture cible et plan de restructuration. |
-| `index.html`, `sw.js` | **Générés** par `build.py`, publiés par GitHub Pages. Ne pas modifier à la main. |
-| `dist/artifact.html` | Variante générée pour l'artefact claude.ai. |
 | `manifest.webmanifest`, `icons/` | Installation sur l'écran d'accueil. |
 | `fonts/` | Polices Alegreya (licence SIL OFL), servies localement. |
 
 ## Modifier l'application
 
-1. Modifier `src/app.html` et/ou `data/spells.json`.
-2. Lancer `python3 build.py` (Python 3, aucune dépendance).
-3. Envoyer les modifications sur la branche `main` : GitHub Pages republie en une minute environ. Les appareils où l'atelier est installé récupèrent la nouvelle version au lancement suivant.
+1. Une fois : `npm install` (installe esbuild, l'outil d'assemblage).
+2. Modifier `src/app.js`, `src/app.html` et/ou `data/*.json`.
+3. `python3 build.py`, puis `python3 tests/run.py` (ou `npm test`, qui fait les deux).
+4. Envoyer les modifications sur la branche `main` : GitHub Pages republie en une minute environ. Les appareils où l'atelier est installé récupèrent la nouvelle version au lancement suivant.
+
+Le code publié est minifié. En cas d'erreur, les outils du navigateur la situent dans `src/app.js` grâce à `app.js.map`.
 
 Pour tester en local : `python3 -m http.server 8000` dans le dossier, puis ouvrir `http://localhost:8000/`.
 

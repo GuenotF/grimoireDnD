@@ -1,0 +1,12 @@
+{
+  "name": "atelier-du-grimoire",
+  "private": true,
+  "description": "Atelier du Grimoire : assemblage de l'application (esbuild). Voir README.md.",
+  "scripts": {
+    "build": "python3 build.py",
+    "test": "python3 build.py && python3 tests/run.py"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10"
+  }
+}

@@ -1,6 +1,6 @@
 # Architecture cible de l'Atelier du Grimoire
 
-*Validé le 21 octobre 2026 (sauf la variante artefact, §8.4, à confirmer).*
+*Validé le 21 octobre 2026. Étape 0 faite le 21 octobre 2026.*
 
 ## 1. Objectifs
 
@@ -18,7 +18,7 @@
 | Règles de classe | Dispersées : 57 tests `isWiz` / `isPal` / `isDru` répartis dans tout le code |
 | Actions | Une seule chaîne de près de 350 lignes (`if (a === "cast") … else if …`) |
 | Sauvegarde | Pas de numéro de version du format |
-| Tests | 29 scénarios dans `tests/` (depuis aujourd'hui) |
+| Tests | 29 scénarios dans `tests/` |
 
 ## 3. Organisation proposée
 
@@ -96,9 +96,9 @@ Chaque étape fait l'objet d'une publication séparée. On ne publie que si les 
 
 | Étape | Contenu | Effort |
 |---|---|---|
-| 0 | Outillage : esbuild branché dans `build.py`, le code actuel passe par esbuild sans être découpé | ½ itération |
+| 0 ✓ | Outillage : esbuild branché dans `build.py`, le code actuel passe par esbuild sans être découpé ; abandon de la variante claude.ai | ½ itération |
 | 1 | Outils et données : `format.js`, import direct des JSON, CSS découpé | ½ |
-| 2 | Noyau : état, stockage, version du format, rendu, registre des actions | 1 |
+| 2 | Noyau : état, stockage, version du format, rendu, registre des actions ; retrait de `S.readonly` (toujours faux depuis l'étape 0) | 1 |
 | 3 | Classes : magicien, paladin, druide derrière le contrat ; suppression des `isX` | 1 |
 | 4 | Mécaniques partagées : sorts, bibliothèque, Forme sauvage, passage de niveau, impression, sauvegarde | ½ |
 | 5 | Documentation : README et ce document mis à jour | — |
@@ -118,5 +118,5 @@ Ce sont des besoins connus et simples. Chacun doit se faire **uniquement dans le
 1. **esbuild et Node.js** : oui. Ils servent seulement à assembler, dans l'espace de travail de Claude ou sur un poste de développement.
 2. **Minification** : oui pour `index.html` publié ; la lisibilité est assurée dans `src/`.
 3. **Langue** : identifiants en anglais (cohérent avec le code existant, aucun surcoût), commentaires et textes en français.
-4. **Variante artefact claude.ai** : proposé de l'abandonner (à confirmer). Concrètement : plus de `dist/artifact.html`, et suppression du mode d'enregistrement propre à claude.ai (`window.claude`, `S.mode === "db"`, lecture seule), ce qui simplifie `store.js`. L'artefact déjà publié sur claude.ai n'est pas supprimé : il reste tel quel, figé.
+4. **Variante artefact claude.ai** : abandonnée (étape 0). Concrètement : plus de `dist/artifact.html`, et suppression du mode d'enregistrement propre à claude.ai (`window.claude`, `S.mode === "db"`, lecture seule), ce qui simplifie `store.js`. L'artefact déjà publié sur claude.ai n'est pas supprimé : il reste tel quel, figé.
 5. **Outils** : les scripts d'extraction (OCR, bêtes, sorts) sont rangés dans `outils/`.
