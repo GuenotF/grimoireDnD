@@ -387,6 +387,8 @@ body.lu-on, body.ws-on { overflow: hidden; }
 .bstats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
 .bstats div { border: 1px solid var(--rule); border-radius: 6px; padding: 4px 6px; display: grid; text-align: center; }
 .bstats span { font-family: var(--f-sc); font-size: 11.5px; color: var(--muted); letter-spacing: .05em; }
+.bskill { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 6px; font-size: 14px; }
+.bskill b { margin-right: 2px; }
 .btr, .bact.txt { font-size: 13.5px; line-height: 1.4; }
 .bact { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 14px; }
 .rchg { font-size: 11.5px; padding: 0 5px; margin-left: 6px; font-weight: 600; }
@@ -495,7 +497,7 @@ body.lu-on, body.ws-on { overflow: hidden; }
 <script>
 const SPELLS = /*SPELLS*/[];
 const BY_ID = Object.fromEntries(SPELLS.map(s => [s.id, s]));
-const BEASTS = /*BEASTS*/[]; // bêtes du Manuel des monstres (Forme sauvage) : fp, ca, pv, v (vitesses), st (FOR, DEX, CON), tr (capacités), ac (actions)
+const BEASTS = /*BEASTS*/[]; // bêtes du Manuel des monstres (Forme sauvage) : fp, ca, pv, v (vitesses), st (FOR, DEX, CON), cp (compétences), tr (capacités), ac (actions)
 const BEAST = Object.fromEntries(BEASTS.map(b => [b.id, b]));
 // Page ouverte seule (fichier exporté) plutôt que dans le cadre de claude.ai
 const STANDALONE = (() => { try { return window.self === window.top; } catch (e) { return false; } })();
@@ -938,7 +940,8 @@ function beastCard(g, b) {
   return `<div class="bcard"><span class="muted bsz">Bête de taille ${esc(SIZES[b.sz] || b.sz)}</span>
   <div class="kps"><span class="kp">CA ${b.ca}</span><span class="kp">PV ${b.pv} (${esc(b.pvd)})</span><span class="kp">${esc(spdTxt(b))}</span></div>
   <div class="bstats">${["FOR", "DEX", "CON"].map((l, i) => `<div><span>${l}</span><b>${b.st[i]} (${modOf(b.st[i])})</b></div>`).join("")}</div>
-  <span class="muted" style="font-size:12.5px">INT, SAG et CHA : les tiens. ${b.sens ? `Sens : ${esc(b.sens)}.` : ""}</span>
+  <div class="bskill"><b>Compétences</b> ${b.cp ? b.cp.split(", ").map(x => `<span class="kp">${esc(x)}</span>`).join("") : `<span class="muted">aucune</span>`}</div>
+  <span class="muted" style="font-size:12.5px">INT, SAG et CHA : les tiens. Tu gardes tes maîtrises de compétences et de sauvegardes ; si la bête a la même maîtrise avec un meilleur bonus, prends le sien. ${b.sens ? `Sens : ${esc(b.sens)}.` : ""}</span>
   ${b.tr.map(([n, d, r]) => `<div class="btr"><b>${esc(n)}.</b>${rchg(r)} ${esc(d)}</div>`).join("")}
   ${b.ac.length ? `<span class="lusub">Actions</span>${beastActs(b)}` : `<span class="muted">Aucune attaque.</span>`}</div>`;
 }
