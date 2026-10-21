@@ -74,6 +74,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 | `data/spells.json` | Les 310 sorts (magicien, paladin, druide, sorts de serment), un par ligne. **À modifier ici.** |
 | `src/sw.js` | Modèle du service worker (cache hors connexion). |
 | `build.py` | Assemble les sources. |
+| `tests/` | Tests automatiques (téléphone simulé) : `python3 tests/run.py`. |
 | `index.html`, `sw.js` | **Générés** par `build.py`, publiés par GitHub Pages. Ne pas modifier à la main. |
 | `dist/artifact.html` | Variante générée pour l'artefact claude.ai. |
 | `manifest.webmanifest`, `icons/` | Installation sur l'écran d'accueil. |
