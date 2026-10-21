@@ -1,10 +1,5 @@
 // Tables de règles sans dépendance (Manuel des joueurs 2014) : écoles, emplacements des lanceurs complets et des demi-lanceurs.
 
-
-
-
-
-
 const SCHOOLS = ["Abjuration","Divination","Enchantement","Évocation","Illusion","Invocation","Nécromancie","Transmutation"];
 const SCHOOL_VAR = {"Abjuration":"--s-abj","Divination":"--s-div","Enchantement":"--s-enc","Évocation":"--s-evo","Illusion":"--s-ill","Invocation":"--s-inv","Nécromancie":"--s-nec","Transmutation":"--s-tra"};
 // Emplacements du magicien (Manuel des joueurs 2014, tableau du magicien)

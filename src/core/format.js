@@ -2,9 +2,6 @@
 
 /** Nombre avec son signe : +3, −1 (vrai signe moins). */
 
-
-
-
 export const signed = n => (n >= 0 ? "+" : "−") + Math.abs(n);
 /** Nombre décimal à la française : 1,5. */
 export const fmt = n => String(n).replace(".", ",");

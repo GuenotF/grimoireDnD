@@ -4,9 +4,14 @@
   "description": "Atelier du Grimoire : assemblage de l'application (esbuild). Voir README.md.",
   "scripts": {
     "build": "python3 build.py",
-    "test": "python3 build.py && python3 tests/run.py"
+    "test": "python3 build.py && eslint src && python3 tests/run.py",
+    "lint": "eslint src"
   },
   "devDependencies": {
-    "esbuild": "0.25.10"
+    "acorn": "^8.14.0",
+    "acorn-walk": "^8.3.4",
+    "esbuild": "0.25.10",
+    "eslint": "9.13.0",
+    "globals": "15.11.0"
   }
 }

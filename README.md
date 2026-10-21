@@ -89,9 +89,9 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 ## Modifier l'application
 
-1. Une fois : `npm install` (installe esbuild, l'outil d'assemblage).
+1. Une fois : `npm install` (installe esbuild, l'outil d'assemblage, et ESLint, le contrôle du code).
 2. Modifier les fichiers de `src/` et/ou `data/*.json`.
-3. `python3 build.py`, puis `python3 tests/run.py` (ou `npm test`, qui fait les deux).
+3. `npm test` : assemblage (`python3 build.py`), contrôle du code (`npm run lint` : aucun nom indéfini, aucun import inutile) et tests (`python3 tests/run.py`).
 4. Envoyer les modifications sur la branche `main` : GitHub Pages republie en une minute environ. Les appareils où l'atelier est installé récupèrent la nouvelle version au lancement suivant.
 
 Le code publié est minifié. En cas d'erreur, les outils du navigateur la situent dans `src/app.js` grâce à `app.js.map`.
