@@ -27,6 +27,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 **Onglet Grimoire, mode « En jeu »** (en partie)
 - Seulement les sorts préparés, les sorts mineurs, les rituels et les autres sorts, en lignes compactes avec *Lancer* à droite.
 - Repère doré ✎ sur les sorts qui ont une note ; la note s'affiche au-dessus du bouton *Lancer* quand on déplie le sort (lecture seule).
+- Sorts mineurs de concentration (Embrasement, Assistance, Résistance, Lumières dansantes, Coup au but) : bouton *Lancer* sans emplacement, pour suivre la concentration.
 - *Lancer* coche un emplacement du niveau du sort (ou du premier niveau supérieur libre) ; **▲** choisit un niveau supérieur quand le sort y gagne quelque chose ; *Rituel* pour les sorts lancés en rituel. Chaque lancement peut être annulé.
 - **Concentration** : avertissement avant de remplacer un sort de concentration, panneau du jet de concentration (DD calculé à partir des dégâts subis).
 - **Sorts en cours** : ajoutés automatiquement au lancement, puces dans la barre du bas, volet *En cours* avec note facultative et *Terminer*.
