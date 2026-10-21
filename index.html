@@ -545,7 +545,8 @@ function norm(g) {
   ["loh", "dsU", "cdU"].forEach(k => { o[k] = Math.max(0, +o[k] || 0); }); // paladin : PV d'Imposition dépensés, Perception divine et Conduit divin utilisés
   ["cantrips","spells","prepared","extras"].forEach(k => { if (!Array.isArray(o[k])) o[k] = []; });
   o.spells = o.spells.filter(x => x && BY_ID[x.id]); o.cantrips = o.cantrips.filter(id => BY_ID[id]);
-  o.prepared = o.prepared.filter(id => o.spells.some(x => x.id === id));
+  // Magicien : un sort préparé doit être dans le grimoire. Paladin : dans la liste de sa classe.
+  o.prepared = [...new Set(o.prepared)].filter(id => o.cls === "magicien" ? o.spells.some(x => x.id === id) : BY_ID[id] && (BY_ID[id].cl || []).includes(o.cls));
   if (!o.used || typeof o.used !== "object") o.used = {};
   if (!o.snotes || typeof o.snotes !== "object" || Array.isArray(o.snotes)) o.snotes = {}; // notes personnelles par sort : {id: texte}
   if (!Array.isArray(o.effects)) o.effects = []; // sorts en cours : {k, id, name, d, c (concentration), note}
@@ -1013,12 +1014,15 @@ function jeuRow(g, s, kind) {
     if (kind === "prep") { const lv = firstFree(g, s); act = lv ? `<button class="btn cast-go sm" data-a="cast" data-id="${s.id}" data-l="${lv}">${lv === s.l ? "Lancer" : "Lancer · niv. " + lv}</button>` : `<button class="btn cast-none sm" disabled>Épuisé</button>`; }
     else if (kind === "rit") act = `<button class="btn cast-rit sm" data-a="cast-rit" data-id="${s.id}">Rituel</button>`;
   }
-  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${isOath(g, s) ? `<span class="ostar" title="Sort de serment">★</span>` : ""}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${noteMark(g, s)}${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${act}</div>
+  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${noteMark(g, s)}${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${act}</div>
   ${open ? `<div class="jbody">${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${noteOf(g, s) ? noteBox(g, s) : ""}${kind !== "cantrip" && !S.readonly ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
 }
 function jeuHTML(g) {
   const prepared = new Set(g.prepared), max = R.maxLevel(g), slots = R.slots(g), ready = castable(g);
   let h = isWiz(g) ? "" : smiteHTML(g);
+  // Paladin : sorts de serment dans leur propre section, comme dans Gérer
+  const oath = isWiz(g) ? [] : ready.filter(s => isOath(g, s)).sort((a, b) => a.l - b.l || byName(a, b));
+  if (oath.length) { h += foldHead("o", "oath", "Sorts de serment", `toujours préparés · ${esc(OATHS[g.oath].n)}`, plural(oath.length, "sort")); if (!isFold("o")) oath.forEach(s => { h += jeuRow(g, s, "prep"); }); }
   const cans = g.cantrips.map(id => BY_ID[id]).sort(byName);
   if (cans.length) {
     // Sorts mineurs : un par ligne, ceux qui ont un jet (attaque, sauvegarde) d'abord
@@ -1027,7 +1031,7 @@ function jeuHTML(g) {
     if (!isFold("c")) [...combat, ...util].forEach(s => { h += jeuRow(g, s, "cantrip"); });
   }
   for (let lv = 1; lv <= max; lv++) {
-    const list = ready.filter(s => s.l === lv).sort(byName);
+    const list = ready.filter(s => s.l === lv && !isOath(g, s)).sort(byName);
     if (!list.length) continue;
     h += foldHead("l" + lv, "", `Niveau ${lv}`, `${slotsLeft(g, lv)} / ${slots[lv - 1]} restant${slotsLeft(g, lv) > 1 ? "s" : ""}`, plural(list.length, "sort"));
     if (!isFold("l" + lv)) list.forEach(s => { h += jeuRow(g, s, "prep"); });

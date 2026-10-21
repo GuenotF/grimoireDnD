@@ -8,7 +8,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 **Classes**
 - **Magicien** : toutes les fonctionnalités ci-dessous.
-- **Paladin** : Charisme, serment (Conquête), emplacements de demi-lanceur. *Gérer* : sorts de serment (★, toujours préparés), toute la liste du paladin à cocher avec la limite (mod. CHA + moitié du niveau). Ressources : Imposition des mains (volet de soin, maladie/poison), Perception divine, Conduit divin ; repos court et long. *En jeu* : Châtiment divin (dés par niveau d'emplacement, +1d8 contre morts-vivants et fiélons), sorts préparés et de serment avec *Lancer*, même barre du bas que le magicien. Impression, règles et passage de niveau : magicien seulement pour l'instant.
+- **Paladin** : Charisme, serment (Conquête), emplacements de demi-lanceur. *Gérer* : sorts de serment (★, toujours préparés), toute la liste du paladin à cocher avec la limite (mod. CHA + moitié du niveau). Ressources : Imposition des mains (volet de soin, maladie/poison), Perception divine, Conduit divin ; repos court et long. *En jeu* : Châtiment divin (dés par niveau d'emplacement, +1d8 contre morts-vivants et fiélons), section *Sorts de serment* puis sorts préparés par niveau, avec *Lancer*, même barre du bas que le magicien. Impression, règles et passage de niveau : magicien seulement pour l'instant.
 - *Nouveau personnage* : choix de la classe à la création. Un fichier importé garde sa classe ; les anciens fichiers sans classe sont des magiciens.
 
 **Le magicien**
