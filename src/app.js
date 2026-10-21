@@ -74,8 +74,7 @@ const R = {
 };
 
 // ---------- État ----------
-const S = { list: {}, cur: null, tab: "grimoire", readonly: false, // readonly : toujours faux depuis l'abandon de la version claude.ai, retiré à l'étape 2
-  view: "gerer", fxOpen: false, shortOpen: false, sr: {}, open: new Set(), concWarn: null, concPanel: false,
+const S = { list: {}, cur: null, tab: "grimoire", view: "gerer", fxOpen: false, shortOpen: false, sr: {}, open: new Set(), concWarn: null, concPanel: false,
   f: { q: "", lvl: "all", school: "", conc: false, rit: false, hideOwned: false, reachable: false },
   bf: { q: "", fp: "all", mv: "", sz: "", reach: false, fav: false },
   confirm: null, newForm: false };
@@ -153,16 +152,16 @@ function render() {
   const showFx = showBar && S.fxOpen && g.effects.length > 0, fs = document.getElementById("fxsheet");
   fs.hidden = !showFx; document.getElementById("fxback").hidden = !showFx; if (showFx) fs.innerHTML = fxSheetHTML(g);
   if (!showFx) S.fxOpen = false;
-  const lh = document.getElementById("lohsheet"), showLh = !!g && !!S.lohOpen && !isWiz(g) && !S.readonly;
+  const lh = document.getElementById("lohsheet"), showLh = !!g && !!S.lohOpen && !isWiz(g);
   if (!showLh) S.lohOpen = false;
   lh.hidden = !showLh; document.getElementById("lohback").hidden = !showLh; if (showLh) lh.innerHTML = lohHTML(g);
-  const nw = document.getElementById("nwsheet"), showNw = !!S.newOpen && !S.readonly;
+  const nw = document.getElementById("nwsheet"), showNw = !!S.newOpen;
   nw.hidden = !showNw; document.getElementById("nwback").hidden = !showNw; if (showNw) nw.innerHTML = newHTML();
-  const lu = document.getElementById("lvlup"), showLu = !!g && !!S.lu && !S.readonly;
+  const lu = document.getElementById("lvlup"), showLu = !!g && !!S.lu;
   if (!showLu) S.lu = null;
   lu.hidden = !showLu; document.body.classList.toggle("lu-on", showLu);
   if (showLu) { const sc = lu.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; lu.innerHTML = luHTML(g); const nb = lu.querySelector(".lubody"); if (nb && S.luKeep) nb.scrollTop = top; S.luKeep = false; }
-  const ws = document.getElementById("wssheet"), showWs = !!g && !!S.ws && isDru(g) && !S.readonly && !showLu;
+  const ws = document.getElementById("wssheet"), showWs = !!g && !!S.ws && isDru(g) && !showLu;
   if (!showWs) S.ws = null;
   ws.hidden = !showWs; document.body.classList.toggle("ws-on", showWs);
   if (showWs) { const sc = ws.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; ws.innerHTML = wsSheetHTML(g); const nb = ws.querySelector(".lubody"); if (nb && !S.wsTop) nb.scrollTop = top; S.wsTop = false; } // la liste garde sa position (sauf changement de filtre)
@@ -172,17 +171,16 @@ function renderPicker() {
   const ids = Object.keys(S.list).sort((a, b) => S.list[a].name.localeCompare(S.list[b].name, "fr"));
   const p = document.getElementById("picker");
   p.innerHTML = (ids.length ? `<select id="cur" aria-label="Grimoire affiché">${ids.map(id => `<option value="${esc(id)}"${id === S.cur ? " selected" : ""}>${esc(S.list[id].name)} · ${C(S.list[id]).n} ${S.list[id].level}</option>`).join("")}</select>` : "")
-    + (ids.length ? `<button class="btn" data-a="new"${S.readonly ? " disabled" : ""}>Nouveau personnage</button>` : "") + `<span class="status" id="status"></span>`;
+    + (ids.length ? `<button class="btn" data-a="new">Nouveau personnage</button>` : "") + `<span class="status" id="status"></span>`;
 }
 function welcomeHTML() {
   return `<div class="welcome"><h1><span class="initial">G</span>rimoires</h1>
   <p>Aucun personnage pour l'instant. Crée un magicien, un paladin ou un druide : l'atelier calcule ses emplacements, ses sorts préparés et ses ressources d'après le Manuel des joueurs. Tu as déjà une sauvegarde (fichier .json ou .txt) ? Importe-la.</p>
-  <div class="frow"><button class="btn primary" data-a="new"${S.readonly ? " disabled" : ""}>Créer un personnage</button>${S.readonly ? "" : `<label class="btn" for="f-import">Importer une sauvegarde</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden>`}</div></div>`;
+  <div class="frow"><button class="btn primary" data-a="new">Créer un personnage</button><label class="btn" for="f-import">Importer une sauvegarde</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden></div></div>`;
 }
 function heroHTML(g) {
   const prof = R.prof(g.level), mod = R.am(g), max = R.maxLevel(g);
   const nPrep = g.prepared.length, pMax = R.prepMax(g), exp = R.expected(g.level), nSp = g.spells.length, cMax = R.cantrips(g);
-  const ro = S.readonly ? " disabled" : "";
   const first = esc(g.name.charAt(0)), rest = esc(g.name.slice(1));
   return `<section class="hero">
   <div>
@@ -190,12 +188,12 @@ function heroHTML(g) {
     <div class="subline">${isWiz(g) ? `Niveau ${g.level} · École ${/^[AÉEIO]/.test(g.school) ? "d'" : "de "}${esc(g.school)}` : `${C(g).n} niveau ${g.level}${isPal(g) && g.level >= 3 ? ` · ${esc(OATHS[g.oath].full)}` : isDru(g) && g.level >= 2 ? ` · ${esc(CIRCLES[g.circle].full)}` : ""}`} · ${max ? `sorts jusqu'au niveau ${max}` : `sorts au niveau ${R.unlockAt(g, 1)}`}</div>
   </div>
   <div class="setup">
-    <div class="field"><label for="f-full">Nom complet</label><input id="f-full" type="text" value="${esc(g.name)}"${ro}></div>
-    <div class="field"><label for="f-level">Niveau de ${C(g).n.toLowerCase()}</label><div class="lvrow"><select id="f-level"${ro}>${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select>${g.level < 20 && !S.readonly ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}</div></div>
-    <div class="field"><label for="f-${C(g).ab}">${C(g).abN} (valeur)</label><input id="f-${C(g).ab}" data-ab="${C(g).ab}" type="number" min="1" max="30" value="${g[C(g).ab]}"${ro}></div>
-    ${isWiz(g) ? `<div class="field"><label for="f-school">Tradition arcanique</label><select id="f-school"${ro}>${SCHOOLS.map(s=>`<option${s===g.school?" selected":""}>${s}</option>`).join("")}</select></div>`
-      : isDru(g) ? `<div class="field"><label for="f-circle">Cercle druidique</label><select id="f-circle"${ro}>${Object.entries(CIRCLES).map(([k, o]) => `<option value="${k}"${k === g.circle ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`
-      : `<div class="field"><label for="f-oath">Serment sacré</label><select id="f-oath"${ro}>${Object.entries(OATHS).map(([k, o]) => `<option value="${k}"${k === g.oath ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`}
+    <div class="field"><label for="f-full">Nom complet</label><input id="f-full" type="text" value="${esc(g.name)}"></div>
+    <div class="field"><label for="f-level">Niveau de ${C(g).n.toLowerCase()}</label><div class="lvrow"><select id="f-level">${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select>${g.level < 20 ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}</div></div>
+    <div class="field"><label for="f-${C(g).ab}">${C(g).abN} (valeur)</label><input id="f-${C(g).ab}" data-ab="${C(g).ab}" type="number" min="1" max="30" value="${g[C(g).ab]}"></div>
+    ${isWiz(g) ? `<div class="field"><label for="f-school">Tradition arcanique</label><select id="f-school">${SCHOOLS.map(s=>`<option${s===g.school?" selected":""}>${s}</option>`).join("")}</select></div>`
+      : isDru(g) ? `<div class="field"><label for="f-circle">Cercle druidique</label><select id="f-circle">${Object.entries(CIRCLES).map(([k, o]) => `<option value="${k}"${k === g.circle ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`
+      : `<div class="field"><label for="f-oath">Serment sacré</label><select id="f-oath">${Object.entries(OATHS).map(([k, o]) => `<option value="${k}"${k === g.oath ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`}
   </div>
   <div class="stats" role="list">
     <div class="stat" role="listitem"><div class="v">${signed(mod)}</div><div class="l">Mod. ${C(g).abN}</div></div>
@@ -209,7 +207,6 @@ function heroHTML(g) {
     : `<div class="stat" role="listitem"><div class="v">${oathSpells(g).length}</div><div class="l">Sorts de serment</div></div>
     <div class="stat" role="listitem"><div class="v">${5 * g.level}</div><div class="l">Imposition (PV)</div></div>`}
   </div>
-  ${S.readonly ? `<div class="banner">Lecture seule : tu peux consulter ce grimoire, mais pas le modifier.</div>` : ""}
   <div class="banner">Tes personnages sont enregistrés sur cet appareil, dans ce navigateur. Exporte-les de temps en temps (onglet Sauvegarde) pour les sauvegarder ou les passer sur un autre appareil.</div>
   ${showIosTip() ? `<div class="banner">Sur iPhone ou iPad, installe l'atelier : bouton <b>Partager</b>, puis <b>Sur l'écran d'accueil</b>. Ouvre-le ensuite toujours depuis cette icône : c'est là que tes grimoires sont le mieux conservés. <button class="btn ghost" data-a="hide-ios">Masquer</button></div>` : ""}
   </section>`;
@@ -268,10 +265,10 @@ function foldHead(k, cls, title, aside, summary) {
 }
 // ---------- Paladin : ressources ----------
 function palResHTML(g) {
-  const ro = S.readonly ? " disabled" : "", pool = PAL.loh(g), left = Math.max(0, pool - g.loh), ds = PAL.ds(g), cd = PAL.cd(g);
-  const pips = (r, n, u, lbl) => Array.from({ length: n }, (_, k) => `<button class="pip${k < u ? " used" : ""}" data-a="res-pip" data-r="${r}" data-k="${k}" aria-label="${lbl} ${k + 1}, ${k < u ? "utilisée" : "disponible"}"${ro}></button>`).join("");
+  const pool = PAL.loh(g), left = Math.max(0, pool - g.loh), ds = PAL.ds(g), cd = PAL.cd(g);
+  const pips = (r, n, u, lbl) => Array.from({ length: n }, (_, k) => `<button class="pip${k < u ? " used" : ""}" data-a="res-pip" data-r="${r}" data-k="${k}" aria-label="${lbl} ${k + 1}, ${k < u ? "utilisée" : "disponible"}"></button>`).join("");
   return `<div class="rubric"><h2>Ressources du paladin</h2></div><div class="slots res">
-  <div class="resrow"><span class="rn"><b>Imposition des mains</b><small>réserve · repos long</small></span><span class="rv">${left}<small>/${pool}</small></span><button class="btn cast-go sm" data-a="loh-open"${ro || (left ? "" : " disabled")}>Soigner</button></div>
+  <div class="resrow"><span class="rn"><b>Imposition des mains</b><small>réserve · repos long</small></span><span class="rv">${left}<small>/${pool}</small></span><button class="btn cast-go sm" data-a="loh-open"${(left ? "" : " disabled")}>Soigner</button></div>
   <div class="bar"><span style="width:${pool ? Math.round(100 * left / pool) : 0}%"></span></div>
   ${capRow(g, "ds", "Perception divine", "repos long", pips("ds", ds, Math.min(ds, g.dsU), "Perception divine"), true)}
   ${cd ? capRow(g, "cd", "Conduit divin", "repos court", pips("cd", cd, Math.min(cd, g.cdU), "Conduit divin")) : ""}
@@ -313,14 +310,14 @@ const classFeats = g => isDru(g) ? DRU_FEATS.filter(f => !f.circle || f.circle =
 function palFeatsHTML(g) {
   const feats = classFeats(g), have = feats.filter(f => f.lv <= g.level), next = feats.filter(f => f.lv > g.level).slice(0, 2);
   if (!have.length && !next.length) return "";
-  const gerer = S.view !== "jeu", ro = S.readonly ? " disabled" : "";
+  const gerer = S.view !== "jeu";
   let h = foldHead("k", "", "Capacités de classe", `${esc(g.name)} · niveau ${g.level}`, plural(have.length, "capacité"));
   if (isFold("k")) return h;
   if (!have.length) h += `<div class="empty">Première capacité au niveau ${next[0].lv}.</div>`;
   have.forEach(f => {
     const key = "feat:" + f.id, open = S.open.has(key);
-    const right = f.id === "style" && gerer && !S.readonly
-      ? `<select id="f-style" aria-label="Style de combat"${ro}><option value="">À choisir</option>${Object.entries(STYLES).map(([k, s]) => `<option value="${k}"${g.style === k ? " selected" : ""}>${s.n}</option>`).join("")}</select>`
+    const right = f.id === "style" && gerer
+      ? `<select id="f-style" aria-label="Style de combat"><option value="">À choisir</option>${Object.entries(STYLES).map(([k, s]) => `<option value="${k}"${g.style === k ? " selected" : ""}>${s.n}</option>`).join("")}</select>`
       : `<span class="kp ${f.k}">${esc(f.pill(g))}</span>`;
     h += `<div class="jrow feat"><div class="jline"><span class="flv">niv. ${f.lv}</span><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${f.n}<span class="chev">${open ? "▴" : "▾"}</span></button></div>${right}</div>${open ? `<div class="jbody"><div class="eff">${esc(f.d(g))}</div></div>` : ""}</div>`;
   });
@@ -344,23 +341,23 @@ function lohHTML(g) {
 // Capacité dépliable (Perception divine, Conduit divin) : cercles à droite, détail et boutons au toucher du nom
 const pillsRaw = list => `<div class="pills">${list.map(([k, l, v, sub]) => `<div class="pill ${k}"><span class="pl">${l}</span><span class="pv">${esc(v)}</span>${sub ? `<span class="ps">${esc(sub)}</span>` : ""}</div>`).join("")}</div>`;
 function capRow(g, r, name, rest, pipsHTML, sep) {
-  const key = "res:" + r, open = S.open.has(key), ro = !!S.readonly;
+  const key = "res:" + r, open = S.open.has(key);
   let body = "";
   if (open && r === "ds") {
     const left = PAL.ds(g) - Math.min(PAL.ds(g), g.dsU);
     body = `${pillsRaw([["n", "Incantation", "1 action"], ["n", "Zone", "18 m"], ["n", "Durée", "jusqu'à ton prochain tour"]])}
     <div class="eff">Tu sais où sont les célestes, fiélons et morts-vivants (leur type, pas leur identité) et les lieux ou objets consacrés ou profanés, hors abri total.</div>
-    ${ro ? "" : `<div class="cast"><button class="btn cast-go sm" data-a="ds-use"${left ? "" : " disabled"}>${left ? `Utiliser · ${left} restante${left > 1 ? "s" : ""}` : "Plus d'utilisation"}</button></div>`}`;
+    <div class="cast"><button class="btn cast-go sm" data-a="ds-use"${left ? "" : " disabled"}>${left ? `Utiliser · ${left} restante${left > 1 ? "s" : ""}` : "Plus d'utilisation"}</button></div>`;
   }
   if (open && r === "ws") {
     const fp = DRU.fp(g), lim = g.level < 4 ? "ni nage ni vol" : g.level < 8 ? "nage autorisée, pas de vol" : "nage et vol autorisés";
     body = `${pillsRaw([["n", "Incantation", "1 action bonus"], ["n", "Durée", `${DRU.hours(g)} h maximum`], ["f", "Bêtes", `FP ${fp} maximum`, lim]])}
     <div class="eff">Tu prends la forme d'une bête déjà vue : ses statistiques physiques et ses PV remplacent les tiens (tu gardes INT, SAG, CHA, tes compétences et ta concentration). À 0 PV, tu reprends ta forme et l'excédent de dégâts passe sur tes PV. Pas de sort dans cette forme.</div>
-    ${S.readonly ? "" : `<div class="cast"><button class="btn cast-go sm wsbtn" data-a="ws-open">${g.wsForm ? "Changer de forme" : "Choisir une forme"}</button></div>`}`;
+    <div class="cast"><button class="btn cast-go sm wsbtn" data-a="ws-open">${g.wsForm ? "Changer de forme" : "Choisir une forme"}</button></div>`;
   }
   if (open && r === "cd") {
     const o = OATHS[g.oath], left = PAL.cd(g) - Math.min(PAL.cd(g), g.cdU);
-    body = (o.cd || []).map(x => `<div class="capopt"><b>${x.n}</b>${x.pills ? pillsRaw(x.pills(g)) : ""}<div class="eff">${x.e}</div>${ro ? "" : `<div class="cast"><button class="btn cast-go sm" data-a="cd-use" data-v="${x.k}"${left ? "" : " disabled"}>${x.btn || x.n}</button></div>`}</div>`).join("")
+    body = (o.cd || []).map(x => `<div class="capopt"><b>${x.n}</b>${x.pills ? pillsRaw(x.pills(g)) : ""}<div class="eff">${x.e}</div><div class="cast"><button class="btn cast-go sm" data-a="cd-use" data-v="${x.k}"${left ? "" : " disabled"}>${x.btn || x.n}</button></div></div>`).join("")
       + `<span class="muted" style="font-size:12.5px">${left ? "Une seule utilisation par repos : choisir l'une ou l'autre." : "Conduit divin utilisé : il revient au prochain repos court ou long."}</span>`;
   }
   return `<div class="resrow${sep ? " sep" : ""}"><span class="rn"><button class="capname" data-a="row" data-id="${key}" aria-expanded="${open}">${name}<span class="chev">${open ? "▴" : "▾"}</span></button><small>${rest}</small></span><span class="pips">${pipsHTML}</span></div>${body ? `<div class="capbody">${body}</div>` : ""}`;
@@ -368,8 +365,8 @@ function capRow(g, r, name, rest, pipsHTML, sep) {
 // ---------- Druide : ressources ----------
 function druResHTML(g) {
   const n = DRU.ws(g); if (!n) return "";
-  const ro = S.readonly ? " disabled" : "", u = Math.min(n, g.wsU);
-  const pips = n > 10 ? `<span class="muted">illimitée</span>` : Array.from({ length: n }, (_, k) => `<button class="pip${k < u ? " used" : ""}" data-a="res-pip" data-r="ws" data-k="${k}" aria-label="Forme sauvage ${k + 1}, ${k < u ? "utilisée" : "disponible"}"${ro}></button>`).join("");
+  const u = Math.min(n, g.wsU);
+  const pips = n > 10 ? `<span class="muted">illimitée</span>` : Array.from({ length: n }, (_, k) => `<button class="pip${k < u ? " used" : ""}" data-a="res-pip" data-r="ws" data-k="${k}" aria-label="Forme sauvage ${k + 1}, ${k < u ? "utilisée" : "disponible"}"></button>`).join("");
   return `<div class="rubric"><h2>Ressources du druide</h2></div><div class="slots res">${capRow(g, "ws", "Forme sauvage", "repos court", pips)}</div>`;
 }
 // ---------- Druide : Forme sauvage ----------
@@ -416,7 +413,7 @@ function wsSheetHTML(g) {
   const row = b => {
     const key = "ws:" + b.id, open = S.open.has(key), fav = g.favs.includes(b.id);
     return `<div class="jrow wsrow"><div class="jline"><button class="wsfav${fav ? " on" : ""}" data-a="ws-fav" data-id="${b.id}" aria-pressed="${fav}" aria-label="${fav ? "Retirer des" : "Ajouter aux"} formes favorites">${fav ? "★" : "☆"}</button><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(b.n)}<span class="chev">${open ? "▴" : "▾"}</span></button><span class="flv">FP ${esc(b.fp)}</span><span class="wsmini">PV ${b.pv}</span><span class="wsmini">CA ${b.ca}</span>${Object.keys(MV).filter(k => b.v[k]).map(k => `<span class="wsmini">${k} ${b.v[k]} m</span>`).join("")}</div></div>
-    ${open ? `${beastCard(g, b)}${S.readonly ? "" : `<div class="cast"><button class="btn cast-go wsgo" data-a="ws-go" data-id="${b.id}"${left ? "" : " disabled"}>${left ? `Se transformer · 1 utilisation (reste ${left})` : "Plus d'utilisation : repos court"}</button></div>`}` : ""}</div>`;
+    ${open ? `${beastCard(g, b)}<div class="cast"><button class="btn cast-go wsgo" data-a="ws-go" data-id="${b.id}"${left ? "" : " disabled"}>${left ? `Se transformer · 1 utilisation (reste ${left})` : "Plus d'utilisation : repos court"}</button></div>` : ""}</div>`;
   };
   let body = "";
   if (favs.length) body += `<div class="rubric oathr"><h3>★ Mes formes</h3></div>` + favs.map(row).join("");
@@ -458,35 +455,35 @@ function bestiaryHTML(g) {
 }
 function bstRow(g, b, full) {
   const key = "bst:" + b.id, open = full || S.open.has(key), fav = g.favs.includes(b.id), ok = wsAllowed(g, b), need = wsNeed(b);
-  const star = S.readonly || (!ok && !fav) ? `<span class="wsfav off" aria-hidden="true">☆</span>` : `<button class="wsfav${fav ? " on" : ""}" data-a="ws-fav" data-id="${b.id}" aria-pressed="${fav}" aria-label="${fav ? "Retirer des" : "Ajouter aux"} formes favorites">${fav ? "★" : "☆"}</button>`;
+  const star = (!ok && !fav) ? `<span class="wsfav off" aria-hidden="true">☆</span>` : `<button class="wsfav${fav ? " on" : ""}" data-a="ws-fav" data-id="${b.id}" aria-pressed="${fav}" aria-label="${fav ? "Retirer des" : "Ajouter aux"} formes favorites">${fav ? "★" : "☆"}</button>`;
   const mark = ok ? "" : `<span class="libmark">${need[0] > 20 ? "Hors de portée" : `${need[1]} : niveau ${need[0]}`}</span>`;
   return `<div class="jrow wsrow${ok ? "" : " locked"}"><div class="jline">${star}<div class="jmain">${full ? `<span class="jname">${esc(b.n)}</span>` : `<button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(b.n)}<span class="chev">${open ? "▴" : "▾"}</span></button>`}<span class="flv">FP ${esc(b.fp)}</span><span class="wsmini">PV ${b.pv}</span><span class="wsmini">CA ${b.ca}</span>${Object.keys(MV).filter(k => b.v[k]).map(k => `<span class="wsmini">${k} ${b.v[k]} m</span>`).join("")}</div>${mark}</div>
   ${open ? beastCard(g, b) : ""}</div>`;
 }
 // Rappel du jet de concentration après des dégâts en forme de bête (la concentration continue en Forme sauvage)
 function wsConcHTML(g) {
-  const w = S.wsConc, cur = concOf(g); if (!w || !cur || S.readonly) { S.wsConc = null; return ""; }
+  const w = S.wsConc, cur = concOf(g); if (!w || !cur) { S.wsConc = null; return ""; }
   const con = w.con != null ? `avec la CON de la bête (${signed(w.con)})` : "avec ta propre CON (tu as repris ta forme)";
   return `<div class="concwarn wsconc" role="alert"><div><b>◉ ${esc(cur.name)}</b> : jet de sauvegarde de Constitution, <b>DD ${w.dd}</b> (${plural(w.n, "dégât")}), ${con}.</div>
   <div class="cast"><button class="btn" data-a="wsconc-ok">Réussi</button><button class="btn" data-a="conc-end" style="border-color:var(--rubric);color:var(--pa-fg)">Raté : concentration perdue</button></div></div>`;
 }
 function wsActiveHTML(g) {
   const f = g.wsForm, b = f && BEAST[f.id]; if (!b) return "";
-  const pct = Math.round(100 * Math.max(0, f.hp) / f.max), ro = !!S.readonly;
+  const pct = Math.round(100 * Math.max(0, f.hp) / f.max);
   const slots = R.slots(g).map((n, i) => [i + 1, slotsLeft(g, i + 1)]).filter(([, l]) => l > 0);
   const shut = isFold("ws");
   return `<section class="wsactive${shut ? " shut" : ""}" id="ws-active"><button class="wsh" data-a="fold" data-k="ws" aria-expanded="${!shut}"><span class="k"><span class="chev" aria-hidden="true">${shut ? "▸" : "▾"}</span> Forme active</span><span class="muted">${shut ? "déplier la fiche" : `jusqu'à ${DRU.hours(g)} h · replier`}</span></button>
   <div class="wsn"><b>${esc(b.n)}${shut ? `<small> · CA ${b.ca}</small>` : ""}</b><span class="hp">${f.hp}<small>/${f.max} PV</small></span></div>
   <div class="bar"><span style="width:${pct}%"></span></div>
-  ${ro ? "" : `<div class="wsdmg"><label for="ws-n">PV</label><input id="ws-n" type="number" inputmode="numeric" min="0" placeholder="${S.wsDice ? S.wsDice : "0"}"><button class="btn cast-go sm" data-a="ws-dmg">Dégâts</button><button class="btn sm" data-a="ws-heal">Soins</button></div>
-  ${S.wsDice ? `<div class="muted" style="font-size:13px">Lance <b>${S.wsDice}</b>, tape le résultat puis « Soins ».</div>` : ""}${wsConcHTML(g)}`}
+  <div class="wsdmg"><label for="ws-n">PV</label><input id="ws-n" type="number" inputmode="numeric" min="0" placeholder="${S.wsDice ? S.wsDice : "0"}"><button class="btn cast-go sm" data-a="ws-dmg">Dégâts</button><button class="btn sm" data-a="ws-heal">Soins</button></div>
+  ${S.wsDice ? `<div class="muted" style="font-size:13px">Lance <b>${S.wsDice}</b>, tape le résultat puis « Soins ».</div>` : ""}${wsConcHTML(g)}
   ${shut ? "" : `${g.level >= 6 ? `<div class="wsprimal"><span class="kp f">Frappe primitive</span> Tes attaques de bête comptent comme magiques (résistances et immunités aux attaques non magiques).</div>` : ""}${beastCard(g, b)}
-  ${ro ? "" : `<div class="wscf"><span class="lusub">Changeforme de combat · action bonus</span>
+  <div class="wscf"><span class="lusub">Changeforme de combat · action bonus</span>
     ${slots.length ? `<div class="cast"><button class="btn cast-go" data-a="ws-cf" data-l="${slots[0][0]}">Soin · niv. ${slots[0][0]} = ${slots[0][0]}d8 PV</button>${R.slots(g).length > 1 ? `<button class="btn cast-up" data-a="cast-open" data-id="ws-cf" aria-label="Se soigner avec un emplacement plus élevé" aria-expanded="${S.castOpen === "ws-cf"}">▲</button>` : ""}</div>
     ${S.castOpen === "ws-cf" ? `<div class="chooser"><span class="lbl">Dépenser un emplacement de</span><div class="lvls">${R.slots(g).map((n, i) => { const lv = i + 1, left = slotsLeft(g, lv);
       return `<button class="btn" data-a="ws-cf" data-l="${lv}"${left ? "" : " disabled"}><b>Niveau ${lv} · ${lv}d8</b><small>${left ? `${left} restant${left > 1 ? "s" : ""}` : "épuisé"}</small></button>`; }).join("")}</div><div class="hint">1d8 PV par niveau d'emplacement.</div><button class="btn ghost" data-a="cast-close" style="justify-self:start">Fermer</button></div>` : ""}`
     : `<span class="muted" style="font-size:13px">Plus d'emplacement pour te soigner.</span>`}</div>
-  <div class="cast"><button class="btn sm" data-a="ws-end">Reprendre ma forme</button><button class="btn ghost sm" data-a="ws-open">Changer de forme</button></div>`}
+  <div class="cast"><button class="btn sm" data-a="ws-end">Reprendre ma forme</button><button class="btn ghost sm" data-a="ws-open">Changer de forme</button></div>
   <p class="muted" style="font-size:12.5px;margin:0">À 0 PV, tu reprends ta forme et l'excédent de dégâts passe sur tes PV. ${g.level >= 18 ? "Sorts bestiaux : tu peux lancer tes sorts à composantes verbales et somatiques (pas de composante matérielle)" : "Pas de sort dans cette forme"} ; la concentration continue.</p>`}</section>`;
 }
 // ---------- Paladin et druide : préparation (Gérer) ----------
@@ -523,18 +520,17 @@ function smiteHTML(g) {
   const ud = !!S.smiteUndead;
   return `<div class="smite"><div class="sh"><b>Châtiment divin</b><span class="muted">après un coup au corps à corps · radiant</span></div>
   <div class="sb">${slots.map((n, i) => { const lv = i + 1, left = slotsLeft(g, lv), d = PAL.smite(lv) + (ud ? 1 : 0);
-    return `<button class="btn cast-go" data-a="smite" data-l="${lv}"${left && !S.readonly ? "" : " disabled"}><b>Niv. ${lv} · ${d}d8</b><small>${left ? `${left} restant${left > 1 ? "s" : ""}` : "épuisé"}</small></button>`; }).join("")}</div>
+    return `<button class="btn cast-go" data-a="smite" data-l="${lv}"${left ? "" : " disabled"}><b>Niv. ${lv} · ${d}d8</b><small>${left ? `${left} restant${left > 1 ? "s" : ""}` : "épuisé"}</small></button>`; }).join("")}</div>
   <label class="check"><input type="checkbox" data-a="smite-ud"${ud ? " checked" : ""}> Mort-vivant ou fiélon : +1d8 · critique : dés doublés</label></div>`;
 }
 function extrasNotesHTML(g) {
-  const ro = S.readonly ? " disabled" : "";
   let h = "";
   // Autres sorts
   h += foldHead("x", "", "Autres sorts", "race, dons, objets magiques", plural(g.extras.length, "sort"));
   if (!isFold("x")) { h += `<div class="extras">`;
   if (!g.extras.length) h += `<div class="empty">Rien pour l'instant. Exemple : « Représailles infernales », 1 fois par repos long (héritage tieffelin).</div>`;
   g.extras.forEach((x, i) => {
-    if (S.editX === i && !S.readonly) {
+    if (S.editX === i) {
       const d = S.xdraft || { name: x.name, note: x.note || "" };
       h += `<form class="extra edit" data-a="editx" data-i="${i}">
       <div class="fields"><div class="field"><label for="x-ename">Nom</label><input type="text" id="x-ename" value="${esc(d.name)}" required></div>
@@ -544,13 +540,12 @@ function extrasNotesHTML(g) {
     }
     h += extraRow(x, i, true);
   });
-  h += `</div>${S.readonly ? "" : `<form class="addrow" data-a="addx"><input type="text" id="x-name" placeholder="Nom du sort" required aria-label="Nom du sort"><input type="text" id="x-note" placeholder="Usage et effet (ex. 1/repos long, 3d10 feu)" aria-label="Usage et effet"><button class="btn" type="submit">Ajouter</button></form>`}`; }
+  h += `</div><form class="addrow" data-a="addx"><input type="text" id="x-name" placeholder="Nom du sort" required aria-label="Nom du sort"><input type="text" id="x-note" placeholder="Usage et effet (ex. 1/repos long, 3d10 feu)" aria-label="Usage et effet"><button class="btn" type="submit">Ajouter</button></form>`; }
 
-  h += `<div class="rubric"><h3>Notes</h3></div><textarea id="f-notes" placeholder="Grimoires trouvés, sorts à copier, idées…"${ro}>${esc(g.notes)}</textarea>`;
+  h += `<div class="rubric"><h3>Notes</h3></div><textarea id="f-notes" placeholder="Grimoires trouvés, sorts à copier, idées…">${esc(g.notes)}</textarea>`;
   return h;
 }
 function grimoireHTML(g) {
-  const ro = S.readonly ? " disabled" : "";
   const slots = R.slots(g), max = slots.length, pMax = R.prepMax(g);
   let h = `<div class="viewsw" role="group" aria-label="Affichage du grimoire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
   if (isDru(g) && g.wsForm) h += wsActiveHTML(g);
@@ -559,13 +554,13 @@ function grimoireHTML(g) {
   if (!slots.length) h += `<p class="muted" style="margin:0 0 6px">Pas encore d'emplacement : les sorts arrivent au niveau ${R.unlockAt(g, 1)}.</p>`;
   slots.forEach((n, i) => {
     const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0));
-    h += `<div class="slotrow"><span class="lv">Niveau ${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"${ro}></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
+    h += `<div class="slotrow"><span class="lv">Niveau ${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
   });
-  h += `<div class="restbar"><button class="btn" data-a="longrest"${ro}>Repos long</button>${isWiz(g) ? `<button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}"${ro}>Repos court ${S.shortOpen ? "▴" : "▾"}</button>
-    <label class="check"><input type="checkbox" data-a="arcane"${g.arcane ? " checked" : ""}${ro}> Restauration arcanique utilisée</label>
+  h += `<div class="restbar"><button class="btn" data-a="longrest">Repos long</button>${isWiz(g) ? `<button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}">Repos court ${S.shortOpen ? "▴" : "▾"}</button>
+    <label class="check"><input type="checkbox" data-a="arcane"${g.arcane ? " checked" : ""}> Restauration arcanique utilisée</label>
     <span class="muted">Au repos court, 1 fois par jour : récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</span>`
-    : `<button class="btn" data-a="short-pal"${ro}>Repos court</button><span class="muted">Repos court : ${isDru(g) ? "Forme sauvage" : "Conduit divin"}. Repos long : tout.</span>`}</div></div>`;
-  if (S.shortOpen && !S.readonly && isWiz(g)) h += shortHTML(g);
+    : `<button class="btn" data-a="short-pal">Repos court</button><span class="muted">Repos court : ${isDru(g) ? "Forme sauvage" : "Conduit divin"}. Repos long : tout.</span>`}</div></div>`;
+  if (S.shortOpen && isWiz(g)) h += shortHTML(g);
   if (!isWiz(g)) { h += (isPal(g) ? palResHTML(g) : druResHTML(g)) + palFeatsHTML(g); return h + (S.view === "jeu" ? jeuHTML(g) : palGererHTML(g)); }
   if (S.view === "jeu") return h + jeuHTML(g);
 
@@ -603,7 +598,6 @@ function grimoireHTML(g) {
 // ---------- Notes personnelles par sort ----------
 const noteOf = (g, s) => (g.snotes && g.snotes[s.id]) || "";
 function notePen(g, s) {
-  if (S.readonly) return "";
   const has = !!noteOf(g, s), ed = S.noteEdit === s.id;
   return `<button class="npen${has ? " has" : ""}${ed ? " on" : ""}" data-a="note-edit" data-id="${s.id}" aria-label="${has ? "Modifier la note" : "Ajouter une note"} : ${esc(s.n)}" aria-expanded="${ed}">✎</button>`;
 }
@@ -622,9 +616,9 @@ const noteBox = (g, s) => `<div class="nbox">${esc(noteOf(g, s))}</div>`;
 
 // Mode Gérer : une ligne par sort (case Préparer, nom, pastilles clés), détail complet au toucher du nom
 function gererRow(g, s, x, locked, p, cantrip, oath) {
-  const open = S.open.has(s.id), ro = S.readonly ? " disabled" : "", wiz = isWiz(g);
+  const open = S.open.has(s.id), wiz = isWiz(g);
   const full = !p && !locked && g.prepared.length >= R.prepMax(g); // limite atteinte : on ne peut plus que décocher
-  const box = cantrip ? "" : oath ? `<span class="gstar" title="Sort de serment : toujours préparé, hors limite" aria-label="Sort de serment, toujours préparé">★</span>` : `<input type="checkbox" class="gprep${full ? " full" : ""}" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked || S.readonly ? " disabled" : full ? ' aria-disabled="true"' : ""}>`;
+  const box = cantrip ? "" : oath ? `<span class="gstar" title="Sort de serment : toujours préparé, hors limite" aria-label="Sort de serment, toujours préparé">★</span>` : `<input type="checkbox" class="gprep${full ? " full" : ""}" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked ? " disabled" : full ? ' aria-disabled="true"' : ""}>`;
   let body = "";
   if (open) {
     const origin = !wiz ? (oath ? `Sort de serment · ${esc(OATHS[g.oath].full)}` : cantrip ? "Sort mineur" : `Liste du ${C(g).n.toLowerCase()}`) : cantrip ? "Sort mineur" : x && x.how === "copie" ? `Copié · ${fmt(x.h)} h · ${fr(x.po)} po` : "Montée de niveau";
@@ -632,20 +626,19 @@ function gererRow(g, s, x, locked, p, cantrip, oath) {
     ${isDru(g) && !cantrip && s.ri && !p ? `<div class="meta">Rituel : prépare-le pour pouvoir le lancer en rituel (+10 min, sans emplacement).</div>` : ""}
     ${wiz && !cantrip && s.ri && !p ? `<div class="meta">Rituel : se lance depuis le grimoire sans être préparé (+10 min, sans emplacement).</div>` : ""}
     ${noteOf(g, s) && S.noteEdit !== s.id ? noteBox(g, s) : ""}
-    ${(!cantrip || s.c) && !locked && !S.readonly ? castHTML(g, s, p) : ""}
-    <div class="rowact"><span class="origin">${origin}</span>${wiz || cantrip ? removeBtn((cantrip ? "c:" : "s:") + s.id, ro) : ""}</div></div>`;
+    ${(!cantrip || s.c) && !locked ? castHTML(g, s, p) : ""}
+    <div class="rowact"><span class="origin">${origin}</span>${wiz || cantrip ? removeBtn((cantrip ? "c:" : "s:") + s.id) : ""}</div></div>`;
   }
   return `<div class="jrow${p ? (oath ? " on oath" : " on") : ""}"><div class="jline">${box}<div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${notePen(g, s)}</div>${noteGerer(g, s)}${body}${concWarnHTML(g, s)}</div>`;
 }
 // Autres sorts : une ligne (nom + « utilisé »), usage et actions au toucher du nom
 function extraRow(x, i, manage) {
-  const key = "x:" + i, open = S.open.has(key), ro = S.readonly ? " disabled" : "";
-  const body = open ? `<div class="jbody">${x.note ? `<div class="eff">${esc(x.note)}</div>` : `<div class="meta">Aucune description.${manage && !S.readonly ? " Utilise « Modifier » pour en ajouter une." : ""}</div>`}
-    ${manage && !S.readonly ? `<div class="rowact"><button class="btn ghost" data-a="xedit" data-i="${i}" aria-label="Modifier ${esc(x.name)}">Modifier</button>${removeBtn(key, ro)}</div>` : ""}</div>` : "";
-  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(x.name)}<span class="chev">${open ? "▴" : "▾"}</span></button></div><label class="check"><input type="checkbox" data-a="xused" data-i="${i}"${x.used ? " checked" : ""}${ro}> utilisé</label></div>${body}</div>`;
+  const key = "x:" + i, open = S.open.has(key);
+  const body = open ? `<div class="jbody">${x.note ? `<div class="eff">${esc(x.note)}</div>` : `<div class="meta">Aucune description.${manage ? " Utilise « Modifier » pour en ajouter une." : ""}</div>`}
+    ${manage ? `<div class="rowact"><button class="btn ghost" data-a="xedit" data-i="${i}" aria-label="Modifier ${esc(x.name)}">Modifier</button>${removeBtn(key)}</div>` : ""}</div>` : "";
+  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(x.name)}<span class="chev">${open ? "▴" : "▾"}</span></button></div><label class="check"><input type="checkbox" data-a="xused" data-i="${i}"${x.used ? " checked" : ""}> utilisé</label></div>${body}</div>`;
 }
-function removeBtn(key, ro) {
-  if (ro) return "";
+function removeBtn(key) {
   return S.confirm === key ? `<button class="btn confirm" data-a="rm" data-k="${esc(key)}">Retirer ?</button>` : `<button class="btn ghost" data-a="rm" data-k="${esc(key)}" aria-label="Retirer">Retirer</button>`;
 }
 
@@ -750,13 +743,13 @@ function keyPills(s, g) {
 function jeuRow(g, s, kind) {
   const open = S.open.has(s.id);
   let act = "";
-  if (!open && !S.readonly) {
+  if (!open) {
     if (kind === "prep") { const lv = firstFree(g, s); act = lv ? `<button class="btn cast-go sm" data-a="cast" data-id="${s.id}" data-l="${lv}">${lv === s.l ? "Lancer" : "Lancer · niv. " + lv}</button>` : `<button class="btn cast-none sm" disabled>Épuisé</button>`; }
     else if (kind === "rit") act = `<button class="btn cast-rit sm" data-a="cast-rit" data-id="${s.id}">Rituel</button>`;
     else if (kind === "cantrip" && s.c) act = `<button class="btn cast-go sm" data-a="cast" data-id="${s.id}" data-l="0">Lancer</button>`;
   }
   return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${noteMark(g, s)}${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${act}</div>
-  ${open ? `<div class="jbody">${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${noteOf(g, s) ? noteBox(g, s) : ""}${(kind !== "cantrip" || s.c) && !S.readonly ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
+  ${open ? `<div class="jbody">${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${noteOf(g, s) ? noteBox(g, s) : ""}${(kind !== "cantrip" || s.c) ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
 }
 function jeuHTML(g) {
   const prepared = new Set(g.prepared), max = R.maxLevel(g), slots = R.slots(g), ready = castable(g);
@@ -830,10 +823,9 @@ function libRow(g, s, owned, max, prefix) {
   ${open ? `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g, prefix)}<div class="rowact">${addBtns(g, s, owned, max)}</div></div>` : ""}</div>`;
 }
 function addBtns(g, s, owned, max) {
-  if (!isWiz(g) && s.l === 0) return owned.has(s.id) ? `<span class="origin">Déjà appris</span>` : S.readonly ? "" : `<button class="btn" data-a="add" data-id="${s.id}" data-how="mineur">Apprendre</button>`;
+  if (!isWiz(g) && s.l === 0) return owned.has(s.id) ? `<span class="origin">Déjà appris</span>` : `<button class="btn" data-a="add" data-id="${s.id}" data-how="mineur">Apprendre</button>`;
   if (!isWiz(g)) return s.l > max ? `<span class="origin">Niveau ${R.unlockAt(g, s.l)} requis</span>` : `<span class="origin">Liste du ${C(g).n.toLowerCase()}</span>`;
   if (owned.has(s.id)) return `<span class="origin">Déjà appris</span>`;
-  if (S.readonly) return "";
   if (s.l === 0) return `<button class="btn" data-a="add" data-id="${s.id}" data-how="mineur">Apprendre</button>`;
   if (s.l > max) return `<span class="origin">Niveau ${R.unlockAt(g, s.l)} requis</span>`;
   const c = R.copy(g, s);
@@ -870,12 +862,12 @@ function saveHTML(g) {
   return `<div class="rubric" style="margin-top:4px"><h2>Exporter</h2></div>
   <p style="max-width:65ch">Enregistre ${esc(g.name)} dans un fichier : c'est ta sauvegarde, et c'est ce fichier qu'on importe sur un autre appareil.${canShareFiles() ? " « Envoyer au MJ » ouvre le menu de partage du téléphone avec le fichier déjà joint : choisis la conversation de ton MJ." : ""}</p>
   <div class="frow">${canShareFiles() ? `<button class="btn primary" data-a="share-json">Envoyer au MJ</button><button class="btn" data-a="dl-json">Exporter (.json)</button>` : `<button class="btn primary" data-a="dl-json">Exporter ${esc(g.name)} (.json)</button>`}</div>
-  ${S.readonly ? "" : `<div class="rubric"><h3>Importer</h3></div>
+  <div class="rubric"><h3>Importer</h3></div>
   <p style="max-width:65ch">Ajoute un personnage à partir d'un fichier .json ou .txt exporté depuis l'atelier ; sa classe est reconnue d'elle-même. L'import crée un nouveau personnage : il ne remplace pas celui qui est affiché.</p>
   <div class="frow"><label class="btn" for="f-import">Choisir un fichier…</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden></div>
   <div class="rubric"><h3>Supprimer</h3></div>
   <p style="max-width:65ch">La suppression est définitive sur cet appareil. Exporte le grimoire avant si tu veux pouvoir le récupérer.</p>
-  ${S.confirm === "del" ? `<button class="btn confirm" data-a="del">Supprimer définitivement ${esc(g.name)} ?</button> <button class="btn ghost" data-a="cancel">Annuler</button>` : `<button class="btn" data-a="del">Supprimer ${isWiz(g) ? "ce grimoire" : "ce personnage"}</button>`}`}`;
+  ${S.confirm === "del" ? `<button class="btn confirm" data-a="del">Supprimer définitivement ${esc(g.name)} ?</button> <button class="btn ghost" data-a="cancel">Annuler</button>` : `<button class="btn" data-a="del">Supprimer ${isWiz(g) ? "ce grimoire" : "ce personnage"}</button>`}`;
 }
 
 // ---------- Fiche imprimable ----------
@@ -1154,7 +1146,7 @@ function toast(t, undo) {
   S.undo = undo || null; el.hidden = false; clearTimeout(toastT);
   toastT = setTimeout(() => { el.hidden = true; S.undo = null; }, undo ? 5000 : 2600);
 }
-function mutate(fn, rerender = true) { const g = G(); if (!g || S.readonly) return; fn(g); save(S.cur); if (rerender) render(); }
+function mutate(fn, rerender = true) { const g = G(); if (!g) return; fn(g); save(S.cur); if (rerender) render(); }
 // Nom des fichiers de sauvegarde, datés pour qu'ils se rangent d'eux-mêmes : « Grimoire - Némeia - 2026-10-19 »
 function backupName(g) {
   const d = new Date(), p = n => String(n).padStart(2, "0");
@@ -1194,11 +1186,11 @@ document.addEventListener("click", e => {
   if (["prep","arcane","xused","ftog","btog","lu-prep","lu-pprep","lu-cpick","smite-ud"].includes(a)) return; // gérés par "change"
   if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null;
   if (a === "tab") { S.tab = b.dataset.v; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); }
-  else if (a === "new") { if (S.readonly) return; S.newOpen = true; S.newCls = null; S.newName = ""; render(); }
+  else if (a === "new") { S.newOpen = true; S.newCls = null; S.newName = ""; render(); }
   else if (a === "nw-close") { S.newOpen = false; render(); }
   else if (a === "nw-cls") { S.newCls = b.dataset.v; render(); const el = document.getElementById("nw-name"); if (el) el.focus({ preventScroll: true }); }
   else if (a === "nw-go") {
-    if (S.readonly || !CLASSES[S.newCls]) return;
+    if (!CLASSES[S.newCls]) return;
     const g = blank((S.newName || "").trim(), S.newCls), id = newId(g.name);
     S.list[id] = g; S.newOpen = false; S.tab = "grimoire"; setCur(id); save(id); toast(`${esc(g.name)} créé`);
   }
@@ -1369,7 +1361,7 @@ document.addEventListener("click", e => {
     mutate(g => { delete g.snotes[id]; });
     toast("Note effacée", () => { mutate(g => { g.snotes[id] = old; }); return "Note rétablie"; });
   }
-  else if (a === "lu-open") { const g = G(); if (!g || g.level >= 20 || S.readonly) return; luOpen(g); render(); const x = document.querySelector("#lvlup .lufoot .primary"); if (x) x.focus({ preventScroll: true }); }
+  else if (a === "lu-open") { const g = G(); if (!g || g.level >= 20) return; luOpen(g); render(); const x = document.querySelector("#lvlup .lufoot .primary"); if (x) x.focus({ preventScroll: true }); }
   else if (a === "lu-close") { S.lu = null; render(); }
   else if (S.lu && a === "lu-next") { S.lu.step = Math.min(3, S.lu.step + 1); S.lu.open = null; render(); }
   else if (S.lu && a === "lu-back") { S.lu.step = Math.max(1, S.lu.step - 1); S.lu.open = null; render(); }

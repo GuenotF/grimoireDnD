@@ -6,7 +6,7 @@
     python3 tests/captures.py comparer /tmp/avant /tmp/apres
 
 34 écrans (magicien, paladin, druide, accueil ; thèmes clair et sombre), en page entière, comparés au pixel près.
-Une différence isolée en bas d'une page longue peut venir de la barre fixe pendant la capture : reprendre la capture.
+Pour comparer avec une version précédente sans la republier : GRIMOIRE_ROOT=/chemin/vers/une/copie python3 tests/captures.py prendre /tmp/avant
 """
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -18,9 +18,13 @@ def prendre(out):
     from playwright.sync_api import sync_playwright
     os.makedirs(out, exist_ok=True)
     srv, url = run.serve()
-    def full(a, name): a.pg.wait_for_timeout(150); a.pg.screenshot(path=f"{out}/{name}.png", full_page=True, animations="disabled")
+    def full(a, name):
+        a.pg.add_style_tag(content="#slotbar{position:absolute!important}")  # barre fixe : sinon sa place varie pendant la capture
+        a.pg.wait_for_timeout(150); a.pg.screenshot(path=f"{out}/{name}.png", full_page=True, animations="disabled")
     srv, url = run.serve()
-    def full(a, name): a.pg.wait_for_timeout(150); a.pg.screenshot(path=f"{out}/{name}.png", full_page=True, animations="disabled")
+    def full(a, name):
+        a.pg.add_style_tag(content="#slotbar{position:absolute!important}")  # barre fixe : sinon sa place varie pendant la capture
+        a.pg.wait_for_timeout(150); a.pg.screenshot(path=f"{out}/{name}.png", full_page=True, animations="disabled")
     with sync_playwright() as p:
         b = p.chromium.launch()
         for scheme in ["light", "dark"]:

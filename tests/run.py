@@ -10,6 +10,7 @@ Les tests ouvrent index.html (la version assemblée) dans un téléphone simulé
 import functools, http.server, importlib, os, socketserver, sys, threading, time, traceback
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.environ.get("GRIMOIRE_ROOT", ROOT)  # autre copie du dépôt à servir (ex. version précédente, pour les captures)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
