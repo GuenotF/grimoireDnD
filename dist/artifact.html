@@ -314,6 +314,13 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .resrow .rv { font-family: var(--f-display); font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .resrow .rv small { font-size: 14px; color: var(--muted); font-weight: 500; }
 .resrow.sep { border-top: 1px dashed var(--rule); padding-top: 8px; }
+.capname { background: transparent; border: 0; padding: 0; text-align: left; font-family: var(--f-display); font-weight: 700; font-size: 16.5px; color: var(--ink); }
+.capname .chev { font-family: var(--f-body); font-weight: 400; font-size: 12px; color: var(--muted); margin-left: 5px; }
+.capbody { display: grid; gap: 8px; padding: 2px 0 6px; }
+.capbody .eff { font-size: 14px; line-height: 1.4; }
+.capopt { display: grid; gap: 6px; border-left: 3px solid var(--pf-bd); padding-left: 10px; }
+.capopt + .capopt { border-left-color: var(--rubric); }
+.capopt > b { font-family: var(--f-display); font-size: 15.5px; }
 .slots.res .bar, .fxsheet .bar { height: 6px; border-radius: 3px; background: var(--sunk); overflow: hidden; }
 .slots.res .bar span, .fxsheet .bar span { display: block; height: 100%; background: var(--ok); border-radius: 3px; }
 .gstar { width: 20px; height: 20px; border-radius: 4px; background: var(--gold); color: var(--surface); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex: none; margin: 0 2px 0 0; }
@@ -452,7 +459,13 @@ const HALF = {1:[],2:[2],3:[3],4:[3],5:[4,2],6:[4,2],7:[4,3],8:[4,3],9:[4,3,2],1
   15:[4,3,3,2],16:[4,3,3,2],17:[4,3,3,3,1],18:[4,3,3,3,1],19:[4,3,3,3,2],20:[4,3,3,3,2]};
 // Serments du paladin : sorts toujours préparés, par niveau de paladin (Guide de Xanathar pour la Conquête)
 const OATHS = {
-  conquete: { n: "Conquête", full: "Serment de la conquête", sp: {3: ["armor-of-agathys", "command"], 5: ["hold-person", "spiritual-weapon"], 9: ["bestow-curse", "fear"], 13: ["dominate-beast", "stoneskin"], 17: ["cloudkill", "dominate-person"]} },
+  conquete: { n: "Conquête", full: "Serment de la conquête",
+    cd: [
+      { k: "presence", n: "Présence conquérante", fx: "1 minute", pills: g => [["f", "Effet", "Effrayée"], ["s", "Jet de la cible", `JdS SAG · DD ${8 + R.prof(g.level) + R.am(g)}`, "nouveau jet à chaque fin de tour"], ["n", "Zone", "9 m"], ["n", "Durée", "1 minute"]],
+        e: "Action. Chaque créature de ton choix à 9 m ou moins qui rate son jet est effrayée." },
+      { k: "guided", n: "Frappe guidée", btn: "Frappe guidée · +10", e: "+10 à un jet d'attaque, après avoir vu le d20 mais avant de savoir s'il touche." },
+    ],
+    sp: {3: ["armor-of-agathys", "command"], 5: ["hold-person", "spiritual-weapon"], 9: ["bestow-curse", "fear"], 13: ["dominate-beast", "stoneskin"], 17: ["cloudkill", "dominate-person"]} },
 };
 // Classes : caractéristique d'incantation, table d'emplacements, préparation, sous-classe
 const CLASSES = {
@@ -724,8 +737,8 @@ function palResHTML(g) {
   return `<div class="rubric"><h2>Ressources du paladin</h2></div><div class="slots res">
   <div class="resrow"><span class="rn"><b>Imposition des mains</b><small>réserve · repos long</small></span><span class="rv">${left}<small>/${pool}</small></span><button class="btn cast-go sm" data-a="loh-open"${ro || (left ? "" : " disabled")}>Soigner</button></div>
   <div class="bar"><span style="width:${pool ? Math.round(100 * left / pool) : 0}%"></span></div>
-  <div class="resrow sep"><span class="rn"><b>Perception divine</b><small>repos long</small></span><span class="pips">${pips("ds", ds, Math.min(ds, g.dsU), "Perception divine")}</span></div>
-  ${cd ? `<div class="resrow"><span class="rn"><b>Conduit divin</b><small>${g.oath === "conquete" ? "Présence conquérante ou Frappe guidée · " : ""}repos court</small></span><span class="pips">${pips("cd", cd, Math.min(cd, g.cdU), "Conduit divin")}</span></div>` : ""}
+  ${capRow(g, "ds", "Perception divine", "repos long", pips("ds", ds, Math.min(ds, g.dsU), "Perception divine"), true)}
+  ${cd ? capRow(g, "cd", "Conduit divin", "repos court", pips("cd", cd, Math.min(cd, g.cdU), "Conduit divin")) : ""}
   </div>`;
 }
 // Volet Imposition des mains
@@ -738,6 +751,24 @@ function lohHTML(g) {
   <div class="chips">${[5, 10].filter(v => v < left).map(v => `<button class="chip" data-a="loh-set" data-v="${v}">${v}</button>`).join("")}${left ? `<button class="chip" data-a="loh-set" data-v="${left}">Tout (${left})</button>` : ""}</div>
   <div class="lohcure"><span>Guérir une maladie ou neutraliser un poison</span><button class="btn" data-a="loh-cure"${left >= 5 ? "" : " disabled"}>−5 PV</button></div>
   <p class="help">Sans effet sur les morts-vivants et les artificiels. La réserve revient au repos long.</p>`;
+}
+// Capacité dépliable (Perception divine, Conduit divin) : cercles à droite, détail et boutons au toucher du nom
+const pillsRaw = list => `<div class="pills">${list.map(([k, l, v, sub]) => `<div class="pill ${k}"><span class="pl">${l}</span><span class="pv">${esc(v)}</span>${sub ? `<span class="ps">${esc(sub)}</span>` : ""}</div>`).join("")}</div>`;
+function capRow(g, r, name, rest, pipsHTML, sep) {
+  const key = "res:" + r, open = S.open.has(key), ro = !!S.readonly;
+  let body = "";
+  if (open && r === "ds") {
+    const left = PAL.ds(g) - Math.min(PAL.ds(g), g.dsU);
+    body = `${pillsRaw([["n", "Incantation", "1 action"], ["n", "Zone", "18 m"], ["n", "Durée", "jusqu'à ton prochain tour"]])}
+    <div class="eff">Tu sais où sont les célestes, fiélons et morts-vivants (leur type, pas leur identité) et les lieux ou objets consacrés ou profanés, hors abri total.</div>
+    ${ro ? "" : `<div class="cast"><button class="btn cast-go sm" data-a="ds-use"${left ? "" : " disabled"}>${left ? `Utiliser · ${left} restante${left > 1 ? "s" : ""}` : "Plus d'utilisation"}</button></div>`}`;
+  }
+  if (open && r === "cd") {
+    const o = OATHS[g.oath], left = PAL.cd(g) - Math.min(PAL.cd(g), g.cdU);
+    body = (o.cd || []).map(x => `<div class="capopt"><b>${x.n}</b>${x.pills ? pillsRaw(x.pills(g)) : ""}<div class="eff">${x.e}</div>${ro ? "" : `<div class="cast"><button class="btn cast-go sm" data-a="cd-use" data-v="${x.k}"${left ? "" : " disabled"}>${x.btn || x.n}</button></div>`}</div>`).join("")
+      + `<span class="muted" style="font-size:12.5px">${left ? "Une seule utilisation par repos : choisir l'une ou l'autre." : "Conduit divin utilisé : il revient au prochain repos court ou long."}</span>`;
+  }
+  return `<div class="resrow${sep ? " sep" : ""}"><span class="rn"><button class="capname" data-a="row" data-id="${key}" aria-expanded="${open}">${name}<span class="chev">${open ? "▴" : "▾"}</span></button><small>${rest}</small></span><span class="pips">${pipsHTML}</span></div>${body ? `<div class="capbody">${body}</div>` : ""}`;
 }
 // ---------- Paladin : préparation (Gérer) ----------
 function palGererHTML(g) {
@@ -1440,6 +1471,17 @@ document.addEventListener("click", e => {
   else if (a === "row") { const k = b.dataset.id; if (S.open.has(k)) S.open.delete(k); else S.open.add(k); S.castOpen = null; render(); }
   else if (a === "undo") { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } }
   else if (a === "res-pip") mutate(g => { const f = b.dataset.r === "ds" ? "dsU" : "cdU", k = +b.dataset.k, u = Math.min(g[f], b.dataset.r === "ds" ? PAL.ds(g) : PAL.cd(g)); g[f] = k < u ? k : k + 1; });
+  else if (a === "ds-use") {
+    const g = G(); if (!g || g.dsU >= PAL.ds(g)) return; const prev = g.dsU;
+    mutate(g => { g.dsU = prev + 1; });
+    toast(`<b>Perception divine</b> : célestes, fiélons et morts-vivants à 18 m · reste ${PAL.ds(g) - prev - 1}`, () => { mutate(g => { g.dsU = prev; }); return "Perception divine annulée"; });
+  }
+  else if (a === "cd-use") {
+    const g = G(); if (!g || g.cdU >= PAL.cd(g)) return; const x = (OATHS[g.oath].cd || []).find(o => o.k === b.dataset.v); if (!x) return;
+    const prev = JSON.parse(JSON.stringify({ cdU: g.cdU, effects: g.effects }));
+    mutate(g => { g.cdU += 1; if (x.fx) g.effects.push({ k: fxKey(), id: "cd-" + x.k, name: x.n, d: x.fx, c: false, note: "" }); });
+    toast(`<b>${x.n}</b> : Conduit divin utilisé${x.k === "guided" ? " · +10 au jet d'attaque" : ""}`, () => { mutate(g => { g.cdU = prev.cdU; g.effects = prev.effects; }); return "Conduit divin annulé"; });
+  }
   else if (a === "short-pal") { const g = G(); if (!g) return; const prev = g.cdU; mutate(g => { g.cdU = 0; }); toast("Repos court : Conduit divin récupéré", () => { mutate(g => { g.cdU = prev; }); return "Repos court annulé"; }); }
   else if (a === "loh-open") { const g = G(); if (!g) return; const left = PAL.loh(g) - g.loh; S.lohAmt = Math.min(5, left); S.lohOpen = true; render(); }
   else if (a === "loh-close") { S.lohOpen = false; render(); }
