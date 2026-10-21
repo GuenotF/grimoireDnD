@@ -444,6 +444,12 @@ body.lu-on { overflow: hidden; }
 .luadd > div { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--rule); }
 .luadd .n { flex: 1; font-family: var(--f-display); font-weight: 700; font-size: 16px; }
 .luadd small { color: var(--muted); font-size: 12.5px; }
+.luplist { display: grid; }
+.lurowp { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+.lurowp.on { background: linear-gradient(90deg, var(--rubric-soft), transparent 75%); }
+.lurowp input { width: 20px; height: 20px; accent-color: var(--rubric); flex: none; margin: 0; }
+.lurowp input.full { appearance: none; -webkit-appearance: none; box-sizing: border-box; border: 1.5px dashed var(--pn-bd); border-radius: 4px; background: var(--sunk); }
+.lurowp .n { flex: 1; min-width: 0; font-family: var(--f-display); font-weight: 700; font-size: 15.5px; }
 .linkbtn { background: transparent; border: 0; padding: 2px 0; color: var(--muted); text-decoration: underline; justify-self: start; font-size: 13.5px; }
 </style>
 
@@ -686,7 +692,7 @@ function heroHTML(g) {
   </div>
   <div class="setup">
     <div class="field"><label for="f-full">Nom complet</label><input id="f-full" type="text" value="${esc(g.name)}"${ro}></div>
-    <div class="field"><label for="f-level">Niveau de ${C(g).n.toLowerCase()}</label><div class="lvrow"><select id="f-level"${ro}>${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select>${g.level < 20 && !S.readonly && isWiz(g) ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}</div></div>
+    <div class="field"><label for="f-level">Niveau de ${C(g).n.toLowerCase()}</label><div class="lvrow"><select id="f-level"${ro}>${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select>${g.level < 20 && !S.readonly ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}</div></div>
     <div class="field"><label for="f-${C(g).ab}">${C(g).abN} (valeur)</label><input id="f-${C(g).ab}" data-ab="${C(g).ab}" type="number" min="1" max="30" value="${g[C(g).ab]}"${ro}></div>
     ${isWiz(g) ? `<div class="field"><label for="f-school">Tradition arcanique</label><select id="f-school"${ro}>${SCHOOLS.map(s=>`<option${s===g.school?" selected":""}>${s}</option>`).join("")}</select></div>`
       : `<div class="field"><label for="f-oath">Serment sacré</label><select id="f-oath"${ro}>${Object.entries(OATHS).map(([k, o]) => `<option value="${k}"${k === g.oath ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`}
@@ -1307,21 +1313,85 @@ function newHTML() {
 // ---------- Passage de niveau ----------
 // Assistant ouvert par le bouton « ↑ Niveau N » : ce qui change, sorts gratuits, validation.
 // Le sélecteur de niveau reste un réglage direct (création, correction), sans assistant.
-function luOpen(g) { S.lu = { step: 1, to: g.level + 1, picks: [], cpicks: [], prep: [], flt: R.maxLevel(g, g.level + 1), open: null }; S.concPanel = false; S.fxOpen = false; S.shortOpen = false; }
+function luOpen(g) { S.lu = isWiz(g) ? { step: 1, to: g.level + 1, picks: [], cpicks: [], prep: [], flt: R.maxLevel(g, g.level + 1), open: null }
+    : { step: 1, to: g.level + 1, style: g.style || "", prep: [...g.prepared], open: null }; S.concPanel = false; S.fxOpen = false; S.shortOpen = false; }
 const luNeed = (g, to) => ({ s: 2, c: Math.max(0, R.cantrips(g, to) - R.cantrips(g)) });
-const firstName = g => g.name.trim().split(/\s+/)[0] || g.name;
+const firstName = g => g.name.trim() || g.name; // nom complet (« Ser Kael », pas « Ser »)
 const plural = (n, w, ws) => `${n} ${n > 1 ? (ws || w + "s") : w}`;
 function luHTML(g) {
   const L = S.lu, to = L.to, b = { ...g, level: to }, step = L.step, fn = firstName(g);
-  const names = ["Ce qui change", "Sorts gratuits", "Valider"];
+  const wiz = isWiz(g), names = ["Ce qui change", wiz ? "Sorts gratuits" : "Préparation", "Valider"];
   const head = `<div class="luhead"><div class="t"><h2><span class="initial">${esc(fn.charAt(0))}</span>${esc(fn.slice(1))} passe au niveau ${to}</h2><button class="x" data-a="lu-close" aria-label="Fermer l'assistant">✕</button></div>
   <div class="lusteps">${names.map((n, i) => `<div class="${i + 1 < step ? "done" : i + 1 === step ? "cur" : ""}"${i + 1 === step ? ' aria-current="step"' : ""}>${i + 1} · ${n}</div>`).join("")}</div></div>`;
-  const body = step === 1 ? luStep1(g, b) : step === 2 ? luStep2(g, b) : luStep3(g, b);
+  const body = !wiz ? (step === 1 ? palLu1(g, b) : step === 2 ? palLu2(g, b) : palLu3(g, b)) : step === 1 ? luStep1(g, b) : step === 2 ? luStep2(g, b) : luStep3(g, b);
   const need = luNeed(g, to);
-  const foot = step === 1 ? `<button class="btn" data-a="lu-close">Annuler</button><button class="btn primary" data-a="lu-next">${need.c ? "Choisir les sorts" : "Choisir les 2 sorts"} →</button>`
+  const foot = step === 1 ? `<button class="btn" data-a="lu-close">Annuler</button><button class="btn primary" data-a="lu-next">${!wiz ? "Préparation" : need.c ? "Choisir les sorts" : "Choisir les 2 sorts"} →</button>`
     : step === 2 ? `<button class="btn" data-a="lu-back">← Retour</button><button class="btn primary" data-a="lu-next">Suivant →</button>`
     : `<button class="btn" data-a="lu-back">← Retour</button><button class="btn primary" data-a="lu-go" style="font-weight:700">Passer au niveau ${to}</button>`;
   return `<div class="lubox">${head}<div class="lubody">${body}</div><div class="lufoot">${foot}</div></div>`;
+}
+// ---------- Passage de niveau du paladin ----------
+function palLu1(g, b) {
+  const from = g.level, to = b.level, a0 = R.slots(g, from), a1 = R.slots(g, to);
+  let h = "";
+  if (a1.length > a0.length) {
+    const lv = a1.length, n = a1[lv - 1], more = a0.map((x, i) => [i + 1, a1[i] - x]).filter(([, d]) => d > 0);
+    h += `<div class="lunew"><span class="k">Nouveau</span><b class="h">${lv === 1 ? "Premiers sorts de paladin" : `Sorts de niveau ${lv} accessibles`}</b><div class="sl"><b>Niveau ${lv}</b>${Array.from({ length: n }, () => `<span class="o"></span>`).join("")}<span>${plural(n, "emplacement")}</span>${more.map(([l, d]) => `<span class="muted">· niveau ${l} : ${a0[l - 1]} → ${a1[l - 1]}</span>`).join("")}</div></div>`;
+  } else {
+    const more = a1.map((n, i) => [i + 1, n - (a0[i] || 0)]).filter(([, d]) => d > 0);
+    if (more.length) h += `<div class="lunew"><span class="k">Nouveau</span><div class="sl">${more.map(([lv, d]) => `<span>+${d} emplacement${d > 1 ? "s" : ""} de niveau ${lv}</span>`).join(" · ")}</div></div>`;
+  }
+  const mod = R.am(g), row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
+  h += `<div class="lutab"><div class="hd"><span></span><span>Niv. ${from}</span><span></span><span>Niv. ${to}</span></div>
+  ${row("DD des sorts", 8 + R.prof(from) + mod, 8 + R.prof(to) + mod, "--ps-fg")}
+  ${row("Attaque de sort", signed(R.prof(from) + mod), signed(R.prof(to) + mod), "--pa-fg")}
+  ${row("Imposition des mains", PAL.loh(g) + " PV", PAL.loh(b) + " PV", "--ok")}
+  ${row("Sorts préparés", R.maxLevel(g) ? R.prepMax(g) : 0, R.maxLevel(b) ? R.prepMax(b) : 0)}
+  ${row("Perception divine", PAL.ds(g), PAL.ds(b))}
+  ${PAL.cd(b) ? row("Conduit divin", PAL.cd(g), PAL.cd(b)) : ""}</div>`;
+  const feats = PAL_FEATS.filter(f => f.lv === to && (!f.oath || f.oath === g.oath));
+  if (feats.length) h += `<div style="display:grid;gap:6px"><span class="lusub">Nouvelle capacité</span>${feats.map(f => `<div class="lucan"><span class="n">${f.n}</span><span class="kp ${f.k}">${esc(f.pill(b))}</span></div>`).join("")}</div>`;
+  const newOath = oathSpells(b).filter(id => !oathSpells(g).includes(id));
+  if (newOath.length) h += `<div style="display:grid;gap:6px"><span class="lusub" style="color:var(--gold)">Nouveaux sorts de serment · toujours préparés</span>${newOath.map(id => BY_ID[id]).map(s => `<div class="lucan"><span style="color:var(--gold)">★</span><span class="n">${esc(s.n)}</span><span class="kps">${keyPills(s, b)}</span></div>`).join("")}</div>`;
+  const notes = [`<span>Hors appli, à vérifier sur ta fiche : points de vie (1d10 + mod. CON)${R.prof(to) > R.prof(from) ? ` et bonus de maîtrise (${signed(R.prof(to))}), qui monte aussi le toucher de tes armes` : ""}.</span>`];
+  if ([4, 8, 12, 16, 19].includes(to)) notes.unshift(`<span><b>Amélioration de caractéristiques</b> : si tu augmentes le Charisme, change sa valeur dans la fiche, le DD et l'attaque suivront.</span>`);
+  if (to === 3) notes.unshift(`<span><b>Serment sacré</b> : vérifie le serment choisi dans la fiche (${esc(OATHS[g.oath].n)}).</span>`);
+  return h + `<div class="lunote">${notes.join("")}</div>`;
+}
+function palLu2(g, b) {
+  const L = S.lu, max = R.maxLevel(b), pMax = max ? R.prepMax(b) : 0, oath = oathSpells(b);
+  let h = "";
+  if (!g.style && b.level >= 2) h += `<div class="luprep"><h3>Style de combat</h3><span class="muted">Pas encore choisi : c'est le moment.</span>
+    <div class="chips">${Object.entries(STYLES).map(([k, s]) => `<button class="chip" data-a="lu-style" data-v="${k}" aria-pressed="${L.style === k}">${s.n}</button>`).join("")}</div>
+    ${L.style ? `<span class="muted" style="font-size:13px">${esc(STYLES[L.style].n)} : ${esc(STYLES[L.style].d)}</span>` : ""}</div>`;
+  if (!max) return h + `<div class="empty">Le paladin prépare ses sorts à partir du niveau ${R.unlockAt(g, 1)}.</div>`;
+  const prep = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id)), full = prep.length >= pMax;
+  const box = (s, on) => `<label class="lurowp${on ? " on" : ""}"><input type="checkbox" data-a="lu-pprep" data-id="${s.id}"${on ? " checked" : ""}${!on && full ? ' class="full" aria-disabled="true"' : ""}><span class="n">${esc(s.n)}${tags(s)}</span><span class="kps">${keyPills(s, b)}</span></label>`;
+  h += `<div style="font-size:14px;line-height:1.4">Tes sorts préparés au niveau ${b.level} : <b>${pMax}</b> (sans compter le serment).${!R.maxLevel(g) ? ` Choisis-les dans la liste du niveau 1.` : R.maxLevel(g) < max ? ` Tu peux en remplacer un par un sort de niveau ${max}.` : ""} <span class="muted">En principe au repos long : vois avec ton MJ.</span></div>`;
+  // Liste stable : les sorts déjà préparés restent affichés, cochés ou non
+  const newLv = R.maxLevel(g) < max ? max : 0;
+  const base = [...new Set([...g.prepared, ...prep])].filter(id => BY_ID[id] && BY_ID[id].l <= max && BY_ID[id].l !== newLv && !oath.includes(id)).map(id => BY_ID[id]).sort((x, y) => x.l - y.l || byName(x, y));
+  h += `<div class="rubric"><h3>Préparés</h3><span class="aside"${prep.length > pMax ? ' style="color:var(--warn);font-weight:700;font-style:normal"' : ""}>${prep.length} / ${pMax}</span></div><div class="luplist">${base.map(s => box(s, prep.includes(s.id))).join("") || `<div class="empty">Aucun sort préparé pour l'instant${newLv === 1 ? " : choisis-les ci-dessous" : ""}.</div>`}</div>`;
+  if (newLv) {
+    const fresh = classSpells(b).filter(s => s.l === max && !oath.includes(s.id)).sort(byName);
+    h += `<div class="rubric"><h3>Niveau ${max} · nouveau</h3><span class="aside">${full ? "décoche un sort pour en ajouter" : "coche pour préparer"}</span></div><div class="luplist">${fresh.map(s => box(s, prep.includes(s.id))).join("")}</div>`;
+  }
+  return h;
+}
+function palLu3(g, b) {
+  const L = S.lu, max = R.maxLevel(b), oath = oathSpells(b), prep = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id));
+  const same = prep.length === g.prepared.length && prep.every(id => g.prepared.includes(id)), nOath = oath.length - oathSpells(g).length;
+  const a0 = R.slots(g), a1 = R.slots(b), gained = a1.map((n, i) => [i + 1, n - (a0[i] || 0)]).filter(([, d]) => d > 0);
+  return `<div style="display:grid;gap:6px"><span class="lusub">Récapitulatif</span><div class="luadd">
+    ${!g.style && b.level >= 2 ? `<div><span class="n">Style de combat</span><small>${L.style ? esc(STYLES[L.style].n) : "pas encore choisi"}</small></div>` : ""}
+    ${max ? `<div><span class="n">Sorts préparés</span><small>${prep.length} / ${R.prepMax(b)}${same ? " · inchangés" : ""}</small></div>` : ""}
+    ${nOath ? `<div><span class="n">Sorts de serment</span><small>+ ${nOath}</small></div>` : ""}</div>
+    <button class="linkbtn" data-a="lu-edit">Modifier</button></div>
+  <div style="display:grid;gap:4px;font-size:13.5px;color:var(--muted);line-height:1.45">
+    ${gained.length ? `<span>• ${cap(gained.map(([lv, d]) => `${d > 1 ? `les ${d} emplacements` : "le nouvel emplacement"} de niveau ${lv}`).join(" et "))} ${gained.length > 1 || gained[0][1] > 1 ? "sont disponibles" : "est disponible"} tout de suite.</span>` : ""}
+    <span>• La réserve d'Imposition des mains passe à ${PAL.loh(b)} PV.</span>
+    <span>• DD, attaque et capacités sont mis à jour partout.</span>
+    <span>• Tu peux revenir au niveau ${g.level} avec le sélecteur de niveau.</span></div>`;
 }
 function luStep1(g, b) {
   const from = g.level, to = b.level, a0 = R.slots(g, from), a1 = R.slots(g, to), mod = R.am(g);
@@ -1445,7 +1515,7 @@ async function offer(filename, data) {
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-a]"); if (!b || b.tagName === "FORM") return;
   const a = b.dataset.a;
-  if (["prep","arcane","xused","ftog","lu-prep","smite-ud"].includes(a)) return; // gérés par "change"
+  if (["prep","arcane","xused","ftog","lu-prep","lu-pprep","smite-ud"].includes(a)) return; // gérés par "change"
   if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null;
   if (a === "tab") { S.tab = b.dataset.v; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); }
   else if (a === "new") { if (S.readonly) return; S.newOpen = true; S.newCls = null; S.newName = ""; render(); }
@@ -1605,6 +1675,13 @@ document.addEventListener("click", e => {
     else if (L[k].length < lim) L[k].push(s.id);
     S.luKeep = true; render();
   }
+  else if (S.lu && a === "lu-style") { S.lu.style = b.dataset.v; S.luKeep = true; render(); }
+  else if (S.lu && a === "lu-go" && !isWiz(G())) {
+    const L = S.lu, g = G(), to = L.to, fn = firstName(g), max = R.maxLevel(g, to), oath = oathSpells({ ...g, level: to });
+    const prev = JSON.parse(JSON.stringify({ level: g.level, style: g.style, prepared: g.prepared })); S.lu = null;
+    mutate(g => { g.level = to; if (L.style) g.style = L.style; g.prepared = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id)); });
+    toast(`<b>${esc(fn)}</b> passe au niveau ${to}`, () => { mutate(g => Object.assign(g, prev)); return "Passage de niveau annulé"; });
+  }
   else if (S.lu && a === "lu-go") {
     const L = S.lu, g = G(); if (!g) return;
     const prev = JSON.parse(JSON.stringify({ level: g.level, spells: g.spells, cantrips: g.cantrips, prepared: g.prepared })), to = L.to, fn = firstName(g);
@@ -1633,6 +1710,12 @@ document.addEventListener("change", e => {
   if (a === "prep") return mutate(g => { const id = t.dataset.id; g.prepared = t.checked ? [...g.prepared, id] : g.prepared.filter(x => x !== id); });
   if (a === "arcane") return mutate(g => { g.arcane = t.checked; });
   if (a === "smite-ud") { S.smiteUndead = t.checked; render(); return; }
+  if (a === "lu-pprep" && S.lu) {
+    const id = t.dataset.id, g = G(), b = { ...g, level: S.lu.to }, oath = oathSpells(b), max = R.maxLevel(b);
+    const cur = S.lu.prep.filter(x => BY_ID[x] && BY_ID[x].l <= max && !oath.includes(x));
+    if (t.checked && cur.length >= R.prepMax(b)) { t.checked = false; toast(`Limite atteinte (${cur.length}/${R.prepMax(b)}) : décoche d'abord un sort`); return; }
+    S.lu.prep = t.checked ? [...cur, id] : cur.filter(x => x !== id); S.luKeep = true; render(); return;
+  }
   if (a === "lu-prep" && S.lu) { const id = t.dataset.id; S.lu.prep = t.checked ? [...S.lu.prep, id] : S.lu.prep.filter(x => x !== id); S.luKeep = true; render(); return; }
   if (t.classList.contains("fxnote")) return mutate(g => { const e = g.effects.find(e => e.k === t.dataset.k); if (e) e.note = t.value.trim(); }, false);
   if (a === "xused") return mutate(g => { g.extras[+t.dataset.i].used = t.checked; });
