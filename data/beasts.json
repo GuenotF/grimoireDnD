@@ -1,84 +1,3098 @@
 [
-{"id": "aigle", "n": "Aigle", "sz": "P", "fp": "0", "fpn": 0, "ca": 12, "can": "", "pv": 3, "pvd": "1d6", "v": {"marche": "3", "vol": "18"}, "st": [6, 15, 10], "sens": "Perception passive 14", "tr": [["Vue aiguisée", "L'aigle a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."]], "ac": [{"n": "Serres", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d4 + 2) dégâts tranchants.", "b": 4, "d": "1d4 + 2 tranchant"}]},
-{"id": "araignee", "n": "Araignée", "sz": "TP", "fp": "0", "fpn": 0, "ca": 12, "can": "", "pv": 1, "pvd": "1d4 - 1", "v": {"marche": "6", "escalade": "6"}, "st": [2, 14, 8], "sens": "vision dans le noir 9 m, Perception passive 10", "tr": [["Pattes d'araignée", "L'araignée peut escalader des surfaces difficiles et 6tre au plafond la tête en bas sans avoir besoin d'effectuer un jet de caractéristique."], ["Sens de la toile", "Lorsqu'elle est en contact avec une toile, l'araignée connait l'emplacement exact de toutes les créatures qui sont en contact avec cette toile."], ["Déplacement sur la toile", "L'araignée ignore les restrictions de mouvement causées par une toile d'araignée."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 1 dégât perforant et la cible doit réussir un jet de sauvegarde de Constitution DD 9 ou subir 2 (1d4) dégâts de poison.", "b": 4, "d": "1 perforant"}]},
-{"id": "babouin", "n": "Babouin", "sz": "P", "fp": "0", "fpn": 0, "ca": 12, "can": "", "pv": 3, "pvd": "1d6", "v": {"marche": "9", "escalade": "9"}, "st": [8, 14, 11], "sens": "Perception passive 11", "tr": [["Tactique de groupe", "Le babouin a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +1 au toucher, allonge 1,5 m, une cible. Touché : 1 (1d4 — 1) dégâts perforants.", "b": 1, "d": "1d4—1 perforant"}]},
-{"id": "belette", "n": "Belette", "sz": "TP", "fp": "0", "fpn": 0, "ca": 13, "can": "", "pv": 1, "pvd": "1d4 - 1", "v": {"marche": "9"}, "st": [3, 16, 8], "sens": "Perception passive 13", "tr": [["Odorat et ouïe aiguisés", "La belette a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou l'ouïe."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.", "b": 5, "d": "1 perforant"}]},
-{"id": "blaireau", "n": "Blaireau", "sz": "TP", "fp": "0", "fpn": 0, "ca": 10, "can": "", "pv": 3, "pvd": "1d4 + 1", "v": {"marche": "50"}, "st": [4, 11, 12], "sens": "vision dans le noir 9 m, Perception passive 11", "tr": [["Odorat aiguisé", "Le blaireau a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.", "b": 2, "d": "1 perforant"}]},
-{"id": "cerf", "n": "Cerf", "sz": "M", "fp": "0", "fpn": 0, "ca": 13, "can": "", "pv": 4, "pvd": "18", "v": {"marche": "15"}, "st": [11, 16, 11], "sens": "Perception passive 12", "tr": [], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une cible. Touché : 2 (1d4) dégâts perforants.", "b": 2, "d": "1d4 perforant"}]},
-{"id": "chacal", "n": "Chacal", "sz": "P", "fp": "0", "fpn": 0, "ca": 12, "can": "", "pv": 3, "pvd": "1d6", "v": {"marche": "12"}, "st": [8, 15, 11], "sens": "Perception passive 13", "tr": [["Odorat et ouïe aiguisés", "Le chacal a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou louïe."], ["Tactique de groupe", "Le chacal a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +1 au toucher, allonge 1,5 m, une cible. Touché : 1 (1d4 - 1) dégâts perforants.", "b": 1, "d": "1d4 − 1 perforant"}]},
-{"id": "chat", "n": "Chat", "sz": "TP", "fp": "0", "fpn": 0, "ca": 12, "can": "", "pv": 2, "pvd": "1d4", "v": {"marche": "12", "escalade": "9"}, "st": [3, 15, 10], "sens": "Perception passive 13", "tr": [["Odorat aiguisé", "Le chat a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."]], "ac": [{"n": "Griffes", "t": "Attaque au corps à corps avec une arme : +0 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât tranchant.", "b": 0, "d": "1 tranchant"}]},
-{"id": "chauve-souris", "n": "Chauve-souris", "sz": "TP", "fp": "0", "fpn": 0, "ca": 12, "can": "", "pv": 1, "pvd": "1d4 - 1", "v": {"marche": "50", "vol": "9"}, "st": [2, 15, 8], "sens": "vision aveugle 18 m, Perception passive 11", "tr": [["Echolocalisation", "La chauve-souris ne peut utiliser sa vision aveugle quand elle est assourdie."], ["Ouie aiguisée", "La chauve-souris a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +0 au toucher, allonge 1,5 m, une créature. Touché : 1 dégât perforant.", "b": 0, "d": "1 perforant"}]},
-{"id": "chouette", "n": "Chouette", "sz": "TP", "fp": "0", "fpn": 0, "ca": 11, "can": "", "pv": 1, "pvd": "1d4 - 1", "v": {"marche": "50", "vol": "18"}, "st": [3, 13, 2], "sens": "vision dans le noir 36 m, Perception passive 13", "tr": [["Repli aérien", "La chouette ne provoque pas d'attaques d'opportunité lorsqu'elle quitte l'allonge d'un ennemi en volant."], ["Ouie et vue aiguisées", "La chouette a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe ou a la vue."]], "ac": [{"n": "Serres", "t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât tranchant.", "b": 3, "d": "1 tranchant"}]},
-{"id": "chevre", "n": "Chèvre", "sz": "M", "fp": "0", "fpn": 0, "ca": 10, "can": "", "pv": 4, "pvd": "1d8", "v": {"marche": "12"}, "st": [12, 10, 11], "sens": "Perception passive 10", "tr": [["Charge", "Si la chévre se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 2 (1d4) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 10 ou tomber a terre."], ["Stable", "La chévre a un avantage aux jets de sauvegarde de Force et de Dextérité contre les effets susceptibles de la faire tomber a terre."]], "ac": [{"n": "Coup de tête", "t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 3 (1d4 + 1) dégâts contondants.", "b": 3, "d": "1d4 + 1 contondant"}]},
-{"id": "corbeau", "n": "Corbeau", "sz": "TP", "fp": "0", "fpn": 0, "ca": 12, "can": "", "pv": 1, "pvd": "1d4 - 1", "v": {"marche": "3", "vol": "15"}, "st": [2, 14, 8], "sens": "Perception passive 13", "tr": [["Imitation", "Le corbeau peut imiter des sons simples qu'il a entendus, comme le chuchotement d'une personne, un bébé qui pleure ou un petit cri animal. Une créature qui entend les sons peut se rendre compte qu'il s‘agit d'imitations si elle réussit un jet de Sagesse (Intuition) DD 10."]], "ac": [{"n": "Bec", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.", "b": 4, "d": "1 perforant"}]},
-{"id": "crabe", "n": "Crabe", "sz": "TP", "fp": "0", "fpn": 0, "ca": 11, "can": "armure naturelle", "pv": 2, "pvd": "1d4", "v": {"marche": "6", "nage": "6"}, "st": [2, 11, 10], "sens": "vision aveugle 9 m, Perception passive 9", "tr": [["Amphibien", "Le crabe peut respirer aussi bien dans lair que sous l'eau."]], "ac": [{"n": "Pinces", "t": "Attaque au corps à corps avec une arme : +0 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât contondant.", "b": 0, "d": "1 contondant"}]},
-{"id": "faucon", "n": "Faucon", "sz": "TP", "fp": "0", "fpn": 0, "ca": 13, "can": "", "pv": 1, "pvd": "1d4 - 1", "v": {"marche": "3", "vol": "18"}, "st": [5, 16, 8], "sens": "Perception passive 14", "tr": [["Vue aiguisée", "Le faucon a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."]], "ac": [{"n": "Serres", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât tranchant.", "b": 5, "d": "1 tranchant"}]},
-{"id": "grenouille", "n": "Grenouille", "sz": "TP", "fp": "0", "fpn": 0, "ca": 11, "can": "", "pv": 1, "pvd": "1d4 - 1", "v": {"marche": "6", "nage": "6"}, "st": [1, 13, 8], "sens": "vision dans le noir 9 m, Perception passive 11", "tr": [["Amphibien", "La grenouille peut respirer aussi bien dans lair que sous l'eau."], ["Saut sans élan", "La grenouille peut sauter en longueur jusqu'a 3 m ou en hauteur jusqu'a 1,5 m, avec ou sans élan. _ ep Une grenouille n'a pas d'attaque efficace. Elle se nourrit de petits insectes et reste en général prés de l'eau, des arbres, ou sous terre."]], "ac": []},
-{"id": "hippocampe", "n": "Hippocampe", "sz": "TP", "fp": "0", "fpn": 0, "ca": 11, "can": "", "pv": 1, "pvd": "1d4 - 1", "v": {"marche": "0", "nage": "6"}, "st": [1, 12, 8], "sens": "Perception passive 10", "tr": [["Respiration aquatique", "L'hippocampe ne peut respirer que sous l'eau. asVsSIOOoO,yr.,"]], "ac": []},
-{"id": "hyene", "n": "Hyène", "sz": "M", "fp": "0", "fpn": 0, "ca": 11, "can": "", "pv": 5, "pvd": "1d8 + 1", "v": {"marche": "15"}, "st": [11, 13, 12], "sens": "Perception passive 13", "tr": [["Tactique de groupe", "La hyéne a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une cible. Touché : 3 (1d6) dégâts perforants.", "b": 2, "d": "1d6 perforant"}]},
-{"id": "lezard", "n": "Lézard", "sz": "TP", "fp": "0", "fpn": 0, "ca": 10, "can": "", "pv": 2, "pvd": "1d4", "v": {"marche": "6", "escalade": "6"}, "st": [2, 11, 10], "sens": "vision dans le noir 9 m, Perception passive 9", "tr": [], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +0 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.", "b": 0, "d": "1 perforant"}]},
-{"id": "pieuvre", "n": "Pieuvre", "sz": "P", "fp": "0", "fpn": 0, "ca": 12, "can": "", "pv": 3, "pvd": "1d6", "v": {"marche": "50", "nage": "9"}, "st": [4, 15, 11], "sens": "vision dans le noir 9 m, Perception passive 12", "tr": [["Apnée", "La pieuvre peut retenir son souffle durant 30 minutes hors de l'eau."], ["Camouflage dans l'eau", "La pieuvre a un avantage aux jets de Dextérité (Discrétion) réalisés lorsqu'elle se trouve sous l'eau."], ["Respiration aquatique", "La pieuvre ne peut respirer que sous l'eau."]], "ac": [{"n": "Tentacules", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât contondant et la cible est agrippée (évasion DD 10). Tant qu'elle reste agrippée, la pieuvre ne peut utiliser ses tentacules contre une autre cible.", "b": 4, "d": "1 contondant"}]},
-{"id": "piranha", "n": "Piranha", "sz": "TP", "fp": "0", "fpn": 0, "ca": 13, "can": "", "pv": 1, "pvd": "1d4 - 1", "v": {"marche": "0", "nage": "12"}, "st": [2, 16, 9], "sens": "vision dans le noir 18 m, Perception passive 8", "tr": [["Frénésie sanguinaire", "Le piranha a un avantage aux jets d'attaque au corps à corps contre une créature qui n'a pas tous ses points de vie."], ["Respiration aquatique", "Le piranha ne peut respirer que sous l'eau."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.", "b": 5, "d": "1 perforant"}]},
-{"id": "rat", "n": "Rat", "sz": "TP", "fp": "0", "fpn": 0, "ca": 10, "can": "", "pv": 1, "pvd": "1d4 - 1", "v": {"marche": "6"}, "st": [2, 11, 9], "sens": "vision dans le noir 9 m, Perception passive 10", "tr": [["Odorat aiguisé", "Le rat a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +0 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.", "b": 0, "d": "1 perforant"}]},
-{"id": "scarabee-de-feu-geant", "n": "Scarabée de feu géant", "sz": "P", "fp": "0", "fpn": 0, "ca": 13, "can": "armure naturelle", "pv": 4, "pvd": "1d6 + 1", "v": {"marche": "9"}, "st": [8, 10, 12], "sens": "vision aveugle 9 m, Perception passive 8", "tr": [["Illumination", "Le scarabée émet une lumiére vive dans un rayon de 3 m et une lumiére faible sur 3 m supplémentaires."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +1 au toucher, allonge 1,5 m, une cible. Touché : 2 (1d6 - 1) dégâts tranchants.", "b": 1, "d": "1d6 − 1 tranchant"}]},
-{"id": "scorpion", "n": "Scorpion", "sz": "TP", "fp": "0", "fpn": 0, "ca": 11, "can": "armure naturelle", "pv": 1, "pvd": "1d4 - 1", "v": {"marche": "3"}, "st": [2, 11, 8], "sens": "vision aveugle 3 m, Perception passive 9", "tr": [], "ac": [{"n": "Dard", "t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une créature. Touché : 1 dégât perforant et la cible doit réaliser un jet de sauvegarde de Constitution DD 9, subissant 4 (1d8) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite.", "b": 2, "d": "1 perforant"}]},
-{"id": "vautour", "n": "Vautour", "sz": "M", "fp": "0", "fpn": 0, "ca": 10, "can": "", "pv": 5, "pvd": "1d8 + 1", "v": {"marche": "3", "vol": "15"}, "st": [7, 10, 13], "sens": "Perception passive 13", "tr": [["Odorat et vue aiguisés", "Le vautour a un avantage aux jets de Sagesse (Perception) basés sur la vue ou l'odorat."], ["Tactique de groupe", "Le vautour a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."]], "ac": [{"n": "Bec", "t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une cible. Touché : 2 (1d4) dégâts perforants.", "b": 2, "d": "1d4 perforant"}]},
-{"id": "belette-geante", "n": "Belette géante", "sz": "M", "fp": "1/8", "fpn": 0.125, "ca": 13, "can": "", "pv": 9, "pvd": "2d8", "v": {"marche": "12"}, "st": [11, 16, 10], "sens": "vision dans le noir 18 m, Perception passive 13", "tr": [["Odorat et ouïe aiguisés", "La belette a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou louïe."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 5 (1d4 + 3) dégâts perforants.", "b": 5, "d": "1d4 + 3 perforant"}]},
-{"id": "chameau", "n": "Chameau", "sz": "G", "fp": "1/8", "fpn": 0.125, "ca": 9, "can": "", "pv": 15, "pvd": "2d10 + 4", "v": {"marche": "15"}, "st": [16, 8, 14], "sens": "Perception passive 9", "tr": [], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 2 (1d4) dégâts contondants.", "b": 5, "d": "1d4 contondant"}]},
-{"id": "crabe-geant", "n": "Crabe géant", "sz": "M", "fp": "1/8", "fpn": 0.125, "ca": 15, "can": "armure naturelle", "pv": 13, "pvd": "3d8", "v": {"marche": "9", "nage": "9"}, "st": [13, 15, 11], "sens": "vision aveugle 9 m, Perception passive 9", "tr": [["Amphibien", "Le crabe peut respirer aussi bien dans l'air que sous l'eau."]], "ac": [{"n": "Pinces", "t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts contondants, et la cible est agrippée (DD 11 pour s'échapper). Le crabe a deux pinces, chacune lui permettant d'agripper une cible.", "b": 3, "d": "1d6 + 1 contondant"}]},
-{"id": "faucon-de-sang", "n": "Faucon de sang", "sz": "P", "fp": "1/8", "fpn": 0.125, "ca": 12, "can": "", "pv": 7, "pvd": "2d6", "v": {"marche": "3", "vol": "18"}, "st": [6, 14, 10], "sens": "Perception passive 14", "tr": [["Tactique de groupe", "Le faucon a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est & 1,5 m ou moins de la créature et n'est pas incapable d'agir."], ["Vue aiguisée", "Le faucon a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."]], "ac": [{"n": "Bec", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d4 + 2) dégâts perforants. i 1 Tenant son nom de ses plumes pourpres et de sa nature agressive, le faucon de sang attaque sans crainte avec son bec aiguisé telle une dague.", "b": 4, "d": "1d4 + 2 perforant"}]},
-{"id": "molosse", "n": "Molosse", "sz": "M", "fp": "1/8", "fpn": 0.125, "ca": 12, "can": "", "pv": 5, "pvd": "1d8 + 1", "v": {"marche": "12"}, "st": [13, 14, 12], "sens": "Perception passive 13", "tr": [["Odorat et ouïe aiguisés", "Le molosse a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou l'ouïe."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 pour ne pas tomber a terre.", "b": 3, "d": "1d6 + 1 perforant"}]},
-{"id": "mule", "n": "Mule", "sz": "M", "fp": "1/8", "fpn": 0.125, "ca": 10, "can": "", "pv": 11, "pvd": "2d8 + 2", "v": {"marche": "12"}, "st": [14, 10, 13], "sens": "Perception passive 10", "tr": [["Bête de somme", "La mule est considérée comme un animal de taille G pour déterminer sa capacité de charge."], ["Pied sar", "La mule a un avantage aux jets de sauvegarde de Force et Dextérité effectués pour ne pas tomber a terre."]], "ac": [{"n": "Sabots", "t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d4 + 2) dégâts contondants.", "b": 2, "d": "1d4 + 2 contondant"}]},
-{"id": "poney", "n": "Poney", "sz": "M", "fp": "1/8", "fpn": 0.125, "ca": 10, "can": "", "pv": 11, "pvd": "2d8 + 2", "v": {"marche": "12"}, "st": [15, 10, 13], "sens": "Perception passive 10", "tr": [], "ac": [{"n": "Sabots", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (2d4 + 2) dégâts contondants.", "b": 4, "d": "2d4 + 2 contondant"}]},
-{"id": "rat-geant", "n": "Rat géant", "sz": "P", "fp": "1/8", "fpn": 0.125, "ca": 12, "can": "", "pv": 7, "pvd": "2d6", "v": {"marche": "9"}, "st": [7, 15, 11], "sens": "vision dans le noir 18 m, Perception passive 10", "tr": [["Odorat aiguisé", "Le rat a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."], ["Tactique de groupe", "Le rat a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 m ou moins de la créature et n'est pas incapable d'agir."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d4 + 2) dégâts perforants.", "b": 4, "d": "1d4 + 2 perforant"}]},
-{"id": "serpent-venimeux", "n": "Serpent venimeux", "sz": "TP", "fp": "1/8", "fpn": 0.125, "ca": 13, "can": "", "pv": 2, "pvd": "14", "v": {"marche": "9", "nage": "9"}, "st": [2, 16, 11], "sens": "vision aveugle 3 m, Perception passive 10", "tr": [], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant et la cible doit réaliser un jet de sauvegarde de Constitution DD 10, subissant 5 (2d4) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite.", "b": 5, "d": "1 perforant"}]},
-{"id": "serpent-volant", "n": "Serpent volant", "sz": "TP", "fp": "1/8", "fpn": 0.125, "ca": 14, "can": "", "pv": 5, "pvd": "2d4", "v": {"marche": "9", "nage": "9", "vol": "18"}, "st": [4, 18, 11], "sens": "vision aveugle 3 m, Perception passive 11", "tr": [["Repli aérien", "Le serpent ne provoque pas d'attaques d'opportunité lorsqu'il quitte l'allonge d'un ennemi en volant."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant + 7 (3d4) dégâts de poison.", "b": 6, "d": "1 perforant"}]},
-{"id": "araignee-loup-geante", "n": "Araignée-loup géante", "sz": "M", "fp": "1/4", "fpn": 0.25, "ca": 13, "can": "", "pv": 11, "pvd": "2d8 + 2", "v": {"marche": "12", "escalade": "12"}, "st": [12, 16, 13], "sens": "vision aveugle 3 m, vision dans le noir 18 m, Perception", "tr": [["Déplacement sur la toile", "L'araignée ignore les restrictions de mouvement causées par une toile d'araignée."], ["Pattes d'araignée", "L'araignée peut escalader des surfaces difficiles et 6tre au plafond la tête en bas sans avoir besoin d'effectuer un jet de caractéristique."], ["Sens de la toile", "Lorsqu'elle est en contact avec une toile, l'araignée connait l'emplacement exact de toutes les créatures qui sont en contact avec cette toile."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une créature. Touché : 4 (1d6 + 1) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 7 (2d6) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére. [ 1", "b": 3, "d": "1d6 + 1 perforant"}]},
-{"id": "bec-de-hache", "n": "Bec de hache", "sz": "G", "fp": "1/4", "fpn": 0.25, "ca": 11, "can": "", "pv": 19, "pvd": "3d10 + 3", "v": {"marche": "15"}, "st": [4, 12, 12], "sens": "Perception passive 10", "tr": [], "ac": [{"n": "Bec", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d8 + 2) dégâts tranchants.", "b": 4, "d": "1d8 + 2 tranchant"}]},
-{"id": "blaireau-geant", "n": "Blaireau géant", "sz": "M", "fp": "1/4", "fpn": 0.25, "ca": 10, "can": "", "pv": 13, "pvd": "2d8 + 4", "v": {"marche": "9", "creusement": "3"}, "st": [13, 10, 15], "sens": "vision dans le noir 9 m, Perception passive 11", "tr": [["Odorat aiguisé", "Le blaireau a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."]], "ac": [{"n": "Attaques multiples", "t": "Le blaireau réalise deux attaques : une avec ses griffes et une de morsure."}, {"n": "Griffes", "t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 6 (2d4 + 1) dégâts tranchants.", "b": 3, "d": "2d4 + 1 tranchant"}, {"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts perforants.", "b": 3, "d": "1d6 + 1 perforant"}]},
-{"id": "chauve-souris-geante", "n": "Chauve-souris géante", "sz": "G", "fp": "1/4", "fpn": 0.25, "ca": 13, "can": "", "pv": 22, "pvd": "4d10", "v": {"marche": "3", "vol": "18"}, "st": [15, 16, 11], "sens": "vision aveugle 18 m, Perception passive 11", "tr": [["Echolocalisation", "La chauve-souris ne peut utiliser sa vision aveugle quand elle est assourdie."], ["Ouie aiguisée", "La chauve-souris a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 5 (1d6 + 2) dégâts perforants.", "b": 4, "d": "1d6 + 2 perforant"}]},
-{"id": "cheval-de-selle", "n": "Cheval de selle", "sz": "G", "fp": "1/4", "fpn": 0.25, "ca": 10, "can": "", "pv": 13, "pvd": "2d10 + 2", "v": {"marche": "18"}, "st": [16, 10, 12], "sens": "Perception passive 10", "tr": [], "ac": [{"n": "Sabots", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 8 (2d4 + 3) dégâts contondants.", "b": 5, "d": "2d4 + 3 contondant"}]},
-{"id": "cheval-de-trait", "n": "Cheval de trait", "sz": "G", "fp": "1/4", "fpn": 0.25, "ca": 10, "can": "", "pv": 19, "pvd": "3d10 + 3", "v": {"marche": "12"}, "st": [18, 10, 12], "sens": "Perception passive 10", "tr": [], "ac": [{"n": "Sabots", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 9 (2d4 + 4) dégâts contondants.", "b": 6, "d": "2d4 + 4 contondant"}]},
-{"id": "chouette-geante", "n": "Chouette géante", "sz": "G", "fp": "1/4", "fpn": 0.25, "ca": 12, "can": "", "pv": 19, "pvd": "3d10 + 3", "v": {"marche": "50", "vol": "18"}, "st": [13, 15, 12], "sens": "vision dans le noir 36 m, Perception passive 15", "tr": [["Repli aérien", "La chouette ne provoque pas d'attaques d'opportunité lorsqu'elle quitte l'allonge d'un ennemi en volant."], ["Ouie et vue aiguisées", "La chouette a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe ou a la vue."]], "ac": [{"n": "Serres", "t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 8 (2d6 + 1) dégâts tranchants.", "b": 3, "d": "2d6 + 1 tranchant"}]},
-{"id": "grenouille-geante", "n": "Grenouille géante", "sz": "M", "fp": "1/4", "fpn": 0.25, "ca": 11, "can": "", "pv": 18, "pvd": "4d8", "v": {"marche": "9", "nage": "9"}, "st": [12, 13, 11], "sens": "vision dans le noir 9 m, Perception passive 12", "tr": [["Amphibien", "La grenouille peut respirer aussi bien dans lair que sous l'eau."], ["Saut sans élan", "La grenouille peut sauter en longueur jusqu'a 6 m ou en hauteur jusqu'a 3 m, avec ou sans élan."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts perforants, et la cible est agrippée (DD 11 pour s'échapper). Tant qu'elle est agrippée, la cible est entravée, et la grenouille ne peut pas mordre une autre cible.", "b": 3, "d": "1d6 + 1 perforant"}, {"n": "Engloutissement", "t": "La grenouille effectue une attaque de morsure contre une cible de taille P ou inférieure qu'elle agrippe. Si l'attaque réussit, la cible est avalée et elle n'est plus agrippée. La créature avalée est aveuglée est entravée, bénéficie d'un abri total contre les attaques ou autres effets provenant de l'extérieur de la grenouille, et subit 5 (2d4) dégâts d'acide au début de chaque tour de la grenouille. La grenouille ne peut avaler qu'une cible a la fois. Si la grenouille meurt, la créature avalée n'est plus entravée et peut sortir du cadavre en utilisant 1,5 m de mouvement, pour alors en émerger et se retrouver a terre."}]},
-{"id": "loup", "n": "Loup", "sz": "M", "fp": "1/4", "fpn": 0.25, "ca": 13, "can": "armure naturelle", "pv": 11, "pvd": "2d8 + 2", "v": {"marche": "12"}, "st": [12, 15, 12], "sens": "Perception passive 13", "tr": [["Odorat et ouïe aiguisés", "Le loup a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou l'ouïe."], ["Tactique de groupe", "Le loup a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 meétre ou moins de la créature et n'est pas incapable d'agir."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (2d4 + 2) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 pour ne pas tomber a terre.", "b": 4, "d": "2d4 + 2 perforant"}]},
-{"id": "lezard-geant", "n": "Lézard géant", "sz": "G", "fp": "1/4", "fpn": 0.25, "ca": 12, "can": "armure naturelle", "pv": 19, "pvd": "3d10 + 3", "v": {"marche": "9", "escalade": "9"}, "st": [15, 12, 13], "sens": "vision dans le noir 9 m, Perception passive 10", "tr": [], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d8 + 2) dégâts perforants.", "b": 4, "d": "1d8 + 2 perforant"}, {"n": "Apnée", "t": "Le lézard peut retenir son souffle durant 15 minutes (un lézard qui a ce trait posséde également une vitesse de nage de 9 metres)."}, {"n": "Pattes d'araignée", "t": "Le lézard peut escalader des surfaces difficiles et 6tre au plafond la tête en bas sans avoir besoin d'effectuer un jet de caractéristique. Les lézards géants sont de terrifiants prédateurs souvent utilisés comme monture ou comme animaux de trait par les humanoides reptiliens et les résidents de ]'Outreterre."}]},
-{"id": "mille-pattes-geant", "n": "Mille-pattes géant", "sz": "P", "fp": "1/4", "fpn": 0.25, "ca": 13, "can": "armure naturelle", "pv": 4, "pvd": "1d6 + 1", "v": {"marche": "9", "escalade": "9"}, "st": [5, 14, 12], "sens": "vision aveugle 9 m, Perception passive 8", "tr": [], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 4 (1d4 + 2) dégâts perforants, et la cible doit réussir un jet de sauvegarde de Constitution DD 11 ou subir 10 (3d6) dégâts de poison. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére.", "b": 4, "d": "1d4 + 2 perforant"}]},
-{"id": "panthere", "n": "Panthère", "sz": "M", "fp": "1/4", "fpn": 0.25, "ca": 12, "can": "", "pv": 13, "pvd": "3d8", "v": {"marche": "15", "escalade": "12"}, "st": [14, 15, 10], "sens": "Perception passive 14", "tr": [["Odorat aiguisé", "La panthére a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."], ["Bond agressif", "Si la panthére se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 12 pour ne pas tomber & terre. Si la cible est a terre, la panthére peut effectuer une attaque de morsure contre elle en tant qu'action bonus."]], "ac": [{"n": "Griffes", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d4 + 2) dégâts tranchants.", "b": 4, "d": "1d4 + 2 tranchant"}, {"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 5 (1d6 + 2) dégâts perforants.", "b": 4, "d": "1d6 + 2 perforant"}]},
-{"id": "sanglier", "n": "Sanglier", "sz": "M", "fp": "1/4", "fpn": 0.25, "ca": 11, "can": "armure naturelle", "pv": 11, "pvd": "2d8 + 2", "v": {"marche": "12"}, "st": [13, 11, 12], "sens": "Perception passive 9", "tr": [["Charge", "Si le sanglier se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible subit 3 (1d6) dégâts tranchants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 ou tomber a terre. implacable (Recharge aprés un repos court ou long). Si le sanglier subit 7 points de dégâts ou moins qui réduiraient ses points de vie a 0, il se retrouve a la place avec 1 point de vie."]], "ac": [{"n": "Défenses", "t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts tranchants.", "b": 3, "d": "1d6 + 1 tranchant"}]},
-{"id": "serpent-constricteur", "n": "Serpent constricteur", "sz": "G", "fp": "1/4", "fpn": 0.25, "ca": 12, "can": "", "pv": 13, "pvd": "2d10 + 2", "v": {"marche": "9", "nage": "9"}, "st": [15, 14, 12], "sens": "vision aveugle 3 m, Perception passive 10", "tr": [], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 5 (1d6 + 2) dégâts perforants.", "b": 4, "d": "1d6 + 2 perforant"}, {"n": "Constriction", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 6 (1d8 + 2) dégâts contondants, et la cible est agrippée (DD 14 pour s'échapper). Tant qu'elle est agrippée, la créature est entravée, et le serpent ne peut pas étreindre une autre cible.", "b": 4, "d": "1d8 + 2 contondant"}]},
-{"id": "serpent-venimeux-geant", "n": "Serpent venimeux géant", "sz": "M", "fp": "1/4", "fpn": 0.25, "ca": 14, "can": "", "pv": 11, "pvd": "2d8 + 2", "v": {"marche": "9", "nage": "9"}, "st": [10, 18, 13], "sens": "vision aveugle 3 m, Perception passive 12", "tr": [], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 3 m, une cible. Touché : 6 (1d4 + 4) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 10 (3d6) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite.", "b": 6, "d": "1d4 + 4 perforant"}]},
-{"id": "elan", "n": "Élan", "sz": "G", "fp": "1/4", "fpn": 0.25, "ca": 10, "can": "", "pv": 13, "pvd": "2d10 + 2", "v": {"marche": "15"}, "st": [16, 10, 12], "sens": "Perception passive 10", "tr": [["Charge", "Si l'élan se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber a terre."]], "ac": [{"n": "Coup de tête", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d6 + 3) dégâts contondants.", "b": 5, "d": "1d6 + 3 contondant"}, {"n": "Sabots", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une créature au sol. Touché : 8 (2d4 + 3) dégâts contondants.", "b": 5, "d": "2d4 + 3 contondant"}]},
-{"id": "cheval-de-guerre", "n": "Cheval de guerre", "sz": "G", "fp": "1/2", "fpn": 0.5, "ca": 11, "can": "", "pv": 19, "pvd": "3d10 + 3", "v": {"marche": "18"}, "st": [18, 12, 13], "sens": "Perception passive 11", "tr": [["Charge écrasante", "Si un cheval se déplace d'au moins 6 metres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses sabots dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 14 pour ne pas étre jetée a terre. Si la cible est a terre, le cheval peut réaliser une autre attaque contre elle avec ses sabots en tant qu'action bonus."]], "ac": [{"n": "Sabots", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 11 (2d6 + 4) dégâts contondants.", "b": 6, "d": "2d6 + 4 contondant"}]},
-{"id": "chevre-geante", "n": "Chèvre géante", "sz": "G", "fp": "1/2", "fpn": 0.5, "ca": 11, "can": "armure naturelle", "pv": 19, "pvd": "3d10 + 3", "v": {"marche": "12"}, "st": [17, 11, 12], "sens": "Perception passive 11", "tr": [["Charge", "Si la chévre se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 5 (2d4) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber a terre."], ["Stable", "La chévre a un avantage aux jets de sauvegarde de Force et de Dextérité contre les effets susceptibles de la faire tomber a terre."]], "ac": [{"n": "Coup de tête", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 8 (2d4 + 3) dégâts contondants.", "b": 5, "d": "2d4 + 3 contondant"}]},
-{"id": "crocodile", "n": "Crocodile", "sz": "G", "fp": "1/2", "fpn": 0.5, "ca": 12, "can": "armure naturelle", "pv": 19, "pvd": "3d10 + 3", "v": {"marche": "6", "nage": "9"}, "st": [15, 10, 13], "sens": "Perception passive 10", "tr": [["Apnée", "Le crocodile peut retenir son souffle durant 15 minutes."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 7 (1d10 + 2) dégâts perforants, et la cible est agrippée (DD 12 pour s'échapper). Tant qu'elle est agrippée, la créature est entravée, et le crocodile ne peut pas mordre une autre cible.", "b": 4, "d": "1d10 + 2 perforant"}]},
-{"id": "grand-singe", "n": "Grand singe", "sz": "M", "fp": "1/2", "fpn": 0.5, "ca": 12, "can": "", "pv": 19, "pvd": "3d8 + 6", "v": {"marche": "9", "escalade": "9"}, "st": [16, 14, 14], "sens": "Perception passive 13", "tr": [], "ac": [{"n": "Attaques multiples", "t": "Le grand singe réalise deux attaques avec ses poings."}, {"n": "Poing", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d6 + 3) dégâts contondants.", "b": 5, "d": "1d6 + 3 contondant"}, {"n": "Rocher", "t": "Attaque à distance avec une arme : +5 au toucher, portée 7,50/15 m, une cible. Touché : 6 (1d6 + 3) dégâts contondants.", "b": 5, "d": "1d6 + 3 contondant"}]},
-{"id": "guepe-geante", "n": "Guêpe géante", "sz": "M", "fp": "1/2", "fpn": 0.5, "ca": 12, "can": "", "pv": 13, "pvd": "3d8", "v": {"marche": "3", "vol": "15"}, "st": [10, 14, 10], "sens": "Perception passive 10", "tr": [], "ac": [{"n": "Dard", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 5 (1d6 + 2) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 10 (3d6) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére.", "b": 4, "d": "1d6 + 2 perforant"}]},
-{"id": "hippocampe-geant", "n": "Hippocampe géant", "sz": "G", "fp": "1/2", "fpn": 0.5, "ca": 13, "can": "armure naturelle", "pv": 16, "pvd": "3d10", "v": {"marche": "0", "nage": "12"}, "st": [12, 15, 11], "sens": "Perception passive 11", "tr": [["Charge", "Si 'hippocampe se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 ou tomber a terre."], ["Respiration aquatique", "L'hippocampe ne peut respirer que sous l'eau."]], "ac": [{"n": "Coup de tête", "t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts contondants.", "b": 3, "d": "1d6 + 1 contondant"}]},
-{"id": "ours-noir", "n": "Ours noir", "sz": "M", "fp": "1/2", "fpn": 0.5, "ca": 11, "can": "armure naturelle", "pv": 19, "pvd": "3d8 + 6", "v": {"marche": "12", "escalade": "9"}, "st": [15, 10, 14], "sens": "Perception passive 13", "tr": [["Odorat aiguisé", "L'ours a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."]], "ac": [{"n": "Attaques multiples", "t": "L'ours réalise deux attaques : une avec ses griffes et une de morsure."}, {"n": "Griffes", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (2d4 + 2) dégâts tranchants.", "b": 4, "d": "2d4 + 2 tranchant"}, {"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 5 (1d6 + 2) dégâts perforants.", "b": 4, "d": "1d6 + 2 perforant"}]},
-{"id": "requin-de-recif", "n": "Requin de récif", "sz": "M", "fp": "1/2", "fpn": 0.5, "ca": 12, "can": "armure naturelle", "pv": 22, "pvd": "4d8 + 4", "v": {"marche": "0", "nage": "12"}, "st": [4, 13, 13], "sens": "vision aveugle 9 m, Perception passive 12", "tr": [["Tactique de groupe", "Le requin a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."], ["Respiration aquatique", "Le requin ne peut respirer que sous l'eau."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d8 + 2) dégâts perforants.", "b": 4, "d": "1d8 + 2 perforant"}]},
-{"id": "aigle-geant", "n": "Aigle géant", "sz": "G", "fp": "1", "fpn": 1.0, "ca": 13, "can": "", "pv": 26, "pvd": "4d10 + 4", "v": {"marche": "3", "vol": "24"}, "st": [16, 17, 13], "sens": "Perception passive 14", "tr": [["Vue aiguisée", "L'aigle a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."]], "ac": [{"n": "Attaques multiples", "t": "L'aigle réalise deux attaques : une avec son bec et une avec ses serres."}, {"n": "Bec", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d6 + 3) dégâts perforants.", "b": 5, "d": "1d6 + 3 perforant"}, {"n": "Serres", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 10 (2d6 + 3) dégâts tranchants.", "b": 5, "d": "2d6 + 3 tranchant"}]},
-{"id": "araignee-geante", "n": "Araignée géante", "sz": "G", "fp": "1", "fpn": 1.0, "ca": 14, "can": "armure naturelle", "pv": 26, "pvd": "4d10 + 4", "v": {"marche": "9", "escalade": "9"}, "st": [14, 16, 12], "sens": "vision aveugle 3 m, vision dans le noir 18 m, Perception", "tr": [["Déplacement sur la toile", "L'araignée ignore les restrictions de mouvement causées par une toile d'araignée."], ["Pattes d'araignée", "L'araignée peut escalader des surfaces difficiles et 6tre au plafond la tête en bas sans avoir besoin d'effectuer un jet de caractéristique."], ["Sens de la toile", "Lorsqu'elle est en contact avec une toile, l'araignée connait l'emplacement exact de toutes les créatures qui sont en contact avec cette toile."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une créature. Touché : 7 (1d8 + 3) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 9 (2d8) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére.", "b": 5, "d": "1d8 + 3 perforant"}]},
-{"id": "crapaud-geant", "n": "Crapaud géant", "sz": "G", "fp": "1", "fpn": 1.0, "ca": 11, "can": "", "pv": 39, "pvd": "6d10 + 6", "v": {"marche": "6", "nage": "12"}, "st": [15, 13, 13], "sens": "vision dans le noir 9 m, Perception passive 10", "tr": [["Amphibien", "Le crapaud peut respirer aussi bien dans l'air que sous l'eau."], ["Saut sans élan", "Le crapaud peut sauter en longueur jusqu'a 6 metres ou en hauteur jusqu'a 3 m, avec ou sans élan."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (1d10 + 2) dégâts perforants + 5 (1d10) dégâts de poison, et la cible est agrippée (DD 13 pour s'échapper). Tant qu'elle est agrippée, la cible est entravée, et le crapaud ne peut pas mordre une autre cible.", "b": 4, "d": "1d10 + 2 perforant"}, {"n": "Engloutissement", "t": "Le crapaud effectue une attaque de morsure contre une cible de taille M ou inférieure qu'il agrippe. Si l'attaque réussit, la cible est avalée et elle n'est plus agrippée. La créature avalée est aveuglée et entravée, bénéficie d'un abri total contre les attaques ou autres effets provenant de l'extérieur du crapaud, et subit 10 (3d6) dégâts d'acide au début de chaque tour du crapaud. Le crapaud ne peut avaler qu'une cible a la fois. Si le crapaud meurt, la créature avalée n'est plus entravée et peut sortir du cadavre en utilisant 1,5 m de mouvement, pour alors en émerger et se retrouver a terre."}]},
-{"id": "hyene-geante", "n": "Hyène géante", "sz": "G", "fp": "1", "fpn": 1.0, "ca": 12, "can": "", "pv": 45, "pvd": "6d10 + 12", "v": {"marche": "15"}, "st": [16, 14, 14], "sens": "Perception passive 13", "tr": [["Déchainé", "Lorsque durant son tour la hyéne fait tomber les points de vie d'une créature a 0 avec une attaque au corps a corps, elle peut utiliser une action bonus pour se déplacer de la moitié de sa vitesse et effectuer une attaque de morsure."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 10 (2d6 + 3) dégâts perforants.", "b": 5, "d": "2d6 + 3 perforant"}]},
-{"id": "lion", "n": "Lion", "sz": "G", "fp": "1", "fpn": 1.0, "ca": 12, "can": "", "pv": 26, "pvd": "4d10 + 4", "v": {"marche": "15"}, "st": [17, 15, 13], "sens": "Perception passive 13", "tr": [["Odorat aiguisé", "Le lion a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."], ["Tactique de groupe", "Le lion a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est 4 1,50 m ou moins de la créature et n'est pas incapable d'agir."], ["Bond agressif", "Si le lion se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 13 pour ne pas tomber a terre. Si la cible est a terre, le lion peut effectuer une attaque de morsure contre elle en tant qu'action bonus."], ["Saut avec élan", "S'il peut prendre une course d'élan de 3 metres, un lion peut sauter jusqu'a 7,50 metres."]], "ac": [{"n": "Griffes", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d6 + 3) dégâts tranchants.", "b": 5, "d": "1d6 + 3 tranchant"}, {"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 7 (1d8 + 3) dégâts perforants.", "b": 5, "d": "1d8 + 3 perforant"}]},
-{"id": "loup-sanguinaire", "n": "Loup sanguinaire", "sz": "G", "fp": "1", "fpn": 1.0, "ca": 14, "can": "armure naturelle", "pv": 37, "pvd": "5d10 + 10", "v": {"marche": "15"}, "st": [17, 15, 15], "sens": "Perception passive 13", "tr": [["Odorat et ouïe aiguisés", "Le loup a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou louïe."], ["Tactique de groupe", "Le loup a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 m ou moins de la créature et n'est pas incapable d'agir."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 10 (2d6 + 3) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 pour ne pas étre jetée a terre.", "b": 5, "d": "2d6 + 3 perforant"}]},
-{"id": "ours-brun", "n": "Ours brun", "sz": "G", "fp": "1", "fpn": 1.0, "ca": 11, "can": "armure naturelle", "pv": 34, "pvd": "4d10 + 12", "v": {"marche": "12", "escalade": "9"}, "st": [19, 10, 16], "sens": "Perception passive 13", "tr": [["Odorat aiguisé", "L'ours a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."]], "ac": [{"n": "Attaques multiples", "t": "L'ours réalise deux attaques : une avec ses griffes et une de morsure."}, {"n": "Griffes", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 11 (2d6 + 4) dégâts tranchants.", "b": 6, "d": "2d6 + 4 tranchant"}, {"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 8 (1d8 + 4) dégâts perforants.", "b": 6, "d": "1d8 + 4 perforant"}]},
-{"id": "pieuvre-geante", "n": "Pieuvre géante", "sz": "G", "fp": "1", "fpn": 1.0, "ca": 11, "can": "", "pv": 52, "pvd": "8d10 + 8", "v": {"marche": "3", "nage": "18"}, "st": [17, 13, 13], "sens": "vision dans le noir 18 m, Perception passive 14", "tr": [["Apnée", "La pieuvre peut retenir son souffle durant 1 heure hors de l'eau."], ["Camouflage dans l'eau", "La pieuvre a un avantage aux jets de Dextérité (Discrétion) réalisés lorsqu'elle se trouve sous l'eau."], ["Respiration aquatique", "La pieuvre ne peut respirer que sous l'eau."]], "ac": [{"n": "Tentacules", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 4,50 m, une cible. Touché : 10 (2d6 + 3) dégâts contondants, et la cible est agrippée (DD 16 pour s'échapper). Tant qu'elle est agrippée, la créature est entravée, et la pieuvre ne peut pas utiliser ses tentacules contre une autre cible.", "b": 5, "d": "2d6 + 3 contondant"}]},
-{"id": "tigre", "n": "Tigre", "sz": "G", "fp": "1", "fpn": 1.0, "ca": 12, "can": "", "pv": 37, "pvd": "5d10 + 10", "v": {"marche": "12"}, "st": [17, 15, 14], "sens": "vision dans le noir 18 m, Perception passive 13", "tr": [["Odorat aiguisé", "Le tigre a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."], ["Bond agressif", "Si le tigre se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 13 pour ne pas tomber a terre. Si la cible est a terre, le tigre peut effectuer une attaque de morsure contre elle en tant qu'action bonus."]], "ac": [{"n": "Griffes", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 7 (1d8 + 3) dégâts tranchants.", "b": 5, "d": "1d8 + 3 tranchant"}, {"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 8 (1d10 + 3) dégâts perforants.", "b": 5, "d": "1d10 + 3 perforant"}]},
-{"id": "vautour-geant", "n": "Vautour géant", "sz": "G", "fp": "1", "fpn": 1.0, "ca": 10, "can": "", "pv": 22, "pvd": "3d10 + 6", "v": {"marche": "3", "vol": "18"}, "st": [15, 10, 15], "sens": "Perception passive 13", "tr": [["Odorat et vue aiguisés", "Le vautour a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou la vue."], ["Tactique de groupe", "Le vautour a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 metre ou moins de la créature et n'est pas incapable d'agir."]], "ac": [{"n": "Attaques multiples", "t": "Le vautour réalise deux attaques : une avec son bec et une avec ses serres."}, {"n": "Bec", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (2d4 + 2) dégâts perforants.", "b": 4, "d": "2d4 + 2 perforant"}, {"n": "Serres", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 9 (2d6 + 2) dégâts tranchants. Les vautours géants ont une intelligence évoluée et un penchant malveillant.", "b": 5, "d": "2d6 + 2 tranchant"}]},
-{"id": "ours-polaire", "n": "Ours polaire", "sz": "G", "fp": "2", "fpn": 2.0, "ca": 12, "can": "armure naturelle", "pv": 42, "pvd": "5d10 + 15", "v": {"marche": "12", "nage": "9"}, "st": [20, 10, 16], "sens": "Perception passive 13", "tr": [["Odorat aiguisé", "L'ours a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."]], "ac": [{"n": "Attaques multiples", "t": "L'ours réalise deux attaques : une avec ses griffes et une de morsure."}, {"n": "Griffes", "t": "Attaque au corps à corps avec une arme : +7 au toucher, allonge 1,5 m, une cible. Touché : 12 (2d6 + 5) dégâts tranchants.", "b": 7, "d": "2d6 + 5 tranchant"}, {"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +7 au toucher, allonge 1,5 m, une cible. Touché : 9 (1d8 + 5) dégâts perforants. _ ep VARIANTE : OURS DES CAVERNES Certains ours se sont adaptés a la vie souterraine, se nourrissant de lichen et de poissons aveugles.", "b": 7, "d": "1d8 + 5 perforant"}]},
-{"id": "requin-chasseur", "n": "Requin-chasseur", "sz": "G", "fp": "2", "fpn": 2.0, "ca": 12, "can": "armure naturelle", "pv": 45, "pvd": "6d10 + 12", "v": {"marche": "0", "nage": "12"}, "st": [18, 13, 15], "sens": "vision aveugle 9 m, Perception passive 12", "tr": [["Frénésie sanguinaire", "Le requin a un avantage aux jets d'attaque au corps à corps contre une créature qui n'a pas tous ses points de vie."], ["Respiration aquatique", "Le requin ne peut respirer que sous l'eau."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 13 (2d8 + 4) dégâts perforants.", "b": 6, "d": "2d8 + 4 perforant"}]},
-{"id": "rhinoceros", "n": "Rhinocéros", "sz": "G", "fp": "2", "fpn": 2.0, "ca": 11, "can": "armure naturelle", "pv": 45, "pvd": "6d10 + 12", "v": {"marche": "12"}, "st": [21, 8, 15], "sens": "Perception passive 11", "tr": [["Charge", "Si le rhinocéros se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec sa corne dans le même tour, la cible subit 9 (2d8) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 15 ou tomber a terre."]], "ac": [{"n": "Corne", "t": "Attaque au corps à corps avec une arme : +7 au toucher, allonge 1,5 m, une cible. Touché : 14 (2d8 + 5) dégâts contondants.", "b": 7, "d": "2d8 + 5 contondant"}]},
-{"id": "sanglier-geant", "n": "Sanglier géant", "sz": "G", "fp": "2", "fpn": 2.0, "ca": 12, "can": "armure naturelle", "pv": 42, "pvd": "5d10 + 15", "v": {"marche": "12"}, "st": [17, 10, 16], "sens": "Perception passive 8", "tr": [["Charge", "Si le sanglier se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible subit 7 (2d6) dégâts tranchants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber a terre. Implacable (Recharge aprés un Repos court ou long). Si le sanglier subit 10 points de dégâts ou moins qui réduiraient ses points de vie a 0, il se retrouve a la place avec 1 point de vie."]], "ac": [{"n": "Défenses", "t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 10 (2d6 + 3) dégâts tranchants.", "b": 5, "d": "2d6 + 3 tranchant"}]},
-{"id": "serpent-constricteur-geant", "n": "Serpent constricteur géant", "sz": "TG", "fp": "2", "fpn": 2.0, "ca": 12, "can": "", "pv": 60, "pvd": "8d12 + 8", "v": {"marche": "9", "nage": "9"}, "st": [19, 14, 12], "sens": "vision aveugle 3 m, Perception passive 12", "tr": [], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 3 m, une créature. Touché : 11 (2d6 + 4) dégâts perforants.", "b": 6, "d": "2d6 + 4 perforant"}, {"n": "Constriction", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une créature. Touché : 13 (2d8 + 4) dégâts contondants, et la cible est agrippée (DD 16 pour s'échapper). Tant qu'elle est agrippée, la créature est entravée, et le serpent ne peut pas étreindre une autre cible.", "b": 6, "d": "2d8 + 4 contondant"}]},
-{"id": "tigre-a-dents-de-sabre", "n": "Tigre à dents de sabre", "sz": "G", "fp": "2", "fpn": 2.0, "ca": 12, "can": "", "pv": 52, "pvd": "7d10 + 14", "v": {"marche": "12"}, "st": [18, 14, 15], "sens": "Perception passive 13", "tr": [["Odorat aiguisé", "Le tigre a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."], ["Bond agressif", "Si le tigre se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 14 pour ne pas tomber a terre. Si la cible est a terre, le tigre peut effectuer une attaque de morsure contre elle en tant qu'action bonus."]], "ac": [{"n": "Griffes", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 12 (2d6 + 5) dégâts tranchants.", "b": 6, "d": "2d6 + 5 tranchant"}, {"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 10 (1d10 + 5) dégâts perforants.", "b": 6, "d": "1d10 + 5 perforant"}]},
-{"id": "elan-geant", "n": "Élan géant", "sz": "TG", "fp": "2", "fpn": 2.0, "ca": 14, "can": "armure naturelle", "pv": 42, "pvd": "5d12 + 10", "v": {"marche": "18"}, "st": [19, 16, 14], "sens": "Perception passive 14", "tr": [["Charge", "Si l'élan se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 14 ou tomber a terre."]], "ac": [{"n": "Coup de tête", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 3 m, une cible. Touché : 11 (2d6 + 4) dégâts contondants.", "b": 6, "d": "2d6 + 4 contondant"}, {"n": "Sabots", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une créature au sol. Touché : 22 (4d8 + 4) dégâts contondants.", "b": 6, "d": "4d8 + 4 contondant"}]},
-{"id": "scorpion-geant", "n": "Scorpion géant", "sz": "G", "fp": "3", "fpn": 3.0, "ca": 15, "can": "armure naturelle", "pv": 52, "pvd": "7d10 + 14", "v": {"marche": "12"}, "st": [15, 13, 15], "sens": "vision aveugle 18 m, Perception passive 9", "tr": [], "ac": [{"n": "Attaques multiples", "t": "Le scorpion réalise trois attaques : deux avec ses pinces et une avec son aiguillon."}, {"n": "Pinces", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d8 + 2) dégâts contondants, et la cible est agrippée (DD 12 pour s'échapper). Le scorpion a deux pinces, chacune lui permettant d'agripper une cible.", "b": 4, "d": "1d8 + 2 contondant"}, {"n": "Dard", "t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 7 (1d10 + 2) dégâts perforants et la cible doit réaliser un jet de sauvegarde de Constitution DD 12, subissant 22 (4d10) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite.", "b": 4, "d": "1d10 + 2 perforant"}]},
-{"id": "epaulard", "n": "Épaulard", "sz": "TG", "fp": "3", "fpn": 3.0, "ca": 12, "can": "armure naturelle", "pv": 90, "pvd": "12d12 + 12", "v": {"marche": "0", "nage": "18"}, "st": [19, 10, 13], "sens": "vision aveugle 36 m, Perception passive 13", "tr": [["Echolocalisation", "L'épaulard ne peut pas utiliser sa vision aveugle s'il est assourdi."], ["Apnée", "L'épaulard peut retenir son souffle durant 30 minutes."], ["Ouie aiguisée", "L'épaulard a un avantage aux jets de Sagesse (Perception) basés sur l'ouïe."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 21 (5d6 + 4) dégâts perforants.", "b": 6, "d": "5d6 + 4 perforant"}]},
-{"id": "elephant", "n": "Éléphant", "sz": "TG", "fp": "4", "fpn": 4.0, "ca": 12, "can": "armure naturelle", "pv": 76, "pvd": "8d12 + 24", "v": {"marche": "12"}, "st": [22, 9, 17], "sens": "Perception passive 10", "tr": [["Charge écrasante", "Si l'éléphant se déplace d'au moins 6 metres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 12 pour ne pas 6tre jetée a terre. Si la cible est a terre, l'éléphant peut réaliser une attaque de piétinement contre celle-ci par une action bonus."]], "ac": [{"n": "Défenses", "t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 1,5 m, une cible. Touché : 19 (3d8 + 6) dégâts perforants.", "b": 8, "d": "3d8 + 6 perforant"}, {"n": "Piétinement", "t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 1,5 m, une créature a terre. Touché : 22 (3d10 + 6) dégâts contondants.", "b": 8, "d": "3d10 + 6 contondant"}]},
-{"id": "crocodile-geant", "n": "Crocodile géant", "sz": "TG", "fp": "5", "fpn": 5.0, "ca": 14, "can": "armure naturelle", "pv": 85, "pvd": "9d12 + 27", "v": {"marche": "9", "nage": "15"}, "st": [21, 9, 17], "sens": "Perception passive 10", "tr": [["Apnée", "Le crocodile peut retenir son souffle durant 30 minutes."]], "ac": [{"n": "Attaques multiples", "t": "Le crocodile réalise deux attaques : une de morsure et une avec sa queue."}, {"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 1,5 m, une cible. Touché : 21 (3d10 + 5) dégâts perforants, et la cible est agrippée (DD 16 pour s'échapper). Tant qu'elle est agrippée, la créature est entravée, et le crocodile ne peut pas mordre une autre cible.", "b": 8, "d": "3d10 + 5 perforant"}, {"n": "Queue", "t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 3 m, une cible qui n'est pas agrippée par le crocodile. Touché : 14 (2d8 + 5) dégâts contondants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 16 pour ne pas étre jetée au sol.", "b": 8, "d": "2d8 + 5 contondant"}]},
-{"id": "requin-geant", "n": "Requin géant", "sz": "TG", "fp": "5", "fpn": 5.0, "ca": 13, "can": "armure naturelle", "pv": 126, "pvd": "11d12 + 55", "v": {"marche": "0", "nage": "15"}, "st": [23, 11, 21], "sens": "vision aveugle 18 m, Perception passive 13", "tr": [["Frénésie sanguinaire", "Le requin a un avantage aux jets d'attaque au corps à corps contre une créature qui n'a pas tous ses points de vie."], ["Respiration aquatique", "Le requin ne peut respirer que sous l'eau."]], "ac": [{"n": "Morsure", "t": "Attaque au corps à corps avec une arme : +9 au toucher, allonge 1,5 m, une cible. Touché : 22 (3d10 + 6) dégâts perforants.", "b": 9, "d": "3d10 + 6 perforant"}]},
-{"id": "mammouth", "n": "Mammouth", "sz": "TG", "fp": "6", "fpn": 6.0, "ca": 13, "can": "armure naturelle", "pv": 126, "pvd": "11d12 + 55", "v": {"marche": "12"}, "st": [24, 9, 21], "sens": "Perception passive 10", "tr": [["Charge écrasante", "Si le mammouth se déplace d'au moins 6 metres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 18 pour ne pas 6tre jetée a terre. Si la cible est a terre, le mammouth peut réaliser une attaque de piétinement contre celle-ci par une action bonus."]], "ac": [{"n": "Défenses", "t": "Attaque au corps à corps avec une arme : +10 au toucher, allonge 3 m, une cible. Touché : 25 (4d8 + 7) dégâts perforants.", "b": 10, "d": "4d8 + 7 perforant"}, {"n": "Piétinement", "t": "Attaque au corps à corps avec une arme : +10 au toucher, allonge 1,5 m, une créature a terre. Touché : 29 (4d10 + 7) dégâts contondants.", "b": 10, "d": "4d10 + 7 contondant"}]},
-{"id": "singe-geant", "n": "Singe géant", "sz": "TG", "fp": "7", "fpn": 7.0, "ca": 12, "can": "", "pv": 157, "pvd": "15d12 + 60", "v": {"marche": "12", "escalade": "12"}, "st": [23, 14, 18], "sens": "Perception passive 14", "tr": [], "ac": [{"n": "Attaques multiples", "t": "Le singe réalise deux attaques avec ses poings."}, {"n": "Poing", "t": "Attaque au corps à corps avec une arme : +9 au toucher, allonge 3 m, une cible. Touché : 22 (3d10 + 6) dégâts contondants.", "b": 9, "d": "3d10 + 6 contondant"}, {"n": "Rocher", "t": "Attaque à distance avec une arme : +9 au toucher, portée 15/30 m, une cible. Touché : 30 (7d6 + 6) dégâts contondants.", "b": 9, "d": "7d6 + 6 contondant"}]}
+{
+"id": "aigle",
+"n": "Aigle",
+"sz": "P",
+"fp": "0",
+"fpn": 0,
+"ca": 12,
+"can": "",
+"pv": 3,
+"pvd": "1d6",
+"v": {
+"marche": "3",
+"vol": "18"
+},
+"st": [
+6,
+15,
+10
+],
+"sens": "Perception passive 14",
+"tr": [
+[
+"Vue aiguisée",
+"L'aigle a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."
+]
+],
+"ac": [
+{
+"n": "Serres",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d4 + 2) dégâts tranchants.",
+"b": 4,
+"d": "1d4 + 2 tranchant"
+}
+]
+},
+{
+"id": "araignee",
+"n": "Araignée",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 12,
+"can": "",
+"pv": 1,
+"pvd": "1d4 - 1",
+"v": {
+"marche": "6",
+"escalade": "6"
+},
+"st": [
+2,
+14,
+8
+],
+"sens": "vision dans le noir 9 m, Perception passive 10",
+"tr": [
+[
+"Pattes d'araignée",
+"L'araignée peut escalader des surfaces difficiles et 6tre au plafond la tête en bas sans avoir besoin d'effectuer un jet de caractéristique."
+],
+[
+"Sens de la toile",
+"Lorsqu'elle est en contact avec une toile, l'araignée connait l'emplacement exact de toutes les créatures qui sont en contact avec cette toile."
+],
+[
+"Déplacement sur la toile",
+"L'araignée ignore les restrictions de mouvement causées par une toile d'araignée."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 1 dégât perforant et la cible doit réussir un jet de sauvegarde de Constitution DD 9 ou subir 2 (1d4) dégâts de poison.",
+"b": 4,
+"d": "1 perforant"
+}
+]
+},
+{
+"id": "babouin",
+"n": "Babouin",
+"sz": "P",
+"fp": "0",
+"fpn": 0,
+"ca": 12,
+"can": "",
+"pv": 3,
+"pvd": "1d6",
+"v": {
+"marche": "9",
+"escalade": "9"
+},
+"st": [
+8,
+14,
+11
+],
+"sens": "Perception passive 11",
+"tr": [
+[
+"Tactique de groupe",
+"Le babouin a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +1 au toucher, allonge 1,5 m, une cible. Touché : 1 (1d4 — 1) dégâts perforants.",
+"b": 1,
+"d": "1d4—1 perforant"
+}
+]
+},
+{
+"id": "belette",
+"n": "Belette",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 13,
+"can": "",
+"pv": 1,
+"pvd": "1d4 - 1",
+"v": {
+"marche": "9"
+},
+"st": [
+3,
+16,
+8
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat et ouïe aiguisés",
+"La belette a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou l'ouïe."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.",
+"b": 5,
+"d": "1 perforant"
+}
+]
+},
+{
+"id": "blaireau",
+"n": "Blaireau",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 10,
+"can": "",
+"pv": 3,
+"pvd": "1d4 + 1",
+"v": {
+"marche": "50"
+},
+"st": [
+4,
+11,
+12
+],
+"sens": "vision dans le noir 9 m, Perception passive 11",
+"tr": [
+[
+"Odorat aiguisé",
+"Le blaireau a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.",
+"b": 2,
+"d": "1 perforant"
+}
+]
+},
+{
+"id": "cerf",
+"n": "Cerf",
+"sz": "M",
+"fp": "0",
+"fpn": 0,
+"ca": 13,
+"can": "",
+"pv": 4,
+"pvd": "18",
+"v": {
+"marche": "15"
+},
+"st": [
+11,
+16,
+11
+],
+"sens": "Perception passive 12",
+"tr": [],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une cible. Touché : 2 (1d4) dégâts perforants.",
+"b": 2,
+"d": "1d4 perforant"
+}
+]
+},
+{
+"id": "chacal",
+"n": "Chacal",
+"sz": "P",
+"fp": "0",
+"fpn": 0,
+"ca": 12,
+"can": "",
+"pv": 3,
+"pvd": "1d6",
+"v": {
+"marche": "12"
+},
+"st": [
+8,
+15,
+11
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat et ouïe aiguisés",
+"Le chacal a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou louïe."
+],
+[
+"Tactique de groupe",
+"Le chacal a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +1 au toucher, allonge 1,5 m, une cible. Touché : 1 (1d4 - 1) dégâts perforants.",
+"b": 1,
+"d": "1d4 − 1 perforant"
+}
+]
+},
+{
+"id": "chat",
+"n": "Chat",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 12,
+"can": "",
+"pv": 2,
+"pvd": "1d4",
+"v": {
+"marche": "12",
+"escalade": "9"
+},
+"st": [
+3,
+15,
+10
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat aiguisé",
+"Le chat a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+]
+],
+"ac": [
+{
+"n": "Griffes",
+"t": "Attaque au corps à corps avec une arme : +0 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât tranchant.",
+"b": 0,
+"d": "1 tranchant"
+}
+]
+},
+{
+"id": "chauve-souris",
+"n": "Chauve-souris",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 12,
+"can": "",
+"pv": 1,
+"pvd": "1d4 - 1",
+"v": {
+"marche": "50",
+"vol": "9"
+},
+"st": [
+2,
+15,
+8
+],
+"sens": "vision aveugle 18 m, Perception passive 11",
+"tr": [
+[
+"Echolocalisation",
+"La chauve-souris ne peut utiliser sa vision aveugle quand elle est assourdie."
+],
+[
+"Ouie aiguisée",
+"La chauve-souris a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +0 au toucher, allonge 1,5 m, une créature. Touché : 1 dégât perforant.",
+"b": 0,
+"d": "1 perforant"
+}
+]
+},
+{
+"id": "chouette",
+"n": "Chouette",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 11,
+"can": "",
+"pv": 1,
+"pvd": "1d4 - 1",
+"v": {
+"marche": "50",
+"vol": "18"
+},
+"st": [
+3,
+13,
+2
+],
+"sens": "vision dans le noir 36 m, Perception passive 13",
+"tr": [
+[
+"Repli aérien",
+"La chouette ne provoque pas d'attaques d'opportunité lorsqu'elle quitte l'allonge d'un ennemi en volant."
+],
+[
+"Ouie et vue aiguisées",
+"La chouette a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe ou a la vue."
+]
+],
+"ac": [
+{
+"n": "Serres",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât tranchant.",
+"b": 3,
+"d": "1 tranchant"
+}
+]
+},
+{
+"id": "chevre",
+"n": "Chèvre",
+"sz": "M",
+"fp": "0",
+"fpn": 0,
+"ca": 10,
+"can": "",
+"pv": 4,
+"pvd": "1d8",
+"v": {
+"marche": "12"
+},
+"st": [
+12,
+10,
+11
+],
+"sens": "Perception passive 10",
+"tr": [
+[
+"Charge",
+"Si la chévre se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 2 (1d4) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 10 ou tomber a terre."
+],
+[
+"Stable",
+"La chévre a un avantage aux jets de sauvegarde de Force et de Dextérité contre les effets susceptibles de la faire tomber a terre."
+]
+],
+"ac": [
+{
+"n": "Coup de tête",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 3 (1d4 + 1) dégâts contondants.",
+"b": 3,
+"d": "1d4 + 1 contondant"
+}
+]
+},
+{
+"id": "corbeau",
+"n": "Corbeau",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 12,
+"can": "",
+"pv": 1,
+"pvd": "1d4 - 1",
+"v": {
+"marche": "3",
+"vol": "15"
+},
+"st": [
+2,
+14,
+8
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Imitation",
+"Le corbeau peut imiter des sons simples qu'il a entendus, comme le chuchotement d'une personne, un bébé qui pleure ou un petit cri animal. Une créature qui entend les sons peut se rendre compte qu'il s‘agit d'imitations si elle réussit un jet de Sagesse (Intuition) DD 10."
+]
+],
+"ac": [
+{
+"n": "Bec",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.",
+"b": 4,
+"d": "1 perforant"
+}
+]
+},
+{
+"id": "crabe",
+"n": "Crabe",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 11,
+"can": "armure naturelle",
+"pv": 2,
+"pvd": "1d4",
+"v": {
+"marche": "6",
+"nage": "6"
+},
+"st": [
+2,
+11,
+10
+],
+"sens": "vision aveugle 9 m, Perception passive 9",
+"tr": [
+[
+"Amphibien",
+"Le crabe peut respirer aussi bien dans lair que sous l'eau."
+]
+],
+"ac": [
+{
+"n": "Pinces",
+"t": "Attaque au corps à corps avec une arme : +0 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât contondant.",
+"b": 0,
+"d": "1 contondant"
+}
+]
+},
+{
+"id": "faucon",
+"n": "Faucon",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 13,
+"can": "",
+"pv": 1,
+"pvd": "1d4 - 1",
+"v": {
+"marche": "3",
+"vol": "18"
+},
+"st": [
+5,
+16,
+8
+],
+"sens": "Perception passive 14",
+"tr": [
+[
+"Vue aiguisée",
+"Le faucon a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."
+]
+],
+"ac": [
+{
+"n": "Serres",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât tranchant.",
+"b": 5,
+"d": "1 tranchant"
+}
+]
+},
+{
+"id": "grenouille",
+"n": "Grenouille",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 11,
+"can": "",
+"pv": 1,
+"pvd": "1d4 - 1",
+"v": {
+"marche": "6",
+"nage": "6"
+},
+"st": [
+1,
+13,
+8
+],
+"sens": "vision dans le noir 9 m, Perception passive 11",
+"tr": [
+[
+"Amphibien",
+"La grenouille peut respirer aussi bien dans lair que sous l'eau."
+],
+[
+"Saut sans élan",
+"La grenouille peut sauter en longueur jusqu'a 3 m ou en hauteur jusqu'a 1,5 m, avec ou sans élan. _ ep Une grenouille n'a pas d'attaque efficace. Elle se nourrit de petits insectes et reste en général prés de l'eau, des arbres, ou sous terre."
+]
+],
+"ac": []
+},
+{
+"id": "hippocampe",
+"n": "Hippocampe",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 11,
+"can": "",
+"pv": 1,
+"pvd": "1d4 - 1",
+"v": {
+"marche": "0",
+"nage": "6"
+},
+"st": [
+1,
+12,
+8
+],
+"sens": "Perception passive 10",
+"tr": [
+[
+"Respiration aquatique",
+"L'hippocampe ne peut respirer que sous l'eau."
+]
+],
+"ac": []
+},
+{
+"id": "hyene",
+"n": "Hyène",
+"sz": "M",
+"fp": "0",
+"fpn": 0,
+"ca": 11,
+"can": "",
+"pv": 5,
+"pvd": "1d8 + 1",
+"v": {
+"marche": "15"
+},
+"st": [
+11,
+13,
+12
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Tactique de groupe",
+"La hyéne a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une cible. Touché : 3 (1d6) dégâts perforants.",
+"b": 2,
+"d": "1d6 perforant"
+}
+]
+},
+{
+"id": "lezard",
+"n": "Lézard",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 10,
+"can": "",
+"pv": 2,
+"pvd": "1d4",
+"v": {
+"marche": "6",
+"escalade": "6"
+},
+"st": [
+2,
+11,
+10
+],
+"sens": "vision dans le noir 9 m, Perception passive 9",
+"tr": [],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +0 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.",
+"b": 0,
+"d": "1 perforant"
+}
+]
+},
+{
+"id": "pieuvre",
+"n": "Pieuvre",
+"sz": "P",
+"fp": "0",
+"fpn": 0,
+"ca": 12,
+"can": "",
+"pv": 3,
+"pvd": "1d6",
+"v": {
+"marche": "50",
+"nage": "9"
+},
+"st": [
+4,
+15,
+11
+],
+"sens": "vision dans le noir 9 m, Perception passive 12",
+"tr": [
+[
+"Apnée",
+"La pieuvre peut retenir son souffle durant 30 minutes hors de l'eau."
+],
+[
+"Camouflage dans l'eau",
+"La pieuvre a un avantage aux jets de Dextérité (Discrétion) réalisés lorsqu'elle se trouve sous l'eau."
+],
+[
+"Respiration aquatique",
+"La pieuvre ne peut respirer que sous l'eau."
+]
+],
+"ac": [
+{
+"n": "Tentacules",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât contondant et la cible est agrippée (évasion DD 10). Tant qu'elle reste agrippée, la pieuvre ne peut utiliser ses tentacules contre une autre cible.",
+"b": 4,
+"d": "1 contondant"
+},
+{
+"n": "Nuage d'encre",
+"t": "Un nuage d'encre de 1,5 m de rayon s'étend tout autour de la pieuvre si elle est sous l'eau. La visibilité dans la zone est nulle pendant 1 minute, mais un courant important peut disperser l'encre. Après avoir relâché l'encre, la pieuvre peut utiliser l'action Foncer en tant qu'action bonus.",
+"r": "Recharge après un repos court ou long"
+}
+]
+},
+{
+"id": "piranha",
+"n": "Piranha",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 13,
+"can": "",
+"pv": 1,
+"pvd": "1d4 - 1",
+"v": {
+"marche": "0",
+"nage": "12"
+},
+"st": [
+2,
+16,
+9
+],
+"sens": "vision dans le noir 18 m, Perception passive 8",
+"tr": [
+[
+"Frénésie sanguinaire",
+"Le piranha a un avantage aux jets d'attaque au corps à corps contre une créature qui n'a pas tous ses points de vie."
+],
+[
+"Respiration aquatique",
+"Le piranha ne peut respirer que sous l'eau."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.",
+"b": 5,
+"d": "1 perforant"
+}
+]
+},
+{
+"id": "rat",
+"n": "Rat",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 10,
+"can": "",
+"pv": 1,
+"pvd": "1d4 - 1",
+"v": {
+"marche": "6"
+},
+"st": [
+2,
+11,
+9
+],
+"sens": "vision dans le noir 9 m, Perception passive 10",
+"tr": [
+[
+"Odorat aiguisé",
+"Le rat a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +0 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant.",
+"b": 0,
+"d": "1 perforant"
+}
+]
+},
+{
+"id": "scarabee-de-feu-geant",
+"n": "Scarabée de feu géant",
+"sz": "P",
+"fp": "0",
+"fpn": 0,
+"ca": 13,
+"can": "armure naturelle",
+"pv": 4,
+"pvd": "1d6 + 1",
+"v": {
+"marche": "9"
+},
+"st": [
+8,
+10,
+12
+],
+"sens": "vision aveugle 9 m, Perception passive 8",
+"tr": [
+[
+"Illumination",
+"Le scarabée émet une lumiére vive dans un rayon de 3 m et une lumiére faible sur 3 m supplémentaires."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +1 au toucher, allonge 1,5 m, une cible. Touché : 2 (1d6 - 1) dégâts tranchants.",
+"b": 1,
+"d": "1d6 − 1 tranchant"
+}
+]
+},
+{
+"id": "scorpion",
+"n": "Scorpion",
+"sz": "TP",
+"fp": "0",
+"fpn": 0,
+"ca": 11,
+"can": "armure naturelle",
+"pv": 1,
+"pvd": "1d4 - 1",
+"v": {
+"marche": "3"
+},
+"st": [
+2,
+11,
+8
+],
+"sens": "vision aveugle 3 m, Perception passive 9",
+"tr": [],
+"ac": [
+{
+"n": "Dard",
+"t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une créature. Touché : 1 dégât perforant et la cible doit réaliser un jet de sauvegarde de Constitution DD 9, subissant 4 (1d8) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite.",
+"b": 2,
+"d": "1 perforant"
+}
+]
+},
+{
+"id": "vautour",
+"n": "Vautour",
+"sz": "M",
+"fp": "0",
+"fpn": 0,
+"ca": 10,
+"can": "",
+"pv": 5,
+"pvd": "1d8 + 1",
+"v": {
+"marche": "3",
+"vol": "15"
+},
+"st": [
+7,
+10,
+13
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat et vue aiguisés",
+"Le vautour a un avantage aux jets de Sagesse (Perception) basés sur la vue ou l'odorat."
+],
+[
+"Tactique de groupe",
+"Le vautour a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+]
+],
+"ac": [
+{
+"n": "Bec",
+"t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une cible. Touché : 2 (1d4) dégâts perforants.",
+"b": 2,
+"d": "1d4 perforant"
+}
+]
+},
+{
+"id": "belette-geante",
+"n": "Belette géante",
+"sz": "M",
+"fp": "1/8",
+"fpn": 0.125,
+"ca": 13,
+"can": "",
+"pv": 9,
+"pvd": "2d8",
+"v": {
+"marche": "12"
+},
+"st": [
+11,
+16,
+10
+],
+"sens": "vision dans le noir 18 m, Perception passive 13",
+"tr": [
+[
+"Odorat et ouïe aiguisés",
+"La belette a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou louïe."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 5 (1d4 + 3) dégâts perforants.",
+"b": 5,
+"d": "1d4 + 3 perforant"
+}
+]
+},
+{
+"id": "chameau",
+"n": "Chameau",
+"sz": "G",
+"fp": "1/8",
+"fpn": 0.125,
+"ca": 9,
+"can": "",
+"pv": 15,
+"pvd": "2d10 + 4",
+"v": {
+"marche": "15"
+},
+"st": [
+16,
+8,
+14
+],
+"sens": "Perception passive 9",
+"tr": [],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 2 (1d4) dégâts contondants.",
+"b": 5,
+"d": "1d4 contondant"
+}
+]
+},
+{
+"id": "crabe-geant",
+"n": "Crabe géant",
+"sz": "M",
+"fp": "1/8",
+"fpn": 0.125,
+"ca": 15,
+"can": "armure naturelle",
+"pv": 13,
+"pvd": "3d8",
+"v": {
+"marche": "9",
+"nage": "9"
+},
+"st": [
+13,
+15,
+11
+],
+"sens": "vision aveugle 9 m, Perception passive 9",
+"tr": [
+[
+"Amphibien",
+"Le crabe peut respirer aussi bien dans l'air que sous l'eau."
+]
+],
+"ac": [
+{
+"n": "Pinces",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts contondants, et la cible est agrippée (DD 11 pour s'échapper). Le crabe a deux pinces, chacune lui permettant d'agripper une cible.",
+"b": 3,
+"d": "1d6 + 1 contondant"
+}
+]
+},
+{
+"id": "faucon-de-sang",
+"n": "Faucon de sang",
+"sz": "P",
+"fp": "1/8",
+"fpn": 0.125,
+"ca": 12,
+"can": "",
+"pv": 7,
+"pvd": "2d6",
+"v": {
+"marche": "3",
+"vol": "18"
+},
+"st": [
+6,
+14,
+10
+],
+"sens": "Perception passive 14",
+"tr": [
+[
+"Tactique de groupe",
+"Le faucon a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est & 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+],
+[
+"Vue aiguisée",
+"Le faucon a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."
+]
+],
+"ac": [
+{
+"n": "Bec",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d4 + 2) dégâts perforants. i 1 Tenant son nom de ses plumes pourpres et de sa nature agressive, le faucon de sang attaque sans crainte avec son bec aiguisé telle une dague.",
+"b": 4,
+"d": "1d4 + 2 perforant"
+}
+]
+},
+{
+"id": "molosse",
+"n": "Molosse",
+"sz": "M",
+"fp": "1/8",
+"fpn": 0.125,
+"ca": 12,
+"can": "",
+"pv": 5,
+"pvd": "1d8 + 1",
+"v": {
+"marche": "12"
+},
+"st": [
+13,
+14,
+12
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat et ouïe aiguisés",
+"Le molosse a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou l'ouïe."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 pour ne pas tomber a terre.",
+"b": 3,
+"d": "1d6 + 1 perforant"
+}
+]
+},
+{
+"id": "mule",
+"n": "Mule",
+"sz": "M",
+"fp": "1/8",
+"fpn": 0.125,
+"ca": 10,
+"can": "",
+"pv": 11,
+"pvd": "2d8 + 2",
+"v": {
+"marche": "12"
+},
+"st": [
+14,
+10,
+13
+],
+"sens": "Perception passive 10",
+"tr": [
+[
+"Bête de somme",
+"La mule est considérée comme un animal de taille G pour déterminer sa capacité de charge."
+],
+[
+"Pied sar",
+"La mule a un avantage aux jets de sauvegarde de Force et Dextérité effectués pour ne pas tomber a terre."
+]
+],
+"ac": [
+{
+"n": "Sabots",
+"t": "Attaque au corps à corps avec une arme : +2 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d4 + 2) dégâts contondants.",
+"b": 2,
+"d": "1d4 + 2 contondant"
+}
+]
+},
+{
+"id": "poney",
+"n": "Poney",
+"sz": "M",
+"fp": "1/8",
+"fpn": 0.125,
+"ca": 10,
+"can": "",
+"pv": 11,
+"pvd": "2d8 + 2",
+"v": {
+"marche": "12"
+},
+"st": [
+15,
+10,
+13
+],
+"sens": "Perception passive 10",
+"tr": [],
+"ac": [
+{
+"n": "Sabots",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (2d4 + 2) dégâts contondants.",
+"b": 4,
+"d": "2d4 + 2 contondant"
+}
+]
+},
+{
+"id": "rat-geant",
+"n": "Rat géant",
+"sz": "P",
+"fp": "1/8",
+"fpn": 0.125,
+"ca": 12,
+"can": "",
+"pv": 7,
+"pvd": "2d6",
+"v": {
+"marche": "9"
+},
+"st": [
+7,
+15,
+11
+],
+"sens": "vision dans le noir 18 m, Perception passive 10",
+"tr": [
+[
+"Odorat aiguisé",
+"Le rat a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+],
+[
+"Tactique de groupe",
+"Le rat a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 m ou moins de la créature et n'est pas incapable d'agir."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d4 + 2) dégâts perforants.",
+"b": 4,
+"d": "1d4 + 2 perforant"
+}
+]
+},
+{
+"id": "serpent-venimeux",
+"n": "Serpent venimeux",
+"sz": "TP",
+"fp": "1/8",
+"fpn": 0.125,
+"ca": 13,
+"can": "",
+"pv": 2,
+"pvd": "14",
+"v": {
+"marche": "9",
+"nage": "9"
+},
+"st": [
+2,
+16,
+11
+],
+"sens": "vision aveugle 3 m, Perception passive 10",
+"tr": [],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant et la cible doit réaliser un jet de sauvegarde de Constitution DD 10, subissant 5 (2d4) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite.",
+"b": 5,
+"d": "1 perforant"
+}
+]
+},
+{
+"id": "serpent-volant",
+"n": "Serpent volant",
+"sz": "TP",
+"fp": "1/8",
+"fpn": 0.125,
+"ca": 14,
+"can": "",
+"pv": 5,
+"pvd": "2d4",
+"v": {
+"marche": "9",
+"nage": "9",
+"vol": "18"
+},
+"st": [
+4,
+18,
+11
+],
+"sens": "vision aveugle 3 m, Perception passive 11",
+"tr": [
+[
+"Repli aérien",
+"Le serpent ne provoque pas d'attaques d'opportunité lorsqu'il quitte l'allonge d'un ennemi en volant."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 1 dégât perforant + 7 (3d4) dégâts de poison.",
+"b": 6,
+"d": "1 perforant"
+}
+]
+},
+{
+"id": "araignee-loup-geante",
+"n": "Araignée-loup géante",
+"sz": "M",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 13,
+"can": "",
+"pv": 11,
+"pvd": "2d8 + 2",
+"v": {
+"marche": "12",
+"escalade": "12"
+},
+"st": [
+12,
+16,
+13
+],
+"sens": "vision aveugle 3 m, vision dans le noir 18 m, Perception",
+"tr": [
+[
+"Déplacement sur la toile",
+"L'araignée ignore les restrictions de mouvement causées par une toile d'araignée."
+],
+[
+"Pattes d'araignée",
+"L'araignée peut escalader des surfaces difficiles et 6tre au plafond la tête en bas sans avoir besoin d'effectuer un jet de caractéristique."
+],
+[
+"Sens de la toile",
+"Lorsqu'elle est en contact avec une toile, l'araignée connait l'emplacement exact de toutes les créatures qui sont en contact avec cette toile."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une créature. Touché : 4 (1d6 + 1) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 7 (2d6) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére.",
+"b": 3,
+"d": "1d6 + 1 perforant"
+}
+]
+},
+{
+"id": "bec-de-hache",
+"n": "Bec de hache",
+"sz": "G",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 11,
+"can": "",
+"pv": 19,
+"pvd": "3d10 + 3",
+"v": {
+"marche": "15"
+},
+"st": [
+4,
+12,
+12
+],
+"sens": "Perception passive 10",
+"tr": [],
+"ac": [
+{
+"n": "Bec",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d8 + 2) dégâts tranchants.",
+"b": 4,
+"d": "1d8 + 2 tranchant"
+}
+]
+},
+{
+"id": "blaireau-geant",
+"n": "Blaireau géant",
+"sz": "M",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 10,
+"can": "",
+"pv": 13,
+"pvd": "2d8 + 4",
+"v": {
+"marche": "9",
+"creusement": "3"
+},
+"st": [
+13,
+10,
+15
+],
+"sens": "vision dans le noir 9 m, Perception passive 11",
+"tr": [
+[
+"Odorat aiguisé",
+"Le blaireau a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+]
+],
+"ac": [
+{
+"n": "Attaques multiples",
+"t": "Le blaireau réalise deux attaques : une avec ses griffes et une de morsure."
+},
+{
+"n": "Griffes",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 6 (2d4 + 1) dégâts tranchants.",
+"b": 3,
+"d": "2d4 + 1 tranchant"
+},
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts perforants.",
+"b": 3,
+"d": "1d6 + 1 perforant"
+}
+]
+},
+{
+"id": "chauve-souris-geante",
+"n": "Chauve-souris géante",
+"sz": "G",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 13,
+"can": "",
+"pv": 22,
+"pvd": "4d10",
+"v": {
+"marche": "3",
+"vol": "18"
+},
+"st": [
+15,
+16,
+11
+],
+"sens": "vision aveugle 18 m, Perception passive 11",
+"tr": [
+[
+"Echolocalisation",
+"La chauve-souris ne peut utiliser sa vision aveugle quand elle est assourdie."
+],
+[
+"Ouie aiguisée",
+"La chauve-souris a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 5 (1d6 + 2) dégâts perforants.",
+"b": 4,
+"d": "1d6 + 2 perforant"
+}
+]
+},
+{
+"id": "cheval-de-selle",
+"n": "Cheval de selle",
+"sz": "G",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 10,
+"can": "",
+"pv": 13,
+"pvd": "2d10 + 2",
+"v": {
+"marche": "18"
+},
+"st": [
+16,
+10,
+12
+],
+"sens": "Perception passive 10",
+"tr": [],
+"ac": [
+{
+"n": "Sabots",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 8 (2d4 + 3) dégâts contondants.",
+"b": 5,
+"d": "2d4 + 3 contondant"
+}
+]
+},
+{
+"id": "cheval-de-trait",
+"n": "Cheval de trait",
+"sz": "G",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 10,
+"can": "",
+"pv": 19,
+"pvd": "3d10 + 3",
+"v": {
+"marche": "12"
+},
+"st": [
+18,
+10,
+12
+],
+"sens": "Perception passive 10",
+"tr": [],
+"ac": [
+{
+"n": "Sabots",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 9 (2d4 + 4) dégâts contondants.",
+"b": 6,
+"d": "2d4 + 4 contondant"
+}
+]
+},
+{
+"id": "chouette-geante",
+"n": "Chouette géante",
+"sz": "G",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 12,
+"can": "",
+"pv": 19,
+"pvd": "3d10 + 3",
+"v": {
+"marche": "50",
+"vol": "18"
+},
+"st": [
+13,
+15,
+12
+],
+"sens": "vision dans le noir 36 m, Perception passive 15",
+"tr": [
+[
+"Repli aérien",
+"La chouette ne provoque pas d'attaques d'opportunité lorsqu'elle quitte l'allonge d'un ennemi en volant."
+],
+[
+"Ouie et vue aiguisées",
+"La chouette a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe ou a la vue."
+]
+],
+"ac": [
+{
+"n": "Serres",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 8 (2d6 + 1) dégâts tranchants.",
+"b": 3,
+"d": "2d6 + 1 tranchant"
+}
+]
+},
+{
+"id": "grenouille-geante",
+"n": "Grenouille géante",
+"sz": "M",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 11,
+"can": "",
+"pv": 18,
+"pvd": "4d8",
+"v": {
+"marche": "9",
+"nage": "9"
+},
+"st": [
+12,
+13,
+11
+],
+"sens": "vision dans le noir 9 m, Perception passive 12",
+"tr": [
+[
+"Amphibien",
+"La grenouille peut respirer aussi bien dans lair que sous l'eau."
+],
+[
+"Saut sans élan",
+"La grenouille peut sauter en longueur jusqu'a 6 m ou en hauteur jusqu'a 3 m, avec ou sans élan."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts perforants, et la cible est agrippée (DD 11 pour s'échapper). Tant qu'elle est agrippée, la cible est entravée, et la grenouille ne peut pas mordre une autre cible.",
+"b": 3,
+"d": "1d6 + 1 perforant"
+},
+{
+"n": "Engloutissement",
+"t": "La grenouille effectue une attaque de morsure contre une cible de taille P ou inférieure qu'elle agrippe. Si l'attaque réussit, la cible est avalée et elle n'est plus agrippée. La créature avalée est aveuglée est entravée, bénéficie d'un abri total contre les attaques ou autres effets provenant de l'extérieur de la grenouille, et subit 5 (2d4) dégâts d'acide au début de chaque tour de la grenouille. La grenouille ne peut avaler qu'une cible a la fois. Si la grenouille meurt, la créature avalée n'est plus entravée et peut sortir du cadavre en utilisant 1,5 m de mouvement, pour alors en émerger et se retrouver a terre."
+}
+]
+},
+{
+"id": "loup",
+"n": "Loup",
+"sz": "M",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 13,
+"can": "armure naturelle",
+"pv": 11,
+"pvd": "2d8 + 2",
+"v": {
+"marche": "12"
+},
+"st": [
+12,
+15,
+12
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat et ouïe aiguisés",
+"Le loup a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou l'ouïe."
+],
+[
+"Tactique de groupe",
+"Le loup a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 meétre ou moins de la créature et n'est pas incapable d'agir."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (2d4 + 2) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 pour ne pas tomber a terre.",
+"b": 4,
+"d": "2d4 + 2 perforant"
+}
+]
+},
+{
+"id": "lezard-geant",
+"n": "Lézard géant",
+"sz": "G",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 12,
+"can": "armure naturelle",
+"pv": 19,
+"pvd": "3d10 + 3",
+"v": {
+"marche": "9",
+"escalade": "9"
+},
+"st": [
+15,
+12,
+13
+],
+"sens": "vision dans le noir 9 m, Perception passive 10",
+"tr": [
+[
+"Apnée (variante)",
+"Le lézard peut retenir son souffle durant 15 minutes (un lézard qui a ce trait posséde également une vitesse de nage de 9 m)."
+],
+[
+"Pattes d'araignée (variante)",
+"Le lézard peut escalader des surfaces difficiles et être au plafond la tête en bas sans avoir besoin d'effectuer un jet de caractéristique."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d8 + 2) dégâts perforants.",
+"b": 4,
+"d": "1d8 + 2 perforant"
+}
+]
+},
+{
+"id": "mille-pattes-geant",
+"n": "Mille-pattes géant",
+"sz": "P",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 13,
+"can": "armure naturelle",
+"pv": 4,
+"pvd": "1d6 + 1",
+"v": {
+"marche": "9",
+"escalade": "9"
+},
+"st": [
+5,
+14,
+12
+],
+"sens": "vision aveugle 9 m, Perception passive 8",
+"tr": [],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 4 (1d4 + 2) dégâts perforants, et la cible doit réussir un jet de sauvegarde de Constitution DD 11 ou subir 10 (3d6) dégâts de poison. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére.",
+"b": 4,
+"d": "1d4 + 2 perforant"
+}
+]
+},
+{
+"id": "panthere",
+"n": "Panthère",
+"sz": "M",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 12,
+"can": "",
+"pv": 13,
+"pvd": "3d8",
+"v": {
+"marche": "15",
+"escalade": "12"
+},
+"st": [
+14,
+15,
+10
+],
+"sens": "Perception passive 14",
+"tr": [
+[
+"Odorat aiguisé",
+"La panthére a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+],
+[
+"Bond agressif",
+"Si la panthére se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 12 pour ne pas tomber & terre. Si la cible est a terre, la panthére peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
+]
+],
+"ac": [
+{
+"n": "Griffes",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d4 + 2) dégâts tranchants.",
+"b": 4,
+"d": "1d4 + 2 tranchant"
+},
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 5 (1d6 + 2) dégâts perforants.",
+"b": 4,
+"d": "1d6 + 2 perforant"
+}
+]
+},
+{
+"id": "sanglier",
+"n": "Sanglier",
+"sz": "M",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 11,
+"can": "armure naturelle",
+"pv": 11,
+"pvd": "2d8 + 2",
+"v": {
+"marche": "12"
+},
+"st": [
+13,
+11,
+12
+],
+"sens": "Perception passive 9",
+"tr": [
+[
+"Charge",
+"Si le sanglier se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible subit 3 (1d6) dégâts tranchants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 ou tomber a terre."
+],
+[
+"Implacable",
+"Si le sanglier subit 7 points de dégâts ou moins qui réduiraient ses points de vie a 0, il se retrouve a la place avec 1 point de vie.",
+"Recharge après un repos court ou long"
+]
+],
+"ac": [
+{
+"n": "Défenses",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts tranchants.",
+"b": 3,
+"d": "1d6 + 1 tranchant"
+}
+]
+},
+{
+"id": "serpent-constricteur",
+"n": "Serpent constricteur",
+"sz": "G",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 12,
+"can": "",
+"pv": 13,
+"pvd": "2d10 + 2",
+"v": {
+"marche": "9",
+"nage": "9"
+},
+"st": [
+15,
+14,
+12
+],
+"sens": "vision aveugle 3 m, Perception passive 10",
+"tr": [],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 5 (1d6 + 2) dégâts perforants.",
+"b": 4,
+"d": "1d6 + 2 perforant"
+},
+{
+"n": "Constriction",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 6 (1d8 + 2) dégâts contondants, et la cible est agrippée (DD 14 pour s'échapper). Tant qu'elle est agrippée, la créature est entravée, et le serpent ne peut pas étreindre une autre cible.",
+"b": 4,
+"d": "1d8 + 2 contondant"
+}
+]
+},
+{
+"id": "serpent-venimeux-geant",
+"n": "Serpent venimeux géant",
+"sz": "M",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 14,
+"can": "",
+"pv": 11,
+"pvd": "2d8 + 2",
+"v": {
+"marche": "9",
+"nage": "9"
+},
+"st": [
+10,
+18,
+13
+],
+"sens": "vision aveugle 3 m, Perception passive 12",
+"tr": [],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 3 m, une cible. Touché : 6 (1d4 + 4) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 10 (3d6) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite.",
+"b": 6,
+"d": "1d4 + 4 perforant"
+}
+]
+},
+{
+"id": "elan",
+"n": "Élan",
+"sz": "G",
+"fp": "1/4",
+"fpn": 0.25,
+"ca": 10,
+"can": "",
+"pv": 13,
+"pvd": "2d10 + 2",
+"v": {
+"marche": "15"
+},
+"st": [
+16,
+10,
+12
+],
+"sens": "Perception passive 10",
+"tr": [
+[
+"Charge",
+"Si l'élan se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber a terre."
+]
+],
+"ac": [
+{
+"n": "Coup de tête",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d6 + 3) dégâts contondants.",
+"b": 5,
+"d": "1d6 + 3 contondant"
+},
+{
+"n": "Sabots",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une créature au sol. Touché : 8 (2d4 + 3) dégâts contondants.",
+"b": 5,
+"d": "2d4 + 3 contondant"
+}
+]
+},
+{
+"id": "cheval-de-guerre",
+"n": "Cheval de guerre",
+"sz": "G",
+"fp": "1/2",
+"fpn": 0.5,
+"ca": 11,
+"can": "",
+"pv": 19,
+"pvd": "3d10 + 3",
+"v": {
+"marche": "18"
+},
+"st": [
+18,
+12,
+13
+],
+"sens": "Perception passive 11",
+"tr": [
+[
+"Charge écrasante",
+"Si un cheval se déplace d'au moins 6 metres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses sabots dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 14 pour ne pas étre jetée a terre. Si la cible est a terre, le cheval peut réaliser une autre attaque contre elle avec ses sabots en tant qu'action bonus."
+]
+],
+"ac": [
+{
+"n": "Sabots",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 11 (2d6 + 4) dégâts contondants.",
+"b": 6,
+"d": "2d6 + 4 contondant"
+}
+]
+},
+{
+"id": "chevre-geante",
+"n": "Chèvre géante",
+"sz": "G",
+"fp": "1/2",
+"fpn": 0.5,
+"ca": 11,
+"can": "armure naturelle",
+"pv": 19,
+"pvd": "3d10 + 3",
+"v": {
+"marche": "12"
+},
+"st": [
+17,
+11,
+12
+],
+"sens": "Perception passive 11",
+"tr": [
+[
+"Charge",
+"Si la chévre se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 5 (2d4) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber a terre."
+],
+[
+"Stable",
+"La chévre a un avantage aux jets de sauvegarde de Force et de Dextérité contre les effets susceptibles de la faire tomber a terre."
+]
+],
+"ac": [
+{
+"n": "Coup de tête",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 8 (2d4 + 3) dégâts contondants.",
+"b": 5,
+"d": "2d4 + 3 contondant"
+}
+]
+},
+{
+"id": "crocodile",
+"n": "Crocodile",
+"sz": "G",
+"fp": "1/2",
+"fpn": 0.5,
+"ca": 12,
+"can": "armure naturelle",
+"pv": 19,
+"pvd": "3d10 + 3",
+"v": {
+"marche": "6",
+"nage": "9"
+},
+"st": [
+15,
+10,
+13
+],
+"sens": "Perception passive 10",
+"tr": [
+[
+"Apnée",
+"Le crocodile peut retenir son souffle durant 15 minutes."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 7 (1d10 + 2) dégâts perforants, et la cible est agrippée (DD 12 pour s'échapper). Tant qu'elle est agrippée, la créature est entravée, et le crocodile ne peut pas mordre une autre cible.",
+"b": 4,
+"d": "1d10 + 2 perforant"
+}
+]
+},
+{
+"id": "grand-singe",
+"n": "Grand singe",
+"sz": "M",
+"fp": "1/2",
+"fpn": 0.5,
+"ca": 12,
+"can": "",
+"pv": 19,
+"pvd": "3d8 + 6",
+"v": {
+"marche": "9",
+"escalade": "9"
+},
+"st": [
+16,
+14,
+14
+],
+"sens": "Perception passive 13",
+"tr": [],
+"ac": [
+{
+"n": "Attaques multiples",
+"t": "Le grand singe réalise deux attaques avec ses poings."
+},
+{
+"n": "Poing",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d6 + 3) dégâts contondants.",
+"b": 5,
+"d": "1d6 + 3 contondant"
+},
+{
+"n": "Rocher",
+"t": "Attaque à distance avec une arme : +5 au toucher, portée 7,50/15 m, une cible. Touché : 6 (1d6 + 3) dégâts contondants.",
+"b": 5,
+"d": "1d6 + 3 contondant"
+}
+]
+},
+{
+"id": "guepe-geante",
+"n": "Guêpe géante",
+"sz": "M",
+"fp": "1/2",
+"fpn": 0.5,
+"ca": 12,
+"can": "",
+"pv": 13,
+"pvd": "3d8",
+"v": {
+"marche": "3",
+"vol": "15"
+},
+"st": [
+10,
+14,
+10
+],
+"sens": "Perception passive 10",
+"tr": [],
+"ac": [
+{
+"n": "Dard",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 5 (1d6 + 2) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 10 (3d6) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére.",
+"b": 4,
+"d": "1d6 + 2 perforant"
+}
+]
+},
+{
+"id": "hippocampe-geant",
+"n": "Hippocampe géant",
+"sz": "G",
+"fp": "1/2",
+"fpn": 0.5,
+"ca": 13,
+"can": "armure naturelle",
+"pv": 16,
+"pvd": "3d10",
+"v": {
+"marche": "0",
+"nage": "12"
+},
+"st": [
+12,
+15,
+11
+],
+"sens": "Perception passive 11",
+"tr": [
+[
+"Charge",
+"Si 'hippocampe se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 ou tomber a terre."
+],
+[
+"Respiration aquatique",
+"L'hippocampe ne peut respirer que sous l'eau."
+]
+],
+"ac": [
+{
+"n": "Coup de tête",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts contondants.",
+"b": 3,
+"d": "1d6 + 1 contondant"
+}
+]
+},
+{
+"id": "ours-noir",
+"n": "Ours noir",
+"sz": "M",
+"fp": "1/2",
+"fpn": 0.5,
+"ca": 11,
+"can": "armure naturelle",
+"pv": 19,
+"pvd": "3d8 + 6",
+"v": {
+"marche": "12",
+"escalade": "9"
+},
+"st": [
+15,
+10,
+14
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat aiguisé",
+"L'ours a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+]
+],
+"ac": [
+{
+"n": "Attaques multiples",
+"t": "L'ours réalise deux attaques : une avec ses griffes et une de morsure."
+},
+{
+"n": "Griffes",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (2d4 + 2) dégâts tranchants.",
+"b": 4,
+"d": "2d4 + 2 tranchant"
+},
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 5 (1d6 + 2) dégâts perforants.",
+"b": 4,
+"d": "1d6 + 2 perforant"
+}
+]
+},
+{
+"id": "requin-de-recif",
+"n": "Requin de récif",
+"sz": "M",
+"fp": "1/2",
+"fpn": 0.5,
+"ca": 12,
+"can": "armure naturelle",
+"pv": 22,
+"pvd": "4d8 + 4",
+"v": {
+"marche": "0",
+"nage": "12"
+},
+"st": [
+4,
+13,
+13
+],
+"sens": "vision aveugle 9 m, Perception passive 12",
+"tr": [
+[
+"Tactique de groupe",
+"Le requin a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+],
+[
+"Respiration aquatique",
+"Le requin ne peut respirer que sous l'eau."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d8 + 2) dégâts perforants.",
+"b": 4,
+"d": "1d8 + 2 perforant"
+}
+]
+},
+{
+"id": "aigle-geant",
+"n": "Aigle géant",
+"sz": "G",
+"fp": "1",
+"fpn": 1.0,
+"ca": 13,
+"can": "",
+"pv": 26,
+"pvd": "4d10 + 4",
+"v": {
+"marche": "3",
+"vol": "24"
+},
+"st": [
+16,
+17,
+13
+],
+"sens": "Perception passive 14",
+"tr": [
+[
+"Vue aiguisée",
+"L'aigle a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."
+]
+],
+"ac": [
+{
+"n": "Attaques multiples",
+"t": "L'aigle réalise deux attaques : une avec son bec et une avec ses serres."
+},
+{
+"n": "Bec",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d6 + 3) dégâts perforants.",
+"b": 5,
+"d": "1d6 + 3 perforant"
+},
+{
+"n": "Serres",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 10 (2d6 + 3) dégâts tranchants.",
+"b": 5,
+"d": "2d6 + 3 tranchant"
+}
+]
+},
+{
+"id": "araignee-geante",
+"n": "Araignée géante",
+"sz": "G",
+"fp": "1",
+"fpn": 1.0,
+"ca": 14,
+"can": "armure naturelle",
+"pv": 26,
+"pvd": "4d10 + 4",
+"v": {
+"marche": "9",
+"escalade": "9"
+},
+"st": [
+14,
+16,
+12
+],
+"sens": "vision aveugle 3 m, vision dans le noir 18 m, Perception",
+"tr": [
+[
+"Déplacement sur la toile",
+"L'araignée ignore les restrictions de mouvement causées par une toile d'araignée."
+],
+[
+"Pattes d'araignée",
+"L'araignée peut escalader des surfaces difficiles et 6tre au plafond la tête en bas sans avoir besoin d'effectuer un jet de caractéristique."
+],
+[
+"Sens de la toile",
+"Lorsqu'elle est en contact avec une toile, l'araignée connait l'emplacement exact de toutes les créatures qui sont en contact avec cette toile."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une créature. Touché : 7 (1d8 + 3) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 9 (2d8) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére.",
+"b": 5,
+"d": "1d8 + 3 perforant"
+},
+{
+"n": "Toile d'araignée",
+"t": "Attaque à distance avec une arme : +5 au toucher, portée 9/18 m, une créature. Touché : la cible est entravée par la toile. Par une action, la cible entravée peut effectuer un jet de Force DD 12, déchirant la toile en cas de réussite. La toile peut aussi étre attaquée et détruite (CA 10 ; pv 5 ; vulnérabilité aux dégâts de feu ; immunités aux dégâts contondants, de poison et psychiques).",
+"r": "Recharge 5-6",
+"b": 5
+}
+]
+},
+{
+"id": "crapaud-geant",
+"n": "Crapaud géant",
+"sz": "G",
+"fp": "1",
+"fpn": 1.0,
+"ca": 11,
+"can": "",
+"pv": 39,
+"pvd": "6d10 + 6",
+"v": {
+"marche": "6",
+"nage": "12"
+},
+"st": [
+15,
+13,
+13
+],
+"sens": "vision dans le noir 9 m, Perception passive 10",
+"tr": [
+[
+"Amphibien",
+"Le crapaud peut respirer aussi bien dans l'air que sous l'eau."
+],
+[
+"Saut sans élan",
+"Le crapaud peut sauter en longueur jusqu'a 6 metres ou en hauteur jusqu'a 3 m, avec ou sans élan."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (1d10 + 2) dégâts perforants + 5 (1d10) dégâts de poison, et la cible est agrippée (DD 13 pour s'échapper). Tant qu'elle est agrippée, la cible est entravée, et le crapaud ne peut pas mordre une autre cible.",
+"b": 4,
+"d": "1d10 + 2 perforant"
+},
+{
+"n": "Engloutissement",
+"t": "Le crapaud effectue une attaque de morsure contre une cible de taille M ou inférieure qu'il agrippe. Si l'attaque réussit, la cible est avalée et elle n'est plus agrippée. La créature avalée est aveuglée et entravée, bénéficie d'un abri total contre les attaques ou autres effets provenant de l'extérieur du crapaud, et subit 10 (3d6) dégâts d'acide au début de chaque tour du crapaud. Le crapaud ne peut avaler qu'une cible a la fois. Si le crapaud meurt, la créature avalée n'est plus entravée et peut sortir du cadavre en utilisant 1,5 m de mouvement, pour alors en émerger et se retrouver a terre."
+}
+]
+},
+{
+"id": "hyene-geante",
+"n": "Hyène géante",
+"sz": "G",
+"fp": "1",
+"fpn": 1.0,
+"ca": 12,
+"can": "",
+"pv": 45,
+"pvd": "6d10 + 12",
+"v": {
+"marche": "15"
+},
+"st": [
+16,
+14,
+14
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Déchainé",
+"Lorsque durant son tour la hyéne fait tomber les points de vie d'une créature a 0 avec une attaque au corps a corps, elle peut utiliser une action bonus pour se déplacer de la moitié de sa vitesse et effectuer une attaque de morsure."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 10 (2d6 + 3) dégâts perforants.",
+"b": 5,
+"d": "2d6 + 3 perforant"
+}
+]
+},
+{
+"id": "lion",
+"n": "Lion",
+"sz": "G",
+"fp": "1",
+"fpn": 1.0,
+"ca": 12,
+"can": "",
+"pv": 26,
+"pvd": "4d10 + 4",
+"v": {
+"marche": "15"
+},
+"st": [
+17,
+15,
+13
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat aiguisé",
+"Le lion a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+],
+[
+"Tactique de groupe",
+"Le lion a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est 4 1,50 m ou moins de la créature et n'est pas incapable d'agir."
+],
+[
+"Bond agressif",
+"Si le lion se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 13 pour ne pas tomber a terre. Si la cible est a terre, le lion peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
+],
+[
+"Saut avec élan",
+"S'il peut prendre une course d'élan de 3 metres, un lion peut sauter jusqu'a 7,50 metres."
+]
+],
+"ac": [
+{
+"n": "Griffes",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d6 + 3) dégâts tranchants.",
+"b": 5,
+"d": "1d6 + 3 tranchant"
+},
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 7 (1d8 + 3) dégâts perforants.",
+"b": 5,
+"d": "1d8 + 3 perforant"
+}
+]
+},
+{
+"id": "loup-sanguinaire",
+"n": "Loup sanguinaire",
+"sz": "G",
+"fp": "1",
+"fpn": 1.0,
+"ca": 14,
+"can": "armure naturelle",
+"pv": 37,
+"pvd": "5d10 + 10",
+"v": {
+"marche": "15"
+},
+"st": [
+17,
+15,
+15
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat et ouïe aiguisés",
+"Le loup a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou louïe."
+],
+[
+"Tactique de groupe",
+"Le loup a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 m ou moins de la créature et n'est pas incapable d'agir."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 10 (2d6 + 3) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 pour ne pas étre jetée a terre.",
+"b": 5,
+"d": "2d6 + 3 perforant"
+}
+]
+},
+{
+"id": "ours-brun",
+"n": "Ours brun",
+"sz": "G",
+"fp": "1",
+"fpn": 1.0,
+"ca": 11,
+"can": "armure naturelle",
+"pv": 34,
+"pvd": "4d10 + 12",
+"v": {
+"marche": "12",
+"escalade": "9"
+},
+"st": [
+19,
+10,
+16
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat aiguisé",
+"L'ours a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+]
+],
+"ac": [
+{
+"n": "Attaques multiples",
+"t": "L'ours réalise deux attaques : une avec ses griffes et une de morsure."
+},
+{
+"n": "Griffes",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 11 (2d6 + 4) dégâts tranchants.",
+"b": 6,
+"d": "2d6 + 4 tranchant"
+},
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 8 (1d8 + 4) dégâts perforants.",
+"b": 6,
+"d": "1d8 + 4 perforant"
+}
+]
+},
+{
+"id": "pieuvre-geante",
+"n": "Pieuvre géante",
+"sz": "G",
+"fp": "1",
+"fpn": 1.0,
+"ca": 11,
+"can": "",
+"pv": 52,
+"pvd": "8d10 + 8",
+"v": {
+"marche": "3",
+"nage": "18"
+},
+"st": [
+17,
+13,
+13
+],
+"sens": "vision dans le noir 18 m, Perception passive 14",
+"tr": [
+[
+"Apnée",
+"La pieuvre peut retenir son souffle durant 1 heure hors de l'eau."
+],
+[
+"Camouflage dans l'eau",
+"La pieuvre a un avantage aux jets de Dextérité (Discrétion) réalisés lorsqu'elle se trouve sous l'eau."
+],
+[
+"Respiration aquatique",
+"La pieuvre ne peut respirer que sous l'eau."
+]
+],
+"ac": [
+{
+"n": "Tentacules",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 4,50 m, une cible. Touché : 10 (2d6 + 3) dégâts contondants, et la cible est agrippée (DD 16 pour s'échapper). Tant qu'elle est agrippée, la créature est entravée, et la pieuvre ne peut pas utiliser ses tentacules contre une autre cible.",
+"b": 5,
+"d": "2d6 + 3 contondant"
+},
+{
+"n": "Nuage d'encre",
+"t": "Un nuage d'encre de 6 m de rayon s'étend autours de la pieuvre si elle se trouve sous l'eau. La visibilité dans la zone est nulle pendant 1 minute, bien qu'un fort courant puisse disperser l'encre. Après avoir projeté son nuage d'encre, la pieuvre peut réaliser l'action Foncer en tant qu'action bonus.",
+"r": "Recharge après un repos court ou long"
+}
+]
+},
+{
+"id": "tigre",
+"n": "Tigre",
+"sz": "G",
+"fp": "1",
+"fpn": 1.0,
+"ca": 12,
+"can": "",
+"pv": 37,
+"pvd": "5d10 + 10",
+"v": {
+"marche": "12"
+},
+"st": [
+17,
+15,
+14
+],
+"sens": "vision dans le noir 18 m, Perception passive 13",
+"tr": [
+[
+"Odorat aiguisé",
+"Le tigre a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+],
+[
+"Bond agressif",
+"Si le tigre se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 13 pour ne pas tomber a terre. Si la cible est a terre, le tigre peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
+]
+],
+"ac": [
+{
+"n": "Griffes",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 7 (1d8 + 3) dégâts tranchants.",
+"b": 5,
+"d": "1d8 + 3 tranchant"
+},
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 8 (1d10 + 3) dégâts perforants.",
+"b": 5,
+"d": "1d10 + 3 perforant"
+}
+]
+},
+{
+"id": "vautour-geant",
+"n": "Vautour géant",
+"sz": "G",
+"fp": "1",
+"fpn": 1.0,
+"ca": 10,
+"can": "",
+"pv": 22,
+"pvd": "3d10 + 6",
+"v": {
+"marche": "3",
+"vol": "18"
+},
+"st": [
+15,
+10,
+15
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat et vue aiguisés",
+"Le vautour a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou la vue."
+],
+[
+"Tactique de groupe",
+"Le vautour a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 metre ou moins de la créature et n'est pas incapable d'agir."
+]
+],
+"ac": [
+{
+"n": "Attaques multiples",
+"t": "Le vautour réalise deux attaques : une avec son bec et une avec ses serres."
+},
+{
+"n": "Bec",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (2d4 + 2) dégâts perforants.",
+"b": 4,
+"d": "2d4 + 2 perforant"
+},
+{
+"n": "Serres",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 9 (2d6 + 2) dégâts tranchants. Les vautours géants ont une intelligence évoluée et un penchant malveillant.",
+"b": 5,
+"d": "2d6 + 2 tranchant"
+}
+]
+},
+{
+"id": "ours-polaire",
+"n": "Ours polaire",
+"sz": "G",
+"fp": "2",
+"fpn": 2.0,
+"ca": 12,
+"can": "armure naturelle",
+"pv": 42,
+"pvd": "5d10 + 15",
+"v": {
+"marche": "12",
+"nage": "9"
+},
+"st": [
+20,
+10,
+16
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat aiguisé",
+"L'ours a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+]
+],
+"ac": [
+{
+"n": "Attaques multiples",
+"t": "L'ours réalise deux attaques : une avec ses griffes et une de morsure."
+},
+{
+"n": "Griffes",
+"t": "Attaque au corps à corps avec une arme : +7 au toucher, allonge 1,5 m, une cible. Touché : 12 (2d6 + 5) dégâts tranchants.",
+"b": 7,
+"d": "2d6 + 5 tranchant"
+},
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +7 au toucher, allonge 1,5 m, une cible. Touché : 9 (1d8 + 5) dégâts perforants.",
+"b": 7,
+"d": "1d8 + 5 perforant"
+}
+]
+},
+{
+"id": "requin-chasseur",
+"n": "Requin-chasseur",
+"sz": "G",
+"fp": "2",
+"fpn": 2.0,
+"ca": 12,
+"can": "armure naturelle",
+"pv": 45,
+"pvd": "6d10 + 12",
+"v": {
+"marche": "0",
+"nage": "12"
+},
+"st": [
+18,
+13,
+15
+],
+"sens": "vision aveugle 9 m, Perception passive 12",
+"tr": [
+[
+"Frénésie sanguinaire",
+"Le requin a un avantage aux jets d'attaque au corps à corps contre une créature qui n'a pas tous ses points de vie."
+],
+[
+"Respiration aquatique",
+"Le requin ne peut respirer que sous l'eau."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 13 (2d8 + 4) dégâts perforants.",
+"b": 6,
+"d": "2d8 + 4 perforant"
+}
+]
+},
+{
+"id": "rhinoceros",
+"n": "Rhinocéros",
+"sz": "G",
+"fp": "2",
+"fpn": 2.0,
+"ca": 11,
+"can": "armure naturelle",
+"pv": 45,
+"pvd": "6d10 + 12",
+"v": {
+"marche": "12"
+},
+"st": [
+21,
+8,
+15
+],
+"sens": "Perception passive 11",
+"tr": [
+[
+"Charge",
+"Si le rhinocéros se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec sa corne dans le même tour, la cible subit 9 (2d8) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 15 ou tomber a terre."
+]
+],
+"ac": [
+{
+"n": "Corne",
+"t": "Attaque au corps à corps avec une arme : +7 au toucher, allonge 1,5 m, une cible. Touché : 14 (2d8 + 5) dégâts contondants.",
+"b": 7,
+"d": "2d8 + 5 contondant"
+}
+]
+},
+{
+"id": "sanglier-geant",
+"n": "Sanglier géant",
+"sz": "G",
+"fp": "2",
+"fpn": 2.0,
+"ca": 12,
+"can": "armure naturelle",
+"pv": 42,
+"pvd": "5d10 + 15",
+"v": {
+"marche": "12"
+},
+"st": [
+17,
+10,
+16
+],
+"sens": "Perception passive 8",
+"tr": [
+[
+"Charge",
+"Si le sanglier se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible subit 7 (2d6) dégâts tranchants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber a terre."
+],
+[
+"Implacable",
+"Si le sanglier subit 10 points de dégâts ou moins qui réduiraient ses points de vie a 0, il se retrouve a la place avec 1 point de vie.",
+"Recharge après un repos court ou long"
+]
+],
+"ac": [
+{
+"n": "Défenses",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 10 (2d6 + 3) dégâts tranchants.",
+"b": 5,
+"d": "2d6 + 3 tranchant"
+}
+]
+},
+{
+"id": "serpent-constricteur-geant",
+"n": "Serpent constricteur géant",
+"sz": "TG",
+"fp": "2",
+"fpn": 2.0,
+"ca": 12,
+"can": "",
+"pv": 60,
+"pvd": "8d12 + 8",
+"v": {
+"marche": "9",
+"nage": "9"
+},
+"st": [
+19,
+14,
+12
+],
+"sens": "vision aveugle 3 m, Perception passive 12",
+"tr": [],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 3 m, une créature. Touché : 11 (2d6 + 4) dégâts perforants.",
+"b": 6,
+"d": "2d6 + 4 perforant"
+},
+{
+"n": "Constriction",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une créature. Touché : 13 (2d8 + 4) dégâts contondants, et la cible est agrippée (DD 16 pour s'échapper). Tant qu'elle est agrippée, la créature est entravée, et le serpent ne peut pas étreindre une autre cible.",
+"b": 6,
+"d": "2d8 + 4 contondant"
+}
+]
+},
+{
+"id": "tigre-a-dents-de-sabre",
+"n": "Tigre à dents de sabre",
+"sz": "G",
+"fp": "2",
+"fpn": 2.0,
+"ca": 12,
+"can": "",
+"pv": 52,
+"pvd": "7d10 + 14",
+"v": {
+"marche": "12"
+},
+"st": [
+18,
+14,
+15
+],
+"sens": "Perception passive 13",
+"tr": [
+[
+"Odorat aiguisé",
+"Le tigre a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+],
+[
+"Bond agressif",
+"Si le tigre se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 14 pour ne pas tomber a terre. Si la cible est a terre, le tigre peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
+]
+],
+"ac": [
+{
+"n": "Griffes",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 12 (2d6 + 5) dégâts tranchants.",
+"b": 6,
+"d": "2d6 + 5 tranchant"
+},
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 10 (1d10 + 5) dégâts perforants.",
+"b": 6,
+"d": "1d10 + 5 perforant"
+}
+]
+},
+{
+"id": "elan-geant",
+"n": "Élan géant",
+"sz": "TG",
+"fp": "2",
+"fpn": 2.0,
+"ca": 14,
+"can": "armure naturelle",
+"pv": 42,
+"pvd": "5d12 + 10",
+"v": {
+"marche": "18"
+},
+"st": [
+19,
+16,
+14
+],
+"sens": "Perception passive 14",
+"tr": [
+[
+"Charge",
+"Si l'élan se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 14 ou tomber a terre."
+]
+],
+"ac": [
+{
+"n": "Coup de tête",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 3 m, une cible. Touché : 11 (2d6 + 4) dégâts contondants.",
+"b": 6,
+"d": "2d6 + 4 contondant"
+},
+{
+"n": "Sabots",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une créature au sol. Touché : 22 (4d8 + 4) dégâts contondants.",
+"b": 6,
+"d": "4d8 + 4 contondant"
+}
+]
+},
+{
+"id": "scorpion-geant",
+"n": "Scorpion géant",
+"sz": "G",
+"fp": "3",
+"fpn": 3.0,
+"ca": 15,
+"can": "armure naturelle",
+"pv": 52,
+"pvd": "7d10 + 14",
+"v": {
+"marche": "12"
+},
+"st": [
+15,
+13,
+15
+],
+"sens": "vision aveugle 18 m, Perception passive 9",
+"tr": [],
+"ac": [
+{
+"n": "Attaques multiples",
+"t": "Le scorpion réalise trois attaques : deux avec ses pinces et une avec son aiguillon."
+},
+{
+"n": "Pinces",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 6 (1d8 + 2) dégâts contondants, et la cible est agrippée (DD 12 pour s'échapper). Le scorpion a deux pinces, chacune lui permettant d'agripper une cible.",
+"b": 4,
+"d": "1d8 + 2 contondant"
+},
+{
+"n": "Dard",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 7 (1d10 + 2) dégâts perforants et la cible doit réaliser un jet de sauvegarde de Constitution DD 12, subissant 22 (4d10) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite.",
+"b": 4,
+"d": "1d10 + 2 perforant"
+}
+]
+},
+{
+"id": "epaulard",
+"n": "Épaulard",
+"sz": "TG",
+"fp": "3",
+"fpn": 3.0,
+"ca": 12,
+"can": "armure naturelle",
+"pv": 90,
+"pvd": "12d12 + 12",
+"v": {
+"marche": "0",
+"nage": "18"
+},
+"st": [
+19,
+10,
+13
+],
+"sens": "vision aveugle 36 m, Perception passive 13",
+"tr": [
+[
+"Echolocalisation",
+"L'épaulard ne peut pas utiliser sa vision aveugle s'il est assourdi."
+],
+[
+"Apnée",
+"L'épaulard peut retenir son souffle durant 30 minutes."
+],
+[
+"Ouie aiguisée",
+"L'épaulard a un avantage aux jets de Sagesse (Perception) basés sur l'ouïe."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +6 au toucher, allonge 1,5 m, une cible. Touché : 21 (5d6 + 4) dégâts perforants.",
+"b": 6,
+"d": "5d6 + 4 perforant"
+}
+]
+},
+{
+"id": "elephant",
+"n": "Éléphant",
+"sz": "TG",
+"fp": "4",
+"fpn": 4.0,
+"ca": 12,
+"can": "armure naturelle",
+"pv": 76,
+"pvd": "8d12 + 24",
+"v": {
+"marche": "12"
+},
+"st": [
+22,
+9,
+17
+],
+"sens": "Perception passive 10",
+"tr": [
+[
+"Charge écrasante",
+"Si l'éléphant se déplace d'au moins 6 metres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 12 pour ne pas 6tre jetée a terre. Si la cible est a terre, l'éléphant peut réaliser une attaque de piétinement contre celle-ci par une action bonus."
+]
+],
+"ac": [
+{
+"n": "Défenses",
+"t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 1,5 m, une cible. Touché : 19 (3d8 + 6) dégâts perforants.",
+"b": 8,
+"d": "3d8 + 6 perforant"
+},
+{
+"n": "Piétinement",
+"t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 1,5 m, une créature a terre. Touché : 22 (3d10 + 6) dégâts contondants.",
+"b": 8,
+"d": "3d10 + 6 contondant"
+}
+]
+},
+{
+"id": "crocodile-geant",
+"n": "Crocodile géant",
+"sz": "TG",
+"fp": "5",
+"fpn": 5.0,
+"ca": 14,
+"can": "armure naturelle",
+"pv": 85,
+"pvd": "9d12 + 27",
+"v": {
+"marche": "9",
+"nage": "15"
+},
+"st": [
+21,
+9,
+17
+],
+"sens": "Perception passive 10",
+"tr": [
+[
+"Apnée",
+"Le crocodile peut retenir son souffle durant 30 minutes."
+]
+],
+"ac": [
+{
+"n": "Attaques multiples",
+"t": "Le crocodile réalise deux attaques : une de morsure et une avec sa queue."
+},
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 1,5 m, une cible. Touché : 21 (3d10 + 5) dégâts perforants, et la cible est agrippée (DD 16 pour s'échapper). Tant qu'elle est agrippée, la créature est entravée, et le crocodile ne peut pas mordre une autre cible.",
+"b": 8,
+"d": "3d10 + 5 perforant"
+},
+{
+"n": "Queue",
+"t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 3 m, une cible qui n'est pas agrippée par le crocodile. Touché : 14 (2d8 + 5) dégâts contondants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 16 pour ne pas étre jetée au sol.",
+"b": 8,
+"d": "2d8 + 5 contondant"
+}
+]
+},
+{
+"id": "requin-geant",
+"n": "Requin géant",
+"sz": "TG",
+"fp": "5",
+"fpn": 5.0,
+"ca": 13,
+"can": "armure naturelle",
+"pv": 126,
+"pvd": "11d12 + 55",
+"v": {
+"marche": "0",
+"nage": "15"
+},
+"st": [
+23,
+11,
+21
+],
+"sens": "vision aveugle 18 m, Perception passive 13",
+"tr": [
+[
+"Frénésie sanguinaire",
+"Le requin a un avantage aux jets d'attaque au corps à corps contre une créature qui n'a pas tous ses points de vie."
+],
+[
+"Respiration aquatique",
+"Le requin ne peut respirer que sous l'eau."
+]
+],
+"ac": [
+{
+"n": "Morsure",
+"t": "Attaque au corps à corps avec une arme : +9 au toucher, allonge 1,5 m, une cible. Touché : 22 (3d10 + 6) dégâts perforants.",
+"b": 9,
+"d": "3d10 + 6 perforant"
+}
+]
+},
+{
+"id": "mammouth",
+"n": "Mammouth",
+"sz": "TG",
+"fp": "6",
+"fpn": 6.0,
+"ca": 13,
+"can": "armure naturelle",
+"pv": 126,
+"pvd": "11d12 + 55",
+"v": {
+"marche": "12"
+},
+"st": [
+24,
+9,
+21
+],
+"sens": "Perception passive 10",
+"tr": [
+[
+"Charge écrasante",
+"Si le mammouth se déplace d'au moins 6 metres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 18 pour ne pas 6tre jetée a terre. Si la cible est a terre, le mammouth peut réaliser une attaque de piétinement contre celle-ci par une action bonus."
+]
+],
+"ac": [
+{
+"n": "Défenses",
+"t": "Attaque au corps à corps avec une arme : +10 au toucher, allonge 3 m, une cible. Touché : 25 (4d8 + 7) dégâts perforants.",
+"b": 10,
+"d": "4d8 + 7 perforant"
+},
+{
+"n": "Piétinement",
+"t": "Attaque au corps à corps avec une arme : +10 au toucher, allonge 1,5 m, une créature a terre. Touché : 29 (4d10 + 7) dégâts contondants.",
+"b": 10,
+"d": "4d10 + 7 contondant"
+}
+]
+},
+{
+"id": "singe-geant",
+"n": "Singe géant",
+"sz": "TG",
+"fp": "7",
+"fpn": 7.0,
+"ca": 12,
+"can": "",
+"pv": 157,
+"pvd": "15d12 + 60",
+"v": {
+"marche": "12",
+"escalade": "12"
+},
+"st": [
+23,
+14,
+18
+],
+"sens": "Perception passive 14",
+"tr": [],
+"ac": [
+{
+"n": "Attaques multiples",
+"t": "Le singe réalise deux attaques avec ses poings."
+},
+{
+"n": "Poing",
+"t": "Attaque au corps à corps avec une arme : +9 au toucher, allonge 3 m, une cible. Touché : 22 (3d10 + 6) dégâts contondants.",
+"b": 9,
+"d": "3d10 + 6 contondant"
+},
+{
+"n": "Rocher",
+"t": "Attaque à distance avec une arme : +9 au toucher, portée 15/30 m, une cible. Touché : 30 (7d6 + 6) dégâts contondants.",
+"b": 9,
+"d": "7d6 + 6 contondant"
+}
+]
+}
 ]

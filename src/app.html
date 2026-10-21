@@ -387,6 +387,7 @@ body.lu-on, body.ws-on { overflow: hidden; }
 .bstats span { font-family: var(--f-sc); font-size: 11.5px; color: var(--muted); letter-spacing: .05em; }
 .btr, .bact.txt { font-size: 13.5px; line-height: 1.4; }
 .bact { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 14px; }
+.rchg { font-size: 11.5px; padding: 0 5px; margin-left: 6px; font-weight: 600; }
 .brest { flex-basis: 100%; font-size: 13px; color: var(--muted); }
 .wsactive { background: var(--rubric-soft); border: 1.5px solid var(--rubric); border-radius: 10px; padding: 12px 14px; display: grid; gap: 9px; margin: 6px 0 14px; scroll-margin-top: 12px; }
 .wsh { display: flex; justify-content: space-between; align-items: baseline; }
@@ -908,13 +909,14 @@ const MV = { nage: "nage", escalade: "escalade", vol: "vol", creusement: "creuse
 const wsAllowed = (g, b) => b.fpn <= DRU.fp(g) && !(b.v.nage && g.level < 4) && !(b.v.vol && g.level < 8);
 const spdTxt = b => [b.v.marche && b.v.marche !== "0" ? `${b.v.marche} m` : "", ...Object.keys(MV).filter(k => b.v[k]).map(k => `${k} ${b.v[k]} m`)].filter(Boolean).join(" · ");
 const modOf = n => signed(Math.floor((n - 10) / 2));
+const rchg = r => r ? `<span class="kp f rchg">${/repos/.test(r) ? "1 fois par repos" : esc(r.replace(/^Recharge/, "recharge"))}</span>` : "";
 function beastActs(b, compact) {
   return b.ac.map(a => {
     if (a.b != null && a.d) {
       const rest = a.t.replace(/^.*?Touché ?: ?[^.]*\.\s*/, "");
-      return `<div class="bact"><b>${esc(a.n)}</b><span class="kp a">${signed(a.b)}</span><span class="kp d">${esc(a.d)}</span>${!compact && rest ? `<span class="brest">${esc(rest)}</span>` : ""}</div>`;
+      return `<div class="bact"><b>${esc(a.n)}</b>${rchg(a.r)}<span class="kp a">${signed(a.b)}</span><span class="kp d">${esc(a.d)}</span>${!compact && rest ? `<span class="brest">${esc(rest)}</span>` : ""}</div>`;
     }
-    return `<div class="bact txt"><b>${esc(a.n)}</b> <span>${esc(compact && a.t.length > 90 ? a.t.slice(0, a.t.indexOf(".", 40) + 1 || 90) : a.t)}</span></div>`;
+    return `<div class="bact txt"><b>${esc(a.n)}</b>${rchg(a.r)} <span>${esc(compact && a.t.length > 90 ? a.t.slice(0, a.t.indexOf(".", 40) + 1 || 90) : a.t)}</span></div>`;
   }).join("");
 }
 function beastCard(g, b) {
@@ -922,7 +924,7 @@ function beastCard(g, b) {
   <div class="kps"><span class="kp">CA ${b.ca}</span><span class="kp">PV ${b.pv} (${esc(b.pvd)})</span><span class="kp">${esc(spdTxt(b))}</span></div>
   <div class="bstats">${["FOR", "DEX", "CON"].map((l, i) => `<div><span>${l}</span><b>${b.st[i]} (${modOf(b.st[i])})</b></div>`).join("")}</div>
   <span class="muted" style="font-size:12.5px">INT, SAG et CHA : les tiens. ${b.sens ? `Sens : ${esc(b.sens)}.` : ""}</span>
-  ${b.tr.map(([n, d]) => `<div class="btr"><b>${esc(n)}.</b> ${esc(d)}</div>`).join("")}
+  ${b.tr.map(([n, d, r]) => `<div class="btr"><b>${esc(n)}.</b>${rchg(r)} ${esc(d)}</div>`).join("")}
   ${b.ac.length ? `<span class="lusub">Actions</span>${beastActs(b)}` : `<span class="muted">Aucune attaque.</span>`}</div>`;
 }
 function wsSheetHTML(g) {
