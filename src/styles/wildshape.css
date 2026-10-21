@@ -1,0 +1,41 @@
+/* Forme sauvage : formes possibles, fiche de bête, forme active */
+/* Forme sauvage */
+.wsbody { gap: 0; }
+.wsbody .rubric { margin-top: 12px; }
+.wsrow .jline { gap: 8px; }
+.wsrow .jmain { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; flex: 1; }
+.wsfav { flex: none; background: transparent; border: 0; font-size: 20px; line-height: 1; color: var(--pn-bd); padding: 4px 2px; min-width: 32px; min-height: 32px; }
+.wsfav.on { color: var(--rubric); }
+.wsfav.off { color: var(--rule); display: inline-flex; align-items: center; justify-content: center; }
+.wsrow.locked .jname, .wsrow.locked .flv { color: var(--muted); }
+.wsmini { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bcard { display: grid; gap: 7px; padding: 8px 0 4px; }
+.bstats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
+.bstats div { border: 1px solid var(--rule); border-radius: 6px; padding: 4px 6px; display: grid; text-align: center; }
+.bstats span { font-family: var(--f-sc); font-size: 11.5px; color: var(--muted); letter-spacing: .05em; }
+.bskill { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 6px; font-size: 14px; }
+.bskill b { margin-right: 2px; }
+.btr, .bact.txt { font-size: 13.5px; line-height: 1.4; }
+.bact { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 14px; }
+.rchg { font-size: 11.5px; padding: 0 5px; margin-left: 6px; font-weight: 600; }
+.brest { flex-basis: 100%; font-size: 13px; color: var(--muted); }
+.wsactive { background: var(--rubric-soft); border: 1.5px solid var(--rubric); border-radius: 10px; padding: 12px 14px; display: grid; gap: 9px; margin: 6px 0 14px; scroll-margin-top: 12px; }
+.wsh { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; background: transparent; border: 0; padding: 2px 0; margin: 0; font: inherit; color: inherit; text-align: left; width: 100%; cursor: pointer; }
+.wsh .muted { font-size: 13px; }
+.wsn small { font-family: var(--f-body, inherit); font-size: 15px; font-weight: 400; color: var(--muted); }
+.wsactive .bcard { border-top: 1px solid var(--rule); padding-top: 9px; }
+.wsh .k { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--pa-fg); }
+.wsn { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.wsn b { font-family: var(--f-display); font-size: 21px; font-weight: 600; }
+.wsn .hp { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.wsn .hp small { font-size: 14px; color: var(--muted); font-weight: 400; }
+.wsactive .bar { height: 7px; border-radius: 4px; background: var(--surface); border: 1px solid var(--rule); overflow: hidden; }
+.wsactive .bar span { display: block; height: 100%; background: var(--rubric); }
+.wsdmg { display: flex; gap: 6px; align-items: center; }
+.wsdmg label { font-family: var(--f-sc); font-size: 12px; color: var(--muted); }
+.wsdmg input { width: 5em; flex: 0 0 auto; }
+.wsacts { display: grid; gap: 4px; }
+.wscf { display: grid; gap: 6px; border-top: 1px solid var(--rule); padding-top: 8px; }
+.wscf .chip small { color: var(--muted); font-weight: 400; }
+.wsactive .cast { display: flex; gap: 8px; flex-wrap: wrap; }
+.slotbar .chip.ws { background: var(--surface); border-color: var(--rubric); color: var(--pa-fg); font-weight: 700; }

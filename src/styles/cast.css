@@ -1,0 +1,45 @@
+/* Lancer un sort, barre fixe des emplacements, concentration */
+/* Lancer un sort */
+.cast { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
+.btn.cast-go { background: var(--rubric); border-color: var(--rubric); color: var(--surface); font-weight: 500; padding: 7px 14px; }
+.btn.cast-up { padding: 7px 11px; }
+.btn.cast-rit { border-color: var(--ok); color: var(--ok); padding: 7px 14px; }
+.btn.cast-none { border-style: dashed; background: transparent; color: var(--muted); padding: 7px 14px; }
+.chooser { margin-top: 8px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 10px; display: grid; gap: 8px; max-width: 420px; }
+.chooser .lbl { font-family: var(--f-sc); font-size: 12px; letter-spacing: .05em; color: var(--muted); }
+.chooser .lvls { display: flex; flex-wrap: wrap; gap: 6px; }
+.chooser .lvls .btn { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; border-color: var(--rubric); color: var(--pa-fg); }
+.chooser .lvls .btn small { font-size: 12px; }
+.chooser .hint { font-size: 13.5px; color: var(--pd-fg); background: var(--pd-bg); border-radius: 5px; padding: 6px 8px; }
+/* Barre fixe des emplacements */
+.slotbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; background: var(--surface); border-top: 1px solid var(--rule); padding: 0 16px env(safe-area-inset-bottom, 0px); color: var(--ink); }
+.slotbar .fx { display: flex; gap: 6px; padding-top: 8px; overflow-x: auto; scrollbar-width: none; }
+.slotbar .chip { flex: none; font-size: 13px; border-radius: 999px; padding: 3px 10px; white-space: nowrap; border: 1px solid var(--pf-bd); background: var(--pf-bg); color: var(--pf-fg); }
+.slotbar .chip.conc { background: var(--rubric); border-color: var(--rubric); color: var(--surface); font-weight: 700; }
+.slotbar .line { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 54px; background: transparent; border: 0; padding: 0; color: inherit; text-align: left; }
+.slotbar .grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; min-width: 0; }
+.slotbar .lv { display: inline-flex; align-items: center; gap: 4px; }
+.slotbar .lv b { font-family: var(--f-display); font-size: 15px; margin-right: 2px; }
+.slotbar .d { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--rubric); box-sizing: border-box; display: inline-block; }
+.slotbar .d.u { background: var(--rubric); }
+#slots-top { scroll-margin-top: 12px; }
+.slotbar .go { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
+/* Panneau de concentration */
+.concpanel { position: fixed; left: 10px; right: 10px; bottom: calc(var(--barh, 58px) + 8px); z-index: 6; max-width: 520px; margin: 0 auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 6px 20px rgba(27,33,54,.18); padding: 12px 14px; display: grid; gap: 10px; }
+.concpanel .head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.concpanel .head b { font-family: var(--f-display); font-size: 17px; }
+.concpanel p { margin: 0; font-size: 14px; line-height: 1.4; }
+.concpanel .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.concpanel input { width: 80px; }
+.kp { display: inline-block; font-size: 13px; font-weight: 700; border: 1.2px solid var(--pn-bd); border-radius: 4px; padding: 1px 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.kp.d { background: var(--pd-bg); border-color: var(--pd-bd); color: var(--pd-fg); }
+.kp.a { background: var(--pa-bg); border-color: var(--pa-bd); color: var(--pa-fg); }
+.kp.s { background: var(--ps-bg); border-color: var(--ps-bd); color: var(--ps-fg); }
+.kp.f { background: var(--pf-bg); border-color: var(--pf-bd); color: var(--pf-fg); }
+.concwarn { margin-top: 8px; background: var(--surface); border: 1.5px solid var(--warn); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; max-width: 520px; font-size: 14.5px; line-height: 1.4; }
+.concwarn .cast { margin-top: 4px; }
+.wsprimal { font-size: 13.5px; line-height: 1.45; }
+.wsprimal .kp { margin-right: 4px; }
+.wsactive .wsconc { margin-top: 0; max-width: none; }
+.live { font-size: 12.5px; font-weight: 700; color: var(--rubric); white-space: nowrap; margin-left: 6px; }

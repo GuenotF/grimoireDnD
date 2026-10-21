@@ -1,0 +1,11 @@
+/* Bibliothèque */
+/* Bibliothèque */
+.filters { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r); padding: 12px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--rule); background: var(--bg); border-radius: 999px; padding: 3px 11px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip.dim { color: var(--muted); }
+.frow { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+.frow .field { flex: 1 1 200px; }
+.found { font-size: 13.5px; color: var(--muted); margin: 10px 0 0; }
+

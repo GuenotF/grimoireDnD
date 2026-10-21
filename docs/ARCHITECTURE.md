@@ -1,6 +1,6 @@
 # Architecture cible de l'Atelier du Grimoire
 
-*Validé le 21 octobre 2026. Étape 0 faite le 21 octobre 2026.*
+*Validé le 21 octobre 2026. Étapes 0 et 1 faites le 21 octobre 2026.*
 
 ## 1. Objectifs
 
@@ -97,7 +97,7 @@ Chaque étape fait l'objet d'une publication séparée. On ne publie que si les 
 | Étape | Contenu | Effort |
 |---|---|---|
 | 0 ✓ | Outillage : esbuild branché dans `build.py`, le code actuel passe par esbuild sans être découpé ; abandon de la variante claude.ai | ½ itération |
-| 1 | Outils et données : `format.js`, import direct des JSON, CSS découpé | ½ |
+| 1 ✓ | Outils et données : `format.js`, `data.js` (import direct des JSON), CSS découpé en 13 fichiers | ½ |
 | 2 | Noyau : état, stockage, version du format, rendu, registre des actions ; retrait de `S.readonly` (toujours faux depuis l'étape 0) | 1 |
 | 3 | Classes : magicien, paladin, druide derrière le contrat ; suppression des `isX` | 1 |
 | 4 | Mécaniques partagées : sorts, bibliothèque, Forme sauvage, passage de niveau, impression, sauvegarde | ½ |

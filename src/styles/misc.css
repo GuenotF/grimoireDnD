@@ -1,0 +1,25 @@
+/* Divers : boutons, champs, bannières, message d'annulation */
+/* Divers */
+.extras { display: grid; gap: 0; }
+.extra { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 10px; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--rule); }
+.extra .n { font-family: var(--f-display); font-weight: 700; }
+.extra.edit { grid-template-columns: minmax(0,1fr); background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r); padding: 10px 12px; margin: 6px 0; }
+.extra.edit .fields { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); gap: 8px; }
+@media (max-width: 640px) { .extra.edit .fields { grid-template-columns: 1fr; } }
+.extra.edit .bar { display: flex; gap: 8px; justify-content: flex-end; }
+.extra.edit textarea { min-height: 42px; }
+.addrow { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,2fr) auto auto; gap: 8px; margin-top: 10px; }
+@media (max-width: 640px) { .addrow { grid-template-columns: 1fr 1fr; } }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0 28px; }
+@media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+.rules p { margin: 0 0 8px; font-size: 14.5px; max-width: 65ch; }
+.rules b { color: var(--rubric); font-weight: 500; }
+.confirm { color: var(--warn); border-color: var(--warn); }
+.banner { margin-top: 14px; padding: 10px 12px; border-radius: var(--r); background: var(--surface); border: 1px dashed var(--rule); font-size: 14.5px; }
+.welcome { margin-top: 40px; display: grid; gap: 14px; justify-items: start; max-width: 60ch; }
+.welcome h1 { font-family: var(--f-display); font-weight: 500; font-size: 40px; margin: 0; }
+.welcome h1 .initial { color: var(--rubric); font-weight: 700; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: var(--r); font-size: 14px; z-index: 9; max-width: calc(100% - 32px); width: max-content; display: flex; align-items: center; gap: 14px; }
+.toast.above-bar { bottom: calc(var(--barh, 58px) + 16px); }
+.toast.on-top { bottom: auto; top: calc(14px + env(safe-area-inset-top, 0px)); }
+.toast .undo { background: transparent; border: 0; color: var(--rubric-soft); font-weight: 700; padding: 4px 2px; }

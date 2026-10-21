@@ -1,0 +1,43 @@
+/* Paladin et druide : ressources, capacités, volets */
+/* Paladin */
+.slots.res { display: grid; gap: 8px; }
+.resrow { display: flex; align-items: center; gap: 10px; }
+.resrow .rn { flex: 1; min-width: 0; display: grid; }
+.resrow .rn b { font-family: var(--f-display); font-size: 16.5px; }
+.resrow .rn small { font-size: 12.5px; color: var(--muted); }
+.resrow .rv { font-family: var(--f-display); font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.resrow .rv small { font-size: 14px; color: var(--muted); font-weight: 500; }
+.resrow.sep { border-top: 1px dashed var(--rule); padding-top: 8px; }
+.capname { background: transparent; border: 0; padding: 0; text-align: left; font-family: var(--f-display); font-weight: 700; font-size: 16.5px; color: var(--ink); }
+.capname .chev { font-family: var(--f-body); font-weight: 400; font-size: 12px; color: var(--muted); margin-left: 5px; }
+.capbody { display: grid; gap: 8px; padding: 2px 0 6px; }
+.capbody .eff { font-size: 14px; line-height: 1.4; }
+.capopt { display: grid; gap: 6px; border-left: 3px solid var(--pf-bd); padding-left: 10px; }
+.capopt + .capopt { border-left-color: var(--rubric); }
+.jrow.feat .jline { gap: 8px; }
+.flv { flex: none; font-family: var(--f-sc); font-size: 11.5px; letter-spacing: .04em; color: var(--muted); border: 1px solid var(--pn-bd); border-radius: 4px; padding: 0 5px; }
+.jrow.feat select { flex: none; max-width: 48%; padding: 4px 6px; font-size: 14px; }
+.jrow.feat.dim .jname, .jrow.feat.dim .flv, .jrow.feat.dim .fsum { color: var(--pn-bd); border-color: var(--rule); }
+.fsum { font-size: 12.5px; text-align: right; }
+.featnext { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--pn-bd); margin: 10px 0 0; }
+.capopt > b { font-family: var(--f-display); font-size: 15.5px; }
+.slots.res .bar, .fxsheet .bar { height: 6px; border-radius: 3px; background: var(--sunk); overflow: hidden; }
+.slots.res .bar span, .fxsheet .bar span { display: block; height: 100%; background: var(--ok); border-radius: 3px; }
+.gstar { width: 20px; height: 20px; border-radius: 4px; background: var(--gold); color: var(--surface); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex: none; margin: 0 2px 0 0; }
+.jrow.on.oath { background: linear-gradient(90deg, var(--note-bg), transparent 75%); }
+button.rubric.fold.oath { border-bottom-color: var(--gold); } button.rubric.fold.oath .chev, button.rubric.fold.oath .h { color: var(--gold); }
+.ostar { color: var(--gold); font-size: 12px; margin-left: 4px; }
+.smite { margin-top: 18px; background: var(--surface); border: 1.5px solid var(--rubric); border-radius: 10px; padding: 10px 12px; display: grid; gap: 8px; }
+.smite .sh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.smite .sh b { font-family: var(--f-display); font-size: 18px; color: var(--pa-fg); }
+.smite .sh .muted { font-size: 13px; }
+.smite .sb { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+.smite .sb .btn { display: flex; flex-direction: column; align-items: center; line-height: 1.25; padding: 7px 6px; }
+.smite .sb .btn small { font-size: 12px; font-weight: 400; }
+.smite .check { font-size: 13.5px; }
+.lohv { font-size: 15px; color: var(--muted); } .lohv b { font-family: var(--f-display); font-size: 30px; color: var(--ink); }
+.lohrow { display: flex; align-items: center; gap: 8px; }
+.lohrow .btn:not(.cast-go) { width: 40px; height: 38px; padding: 0; font-size: 18px; }
+.lohn { font-family: var(--f-display); font-size: 26px; font-weight: 700; min-width: 46px; text-align: center; border-bottom: 2px solid var(--rubric); font-variant-numeric: tabular-nums; }
+.lohcure { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--rule); padding-top: 10px; font-size: 14px; }
+.lohcure span { flex: 1; }

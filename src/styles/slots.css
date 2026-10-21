@@ -1,0 +1,15 @@
+/* Emplacements de sorts */
+/* Emplacements */
+.slots { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r); padding: 10px 14px; display: grid; gap: 4px; }
+.slotrow { display: grid; grid-template-columns: 86px 1fr auto; align-items: center; gap: 10px; padding: 3px 0; }
+.slotrow + .slotrow { border-top: 1px dotted var(--rule); }
+.slotrow .lv { font-family: var(--f-display); font-weight: 500; }
+.pips { display: flex; flex-wrap: wrap; gap: 7px; }
+.pip { width: 24px; height: 24px; border-radius: 50%; border: 1.6px solid var(--rubric); background: transparent; padding: 0; }
+.pip.used { background: var(--rubric); box-shadow: inset 0 0 0 3px var(--surface); }
+.pip:hover { transform: scale(1.06); }
+.slotrow .left { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.restbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--rule); font-size: 14px; }
+.check { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--rubric); margin: 0; }
+

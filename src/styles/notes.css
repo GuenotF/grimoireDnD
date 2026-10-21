@@ -1,0 +1,11 @@
+/* Notes par sort */
+/* Notes par sort */
+.npen { flex: none; width: 34px; height: 34px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: var(--pn-bd); font-size: 17px; line-height: 1; padding: 0; }
+.npen:hover { border-color: var(--rule); color: var(--muted); }
+.npen.has { border-color: var(--gold); background: var(--note-bg); color: var(--gold); }
+.npen.on { background: var(--gold); border-color: var(--gold); color: var(--surface); }
+.nedit { margin: 4px 0 6px 28px; display: grid; gap: 6px; }
+.nedit textarea { font-size: 14.5px; line-height: 1.4; border: 1.5px solid var(--gold); border-radius: 6px; padding: 7px 9px; background: var(--surface); resize: vertical; width: 100%; box-sizing: border-box; }
+.nedit .cast { display: flex; align-items: center; gap: 8px; }
+.nmark { font-size: 12px; font-weight: 700; color: var(--gold); border: 1.2px solid var(--gold); background: var(--note-bg); border-radius: 4px; padding: 0 5px; line-height: 1.4; }
+.nbox { background: var(--note-bg); border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0; padding: 7px 10px; font-size: 14px; line-height: 1.4; margin: 10px 0 2px; white-space: pre-wrap; max-width: 72ch; }

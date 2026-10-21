@@ -1,8 +1,6 @@
 // Atelier du Grimoire : application (assemblée par build.py avec esbuild).
-import SPELLS from "../data/spells.json";
-const BY_ID = Object.fromEntries(SPELLS.map(s => [s.id, s]));
-import BEASTS from "../data/beasts.json"; // bêtes du Manuel des monstres (Forme sauvage) : fp, ca, pv, v (vitesses), st (FOR, DEX, CON), cp (compétences), tr (capacités), ac (actions)
-const BEAST = Object.fromEntries(BEASTS.map(b => [b.id, b]));
+import { SPELLS, BY_ID, BEASTS, BEAST } from "./data.js";
+import { signed, fmt, fr, esc, cap, plural, byName } from "./core/format.js";
 const SCHOOLS = ["Abjuration","Divination","Enchantement","Évocation","Illusion","Invocation","Nécromancie","Transmutation"];
 const SCHOOL_VAR = {"Abjuration":"--s-abj","Divination":"--s-div","Enchantement":"--s-enc","Évocation":"--s-evo","Illusion":"--s-ill","Invocation":"--s-inv","Nécromancie":"--s-nec","Transmutation":"--s-tra"};
 // Emplacements du magicien (Manuel des joueurs 2014, tableau du magicien)
@@ -74,10 +72,6 @@ const R = {
   savant: (g, s) => g.level >= 2 && s.s === g.school,
   copy: (g, s) => { const k = R.savant(g, s) ? 0.5 : 1; return { h: 2 * s.l * k, po: 50 * s.l * k }; },
 };
-const signed = n => (n >= 0 ? "+" : "−") + Math.abs(n);
-const fmt = n => String(n).replace(".", ",");
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const fr = n => n.toLocaleString("fr-FR");
 
 // ---------- État ----------
 const S = { list: {}, cur: null, tab: "grimoire", readonly: false, // readonly : toujours faux depuis l'abandon de la version claude.ai, retiré à l'étape 2
@@ -254,7 +248,6 @@ function pillData(s, g) {
   out.push({ k: "n", l: "Durée", v: s.d, sub: s.c ? "concentration" : "", conc: s.c });
   return out;
 }
-const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
 // Sorts mineurs à dégâts : un dé de plus aux niveaux 5, 11 et 17
 const tier = lv => 1 + (lv >= 5) + (lv >= 11) + (lv >= 17);
 function pText(s, lv) { if (!s.p) return ""; const v = s.p.slice(2); return s.l === 0 && s.p.startsWith("d:") && s.up ? v.replace(/^(\d+)d/, (m, n) => (n * tier(lv)) + "d") : v; }
@@ -655,7 +648,6 @@ function removeBtn(key, ro) {
   if (ro) return "";
   return S.confirm === key ? `<button class="btn confirm" data-a="rm" data-k="${esc(key)}">Retirer ?</button>` : `<button class="btn ghost" data-a="rm" data-k="${esc(key)}" aria-label="Retirer">Retirer</button>`;
 }
-const byName = (a, b) => a.n.localeCompare(b.n, "fr");
 
 // ---------- Lancer un sort ----------
 const slotsLeft = (g, lv) => Math.max(0, (R.slots(g)[lv - 1] || 0) - (+(g.used[lv] || 0)));
@@ -983,7 +975,6 @@ function luOpen(g) { S.lu = isWiz(g) ? { step: 1, to: g.level + 1, picks: [], cp
     : { step: 1, to: g.level + 1, style: g.style || "", prep: [...g.prepared], cpicks: [], wsfav: [], open: null }; S.concPanel = false; S.fxOpen = false; S.shortOpen = false; }
 const luNeed = (g, to) => ({ s: 2, c: Math.max(0, R.cantrips(g, to) - R.cantrips(g)) });
 const firstName = g => g.name.trim() || g.name; // nom complet (« Ser Kael », pas « Ser »)
-const plural = (n, w, ws) => `${n} ${n > 1 ? (ws || w + "s") : w}`;
 function luHTML(g) {
   const L = S.lu, to = L.to, b = { ...g, level: to }, step = L.step, fn = firstName(g);
   const wiz = isWiz(g), names = ["Ce qui change", wiz ? "Sorts gratuits" : "Préparation", "Valider"];

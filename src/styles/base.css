@@ -1,0 +1,47 @@
+/* Couleurs (clair et sombre), typographie, mise en page générale */
+/* Mise en page : un manuscrit de travail. Bandeau du personnage en tête, onglets, puis le grimoire en rubriques par niveau. */
+:root {
+  --bg: #ECEEF1;
+  --surface: #F9FAFB;
+  --sunk: #E2E5EA;
+  --note-bg: #F5EEDC;
+  --ink: #1B2136;
+  --muted: #5A6176;
+  --rule: #C9CED8;
+  --rubric: #A2261C;
+  --rubric-soft: #F3DEDB;
+  --gold: #8A6516;
+  --ok: #2F6B45;
+  --warn: #9A5B00;
+  --focus: #2D57C7;
+  --s-abj: #3A6EA5; --s-div: #6F6A9E; --s-enc: #B0467A; --s-evo: #C2410C;
+  --s-ill: #7C4DBA; --s-inv: #1F8A70; --s-nec: #4B5563; --s-tra: #9A6A12;
+  --f-display: "Alegreya", "Iowan Old Style", Georgia, serif;
+  --f-body: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --f-sc: "Alegreya Sans SC", "Alegreya Sans", system-ui, sans-serif;
+  --r: 6px;
+  --pd-bg: #FBE7DC; --pd-bd: #C2410C; --pd-fg: #8F2F08; --pa-bg: #F3DEDB; --pa-bd: #A2261C; --pa-fg: #7A1C14; --ps-bg: #E6EAF5; --ps-bd: #2D4A9A; --ps-fg: #233C80; --pf-bg: #EFE6F7; --pf-bd: #6B3FA0; --pf-fg: #4F2C7A; --pn-bd: #9AA0AE;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #10131B; --surface: #171B26; --sunk: #0C0F15; --note-bg: #2A2416; --ink: #E8E4D8; --muted: #9CA2B4; --rule: #2B3142;
+  --rubric: #E46F62; --rubric-soft: #3A1E1C; --gold: #D6AA4E; --ok: #6FC08E; --warn: #E8A64A; --focus: #8AA8FF;
+  --s-abj: #7FA9DA; --s-div: #A8A3D6; --s-enc: #E07FAE; --s-evo: #F08A5D; --s-ill: #B392E8; --s-inv: #5CC7A8; --s-nec: #A3AAB8; --s-tra: #D9A94A;
+  --pd-bg: #3A2214; --pd-bd: #F08A5D; --pd-fg: #F6B08E; --pa-bg: #3A1E1C; --pa-bd: #E46F62; --pa-fg: #F2A39A; --ps-bg: #1C2540; --ps-bd: #7F9BE0; --ps-fg: #AFC2F2; --pf-bg: #2C2140; --pf-bd: #B392E8; --pf-fg: #D3BDF5; --pn-bd: #4A5166;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #10131B; --surface: #171B26; --sunk: #0C0F15; --note-bg: #2A2416; --ink: #E8E4D8; --muted: #9CA2B4; --rule: #2B3142;
+  --rubric: #E46F62; --rubric-soft: #3A1E1C; --gold: #D6AA4E; --ok: #6FC08E; --warn: #E8A64A; --focus: #8AA8FF;
+  --s-abj: #7FA9DA; --s-div: #A8A3D6; --s-enc: #E07FAE; --s-evo: #F08A5D; --s-ill: #B392E8; --s-inv: #5CC7A8; --s-nec: #A3AAB8; --s-tra: #D9A94A;
+  --pd-bg: #3A2214; --pd-bd: #F08A5D; --pd-fg: #F6B08E; --pa-bg: #3A1E1C; --pa-bd: #E46F62; --pa-fg: #F2A39A; --ps-bg: #1C2540; --ps-bd: #7F9BE0; --ps-fg: #AFC2F2; --pf-bg: #2C2140; --pf-bd: #B392E8; --pf-fg: #D3BDF5; --pn-bd: #4A5166;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.45; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 64px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.sc { font-family: var(--f-sc); letter-spacing: .04em; }
+.muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+

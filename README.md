@@ -69,8 +69,10 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 | Fichier | Rôle |
 |---|---|
-| `src/app.js` | Le code de l'application (interface, règles, stockage, fiche imprimable). **À modifier ici.** |
-| `src/app.html` | Le gabarit : styles et structure de la page. **À modifier ici.** |
+| `src/app.js` | Le code de l'application (interface, règles, stockage, fiche imprimable), en cours de découpage (voir `docs/ARCHITECTURE.md`). **À modifier ici.** |
+| `src/data.js`, `src/core/format.js` | Accès aux données (sorts, bêtes) ; mise en forme du texte (signes, pluriels, échappement). |
+| `src/styles/` | Les styles, un fichier par partie de l'écran ; `index.css` fixe l'ordre d'application. |
+| `src/app.html` | Le gabarit : structure de la page. |
 | `data/spells.json` | Les 310 sorts (magicien, paladin, druide, sorts de serment), un par ligne. |
 | `data/beasts.json` | Les 82 bêtes du *Manuel des monstres* utilisables en Forme sauvage. |
 | `src/sw.js` | Modèle du service worker (cache hors connexion). |
@@ -85,7 +87,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 ## Modifier l'application
 
 1. Une fois : `npm install` (installe esbuild, l'outil d'assemblage).
-2. Modifier `src/app.js`, `src/app.html` et/ou `data/*.json`.
+2. Modifier les fichiers de `src/` et/ou `data/*.json`.
 3. `python3 build.py`, puis `python3 tests/run.py` (ou `npm test`, qui fait les deux).
 4. Envoyer les modifications sur la branche `main` : GitHub Pages republie en une minute environ. Les appareils où l'atelier est installé récupèrent la nouvelle version au lancement suivant.
 

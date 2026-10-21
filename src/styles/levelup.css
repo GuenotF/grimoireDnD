@@ -1,0 +1,65 @@
+/* Passage de niveau (assistant) et volets plein écran */
+/* Passage de niveau */
+.lvrow { display: flex; gap: 6px; align-items: stretch; min-width: 0; }
+.lvrow select { flex: 0 0 auto; width: 4.2em; }
+.btn.lvup { flex: 1 1 auto; min-width: 0; white-space: nowrap; border-color: var(--rubric); color: var(--pa-fg); font-weight: 700; padding: 6px 10px; }
+.btn.lvup:hover { background: var(--rubric-soft); }
+body.lu-on, body.ws-on { overflow: hidden; }
+.lvlup { position: fixed; inset: 0; z-index: 8; background: rgba(27,33,54,.35); display: flex; justify-content: center; align-items: center; }
+.lvlup[hidden] { display: none; }
+.lubox { background: var(--surface); width: 100%; max-width: 560px; height: 100%; max-height: 860px; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(27,33,54,.3); }
+@media (min-width: 600px) { .lubox { height: calc(100% - 48px); border-radius: 12px; overflow: hidden; } }
+.luhead { padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 12px; background: var(--bg); border-bottom: 1px solid var(--rule); display: grid; gap: 10px; }
+.luhead .t { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.luhead h2 { margin: 0; font-family: var(--f-display); font-weight: 500; font-size: 23px; line-height: 1.15; }
+.luhead h2 .initial { color: var(--rubric); font-weight: 700; }
+.luhead .x { font-size: 20px; background: transparent; border: 0; color: var(--muted); padding: 0 4px; }
+.lusteps { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
+.lusteps div { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+.lusteps div::before { content: ""; height: 4px; border-radius: 2px; background: var(--rule); }
+.lusteps .done::before, .lusteps .cur::before { background: var(--rubric); }
+.lusteps .cur { color: var(--ink); font-weight: 700; }
+.lubody { flex: 1; overflow-y: auto; padding: 14px 16px; display: grid; align-content: start; gap: 14px; }
+.lufoot { padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 8px; background: var(--surface); }
+.lufoot .btn { padding: 9px 15px; font-size: 14.5px; }
+.lunew { background: var(--rubric-soft); border: 1.5px solid var(--rubric); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; color: var(--pa-fg); }
+.lunew .k { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; }
+.lunew b.h { font-family: var(--f-display); font-size: 19px; }
+.lunew .sl { display: flex; align-items: center; gap: 6px; font-size: 14px; flex-wrap: wrap; }
+.lunew .sl .o { width: 15px; height: 15px; border-radius: 50%; border: 1.6px solid var(--rubric); box-sizing: border-box; }
+.lutab { display: grid; }
+.lutab > div { display: grid; grid-template-columns: minmax(0,1fr) 58px 16px 58px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--sunk); font-size: 14.5px; font-variant-numeric: tabular-nums; }
+.lutab > div > :nth-child(n+2) { text-align: center; }
+.lutab .hd { font-family: var(--f-sc); font-size: 11.5px; letter-spacing: .05em; color: var(--muted); border-bottom-color: var(--rule); }
+.lutab .old { color: var(--muted); } .lutab .ar { color: var(--pn-bd); }
+.lutab .same { color: var(--muted); } .lutab .same b { font-weight: 400; }
+.lusub { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+.lunames { font-size: 13.5px; line-height: 1.5; font-family: var(--f-display); }
+.lufav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lufav .n { font-family: var(--f-display); font-weight: 700; }
+.lucan { display: flex; align-items: center; gap: 8px; font-size: 14.5px; }
+.lucan .n { flex: 1; font-family: var(--f-display); font-weight: 700; }
+.lucan s { color: var(--muted); }
+.lunote { font-size: 13.5px; color: var(--muted); line-height: 1.45; border-left: 3px solid var(--gold); padding-left: 10px; display: grid; gap: 4px; }
+.lunote b { color: var(--ink); }
+.lupicks { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; }
+.lupick { font-size: 13.5px; font-weight: 700; color: var(--surface); background: var(--rubric); border-radius: 999px; padding: 3px 4px 3px 11px; display: inline-flex; align-items: center; gap: 4px; border: 0; }
+.lupick span { padding: 0 5px; }
+.luempty { font-size: 13.5px; color: var(--muted); border: 1px dashed var(--pn-bd); border-radius: 999px; padding: 3px 11px; }
+.lurow.on { background: linear-gradient(90deg, var(--rubric-soft), transparent 80%); }
+.btn.pick { border-color: var(--rubric); color: var(--pa-fg); }
+.btn.pick[aria-pressed="true"] { background: var(--rubric); color: var(--surface); font-weight: 700; }
+.luprep { background: var(--bg); border-radius: 10px; padding: 12px; display: grid; gap: 8px; font-size: 14px; line-height: 1.4; }
+.luprep h3 { margin: 0; font-family: var(--f-display); font-size: 17px; }
+.luprep label { display: flex; align-items: center; gap: 8px; font-size: 14.5px; }
+.luprep input { width: 20px; height: 20px; accent-color: var(--rubric); }
+.luadd > div { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.luadd .n { flex: 1; font-family: var(--f-display); font-weight: 700; font-size: 16px; }
+.luadd small { color: var(--muted); font-size: 12.5px; }
+.luplist { display: grid; }
+.lurowp { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+.lurowp.on { background: linear-gradient(90deg, var(--rubric-soft), transparent 75%); }
+.lurowp input { width: 20px; height: 20px; accent-color: var(--rubric); flex: none; margin: 0; }
+.lurowp input.full { appearance: none; -webkit-appearance: none; box-sizing: border-box; border: 1.5px dashed var(--pn-bd); border-radius: 4px; background: var(--sunk); }
+.lurowp .n { flex: 1; min-width: 0; font-family: var(--f-display); font-weight: 700; font-size: 15.5px; }
+.linkbtn { background: transparent; border: 0; padding: 2px 0; color: var(--muted); text-decoration: underline; justify-self: start; font-size: 13.5px; }

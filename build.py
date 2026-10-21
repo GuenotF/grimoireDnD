@@ -6,7 +6,8 @@
 
 Entrées :
   src/app.js           le code de l'application (importe data/spells.json et data/beasts.json)
-  src/app.html         le gabarit : styles et structure de la page, /*APP*/ à la place du code
+  src/styles/          les styles, un fichier par partie de l'écran (index.css fixe l'ordre)
+  src/app.html         le gabarit : structure de la page, /*CSS*/ et /*APP*/ à la place des styles et du code
   src/sw.js            le service worker (cache hors connexion)
 Sorties :
   index.html           la page publiée par GitHub Pages (code et styles minifiés, intégrés)
@@ -51,11 +52,11 @@ code = read("app.js").strip()
 os.remove(os.path.join(ROOT, "app.js"))
 assert "</script" not in code.lower(), "« </script » dans le code : la page serait coupée"
 
-# --- Styles du gabarit : minifiés ---
+# --- Styles : src/styles/index.css et ses imports, réunis et minifiés ---
+css = esbuild(["src/styles/index.css", "--bundle", "--minify", "--charset=utf8"]).strip()
 tpl = read("src/app.html")
-css = re.search(r"<style>\n(.*?)</style>", tpl, re.S)
-tpl = tpl.replace(css.group(0), "<style>" + esbuild(["--loader=css", "--minify", "--charset=utf8"], css.group(1)).strip() + "</style>", 1)
-body = tpl.replace("/*APP*/", code, 1)
+assert "/*CSS*/" in tpl and "/*APP*/" in tpl, "gabarit sans /*CSS*/ ou /*APP*/"
+body = tpl.replace("/*CSS*/", css, 1).replace("/*APP*/", code, 1)
 
 # --- index.html pour GitHub Pages ---
 title = re.search(r"<title>.*?</title>", body).group(0)
