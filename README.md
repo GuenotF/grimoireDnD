@@ -70,7 +70,9 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 | Fichier | Rôle |
 |---|---|
 | `src/app.js` | Le code de l'application (interface, règles, stockage, fiche imprimable), en cours de découpage (voir `docs/ARCHITECTURE.md`). **À modifier ici.** |
-| `src/data.js`, `src/core/format.js` | Accès aux données (sorts, bêtes) ; mise en forme du texte (signes, pluriels, échappement). |
+| `src/core/` | Le noyau : `state.js` (état de l'écran), `schema.js` (format d'un personnage, version et migrations), `store.js` (enregistrement sur l'appareil), `ui.js` (rendu, message d'annulation), `actions.js` (registre des actions des boutons et champs), `format.js` (mise en forme du texte). |
+| `src/rules/common.js` | Tables et règles des classes (emplacements, serments, cercles, préparation). |
+| `src/data.js` | Accès aux données (sorts, bêtes). |
 | `src/styles/` | Les styles, un fichier par partie de l'écran ; `index.css` fixe l'ordre d'application. |
 | `src/app.html` | Le gabarit : structure de la page. |
 | `data/spells.json` | Les 310 sorts (magicien, paladin, druide, sorts de serment), un par ligne. |

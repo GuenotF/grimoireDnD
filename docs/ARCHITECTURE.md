@@ -1,6 +1,6 @@
 # Architecture cible de l'Atelier du Grimoire
 
-*Validé le 21 octobre 2026. Étapes 0 et 1 faites le 21 octobre 2026.*
+*Validé le 21 octobre 2026. Étapes 0, 1 et 2 faites le 21 octobre 2026.*
 
 ## 1. Objectifs
 
@@ -16,7 +16,7 @@
 | `src/app.html` | 2 050 lignes : CSS, écrans, règles des 3 classes, stockage, actions, fiche imprimable |
 | Données | `data/spells.json` (310 sorts), `data/beasts.json` (82 bêtes), injectées par `build.py` |
 | Règles de classe | Dispersées : 57 tests `isWiz` / `isPal` / `isDru` répartis dans tout le code |
-| Actions | Une seule chaîne de près de 350 lignes (`if (a === "cast") … else if …`) |
+| Actions | Une seule chaîne de près de 350 lignes (`if (a === "cast") … else if …`) ; depuis l'étape 2 : registre `core/actions.js` |
 | Sauvegarde | Pas de numéro de version du format |
 | Tests | 29 scénarios dans `tests/` |
 
@@ -98,7 +98,7 @@ Chaque étape fait l'objet d'une publication séparée. On ne publie que si les 
 |---|---|---|
 | 0 ✓ | Outillage : esbuild branché dans `build.py`, le code actuel passe par esbuild sans être découpé ; abandon de la variante claude.ai | ½ itération |
 | 1 ✓ | Outils et données : `format.js`, `data.js` (import direct des JSON), CSS découpé en 13 fichiers | ½ |
-| 2 | Noyau : état, stockage, version du format, rendu, registre des actions ; retrait de `S.readonly` (toujours faux depuis l'étape 0) | 1 |
+| 2 ✓ | Noyau : état, stockage, version du format (v2 et migrations), rendu, registre des actions ; retrait du mode lecture seule. Les tables de règles sont passées dans `rules/common.js` en préalable à l'étape 3 | 1 |
 | 3 | Classes : magicien, paladin, druide derrière le contrat ; suppression des `isX` | 1 |
 | 4 | Mécaniques partagées : sorts, bibliothèque, Forme sauvage, passage de niveau, impression, sauvegarde | ½ |
 | 5 | Documentation : README et ce document mis à jour | — |

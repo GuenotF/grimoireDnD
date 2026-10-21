@@ -5,6 +5,7 @@ import { SCHOOLS, SCHOOL_VAR, SLOTS, OATHS, CLASSES, isPal, CIRCLES, DRU, C, isW
 import { S, G } from "./core/state.js";
 import { blank, fxKey, norm } from "./core/schema.js";
 import { setRenderer, render, setStatus, toast } from "./core/ui.js";
+import { onClick, onChange, onInput, onSubmit, onKey, beforeEachClick, startActions, NEXT } from "./core/actions.js";
 import { loadLocal, save, removeDoc, pickCurrent, setCur, newId, mutate } from "./core/store.js";
 const NO_TRACK = ["Instantanée", "Jusqu'à dissipation", "Spéciale"]; // durées non suivies dans « En cours »
 function boot() {
@@ -1051,211 +1052,210 @@ function offer(filename, data) { // téléchargement direct par le navigateur
     setTimeout(() => URL.revokeObjectURL(url), 4000); toast("Fichier téléchargé");
   } catch (e) { toast("Téléchargement impossible dans ce navigateur."); }
 }
-document.addEventListener("click", e => {
-  const b = e.target.closest("[data-a]"); if (!b || b.tagName === "FORM") return;
-  const a = b.dataset.a;
-  if (["prep","arcane","xused","ftog","btog","lu-prep","lu-pprep","lu-cpick","smite-ud"].includes(a)) return; // gérés par "change"
-  if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null;
-  if (a === "tab") { S.tab = b.dataset.v; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); }
-  else if (a === "new") { S.newOpen = true; S.newCls = null; S.newName = ""; render(); }
-  else if (a === "nw-close") { S.newOpen = false; render(); }
-  else if (a === "nw-cls") { S.newCls = b.dataset.v; render(); const el = document.getElementById("nw-name"); if (el) el.focus({ preventScroll: true }); }
-  else if (a === "nw-go") {
-    if (!CLASSES[S.newCls]) return;
-    const g = blank((S.newName || "").trim(), S.newCls), id = newId(g.name);
-    S.list[id] = g; S.newOpen = false; S.tab = "grimoire"; setCur(id); save(id); toast(`${esc(g.name)} créé`);
-  }
-  else if (a === "pip") mutate(g => { const lv = +b.dataset.l, k = +b.dataset.k, u = +(g.used[lv] || 0); g.used[lv] = k < u ? k : k + 1; });
-  else if (a === "longrest") { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.arcane = false; g.effects = []; g.loh = 0; g.dsU = 0; g.cdU = 0; g.wsU = 0; g.wsForm = null; S.wsDice = ""; S.wsConc = null; g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); }
-  else if (a === "flvl") { S.f.lvl = b.dataset.v; render(); }
-  else if (a === "bst-f") { const k = b.dataset.k, v = b.dataset.v; S.bf[k] = S.bf[k] === v && k !== "fp" ? "" : v; render(); }
-  else if (a === "add") mutate(g => {
+// ---------- Actions : boutons (data-a) ----------
+beforeEachClick(a => { if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null; }); // un autre clic annule une confirmation en attente
+onClick("tab", (b) => { S.tab = b.dataset.v; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); });
+onClick("new", () => { S.newOpen = true; S.newCls = null; S.newName = ""; render(); });
+onClick("nw-close", () => { S.newOpen = false; render(); });
+onClick("nw-cls", (b) => { S.newCls = b.dataset.v; render(); const el = document.getElementById("nw-name"); if (el) el.focus({ preventScroll: true }); });
+onClick("nw-go", () => {
+  if (!CLASSES[S.newCls]) return;
+  const g = blank((S.newName || "").trim(), S.newCls), id = newId(g.name);
+  S.list[id] = g; S.newOpen = false; S.tab = "grimoire"; setCur(id); save(id); toast(`${esc(g.name)} créé`);
+});
+onClick("pip", (b) => { mutate(g => { const lv = +b.dataset.l, k = +b.dataset.k, u = +(g.used[lv] || 0); g.used[lv] = k < u ? k : k + 1; }); });
+onClick("longrest", () => { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.arcane = false; g.effects = []; g.loh = 0; g.dsU = 0; g.cdU = 0; g.wsU = 0; g.wsForm = null; S.wsDice = ""; S.wsConc = null; g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); });
+onClick("flvl", (b) => { S.f.lvl = b.dataset.v; render(); });
+onClick("bst-f", (b) => { const k = b.dataset.k, v = b.dataset.v; S.bf[k] = S.bf[k] === v && k !== "fp" ? "" : v; render(); });
+onClick("add", (b) => {
+  mutate(g => {
     const s = BY_ID[b.dataset.id];
     if (b.dataset.how === "mineur") { g.cantrips.push(s.id); if (g.cantrips.length > R.cantrips(g)) toast(`Attention : ${g.cantrips.length} sorts mineurs pour ${R.cantrips(g)} connus à ce niveau.`); else toast(`${esc(s.n)} appris`); }
     else { const c = R.copy(g, s); g.spells.push(b.dataset.how === "copie" ? { id: s.id, how: "copie", h: c.h, po: c.po } : { id: s.id, how: "niv" }); toast(`${esc(s.n)} ajouté au grimoire`); }
   });
-  else if (a === "rm") {
-    const k = b.dataset.k;
-    if (S.confirm !== k) { S.confirm = k; render(); return; }
-    S.confirm = null;
-    mutate(g => {
-      const [t, v] = [k.slice(0, 1), k.slice(2)];
-      if (t === "c") { g.cantrips = g.cantrips.filter(id => id !== v); delete g.snotes[v]; }
-      if (t === "s") { g.spells = g.spells.filter(x => x.id !== v); g.prepared = g.prepared.filter(id => id !== v); delete g.snotes[v]; }
-      if (t === "x") { g.extras.splice(+v, 1); S.editX = null; S.xdraft = null; [...S.open].forEach(k => { if (k.startsWith("x:")) S.open.delete(k); }); }
-    });
-  }
-  else if (a === "dl-print") { const g = G(); offer(`Grimoire - ${g.name}.html`, printable(g)); }
-  else if (a === "open-print") {
-    const html = printable(G()).replace("</body>", '<script>window.addEventListener("load", () => setTimeout(() => window.print(), 400));<\/script></body>');
-    const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
-    const w = window.open(url, "_blank");
-    if (!w) toast("Le navigateur a bloqué l'ouverture : autorise les fenêtres pour ce fichier.");
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-  }
-  else if (a === "dl-json") { const g = G(); offer(backupName(g) + ".json", exportJSON(g)); }
-  else if (a === "share-json") shareToGM(G());
-  else if (a === "del") {
-    if (S.confirm !== "del") { S.confirm = "del"; render(); return; }
-    S.confirm = null; const id = S.cur; const n = G().name; S.cur = null; removeDoc(id); pickCurrent(); S.tab = "grimoire"; render(); toast(`${esc(n)} supprimé`);
-  }
-  else if (a === "cancel") { S.confirm = null; render(); }
-  else if (a === "cast" || a === "cast-rit" || a === "cast-force") {
-    const s = BY_ID[b.dataset.id], g = G(); if (!g || !s) return;
-    const rit = a === "cast-rit" || b.dataset.rit === "1", lv = rit ? 0 : +b.dataset.l, free = rit || s.l === 0; // rituel et sort mineur : aucun emplacement
-    if (!free && slotsLeft(g, lv) < 1) return;
-    const cur = concOf(g);
-    if (a !== "cast-force" && s.c && cur && cur.id !== s.id) { S.concWarn = { id: s.id, lv, rit }; S.castOpen = null; render(); return; }
-    S.concWarn = null; S.castOpen = null;
-    const prev = JSON.parse(JSON.stringify({ used: g.used, effects: g.effects }));
-    mutate(g => {
-      if (!free) g.used[lv] = (+(g.used[lv] || 0)) + 1;
-      if (s.c) { g.effects = g.effects.filter(e => !e.c); g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: true, note: "" }); }
-      else if (!NO_TRACK.includes(s.d)) g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: false, note: "" });
-    });
-    const ended = s.c && cur && cur.id !== s.id ? ` · fin de ${esc(cur.name)}` : "";
-    toast((rit ? `<b>${esc(s.n)}</b> lancé en rituel : +10 min, aucun emplacement` : s.l === 0 ? `<b>${esc(s.n)}</b> lancé · sort mineur, concentration suivie` : `<b>${esc(s.n)}</b> lancé · emplacement de niveau ${lv}`) + ended,
-      () => mutate(g => { g.used = prev.used; g.effects = prev.effects; }));
-  }
-  else if (a === "cast-open") { S.castOpen = S.castOpen === b.dataset.id ? null : b.dataset.id; render(); }
-  else if (a === "cast-close") { S.castOpen = null; render(); }
-  else if (a === "conc-cancel") { S.concWarn = null; render(); }
-  else if (a === "conc-panel") { S.concPanel = !S.concPanel; render(); if (S.concPanel) { const i = document.getElementById("conc-dmg"); if (i) i.focus(); } }
-  else if (a === "conc-close") { S.concPanel = false; render(); }
-  else if (a === "wsconc-ok") { const w = S.wsConc; S.wsConc = null; render(); if (w) toast(`Concentration maintenue : <b>${esc((concOf(G()) || {}).name || "")}</b>`); }
-  else if (a === "conc-end") {
-    const g = G(), cur = g && concOf(g); if (!cur) return; S.concPanel = false; S.wsConc = null;
-    const prev = JSON.parse(JSON.stringify(g.effects));
-    mutate(g => { g.effects = g.effects.filter(e => !e.c); });
-    toast(`Concentration perdue : <b>${esc(cur.name)}</b> prend fin`, () => mutate(g => { g.effects = prev; }));
-  }
-  else if (a === "short-open") { S.shortOpen = !S.shortOpen; S.sr = {}; render(); }
-  else if (a === "short-close") { S.shortOpen = false; S.sr = {}; render(); }
-  else if (a === "sr-pick") { S.sr = JSON.parse(b.dataset.c); render(); }
-  else if (a === "sr-inc" || a === "sr-dec") { const lv = +b.dataset.l; S.sr[lv] = Math.max(0, (S.sr[lv] || 0) + (a === "sr-inc" ? 1 : -1)); if (!S.sr[lv]) delete S.sr[lv]; render(); }
-  else if (a === "sr-go") {
-    const g = G(), sr = S.sr; if (!g || !srTotal(sr) || srTotal(sr) > R.arcane(g.level)) return;
-    const prev = JSON.parse(JSON.stringify({ used: g.used, arcane: g.arcane })), label = srLabel(sr);
-    S.shortOpen = false; S.sr = {};
-    mutate(g => { Object.entries(sr).forEach(([lv, n]) => { g.used[lv] = Math.max(0, (+(g.used[lv] || 0)) - n); }); g.arcane = true; });
-    toast(`Restauration arcanique : ${label} récupéré${/s de/.test(label) || label.includes("+") ? "s" : ""}`, () => mutate(g => { g.used = prev.used; g.arcane = prev.arcane; }));
-  }
-  else if (a === "fx-open") { S.fxOpen = true; S.concPanel = false; render(); }
-  else if (a === "fx-close") { S.fxOpen = false; render(); }
-  else if (a === "fx-end" || a === "fx-all") {
-    const g = G(); if (!g) return; const prev = JSON.parse(JSON.stringify(g.effects));
-    const gone = a === "fx-all" ? null : g.effects.find(e => e.k === b.dataset.k);
-    mutate(g => { g.effects = a === "fx-all" ? [] : g.effects.filter(e => e.k !== b.dataset.k); });
-    toast(a === "fx-all" ? "Tous les sorts en cours sont terminés" : `<b>${esc(gone ? gone.name : "Sort")}</b> terminé`, () => mutate(g => { g.effects = prev; }));
-  }
-  else if (a === "view") { S.view = b.dataset.v; S.open.clear(); S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); }
-  else if (a === "row") { const k = b.dataset.id; if (S.open.has(k)) S.open.delete(k); else S.open.add(k); S.castOpen = null; render(); }
-  else if (a === "undo") { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } }
-  else if (a === "res-pip") mutate(g => { const r = b.dataset.r, f = r + "U", mx = r === "ds" ? PAL.ds(g) : r === "cd" ? PAL.cd(g) : DRU.ws(g), k = +b.dataset.k, u = Math.min(g[f], mx); g[f] = k < u ? k : k + 1; });
-  else if (a === "ds-use") {
-    const g = G(); if (!g || g.dsU >= PAL.ds(g)) return; const prev = g.dsU;
-    mutate(g => { g.dsU = prev + 1; });
-    toast(`<b>Perception divine</b> : célestes, fiélons et morts-vivants à 18 m · reste ${PAL.ds(g) - prev - 1}`, () => { mutate(g => { g.dsU = prev; }); return "Perception divine annulée"; });
-  }
-  else if (a === "cd-use") {
-    const g = G(); if (!g || g.cdU >= PAL.cd(g)) return; const x = (OATHS[g.oath].cd || []).find(o => o.k === b.dataset.v); if (!x) return;
-    const prev = JSON.parse(JSON.stringify({ cdU: g.cdU, effects: g.effects }));
-    mutate(g => { g.cdU += 1; if (x.fx) g.effects.push({ k: fxKey(), id: "cd-" + x.k, name: x.n, d: x.fx, c: false, note: "" }); });
-    toast(`<b>${x.n}</b> : Conduit divin utilisé${x.k === "guided" ? " · +10 au jet d'attaque" : ""}`, () => { mutate(g => { g.cdU = prev.cdU; g.effects = prev.effects; }); return "Conduit divin annulé"; });
-  }
-  else if (a === "ws-open") { S.ws = { fp: "all", mv: "", q: "" }; render(); const x = document.querySelector("#wssheet .x"); if (x) x.focus({ preventScroll: true }); }
-  else if (a === "ws-close") { S.ws = null; render(); }
-  else if (S.ws && (a === "ws-fp" || a === "ws-mv")) { const k = a === "ws-fp" ? "fp" : "mv", v = b.dataset.v; S.ws[k] = S.ws[k] === v ? (k === "fp" ? "all" : "") : v; S.wsTop = true; render(); }
-  else if (a === "ws-fav") { const id = b.dataset.id, g0 = G(); if (!g0 || !BEAST[id] || (!wsAllowed(g0, BEAST[id]) && !g0.favs.includes(id))) return; mutate(g => { g.favs = g.favs.includes(id) ? g.favs.filter(x => x !== id) : [...g.favs, id]; }); }
-  else if (a === "ws-go") {
-    const g = G(), bt = BEAST[b.dataset.id]; if (!g || !bt || g.wsU >= DRU.ws(g)) return;
-    const prev = { wsU: g.wsU, wsForm: g.wsForm }; S.ws = null; S.wsDice = ""; S.wsConc = null;
-    mutate(g => { g.wsU += 1; g.wsForm = { id: bt.id, hp: bt.pv, max: bt.pv }; });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    toast(`<b>Forme sauvage</b> : ${esc(bt.n)} · ${bt.pv} PV · reste ${Math.max(0, DRU.ws(g) - prev.wsU - 1)}`, () => { mutate(g => { g.wsU = prev.wsU; g.wsForm = prev.wsForm; }); return "Transformation annulée"; });
-  }
-  else if (a === "ws-dmg" || a === "ws-heal") {
-    const g = G(), el = document.getElementById("ws-n"), n = Math.floor(+(el && el.value) || 0); if (!g || !g.wsForm || n < 1) { if (el) el.focus(); return; }
-    const prev = { ...g.wsForm }, bt = BEAST[prev.id]; S.wsDice = "";
-    const cc = a === "ws-dmg" && concOf(g); S.wsConc = cc ? { dd: concDD(n), n, beast: bt.n, con: n < prev.hp ? Math.floor((bt.st[2] - 10) / 2) : null } : S.wsConc;
-    if (a === "ws-heal") { const hp = Math.min(prev.max, prev.hp + n); mutate(g => { g.wsForm.hp = hp; }); toast(`${esc(bt.n)} : +${hp - prev.hp} PV (${hp}/${prev.max})`, () => { mutate(g => { g.wsForm = prev; }); return "Soin annulé"; }); }
-    else if (n < prev.hp) { mutate(g => { g.wsForm.hp = prev.hp - n; }); toast(`${esc(bt.n)} : −${n} PV (${prev.hp - n}/${prev.max})${cc ? ` · concentration : DD ${concDD(n)}` : ""}`, () => { S.wsConc = null; mutate(g => { g.wsForm = prev; }); return "Dégâts annulés"; }); }
-    else { const over = n - prev.hp; mutate(g => { g.wsForm = null; }); toast(`${esc(bt.n)} à 0 PV : tu reprends ta forme${over ? `. <b>${over} dégât${over > 1 ? "s" : ""}</b> à retirer de tes PV` : ", sans dégât en plus"}`, () => { S.wsConc = null; mutate(g => { g.wsForm = prev; }); return "Forme rétablie"; }); }
-  }
-  else if (a === "ws-cf") {
-    const g = G(), lv = +b.dataset.l; if (!g || !g.wsForm || slotsLeft(g, lv) < 1) return;
-    S.castOpen = null; mutate(g => { g.used[lv] = (+(g.used[lv] || 0)) + 1; }); S.wsDice = `${lv}d8`; render();
-    const el = document.getElementById("ws-n"); if (el) el.focus({ preventScroll: true });
-    toast(`Changeforme de combat : emplacement niv. ${lv} dépensé · lance <b>${lv}d8</b>`, () => { S.wsDice = ""; mutate(g => { g.used[lv] = Math.max(0, (+(g.used[lv] || 0)) - 1); }); return "Emplacement rendu"; });
-  }
-  else if (a === "ws-end") { const g = G(); if (!g || !g.wsForm) return; const prev = g.wsForm; S.wsDice = ""; S.wsConc = null; mutate(g => { g.wsForm = null; }); toast(`Tu reprends ta forme de druide`, () => { mutate(g => { g.wsForm = prev; }); return "Forme rétablie"; }); }
-  else if (a === "ws-top") { const el = document.getElementById("ws-active"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); else { S.tab = "grimoire"; render(); } }
-  else if (a === "short-pal") {
-    const g = G(); if (!g) return; const f = isDru(g) ? "wsU" : "cdU", prev = g[f];
-    mutate(g => { g[f] = 0; }); toast(`Repos court : ${isDru(g) ? "Forme sauvage" : "Conduit divin"} récupéré${isDru(g) ? "e" : ""}`, () => { mutate(g => { g[f] = prev; }); return "Repos court annulé"; });
-  }
-  else if (a === "loh-open") { const g = G(); if (!g) return; const left = PAL.loh(g) - g.loh; S.lohAmt = Math.min(5, left); S.lohOpen = true; render(); }
-  else if (a === "loh-close") { S.lohOpen = false; render(); }
-  else if (a === "loh-inc" || a === "loh-dec") { const g = G(), left = PAL.loh(g) - g.loh; S.lohAmt = Math.max(1, Math.min(left, (S.lohAmt || 0) + (a === "loh-inc" ? 1 : -1))); render(); }
-  else if (a === "loh-set") { S.lohAmt = +b.dataset.v; render(); }
-  else if (a === "loh-go" || a === "loh-cure") {
-    const g = G(); if (!g) return; const left = PAL.loh(g) - g.loh, n = a === "loh-cure" ? 5 : Math.min(left, S.lohAmt || 0); if (n < 1 || n > left) return;
-    const prev = g.loh; S.lohOpen = false;
-    mutate(g => { g.loh += n; });
-    toast(a === "loh-cure" ? "Imposition des mains : maladie ou poison neutralisé (−5 PV de réserve)" : `Imposition des mains : <b>${n} PV</b> soignés · reste ${left - n}`, () => { mutate(g => { g.loh = prev; }); return "Soin annulé"; });
-  }
-  else if (a === "smite") {
-    const g = G(), lv = +b.dataset.l; if (!g || slotsLeft(g, lv) < 1) return;
-    const d = PAL.smite(lv) + (S.smiteUndead ? 1 : 0), prev = JSON.parse(JSON.stringify(g.used));
-    mutate(g => { g.used[lv] = (+(g.used[lv] || 0)) + 1; });
-    toast(`<b>Châtiment divin</b> · niv. ${lv} : <b>${d}d8</b> radiants (critique : ${2 * d}d8)`, () => { mutate(g => { g.used = prev; }); return "Châtiment annulé"; });
-  }
-  else if (a === "fold") {
-    const k = foldKey(b.dataset.k); if (S.fold[k]) delete S.fold[k]; else S.fold[k] = 1;
-    try { localStorage.setItem("grimoire.fold", JSON.stringify(S.fold)); } catch (e) {}
-    render();
-    const el = document.querySelector(`[data-a="fold"][data-k="${b.dataset.k}"]`); if (el) el.focus({ preventScroll: true });
-  }
-  else if (a === "note-edit") {
-    const id = b.dataset.id; S.noteEdit = S.noteEdit === id ? null : id; S.ndraft = null; render();
-    if (S.noteEdit) { const el = document.getElementById("n-edit"); if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(el.value.length, el.value.length); } }
-  }
-  else if (a === "note-save") {
-    const id = b.dataset.id, el = document.getElementById("n-edit"), v = el ? el.value.trim() : "";
-    S.noteEdit = null; S.ndraft = null;
-    mutate(g => { if (v) g.snotes[id] = v; else delete g.snotes[id]; });
-    toast(v ? "Note enregistrée" : "Note effacée");
-  }
-  else if (a === "note-cancel") { S.noteEdit = null; S.ndraft = null; render(); }
-  else if (a === "note-clear") {
-    const id = b.dataset.id, g = G(), old = g && g.snotes[id]; S.noteEdit = null; S.ndraft = null;
-    mutate(g => { delete g.snotes[id]; });
-    toast("Note effacée", () => { mutate(g => { g.snotes[id] = old; }); return "Note rétablie"; });
-  }
-  else if (a === "lu-open") { const g = G(); if (!g || g.level >= 20) return; luOpen(g); render(); const x = document.querySelector("#lvlup .lufoot .primary"); if (x) x.focus({ preventScroll: true }); }
-  else if (a === "lu-close") { S.lu = null; render(); }
-  else if (S.lu && a === "lu-next") { S.lu.step = Math.min(3, S.lu.step + 1); S.lu.open = null; render(); }
-  else if (S.lu && a === "lu-back") { S.lu.step = Math.max(1, S.lu.step - 1); S.lu.open = null; render(); }
-  else if (S.lu && a === "lu-edit") { S.lu.step = 2; render(); }
-  else if (S.lu && a === "lu-flt") { S.lu.flt = +b.dataset.v; S.lu.open = null; render(); }
-  else if (S.lu && a === "lu-row") { S.lu.open = S.lu.open === b.dataset.id ? null : b.dataset.id; S.luKeep = true; render(); }
-  else if (S.lu && a === "lu-pick") {
-    const L = S.lu, g = G(), s = BY_ID[b.dataset.id]; if (!g || !s) return;
-    const need = luNeed(g, L.to), k = s.l === 0 ? "cpicks" : "picks", lim = s.l === 0 ? need.c : need.s;
-    if (L[k].includes(s.id)) { L[k] = L[k].filter(x => x !== s.id); L.prep = L.prep.filter(x => x !== s.id); }
-    else if (L[k].length < lim) L[k].push(s.id);
-    S.luKeep = true; render();
-  }
-  else if (S.lu && a === "lu-pflt") { S.lu.flt = +b.dataset.v; S.luKeep = true; render(); }
-  else if (S.lu && a === "lu-style") { S.lu.style = b.dataset.v; S.luKeep = true; render(); }
-  else if (S.lu && a === "lu-go" && !isWiz(G())) {
+});
+onClick("rm", (b) => {
+  const k = b.dataset.k;
+  if (S.confirm !== k) { S.confirm = k; render(); return; }
+  S.confirm = null;
+  mutate(g => {
+    const [t, v] = [k.slice(0, 1), k.slice(2)];
+    if (t === "c") { g.cantrips = g.cantrips.filter(id => id !== v); delete g.snotes[v]; }
+    if (t === "s") { g.spells = g.spells.filter(x => x.id !== v); g.prepared = g.prepared.filter(id => id !== v); delete g.snotes[v]; }
+    if (t === "x") { g.extras.splice(+v, 1); S.editX = null; S.xdraft = null; [...S.open].forEach(k => { if (k.startsWith("x:")) S.open.delete(k); }); }
+  });
+});
+onClick("dl-print", () => { const g = G(); offer(`Grimoire - ${g.name}.html`, printable(g)); });
+onClick("open-print", (b, a) => {
+  const html = printable(G()).replace("</body>", '<script>window.addEventListener("load", () => setTimeout(() => window.print(), 400));<\/script></body>');
+  const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+  const w = window.open(url, "_blank");
+  if (!w) toast("Le navigateur a bloqué l'ouverture : autorise les fenêtres pour ce fichier.");
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+});
+onClick("dl-json", () => { const g = G(); offer(backupName(g) + ".json", exportJSON(g)); });
+onClick("share-json", () => { shareToGM(G()); });
+onClick("del", () => {
+  if (S.confirm !== "del") { S.confirm = "del"; render(); return; }
+  S.confirm = null; const id = S.cur; const n = G().name; S.cur = null; removeDoc(id); pickCurrent(); S.tab = "grimoire"; render(); toast(`${esc(n)} supprimé`);
+});
+onClick("cancel", () => { S.confirm = null; render(); });
+onClick(["cast", "cast-rit", "cast-force"], (b, a, e) => {
+  const s = BY_ID[b.dataset.id], g = G(); if (!g || !s) return;
+  const rit = a === "cast-rit" || b.dataset.rit === "1", lv = rit ? 0 : +b.dataset.l, free = rit || s.l === 0; // rituel et sort mineur : aucun emplacement
+  if (!free && slotsLeft(g, lv) < 1) return;
+  const cur = concOf(g);
+  if (a !== "cast-force" && s.c && cur && cur.id !== s.id) { S.concWarn = { id: s.id, lv, rit }; S.castOpen = null; render(); return; }
+  S.concWarn = null; S.castOpen = null;
+  const prev = JSON.parse(JSON.stringify({ used: g.used, effects: g.effects }));
+  mutate(g => {
+    if (!free) g.used[lv] = (+(g.used[lv] || 0)) + 1;
+    if (s.c) { g.effects = g.effects.filter(e => !e.c); g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: true, note: "" }); }
+    else if (!NO_TRACK.includes(s.d)) g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: false, note: "" });
+  });
+  const ended = s.c && cur && cur.id !== s.id ? ` · fin de ${esc(cur.name)}` : "";
+  toast((rit ? `<b>${esc(s.n)}</b> lancé en rituel : +10 min, aucun emplacement` : s.l === 0 ? `<b>${esc(s.n)}</b> lancé · sort mineur, concentration suivie` : `<b>${esc(s.n)}</b> lancé · emplacement de niveau ${lv}`) + ended,
+    () => mutate(g => { g.used = prev.used; g.effects = prev.effects; }));
+});
+onClick("cast-open", (b) => { S.castOpen = S.castOpen === b.dataset.id ? null : b.dataset.id; render(); });
+onClick("cast-close", () => { S.castOpen = null; render(); });
+onClick("conc-cancel", () => { S.concWarn = null; render(); });
+onClick("conc-panel", () => { S.concPanel = !S.concPanel; render(); if (S.concPanel) { const i = document.getElementById("conc-dmg"); if (i) i.focus(); } });
+onClick("conc-close", () => { S.concPanel = false; render(); });
+onClick("wsconc-ok", () => { const w = S.wsConc; S.wsConc = null; render(); if (w) toast(`Concentration maintenue : <b>${esc((concOf(G()) || {}).name || "")}</b>`); });
+onClick("conc-end", (b, a, e) => {
+  const g = G(), cur = g && concOf(g); if (!cur) return; S.concPanel = false; S.wsConc = null;
+  const prev = JSON.parse(JSON.stringify(g.effects));
+  mutate(g => { g.effects = g.effects.filter(e => !e.c); });
+  toast(`Concentration perdue : <b>${esc(cur.name)}</b> prend fin`, () => mutate(g => { g.effects = prev; }));
+});
+onClick("short-open", () => { S.shortOpen = !S.shortOpen; S.sr = {}; render(); });
+onClick("short-close", () => { S.shortOpen = false; S.sr = {}; render(); });
+onClick("sr-pick", (b) => { S.sr = JSON.parse(b.dataset.c); render(); });
+onClick(["sr-inc", "sr-dec"], (b, a) => { const lv = +b.dataset.l; S.sr[lv] = Math.max(0, (S.sr[lv] || 0) + (a === "sr-inc" ? 1 : -1)); if (!S.sr[lv]) delete S.sr[lv]; render(); });
+onClick("sr-go", () => {
+  const g = G(), sr = S.sr; if (!g || !srTotal(sr) || srTotal(sr) > R.arcane(g.level)) return;
+  const prev = JSON.parse(JSON.stringify({ used: g.used, arcane: g.arcane })), label = srLabel(sr);
+  S.shortOpen = false; S.sr = {};
+  mutate(g => { Object.entries(sr).forEach(([lv, n]) => { g.used[lv] = Math.max(0, (+(g.used[lv] || 0)) - n); }); g.arcane = true; });
+  toast(`Restauration arcanique : ${label} récupéré${/s de/.test(label) || label.includes("+") ? "s" : ""}`, () => mutate(g => { g.used = prev.used; g.arcane = prev.arcane; }));
+});
+onClick("fx-open", () => { S.fxOpen = true; S.concPanel = false; render(); });
+onClick("fx-close", () => { S.fxOpen = false; render(); });
+onClick(["fx-end", "fx-all"], (b, a, e) => {
+  const g = G(); if (!g) return; const prev = JSON.parse(JSON.stringify(g.effects));
+  const gone = a === "fx-all" ? null : g.effects.find(e => e.k === b.dataset.k);
+  mutate(g => { g.effects = a === "fx-all" ? [] : g.effects.filter(e => e.k !== b.dataset.k); });
+  toast(a === "fx-all" ? "Tous les sorts en cours sont terminés" : `<b>${esc(gone ? gone.name : "Sort")}</b> terminé`, () => mutate(g => { g.effects = prev; }));
+});
+onClick("view", (b) => { S.view = b.dataset.v; S.open.clear(); S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); });
+onClick("row", (b) => { const k = b.dataset.id; if (S.open.has(k)) S.open.delete(k); else S.open.add(k); S.castOpen = null; render(); });
+onClick("undo", () => { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } });
+onClick("res-pip", (b) => { mutate(g => { const r = b.dataset.r, f = r + "U", mx = r === "ds" ? PAL.ds(g) : r === "cd" ? PAL.cd(g) : DRU.ws(g), k = +b.dataset.k, u = Math.min(g[f], mx); g[f] = k < u ? k : k + 1; }); });
+onClick("ds-use", () => {
+  const g = G(); if (!g || g.dsU >= PAL.ds(g)) return; const prev = g.dsU;
+  mutate(g => { g.dsU = prev + 1; });
+  toast(`<b>Perception divine</b> : célestes, fiélons et morts-vivants à 18 m · reste ${PAL.ds(g) - prev - 1}`, () => { mutate(g => { g.dsU = prev; }); return "Perception divine annulée"; });
+});
+onClick("cd-use", (b) => {
+  const g = G(); if (!g || g.cdU >= PAL.cd(g)) return; const x = (OATHS[g.oath].cd || []).find(o => o.k === b.dataset.v); if (!x) return;
+  const prev = JSON.parse(JSON.stringify({ cdU: g.cdU, effects: g.effects }));
+  mutate(g => { g.cdU += 1; if (x.fx) g.effects.push({ k: fxKey(), id: "cd-" + x.k, name: x.n, d: x.fx, c: false, note: "" }); });
+  toast(`<b>${x.n}</b> : Conduit divin utilisé${x.k === "guided" ? " · +10 au jet d'attaque" : ""}`, () => { mutate(g => { g.cdU = prev.cdU; g.effects = prev.effects; }); return "Conduit divin annulé"; });
+});
+onClick("ws-open", () => { S.ws = { fp: "all", mv: "", q: "" }; render(); const x = document.querySelector("#wssheet .x"); if (x) x.focus({ preventScroll: true }); });
+onClick("ws-close", () => { S.ws = null; render(); });
+onClick(["ws-fp", "ws-mv"], (b, a) => { if (!S.ws) return; const k = a === "ws-fp" ? "fp" : "mv", v = b.dataset.v; S.ws[k] = S.ws[k] === v ? (k === "fp" ? "all" : "") : v; S.wsTop = true; render(); });
+onClick("ws-fav", (b) => { const id = b.dataset.id, g0 = G(); if (!g0 || !BEAST[id] || (!wsAllowed(g0, BEAST[id]) && !g0.favs.includes(id))) return; mutate(g => { g.favs = g.favs.includes(id) ? g.favs.filter(x => x !== id) : [...g.favs, id]; }); });
+onClick("ws-go", (b) => {
+  const g = G(), bt = BEAST[b.dataset.id]; if (!g || !bt || g.wsU >= DRU.ws(g)) return;
+  const prev = { wsU: g.wsU, wsForm: g.wsForm }; S.ws = null; S.wsDice = ""; S.wsConc = null;
+  mutate(g => { g.wsU += 1; g.wsForm = { id: bt.id, hp: bt.pv, max: bt.pv }; });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  toast(`<b>Forme sauvage</b> : ${esc(bt.n)} · ${bt.pv} PV · reste ${Math.max(0, DRU.ws(g) - prev.wsU - 1)}`, () => { mutate(g => { g.wsU = prev.wsU; g.wsForm = prev.wsForm; }); return "Transformation annulée"; });
+});
+onClick(["ws-dmg", "ws-heal"], (b, a) => {
+  const g = G(), el = document.getElementById("ws-n"), n = Math.floor(+(el && el.value) || 0); if (!g || !g.wsForm || n < 1) { if (el) el.focus(); return; }
+  const prev = { ...g.wsForm }, bt = BEAST[prev.id]; S.wsDice = "";
+  const cc = a === "ws-dmg" && concOf(g); S.wsConc = cc ? { dd: concDD(n), n, beast: bt.n, con: n < prev.hp ? Math.floor((bt.st[2] - 10) / 2) : null } : S.wsConc;
+  if (a === "ws-heal") { const hp = Math.min(prev.max, prev.hp + n); mutate(g => { g.wsForm.hp = hp; }); toast(`${esc(bt.n)} : +${hp - prev.hp} PV (${hp}/${prev.max})`, () => { mutate(g => { g.wsForm = prev; }); return "Soin annulé"; }); }
+  else if (n < prev.hp) { mutate(g => { g.wsForm.hp = prev.hp - n; }); toast(`${esc(bt.n)} : −${n} PV (${prev.hp - n}/${prev.max})${cc ? ` · concentration : DD ${concDD(n)}` : ""}`, () => { S.wsConc = null; mutate(g => { g.wsForm = prev; }); return "Dégâts annulés"; }); }
+  else { const over = n - prev.hp; mutate(g => { g.wsForm = null; }); toast(`${esc(bt.n)} à 0 PV : tu reprends ta forme${over ? `. <b>${over} dégât${over > 1 ? "s" : ""}</b> à retirer de tes PV` : ", sans dégât en plus"}`, () => { S.wsConc = null; mutate(g => { g.wsForm = prev; }); return "Forme rétablie"; }); }
+});
+onClick("ws-cf", (b) => {
+  const g = G(), lv = +b.dataset.l; if (!g || !g.wsForm || slotsLeft(g, lv) < 1) return;
+  S.castOpen = null; mutate(g => { g.used[lv] = (+(g.used[lv] || 0)) + 1; }); S.wsDice = `${lv}d8`; render();
+  const el = document.getElementById("ws-n"); if (el) el.focus({ preventScroll: true });
+  toast(`Changeforme de combat : emplacement niv. ${lv} dépensé · lance <b>${lv}d8</b>`, () => { S.wsDice = ""; mutate(g => { g.used[lv] = Math.max(0, (+(g.used[lv] || 0)) - 1); }); return "Emplacement rendu"; });
+});
+onClick("ws-end", () => { const g = G(); if (!g || !g.wsForm) return; const prev = g.wsForm; S.wsDice = ""; S.wsConc = null; mutate(g => { g.wsForm = null; }); toast(`Tu reprends ta forme de druide`, () => { mutate(g => { g.wsForm = prev; }); return "Forme rétablie"; }); });
+onClick("ws-top", () => { const el = document.getElementById("ws-active"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); else { S.tab = "grimoire"; render(); } });
+onClick("short-pal", () => {
+  const g = G(); if (!g) return; const f = isDru(g) ? "wsU" : "cdU", prev = g[f];
+  mutate(g => { g[f] = 0; }); toast(`Repos court : ${isDru(g) ? "Forme sauvage" : "Conduit divin"} récupéré${isDru(g) ? "e" : ""}`, () => { mutate(g => { g[f] = prev; }); return "Repos court annulé"; });
+});
+onClick("loh-open", () => { const g = G(); if (!g) return; const left = PAL.loh(g) - g.loh; S.lohAmt = Math.min(5, left); S.lohOpen = true; render(); });
+onClick("loh-close", () => { S.lohOpen = false; render(); });
+onClick(["loh-inc", "loh-dec"], (b, a) => { const g = G(), left = PAL.loh(g) - g.loh; S.lohAmt = Math.max(1, Math.min(left, (S.lohAmt || 0) + (a === "loh-inc" ? 1 : -1))); render(); });
+onClick("loh-set", (b) => { S.lohAmt = +b.dataset.v; render(); });
+onClick(["loh-go", "loh-cure"], (b, a) => {
+  const g = G(); if (!g) return; const left = PAL.loh(g) - g.loh, n = a === "loh-cure" ? 5 : Math.min(left, S.lohAmt || 0); if (n < 1 || n > left) return;
+  const prev = g.loh; S.lohOpen = false;
+  mutate(g => { g.loh += n; });
+  toast(a === "loh-cure" ? "Imposition des mains : maladie ou poison neutralisé (−5 PV de réserve)" : `Imposition des mains : <b>${n} PV</b> soignés · reste ${left - n}`, () => { mutate(g => { g.loh = prev; }); return "Soin annulé"; });
+});
+onClick("smite", (b) => {
+  const g = G(), lv = +b.dataset.l; if (!g || slotsLeft(g, lv) < 1) return;
+  const d = PAL.smite(lv) + (S.smiteUndead ? 1 : 0), prev = JSON.parse(JSON.stringify(g.used));
+  mutate(g => { g.used[lv] = (+(g.used[lv] || 0)) + 1; });
+  toast(`<b>Châtiment divin</b> · niv. ${lv} : <b>${d}d8</b> radiants (critique : ${2 * d}d8)`, () => { mutate(g => { g.used = prev; }); return "Châtiment annulé"; });
+});
+onClick("fold", (b, a) => {
+  const k = foldKey(b.dataset.k); if (S.fold[k]) delete S.fold[k]; else S.fold[k] = 1;
+  try { localStorage.setItem("grimoire.fold", JSON.stringify(S.fold)); } catch (e) {}
+  render();
+  const el = document.querySelector(`[data-a="fold"][data-k="${b.dataset.k}"]`); if (el) el.focus({ preventScroll: true });
+});
+onClick("note-edit", (b) => {
+  const id = b.dataset.id; S.noteEdit = S.noteEdit === id ? null : id; S.ndraft = null; render();
+  if (S.noteEdit) { const el = document.getElementById("n-edit"); if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(el.value.length, el.value.length); } }
+});
+onClick("note-save", (b) => {
+  const id = b.dataset.id, el = document.getElementById("n-edit"), v = el ? el.value.trim() : "";
+  S.noteEdit = null; S.ndraft = null;
+  mutate(g => { if (v) g.snotes[id] = v; else delete g.snotes[id]; });
+  toast(v ? "Note enregistrée" : "Note effacée");
+});
+onClick("note-cancel", () => { S.noteEdit = null; S.ndraft = null; render(); });
+onClick("note-clear", (b) => {
+  const id = b.dataset.id, g = G(), old = g && g.snotes[id]; S.noteEdit = null; S.ndraft = null;
+  mutate(g => { delete g.snotes[id]; });
+  toast("Note effacée", () => { mutate(g => { g.snotes[id] = old; }); return "Note rétablie"; });
+});
+onClick("lu-open", () => { const g = G(); if (!g || g.level >= 20) return; luOpen(g); render(); const x = document.querySelector("#lvlup .lufoot .primary"); if (x) x.focus({ preventScroll: true }); });
+onClick("lu-close", () => { S.lu = null; render(); });
+onClick("lu-next", () => { if (!S.lu) return; S.lu.step = Math.min(3, S.lu.step + 1); S.lu.open = null; render(); });
+onClick("lu-back", () => { if (!S.lu) return; S.lu.step = Math.max(1, S.lu.step - 1); S.lu.open = null; render(); });
+onClick("lu-edit", () => { if (!S.lu) return; S.lu.step = 2; render(); });
+onClick("lu-flt", (b) => { if (!S.lu) return; S.lu.flt = +b.dataset.v; S.lu.open = null; render(); });
+onClick("lu-row", (b) => { if (!S.lu) return; S.lu.open = S.lu.open === b.dataset.id ? null : b.dataset.id; S.luKeep = true; render(); });
+onClick("lu-pick", (b) => {
+  if (!S.lu) return;
+  const L = S.lu, g = G(), s = BY_ID[b.dataset.id]; if (!g || !s) return;
+  const need = luNeed(g, L.to), k = s.l === 0 ? "cpicks" : "picks", lim = s.l === 0 ? need.c : need.s;
+  if (L[k].includes(s.id)) { L[k] = L[k].filter(x => x !== s.id); L.prep = L.prep.filter(x => x !== s.id); }
+  else if (L[k].length < lim) L[k].push(s.id);
+  S.luKeep = true; render();
+});
+onClick("lu-pflt", (b) => { if (!S.lu) return; S.lu.flt = +b.dataset.v; S.luKeep = true; render(); });
+onClick("lu-style", (b) => { if (!S.lu) return; S.lu.style = b.dataset.v; S.luKeep = true; render(); });
+onClick("lu-go", () => {
+  if (S.lu && !isWiz(G())) {
     const L = S.lu, g = G(), to = L.to, fn = firstName(g), max = R.maxLevel(g, to), oath = oathSpells({ ...g, level: to });
     const prev = JSON.parse(JSON.stringify({ level: g.level, style: g.style, prepared: g.prepared, cantrips: g.cantrips, favs: g.favs })); S.lu = null;
     mutate(g => { g.level = to; if (L.style) g.style = L.style; (L.wsfav || []).forEach(id => { if (!g.favs.includes(id)) g.favs.push(id); }); (L.cpicks || []).forEach(id => { if (!g.cantrips.includes(id)) g.cantrips.push(id); }); g.prepared = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id)); });
     toast(`<b>${esc(fn)}</b> passe au niveau ${to}`, () => { mutate(g => Object.assign(g, prev)); return "Passage de niveau annulé"; });
-  }
-  else if (S.lu && a === "lu-wsfav") { const id = b.dataset.id, f = S.lu.wsfav || (S.lu.wsfav = []); S.lu.wsfav = f.includes(id) ? f.filter(x => x !== id) : [...f, id]; S.luKeep = true; render(); }
-  else if (S.lu && a === "lu-go") {
+  } else if (S.lu) {
     const L = S.lu, g = G(); if (!g) return;
     const prev = JSON.parse(JSON.stringify({ level: g.level, spells: g.spells, cantrips: g.cantrips, prepared: g.prepared })), to = L.to, fn = firstName(g);
     S.lu = null;
@@ -1268,80 +1268,84 @@ document.addEventListener("click", e => {
     toast(`<b>${esc(fn)}</b> passe au niveau ${to}${L.picks.length + L.cpicks.length ? ` · ${plural(L.picks.length + L.cpicks.length, "sort ajouté", "sorts ajoutés")}` : ""}`,
       () => { mutate(g => Object.assign(g, prev)); return "Passage de niveau annulé"; });
   }
-  else if (a === "to-slots") { const el = document.getElementById("slots-top"); if (el) el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); }
-  else if (a === "hide-ios") { try { localStorage.setItem("grimoire.iosTip", "0"); } catch (e) {} render(); }
-  else if (a === "xedit") { S.open.delete("x:" + b.dataset.i); S.editX = +b.dataset.i; S.xdraft = null; render(); const el = document.getElementById("x-ename"); if (el) { el.focus(); el.select(); } }
-  else if (a === "xcancel") { S.editX = null; S.xdraft = null; render(); }
 });
-document.addEventListener("change", e => {
-  const t = e.target, a = t.dataset.a;
-  if (t.id === "cur") { setCur(t.value); return; }
-  if ((a === "prep" || a === "lu-prep") && t.checked) {
-    const g = G(), lu = a === "lu-prep" && S.lu, max = lu ? R.prepMax({ ...g, level: S.lu.to }) : R.prepMax(g), n = g.prepared.length + (lu ? S.lu.prep.length : 0);
-    if (n >= max) { t.checked = false; toast(`Limite atteinte (${n}/${max}) : décoche d'abord un sort`); return; }
-  }
-  if (a === "prep") return mutate(g => { const id = t.dataset.id; g.prepared = t.checked ? [...g.prepared, id] : g.prepared.filter(x => x !== id); });
-  if (a === "arcane") return mutate(g => { g.arcane = t.checked; });
-  if (a === "smite-ud") { S.smiteUndead = t.checked; render(); return; }
-  if (a === "lu-cpick" && S.lu) {
-    const id = t.dataset.id, g = G(), need = Math.max(0, R.cantrips(g, S.lu.to) - R.cantrips(g));
-    if (t.checked && S.lu.cpicks.length >= need) { t.checked = false; toast(`${plural(need, "sort mineur", "sorts mineurs")} à ce niveau : décoche d'abord l'autre`); return; }
-    S.lu.cpicks = t.checked ? [...S.lu.cpicks, id] : S.lu.cpicks.filter(x => x !== id); S.luKeep = true; render(); return;
-  }
-  if (a === "lu-pprep" && S.lu) {
-    const id = t.dataset.id, g = G(), b = { ...g, level: S.lu.to }, oath = oathSpells(b), max = R.maxLevel(b);
-    const cur = S.lu.prep.filter(x => BY_ID[x] && BY_ID[x].l <= max && !oath.includes(x));
-    if (t.checked && cur.length >= R.prepMax(b)) { t.checked = false; toast(`Limite atteinte (${cur.length}/${R.prepMax(b)}) : décoche d'abord un sort`); return; }
-    S.lu.prep = t.checked ? [...cur, id] : cur.filter(x => x !== id); S.luKeep = true; render(); return;
-  }
-  if (a === "lu-prep" && S.lu) { const id = t.dataset.id; S.lu.prep = t.checked ? [...S.lu.prep, id] : S.lu.prep.filter(x => x !== id); S.luKeep = true; render(); return; }
-  if (t.classList.contains("fxnote")) return mutate(g => { const e = g.effects.find(e => e.k === t.dataset.k); if (e) e.note = t.value.trim(); }, false);
-  if (a === "xused") return mutate(g => { g.extras[+t.dataset.i].used = t.checked; });
-  if (a === "ftog") { S.f[t.dataset.v] = t.checked; render(); return; }
-  if (a === "btog") { S.bf[t.dataset.v] = t.checked; render(); return; }
-  if (t.id === "f-level") return mutate(g => { g.level = +t.value; });
-  if (t.dataset.ab) return mutate(g => { g[t.dataset.ab] = Math.min(30, Math.max(1, +t.value || 10)); });
-  if (t.id === "f-oath") return mutate(g => { g.oath = t.value; });
-  if (t.id === "f-circle") return mutate(g => { g.circle = t.value; });
-  if (t.id === "f-style") return mutate(g => { g.style = t.value; });
-  if (t.id === "f-school") return mutate(g => { g.school = t.value; });
-  if (t.id === "f-sch") { S.f.school = t.value; render(); return; }
-  if (t.id === "f-full") { renderPicker(); return; }
-  if (t.id === "f-import" && t.files && t.files[0]) {
-    const r = new FileReader();
-    r.onload = () => { try { const j = JSON.parse(r.result); const g = norm(j.grimoire || j); const id = newId(g.name); S.list[id] = g; S.tab = "grimoire"; setCur(id); save(id); toast(`${esc(g.name)} importé`); } catch (err) { toast("Ce fichier n'est pas un grimoire valide (.json exporté depuis cet atelier)."); } };
-    r.readAsText(t.files[0]);
-  }
+onClick("lu-wsfav", (b) => { if (!S.lu) return; const id = b.dataset.id, f = S.lu.wsfav || (S.lu.wsfav = []); S.lu.wsfav = f.includes(id) ? f.filter(x => x !== id) : [...f, id]; S.luKeep = true; render(); });
+onClick("to-slots", () => { const el = document.getElementById("slots-top"); if (el) el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); });
+onClick("hide-ios", () => { try { localStorage.setItem("grimoire.iosTip", "0"); } catch (e) {} render(); });
+onClick("xedit", (b) => { S.open.delete("x:" + b.dataset.i); S.editX = +b.dataset.i; S.xdraft = null; render(); const el = document.getElementById("x-ename"); if (el) { el.focus(); el.select(); } });
+onClick("xcancel", () => { S.editX = null; S.xdraft = null; render(); });
+// ---------- Actions : cases à cocher, listes et champs validés (change) ----------
+onChange("#cur", t => { setCur(t.value); });
+// Limite de préparation (grimoire et assistant du magicien) : refus, sinon on passe au gestionnaire suivant
+onChange(t => (t.dataset.a === "prep" || t.dataset.a === "lu-prep") && t.checked, t => {
+  const a = t.dataset.a, g = G(), lu = a === "lu-prep" && S.lu, max = lu ? R.prepMax({ ...g, level: S.lu.to }) : R.prepMax(g), n = g.prepared.length + (lu ? S.lu.prep.length : 0);
+  if (n >= max) { t.checked = false; toast(`Limite atteinte (${n}/${max}) : décoche d'abord un sort`); return; }
+  return NEXT;
 });
-document.addEventListener("input", e => {
-  const t = e.target;
-  if (t.id === "f-full") { mutate(g => { g.name = t.value || "Sans nom"; }, false); const g = G(), h = document.getElementById("title"); if (h && g) h.innerHTML = `<span class="initial">${esc(g.name.charAt(0))}</span>${esc(g.name.slice(1))}`; }
-  else if (t.id === "f-notes") mutate(g => { g.notes = t.value; }, false);
-  else if (t.id === "n-edit") S.ndraft = t.value;
-  else if (t.id === "nw-name") S.newName = t.value;
-  else if (t.id === "conc-dmg") { const el = document.getElementById("conc-dd"); if (el) el.textContent = `JdS CON · DD ${concDD(t.value)}`; }
-  else if (t.id === "x-ename" || t.id === "x-enote") S.xdraft = { name: document.getElementById("x-ename").value, note: document.getElementById("x-enote").value };
-  else if (t.id === "ws-q" && S.ws) { S.ws.q = t.value; const box = document.getElementById("wssheet"); box.innerHTML = wsSheetHTML(G()); const q = document.getElementById("ws-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); }
-  else if (t.id === "b-q") { S.bf.q = t.value; const p = document.getElementById("panel"); if (p) { p.innerHTML = bestiaryHTML(G()); const q = document.getElementById("b-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); } }
-  else if (t.id === "f-q") { S.f.q = t.value; const p = document.getElementById("panel"); if (p) { p.innerHTML = biblioHTML(G()); const q = document.getElementById("f-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); } }
+onChange("prep", t => { mutate(g => { const id = t.dataset.id; g.prepared = t.checked ? [...g.prepared, id] : g.prepared.filter(x => x !== id); }); });
+onChange("arcane", t => { mutate(g => { g.arcane = t.checked; }); });
+onChange("smite-ud", t => { S.smiteUndead = t.checked; render(); });
+onChange("lu-cpick", t => {
+  if (!S.lu) return;
+  const id = t.dataset.id, g = G(), need = Math.max(0, R.cantrips(g, S.lu.to) - R.cantrips(g));
+  if (t.checked && S.lu.cpicks.length >= need) { t.checked = false; toast(`${plural(need, "sort mineur", "sorts mineurs")} à ce niveau : décoche d'abord l'autre`); return; }
+  S.lu.cpicks = t.checked ? [...S.lu.cpicks, id] : S.lu.cpicks.filter(x => x !== id); S.luKeep = true; render();
 });
-document.addEventListener("submit", e => {
-  if (e.target.dataset.a === "editx") {
-    e.preventDefault(); const i = +e.target.dataset.i;
-    const n = document.getElementById("x-ename").value.trim(), note = document.getElementById("x-enote").value.trim();
-    if (!n) return; S.editX = null; S.xdraft = null;
-    mutate(g => { if (g.extras[i]) { g.extras[i].name = n; g.extras[i].note = note; } }); toast("Modification enregistrée"); return;
-  }
-  if (e.target.dataset.a !== "addx") return; e.preventDefault();
+onChange("lu-pprep", t => {
+  if (!S.lu) return;
+  const id = t.dataset.id, g = G(), b = { ...g, level: S.lu.to }, oath = oathSpells(b), max = R.maxLevel(b);
+  const cur = S.lu.prep.filter(x => BY_ID[x] && BY_ID[x].l <= max && !oath.includes(x));
+  if (t.checked && cur.length >= R.prepMax(b)) { t.checked = false; toast(`Limite atteinte (${cur.length}/${R.prepMax(b)}) : décoche d'abord un sort`); return; }
+  S.lu.prep = t.checked ? [...cur, id] : cur.filter(x => x !== id); S.luKeep = true; render();
+});
+onChange("lu-prep", t => { if (!S.lu) return; const id = t.dataset.id; S.lu.prep = t.checked ? [...S.lu.prep, id] : S.lu.prep.filter(x => x !== id); S.luKeep = true; render(); });
+onChange(t => t.classList.contains("fxnote"), t => { mutate(g => { const e = g.effects.find(e => e.k === t.dataset.k); if (e) e.note = t.value.trim(); }, false); });
+onChange("xused", t => { mutate(g => { g.extras[+t.dataset.i].used = t.checked; }); });
+onChange("ftog", t => { S.f[t.dataset.v] = t.checked; render(); });
+onChange("btog", t => { S.bf[t.dataset.v] = t.checked; render(); });
+onChange("#f-level", t => { mutate(g => { g.level = +t.value; }); });
+onChange(t => !!t.dataset.ab, t => { mutate(g => { g[t.dataset.ab] = Math.min(30, Math.max(1, +t.value || 10)); }); });
+onChange("#f-oath", t => { mutate(g => { g.oath = t.value; }); });
+onChange("#f-circle", t => { mutate(g => { g.circle = t.value; }); });
+onChange("#f-style", t => { mutate(g => { g.style = t.value; }); });
+onChange("#f-school", t => { mutate(g => { g.school = t.value; }); });
+onChange("#f-sch", t => { S.f.school = t.value; render(); });
+onChange("#f-full", () => { renderPicker(); });
+onChange(t => t.id === "f-import" && t.files && t.files[0], t => {
+  const r = new FileReader();
+  r.onload = () => { try { const j = JSON.parse(r.result); const g = norm(j.grimoire || j); const id = newId(g.name); S.list[id] = g; S.tab = "grimoire"; setCur(id); save(id); toast(`${esc(g.name)} importé`); } catch (err) { toast("Ce fichier n'est pas un grimoire valide (.json exporté depuis cet atelier)."); } };
+  r.readAsText(t.files[0]);
+});
+
+// ---------- Actions : saisie au clavier (input) ----------
+onInput("#f-full", t => { mutate(g => { g.name = t.value || "Sans nom"; }, false); const g = G(), h = document.getElementById("title"); if (h && g) h.innerHTML = `<span class="initial">${esc(g.name.charAt(0))}</span>${esc(g.name.slice(1))}`; });
+onInput("#f-notes", t => { mutate(g => { g.notes = t.value; }, false); });
+onInput("#n-edit", t => { S.ndraft = t.value; });
+onInput("#nw-name", t => { S.newName = t.value; });
+onInput("#conc-dmg", t => { const el = document.getElementById("conc-dd"); if (el) el.textContent = `JdS CON · DD ${concDD(t.value)}`; });
+onInput(t => ["x-ename", "x-enote"].includes(t.id), t => { S.xdraft = { name: document.getElementById("x-ename").value, note: document.getElementById("x-enote").value }; });
+onInput("#ws-q", t => { if (!S.ws) return; S.ws.q = t.value; const box = document.getElementById("wssheet"); box.innerHTML = wsSheetHTML(G()); const q = document.getElementById("ws-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); });
+onInput("#b-q", t => { S.bf.q = t.value; const p = document.getElementById("panel"); if (p) { p.innerHTML = bestiaryHTML(G()); const q = document.getElementById("b-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); }; });
+onInput("#f-q", t => { S.f.q = t.value; const p = document.getElementById("panel"); if (p) { p.innerHTML = biblioHTML(G()); const q = document.getElementById("f-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); }; });
+
+// ---------- Actions : formulaires (autres sorts) ----------
+onSubmit("editx", f => {
+  const i = +f.dataset.i, n = document.getElementById("x-ename").value.trim(), note = document.getElementById("x-enote").value.trim();
+  if (!n) return; S.editX = null; S.xdraft = null;
+  mutate(g => { if (g.extras[i]) { g.extras[i].name = n; g.extras[i].note = note; } }); toast("Modification enregistrée");
+});
+onSubmit("addx", () => {
   const n = document.getElementById("x-name").value.trim(), note = document.getElementById("x-note").value.trim();
   if (!n) return; mutate(g => g.extras.push({ name: n, note, used: false }));
 });
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape" && S.lu) { S.lu = null; render(); }
-  else if (e.key === "Escape" && S.ws) { S.ws = null; render(); }
-  else if (e.key === "Escape" && S.newOpen) { S.newOpen = false; render(); }
-  else if (e.key === "Escape" && S.lohOpen) { S.lohOpen = false; render(); }
-  else if (e.key === "Enter" && S.newOpen && e.target.id === "nw-name" && S.newCls) document.querySelector('[data-a="nw-go"]').click();
+
+// ---------- Actions : clavier ----------
+onKey(e => {
+  if (e.key === "Escape" && S.lu) { S.lu = null; render(); return true; }
+  if (e.key === "Escape" && S.ws) { S.ws = null; render(); return true; }
+  if (e.key === "Escape" && S.newOpen) { S.newOpen = false; render(); return true; }
+  if (e.key === "Escape" && S.lohOpen) { S.lohOpen = false; render(); return true; }
+  if (e.key === "Enter" && S.newOpen && e.target.id === "nw-name" && S.newCls) { document.querySelector('[data-a="nw-go"]').click(); return true; }
 });
 // ---------- Version hébergée : installation, hors connexion, stockage persistant ----------
 function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }
@@ -1355,6 +1359,7 @@ if (location.protocol !== "file:") {
   if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(p => p || navigator.storage.persist()).catch(() => {});
 }
 setRenderer(renderApp);
+startActions();
 boot();
 // Accès réservé aux tests automatiques (tests/helpers.py) : le code assemblé n'expose pas ses variables.
 window.__t = { S, G, R, mutate, concOf, inClass, BY_ID, BEAST, BEASTS, SPELLS };

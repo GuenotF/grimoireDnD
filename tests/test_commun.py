@@ -107,3 +107,18 @@ def test_autres_sorts(browser, devices, url):
     a.pg.fill("#x-enote", "à volonté"); a.click("form.extra.edit button[type=submit]")
     check(a.g("extras[0].note") == "à volonté", "modification")
     a.close()
+
+
+def test_chaque_action_a_un_gestionnaire(browser, devices, url):
+    """Contrôle statique : tout data-a="…" écrit dans le code correspond à une action déclarée (onClick, onChange, onSubmit)."""
+    import glob, os, re
+    files = glob.glob(os.path.join(os.path.dirname(__file__), "..", "src", "**", "*.js"), recursive=True)
+    src = "".join(open(f, encoding="utf-8").read() for f in files if not f.endswith("actions.js"))  # actions.js : le registre lui-même
+    used = set(re.findall(r'data-a="([a-z0-9-]+)"', src)) | set(re.findall(r"data-a=\\?'([a-z0-9-]+)", src))
+    declared = set()
+    for m in re.finditer(r'on(?:Click|Change|Submit)\((\[[^\]]*\]|"[^"]*")', src):
+        declared |= set(re.findall(r'"([^"#][^"]*)"', m.group(1)))
+    missing = sorted(used - declared)
+    check(not missing, f"actions sans gestionnaire : {missing}")
+    unused = sorted(declared - used)
+    check(not unused, f"gestionnaires sans élément qui les déclenche : {unused}")
