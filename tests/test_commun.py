@@ -31,6 +31,7 @@ def test_export_import_conserve_tout(browser, devices, url):
     data = json.load(open(path))
     g = data["grimoire"]
     check(data["format"] == "grimoire-5e", "format du fichier")
+    check(g["v"] == 2, "numéro de version du format dans la sauvegarde")
     check(g["favs"] == ["ours-brun", "loup"] and g["wsForm"]["hp"] == 20 and g["wsU"] == 1, "Forme sauvage exportée")
     check(g["snotes"]["moonbeam"].startswith("Déplacer"), "notes exportées")
     a.close()
@@ -44,6 +45,7 @@ def test_ancien_fichier_sans_classe_est_magicien(browser, devices, url):
     old = {k: v for k, v in NEMEIA.items() if k != "cls"}
     a = App(browser, devices, url, char=old)
     check(a.g("cls") == "magicien", "classe par défaut")
+    check(a.g("v") == 2, "format migré vers la version 2")
     check(a.g("prepared.length") == 7, "sorts préparés gardés")
     a.close()
 

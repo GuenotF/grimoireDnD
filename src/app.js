@@ -1,138 +1,17 @@
 // Atelier du Grimoire : application (assemblée par build.py avec esbuild).
 import { SPELLS, BY_ID, BEASTS, BEAST } from "./data.js";
 import { signed, fmt, fr, esc, cap, plural, byName } from "./core/format.js";
-const SCHOOLS = ["Abjuration","Divination","Enchantement","Évocation","Illusion","Invocation","Nécromancie","Transmutation"];
-const SCHOOL_VAR = {"Abjuration":"--s-abj","Divination":"--s-div","Enchantement":"--s-enc","Évocation":"--s-evo","Illusion":"--s-ill","Invocation":"--s-inv","Nécromancie":"--s-nec","Transmutation":"--s-tra"};
-// Emplacements du magicien (Manuel des joueurs 2014, tableau du magicien)
-const SLOTS = {1:[2],2:[3],3:[4,2],4:[4,3],5:[4,3,2],6:[4,3,3],7:[4,3,3,1],8:[4,3,3,2],9:[4,3,3,3,1],10:[4,3,3,3,2],
-  11:[4,3,3,3,2,1],12:[4,3,3,3,2,1],13:[4,3,3,3,2,1,1],14:[4,3,3,3,2,1,1],15:[4,3,3,3,2,1,1,1],16:[4,3,3,3,2,1,1,1],
-  17:[4,3,3,3,2,1,1,1,1],18:[4,3,3,3,3,1,1,1,1],19:[4,3,3,3,3,2,1,1,1],20:[4,3,3,3,3,2,2,1,1]};
-// Emplacements des demi-lanceurs (paladin), Manuel des joueurs 2014
-const HALF = {1:[],2:[2],3:[3],4:[3],5:[4,2],6:[4,2],7:[4,3],8:[4,3],9:[4,3,2],10:[4,3,2],11:[4,3,3],12:[4,3,3],13:[4,3,3,1],14:[4,3,3,1],
-  15:[4,3,3,2],16:[4,3,3,2],17:[4,3,3,3,1],18:[4,3,3,3,1],19:[4,3,3,3,2],20:[4,3,3,3,2]};
-// Serments du paladin : sorts toujours préparés, par niveau de paladin (Guide de Xanathar pour la Conquête)
-const OATHS = {
-  conquete: { n: "Conquête", full: "Serment de la conquête",
-    cd: [
-      { k: "presence", n: "Présence conquérante", fx: "1 minute", pills: g => [["f", "Effet", "Effrayée"], ["s", "Jet de la cible", `JdS SAG · DD ${8 + R.prof(g.level) + R.am(g)}`, "nouveau jet à chaque fin de tour"], ["n", "Zone", "9 m"], ["n", "Durée", "1 minute"]],
-        e: "Action. Chaque créature de ton choix à 9 m ou moins qui rate son jet est effrayée." },
-      { k: "guided", n: "Frappe guidée", btn: "Frappe guidée · +10", e: "+10 à un jet d'attaque, après avoir vu le d20 mais avant de savoir s'il touche." },
-    ],
-    sp: {3: ["armor-of-agathys", "command"], 5: ["hold-person", "spiritual-weapon"], 9: ["bestow-curse", "fear"], 13: ["dominate-beast", "stoneskin"], 17: ["cloudkill", "dominate-person"]} },
-};
-// Classes : caractéristique d'incantation, table d'emplacements, préparation, sous-classe
-const CLASSES = {
-  magicien: { n: "Magicien", ab: "int", abN: "Intelligence", slots: SLOTS, top: 9, book: true,
-    cantrips: lv => lv >= 10 ? 5 : lv >= 4 ? 4 : 3, prep: (g, m) => Math.max(1, m + g.level) },
-  paladin: { n: "Paladin", ab: "cha", abN: "Charisme", slots: HALF, top: 5, book: false,
-    cantrips: () => 0, prep: (g, m) => Math.max(1, m + Math.floor(g.level / 2)) },
-  druide: { n: "Druide", ab: "wis", abN: "Sagesse", slots: SLOTS, top: 9, book: false,
-    cantrips: lv => lv >= 10 ? 4 : lv >= 4 ? 3 : 2, prep: (g, m) => Math.max(1, m + g.level) },
-};
-const isPal = g => !!g && g.cls === "paladin", isDru = g => !!g && g.cls === "druide";
-// Cercles du druide (Cercle de la Lune pour l'instant)
-const CIRCLES = { lune: { n: "Lune", full: "Cercle de la Lune" } };
-const DRU = {
-  ws: g => g.level >= 20 ? 99 : g.level >= 2 ? 2 : 0,          // Forme sauvage : 2 utilisations, repos court (illimitée au niveau 20)
-  fp: g => g.level >= 6 ? Math.floor(g.level / 3) : 1,          // Cercle de la Lune : FP 1, puis niveau ÷ 3 dès le niveau 6
-  hours: g => Math.floor(g.level / 2),
-};
-const C = g => CLASSES[g && g.cls] || CLASSES.magicien;
-const isWiz = g => C(g) === CLASSES.magicien;
-const inClass = (g, s) => (s.cl || ["magicien"]).includes(g.cls || "magicien");
-const classSpells = g => SPELLS.filter(s => inClass(g, s));
-const oathSpells = g => { const o = isPal(g) && OATHS[g.oath]; if (!o) return []; return Object.entries(o.sp).filter(([lv]) => g.level >= +lv).flatMap(([, ids]) => ids).filter(id => BY_ID[id]); };
-const isOath = (g, s) => !isWiz(g) && oathSpells(g).includes(s.id);
-// Sorts lançables en jeu : préparés (+ sorts de serment pour le paladin)
-function castable(g) {
-  if (isWiz(g)) { const pr = new Set(g.prepared); return g.spells.map(x => BY_ID[x.id]).filter(s => s && pr.has(s.id)); }
-  const ids = [...new Set([...oathSpells(g), ...g.prepared])];
-  return ids.map(id => BY_ID[id]).filter(s => s && s.l <= R.maxLevel(g));
-}
-const PAL = {
-  loh: g => 5 * g.level,                                   // Imposition des mains : réserve de PV
-  ds: g => Math.max(1, 1 + R.am(g)),                       // Perception divine : 1 + mod. CHA, repos long
-  cd: g => g.level >= 3 ? 1 : 0,                           // Conduit divin : 1, repos court
-  smite: lv => Math.min(5, lv + 1),                        // Châtiment divin : 2d8 au niv. 1, +1d8 par niveau, 5d8 max
-};
-const LVL_NAME = ["Sorts mineurs","Niveau 1","Niveau 2","Niveau 3","Niveau 4","Niveau 5","Niveau 6","Niveau 7","Niveau 8","Niveau 9"];
-
-// ---------- Règles ----------
-const R = {
-  prof: lv => 2 + Math.floor((lv - 1) / 4),
-  mod: sc => Math.floor((sc - 10) / 2),
-  am: g => R.mod(+g[C(g).ab] || 10), // modificateur de la caractéristique d'incantation
-  slots: (g, lv = g.level) => C(g).slots[lv] || [],
-  maxLevel: (g, lv = g.level) => (C(g).slots[lv] || []).length,
-  unlockAt: (g, sl) => { for (let lv = 1; lv <= 20; lv++) if ((C(g).slots[lv] || []).length >= sl) return lv; return 21; },
-  cantrips: (g, lv = g.level) => C(g).cantrips(lv),
-  prepMax: g => C(g).prep(g, R.am(g)),
-  expected: lv => 6 + 2 * (lv - 1),
-  arcane: lv => Math.ceil(lv / 2),
-  savant: (g, s) => g.level >= 2 && s.s === g.school,
-  copy: (g, s) => { const k = R.savant(g, s) ? 0.5 : 1; return { h: 2 * s.l * k, po: 50 * s.l * k }; },
-};
-
-// ---------- État ----------
-const S = { list: {}, cur: null, tab: "grimoire", view: "gerer", fxOpen: false, shortOpen: false, sr: {}, open: new Set(), concWarn: null, concPanel: false,
-  f: { q: "", lvl: "all", school: "", conc: false, rit: false, hideOwned: false, reachable: false },
-  bf: { q: "", fp: "all", mv: "", sz: "", reach: false, fav: false },
-  confirm: null, newForm: false };
-S.fold = {}; try { S.fold = JSON.parse(localStorage.getItem("grimoire.fold") || "{}") || {}; } catch (e) {}
-try { const t = localStorage.getItem("grimoire.tab"); if (t) S.tab = t; if (localStorage.getItem("grimoire.view") === "jeu") S.view = "jeu"; } catch (e) {}
-
-function blank(name, cls) {
-  cls = CLASSES[cls] ? cls : "magicien";
-  return { cls, name: name || "Nouveau " + CLASSES[cls].n.toLowerCase(), level: 1, int: 16, cha: 14, wis: 16, school: "Évocation", oath: "conquete", circle: "lune", cantrips: [], spells: [],
-    prepared: [], used: {}, arcane: false, extras: [], effects: [], notes: "", snotes: {}, favs: [], wsForm: null, loh: 0, dsU: 0, cdU: 0, wsU: 0, updatedAt: Date.now() };
-}
-const fxKey = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+import { SCHOOLS, SCHOOL_VAR, SLOTS, OATHS, CLASSES, isPal, CIRCLES, DRU, C, isWiz, inClass, classSpells, oathSpells, isOath, castable, PAL, LVL_NAME, R, isDru } from "./rules/common.js";
+import { S, G } from "./core/state.js";
+import { blank, fxKey, norm } from "./core/schema.js";
+import { setRenderer, render, setStatus, toast } from "./core/ui.js";
+import { loadLocal, save, removeDoc, pickCurrent, setCur, newId, mutate } from "./core/store.js";
 const NO_TRACK = ["Instantanée", "Jusqu'à dissipation", "Spéciale"]; // durées non suivies dans « En cours »
-function norm(g) {
-  // Les documents reçus de la base sont figés (lecture seule) : on travaille sur une copie profonde.
-  const b = blank(); const o = Object.assign(b, JSON.parse(JSON.stringify(g || {})));
-  if (!CLASSES[o.cls]) o.cls = "magicien"; // anciens fichiers : magicien
-  o.level = Math.min(20, Math.max(1, +o.level || 1)); o.int = Math.min(30, Math.max(1, +o.int || 10)); o.cha = Math.min(30, Math.max(1, +o.cha || 10)); o.wis = Math.min(30, Math.max(1, +o.wis || 10));
-  if (!CIRCLES[o.circle]) o.circle = "lune";
-  if (!Array.isArray(o.favs)) o.favs = []; o.favs = o.favs.filter(id => BEAST[id]);            // druide : formes favorites
-  if (!o.wsForm || !BEAST[o.wsForm.id]) o.wsForm = null;                                         // druide : forme active {id, hp, max}
-  if (!OATHS[o.oath]) o.oath = "conquete";
-  if (typeof o.style !== "string") o.style = ""; // paladin : style de combat
-  ["loh", "dsU", "cdU", "wsU"].forEach(k => { o[k] = Math.max(0, +o[k] || 0); }); // paladin : PV d'Imposition dépensés, Perception divine et Conduit divin utilisés
-  ["cantrips","spells","prepared","extras"].forEach(k => { if (!Array.isArray(o[k])) o[k] = []; });
-  o.spells = o.spells.filter(x => x && BY_ID[x.id]); o.cantrips = o.cantrips.filter(id => BY_ID[id]);
-  // Magicien : un sort préparé doit être dans le grimoire. Paladin : dans la liste de sa classe.
-  o.prepared = [...new Set(o.prepared)].filter(id => o.cls === "magicien" ? o.spells.some(x => x.id === id) : BY_ID[id] && (BY_ID[id].cl || []).includes(o.cls));
-  if (!o.used || typeof o.used !== "object") o.used = {};
-  if (!o.snotes || typeof o.snotes !== "object" || Array.isArray(o.snotes)) o.snotes = {}; // notes personnelles par sort : {id: texte}
-  if (!Array.isArray(o.effects)) o.effects = []; // sorts en cours : {k, id, name, d, c (concentration), note}
-  o.effects.forEach(e => { if (!e.k) e.k = fxKey(); });
-  return o;
-}
-const G = () => S.cur && S.list[S.cur] ? S.list[S.cur] : null;
-
-// ---------- Stockage ----------
-function cacheLocal() { try { localStorage.setItem("grimoire.cache", JSON.stringify(S.list)); } catch (e) {} }
-function loadLocal() { try { const c = JSON.parse(localStorage.getItem("grimoire.cache") || "{}"); for (const k in c) S.list[k] = norm(c[k]); } catch (e) {} }
-function save(id) {
-  const g = S.list[id]; if (!g) return; g.updatedAt = Date.now(); cacheLocal(); setStatus("Enregistré sur cet appareil");
-}
-function removeDoc(id) { delete S.list[id]; cacheLocal(); }
-function setStatus(t, err) { const el = document.getElementById("status"); if (el) { el.textContent = t; el.classList.toggle("err", !!err); } S.statusText = t; S.statusErr = !!err; }
-
 function boot() {
   loadLocal(); pickCurrent(); setStatus("Enregistré sur cet appareil"); render();
 }
-function pickCurrent() {
-  let want = S.cur; if (!want) { try { want = localStorage.getItem("grimoire.cur"); } catch (e) {} }
-  const ids = Object.keys(S.list);
-  S.cur = want && S.list[want] ? want : (ids.sort((a, b) => S.list[b].updatedAt - S.list[a].updatedAt)[0] || null);
-}
-function setCur(id) { S.cur = id; S.editX = null; S.xdraft = null; S.open.clear(); try { localStorage.setItem("grimoire.cur", id); } catch (e) {} render(); }
-function newId(name) { return (name || "mage").normalize("NFD").replace(/[^\w]+/g, "-").replace(/^-|-$/g, "").toLowerCase().slice(0, 30) + "-" + Math.random().toString(36).slice(2, 7); }
-
 // ---------- Rendu ----------
-function render() {
+function renderApp() {
   const a = document.activeElement; const keep = a && a.id ? { id: a.id, s: a.selectionStart, e: a.selectionEnd } : null;
   renderPicker();
   const g = G(); const main = document.getElementById("main");
@@ -1139,14 +1018,6 @@ function luStep3(g, b) {
 }
 
 // ---------- Actions ----------
-let toastT;
-function toast(t, undo) {
-  const el = document.getElementById("toast");
-  el.innerHTML = `<span>${t}</span>${undo ? `<button class="undo" data-a="undo">Annuler</button>` : ""}`;
-  S.undo = undo || null; el.hidden = false; clearTimeout(toastT);
-  toastT = setTimeout(() => { el.hidden = true; S.undo = null; }, undo ? 5000 : 2600);
-}
-function mutate(fn, rerender = true) { const g = G(); if (!g) return; fn(g); save(S.cur); if (rerender) render(); }
 // Nom des fichiers de sauvegarde, datés pour qu'ils se rangent d'eux-mêmes : « Grimoire - Némeia - 2026-10-19 »
 function backupName(g) {
   const d = new Date(), p = n => String(n).padStart(2, "0");
@@ -1483,6 +1354,7 @@ if (location.protocol !== "file:") {
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
   if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(p => p || navigator.storage.persist()).catch(() => {});
 }
+setRenderer(renderApp);
 boot();
 // Accès réservé aux tests automatiques (tests/helpers.py) : le code assemblé n'expose pas ses variables.
 window.__t = { S, G, R, mutate, concOf, inClass, BY_ID, BEAST, BEASTS, SPELLS };
