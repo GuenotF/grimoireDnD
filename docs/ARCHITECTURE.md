@@ -1,6 +1,6 @@
 # Architecture cible de l'Atelier du Grimoire
 
-*Validé le 21 octobre 2026. Étapes 0, 1 et 2 faites le 21 octobre 2026.*
+*Validé le 21 octobre 2026. Étapes 0 à 3 faites le 21 octobre 2026.*
 
 ## 1. Objectifs
 
@@ -20,68 +20,67 @@
 | Sauvegarde | Pas de numéro de version du format |
 | Tests | 29 scénarios dans `tests/` |
 
-## 3. Organisation proposée
+## 3. Organisation (en place depuis l'étape 3)
 
 ```
 src/
-  index.html              squelette de la page (conteneurs, volets) – sans code
-  app.js                  point d'entrée : importe tout, démarre l'application
-  styles/                 CSS découpé : base, grimoire, jeu, volets, classes
+  app.html                  gabarit de la page (structure) – /*CSS*/ et /*APP*/ remplacés à l'assemblage
+  app.js                    point d'entrée : écran principal (en-tête, onglets), volets, démarrage
+  data.js                   accès aux sorts et aux bêtes (data/*.json)
+  styles/                   CSS, un fichier par partie de l'écran (index.css fixe l'ordre)
   core/
-    state.js              état de l'écran (S), personnage en cours (G), mutate
-    store.js              enregistrement sur l'appareil, mode artefact, sauvegardes
-    schema.js             format du personnage, numéro de version, migrations
-    render.js             rendu général, onglets, volets, message d'annulation
-    actions.js            registre des actions : chaque module déclare les siennes
-    format.js             outils de texte (esc, signed, plural…)
+    state.js                état de l'écran (S) et personnage en cours (G)
+    schema.js               format d'un personnage : valeurs par défaut, contrôle, version (v2) et migrations
+    store.js                enregistrement sur l'appareil, personnage affiché, mutate
+    ui.js                   rendu (fourni par app.js), message d'annulation, statut
+    actions.js              registre des actions : onClick, onChange, onInput, onSubmit, onKey
+    format.js               mise en forme du texte (signes, pluriels, échappement)
+    pwa.js                  version installée : service worker, astuce iPhone
   rules/
-    common.js             maîtrise, modificateurs, DD, emplacements partagés
+    tables.js               tables sans dépendance : écoles, emplacements (lanceur complet, demi-lanceur)
+    common.js               règles communes : maîtrise, modificateurs, emplacements, préparation, sorts lançables
   classes/
-    index.js              registre des classes
-    magicien.js           ┐
-    paladin.js            ├ une fiche de règles par classe (même contrat, voir §4)
-    druide.js             ┘
-  features/               mécaniques partagées entre classes
-    spells/               lignes de sorts, Lancer, concentration, sorts en cours, notes
-    library.js            Bibliothèque
-    wildshape/            Forme sauvage, Bestiaire, forme active
-    levelup.js            assistant (structure commune, étapes fournies par la classe)
-    print.js              fiche imprimable (sections fournies par la classe)
-    save.js               onglet Sauvegarde, export, import
-data/
-  spells.json, beasts.json  inchangés, importés directement par le code
-tests/                    inchangés, joués après chaque étape
-build.py                  appelle esbuild, puis produit index.html, sw.js, dist/artifact.html
+    index.js                registre des classes : C(g), sorts toujours préparés, capacités
+    magicien.js             contrat + Restauration arcanique, onglet Règles, assistant de niveau du grimoire
+    paladin.js              contrat + serments, Imposition des mains, Perception et Conduit divins, Châtiment
+    druide.js               contrat + cercles, ressource Forme sauvage
+    druide-wildshape.js     Forme sauvage : formes possibles, forme active, Changeforme de combat, Bestiaire
+  ui/components.js          éléments réutilisables : sections repliables, capacités dépliables, bouton Retirer
+  features/                 mécaniques partagées par toutes les classes
+    spells.js               affichage d'un sort, notes personnelles
+    cast.js                 Lancer, barre des emplacements, concentration, sorts en cours
+    grimoire.js             onglet Sorts/Grimoire : Gérer, En jeu, capacités de classe, repos
+    library.js              Bibliothèque
+    levelup.js              assistant de passage de niveau (structure et étapes des classes à sorts préparés)
+    save.js, print.js, newchar.js   sauvegarde, fiche imprimable, création d'un personnage
 ```
 
-L'outil esbuild réunit tous les modules en un seul script, intégré à `index.html` comme aujourd'hui. Le code publié est **minifié** (plus léger) ; la lisibilité se joue dans `src/`, pas dans `index.html`. Esbuild produit aussi une carte des sources pour retrouver une erreur de production dans le code d'origine.
+Chaque module déclare lui-même ses actions (boutons, champs) en se chargeant. Aucun module partagé (`app.js`, `core/`, `features/`, `ui/`, `rules/`) n'importe un fichier de classe : il passe par `classes/index.js`.
 
 ## 4. Le contrat d'une classe
 
-Chaque fichier `classes/<classe>.js` exporte un objet de même forme. L'application ne teste plus jamais « est-ce un paladin ? » : elle appelle ce que la classe fournit.
+Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme. Le reste de l'application ne teste jamais la classe d'un personnage (il n'existe plus aucun `isWiz`, `isPal` ou `isDru`) : il appelle ce que la classe fournit, via `C(g)`. Une partie absente veut dire « rien de particulier ».
 
-**Langue** : identifiants du code en anglais, comme le code actuel (`render`, `mutate`, `slotsLeft`, `castHTML`…) ; commentaires, textes affichés et noms de règles en français.
+**Langue** : identifiants du code en anglais ; commentaires, textes affichés et noms de règles en français.
 
-```js
-export default {
-  id: "paladin", name: "Paladin",
-  casting: { ability: "cha", slots: HALF_CASTER, cantrips: () => 0, prepared: (g, mod) => … },
-  subclasses: { conquete: { name: "Serment de la conquête", spells: {…}, channel: […], features: […] } },
-  defaults: { oath: "conquete", loh: 0, dsU: 0, cdU: 0 },   // champs propres au personnage
-  normalize(g) { … },                                         // contrôle à l'ouverture d'un fichier
-  features: […],                                              // rubrique « Capacités de classe »
-  resources: { html(g), shortRest(g), longRest(g) },          // en haut du grimoire
-  play: { beforeSpells(g) },                                  // ex. Châtiment divin, forme active
-  tabs: [],                                                   // ex. druide : Bestiaire
-  levelUp: { summary(g, b), choices(g, b), recap(g, b), apply(g, choice) },
-  rules(g),                                                   // onglet Règles
-  print(g),                                                   // sections de la fiche imprimable
-};
-```
-
-Une partie vide est simplement absente : le magicien n'a pas de `tabs`, le paladin n'a pas de `cantrips`.
-
-**Critère de réussite mesurable** : à la fin, aucun `isPal(`, `isDru(` ou `isWiz(` hors du dossier `classes/`.
+| Champ | Rôle | Magicien | Paladin | Druide |
+|---|---|:-:|:-:|:-:|
+| `n`, `ab`, `abN`, `abArticle` | Nom, caractéristique d'incantation (code, nom, « la Sagesse ») | ✓ | ✓ | ✓ |
+| `slots`, `top`, `cantrips(lv)`, `prep(g, mod)` | Emplacements, niveau de sort maximal, sorts mineurs, sorts préparés | ✓ | ✓ | ✓ |
+| `book` | Modèle du grimoire (apprend, puis prépare parmi ses sorts) ; sinon prépare dans toute la liste | ✓ | | |
+| `hitDie`, `fileLabel`, `prepNote` | Dé de vie (rappel), nom des sauvegardes, précision sur la préparation | ✓ | ✓ | ✓ |
+| `defaults()`, `normalize(o)` | Champs propres au personnage et leur contrôle à l'ouverture | ✓ | ✓ | ✓ |
+| `subline(g)`, `subclassField(g)`, `heroStats(g)` | En-tête : sous-titre, champ de sous-classe, statistiques | ✓ | ✓ | ✓ |
+| `tabs(g)`, `panels` | Onglets et contenu des onglets propres (Règles, Imprimer, Bestiaire) | ✓ | ✓ | ✓ |
+| `alwaysPrepared(g)`, `alwaysPreparedInfo(g)` | Sorts toujours préparés et leurs libellés (serment) | | ✓ | |
+| `canRitual(prepared)`, `ritualNeedsPrep` | Lancer en rituel | ✓ | | ✓ |
+| `features(g)` | Capacités de classe (avec `control(g)` pour un réglage, ex. style de combat) | | ✓ | ✓ |
+| `resources(g)`, `resourceMax` | Ressources en haut de l'onglet et maximum de chaque compteur | | ✓ | ✓ |
+| `beforeSlots(g)`, `playTop(g)`, `slotbarChips(g)` | Ajouts à l'écran : forme active, Châtiment divin, puce de la barre du bas | | ✓ | ✓ |
+| `restBar(g)`, `shortPanel(g)`, `shortRest`, `longRest(g)` | Repos court (propre ou ressource récupérée) et repos long | ✓ | ✓ | ✓ |
+| `renderSheets(g, levelUpOpen)` | Volets propres (Imposition des mains, formes possibles) | | ✓ | ✓ |
+| `levelUp` | Assistant : étapes propres (`init`, `steps`, `apply`…) ou crochets des étapes communes (`rowsBefore`, `rowsAfter`, `summaryExtra`, `notes`, `choicesFirst`, `choices`, `recapBefore`, `recapAfter`, `recapNotes`, `apply`) | ✓ | ✓ | ✓ |
+| `rules(g)`, `print(g)` | Onglet Règles et fiche imprimable (pilotes, à venir pour paladin et druide) | via `panels` | | |
 
 ## 5. Format de sauvegarde versionné
 
@@ -99,8 +98,8 @@ Chaque étape fait l'objet d'une publication séparée. On ne publie que si les 
 | 0 ✓ | Outillage : esbuild branché dans `build.py`, le code actuel passe par esbuild sans être découpé ; abandon de la variante claude.ai | ½ itération |
 | 1 ✓ | Outils et données : `format.js`, `data.js` (import direct des JSON), CSS découpé en 13 fichiers | ½ |
 | 2 ✓ | Noyau : état, stockage, version du format (v2 et migrations), rendu, registre des actions ; retrait du mode lecture seule. Les tables de règles sont passées dans `rules/common.js` en préalable à l'étape 3 | 1 |
-| 3 | Classes : magicien, paladin, druide derrière le contrat ; suppression des `isX` | 1 |
-| 4 | Mécaniques partagées : sorts, bibliothèque, Forme sauvage, passage de niveau, impression, sauvegarde | ½ |
+| 3 ✓ | Classes : magicien, paladin, druide derrière le contrat ; plus aucun `isWiz` / `isPal` / `isDru`. Fait avec l'étape 4 (mécaniques partagées réparties dans `features/`), les deux étant liées | 1 |
+| 4 ✓ | Mécaniques partagées : sorts, bibliothèque, Forme sauvage, passage de niveau, impression, sauvegarde (avec l'étape 3) | ½ |
 | 5 | Documentation : README et ce document mis à jour | — |
 
 Pendant les étapes 0 à 5, il n'y a pas de nouvelle fonctionnalité.

@@ -1,5 +1,5 @@
 // Données de jeu, importées des fichiers JSON (esbuild les intègre à l'assemblage).
-import SPELLS from "../data/spells.json";   // sorts : voir le format dans README.md
+import SPELLS from "../data/spells.json";
 import BEASTS from "../data/beasts.json";   // bêtes du Manuel des monstres (Forme sauvage) : fp, ca, pv, v (vitesses), st (FOR, DEX, CON), cp (compétences), tr (capacités), ac (actions)
 
 export { SPELLS, BEASTS };

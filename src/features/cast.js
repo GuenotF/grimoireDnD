@@ -1,12 +1,13 @@
 // Lancer un sort, emplacements restants (barre du bas), concentration, sorts en cours.
+import { C } from "../classes/index.js";
 import { onChange, onClick, onInput } from "../core/actions.js";
 import { esc } from "../core/format.js";
 import { fxKey } from "../core/schema.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
-import { BEAST, BY_ID } from "../data.js";
-import { R, isDru, isWiz } from "../rules/common.js";
+import { BY_ID } from "../data.js";
+import { R } from "../rules/common.js";
 
 const NO_TRACK = ["Instantanée", "Jusqu'à dissipation", "Spéciale"]; // durées non suivies dans « En cours »
 const slotsLeft = (g, lv) => Math.max(0, (R.slots(g)[lv - 1] || 0) - (+(g.used[lv] || 0)));
@@ -20,7 +21,7 @@ function castHTML(g, s, prepared) {
     h += lv ? `<button class="btn cast-go" data-a="cast" data-id="${s.id}" data-l="${lv}">Lancer · niv. ${lv}</button>` : `<button class="btn cast-none" disabled>Plus d'emplacement</button>`;
     if (higher && lv) h += `<button class="btn cast-up" data-a="cast-open" data-id="${s.id}" aria-label="Lancer ${esc(s.n)} à un niveau supérieur" aria-expanded="${S.castOpen === s.id}">▲</button>`;
   }
-  if (s.ri && (isWiz(g) || (isDru(g) && prepared))) h += `<button class="btn cast-rit" data-a="cast-rit" data-id="${s.id}">Rituel · +10 min</button>`;
+  if (s.ri && C(g).canRitual && C(g).canRitual(prepared)) h += `<button class="btn cast-rit" data-a="cast-rit" data-id="${s.id}">Rituel · +10 min</button>`;
   if (!h) return "";
   h = `<div class="cast">${h}</div>`;
   if (prepared && S.castOpen === s.id) {
@@ -35,7 +36,7 @@ function castHTML(g, s, prepared) {
 function slotbarHTML(g) {
   const cur = concOf(g);
   const others = g.effects.filter(e => !e.c);
-  const wf = isDru(g) && g.wsForm && BEAST[g.wsForm.id] ? `<button class="chip ws" data-a="ws-top">🐾 ${esc(BEAST[g.wsForm.id].n)} · ${g.wsForm.hp}/${g.wsForm.max}</button>` : "";
+  const wf = C(g).slotbarChips ? C(g).slotbarChips(g) : ""; // ex. druide : forme active
   const fx = g.effects.length || wf ? `<div class="fx">${wf}${cur ? `<button class="chip conc" data-a="conc-panel" aria-expanded="${S.concPanel}">◉ ${esc(cur.name)} · conc.</button>` : ""}${others.map(e => `<button class="chip" data-a="fx-open">${esc(e.name)} · ${esc(e.d)}</button>`).join("")}${g.effects.length > 1 || (g.effects.length && !cur) ? `<button class="chip" data-a="fx-open" style="background:transparent;border-color:var(--rule);color:var(--muted)">Tout voir</button>` : ""}</div>` : "";
   return `${fx}<button class="line" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g).map((n, i) => {
     const used = Math.min(n, +(g.used[i + 1] || 0));

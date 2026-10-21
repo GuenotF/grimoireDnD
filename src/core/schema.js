@@ -1,8 +1,6 @@
 // Format d'un personnage : valeurs par défaut, contrôle à l'ouverture, version et migrations.
-import { CIRCLES } from "../classes/druide.js";
-import { OATHS } from "../classes/paladin.js";
-import { BEAST, BY_ID } from "../data.js";
-import { CLASSES } from "../rules/common.js";
+import { CLASSES } from "../classes/index.js";
+import { BY_ID } from "../data.js";
 
 /** Version actuelle du format. Les fichiers sans numéro sont la version 1. */
 export const VERSION = 2;
@@ -20,8 +18,9 @@ export function migrate(o) {
 
 function blank(name, cls) {
   cls = CLASSES[cls] ? cls : "magicien";
-  return { v: VERSION, cls, name: name || "Nouveau " + CLASSES[cls].n.toLowerCase(), level: 1, int: 16, cha: 14, wis: 16, school: "Évocation", oath: "conquete", circle: "lune", cantrips: [], spells: [],
-    prepared: [], used: {}, arcane: false, extras: [], effects: [], notes: "", snotes: {}, favs: [], wsForm: null, loh: 0, dsU: 0, cdU: 0, wsU: 0, updatedAt: Date.now() };
+  // Champs communs, puis champs propres à chaque classe (tous présents : un personnage peut changer de classe dans un fichier)
+  return { v: VERSION, cls, name: name || "Nouveau " + CLASSES[cls].n.toLowerCase(), level: 1, int: 16, cha: 14, wis: 16, cantrips: [], spells: [],
+    prepared: [], used: {}, extras: [], effects: [], notes: "", snotes: {}, ...Object.assign({}, ...Object.values(CLASSES).map(c => c.defaults ? c.defaults() : {})), updatedAt: Date.now() };
 }
 const fxKey = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 function norm(g) {
@@ -29,12 +28,7 @@ function norm(g) {
   const b = blank(); const o = Object.assign(b, migrate(JSON.parse(JSON.stringify(g || {}))));
   if (!CLASSES[o.cls]) o.cls = "magicien"; // anciens fichiers : magicien
   o.level = Math.min(20, Math.max(1, +o.level || 1)); o.int = Math.min(30, Math.max(1, +o.int || 10)); o.cha = Math.min(30, Math.max(1, +o.cha || 10)); o.wis = Math.min(30, Math.max(1, +o.wis || 10));
-  if (!CIRCLES[o.circle]) o.circle = "lune";
-  if (!Array.isArray(o.favs)) o.favs = []; o.favs = o.favs.filter(id => BEAST[id]);            // druide : formes favorites
-  if (!o.wsForm || !BEAST[o.wsForm.id]) o.wsForm = null;                                         // druide : forme active {id, hp, max}
-  if (!OATHS[o.oath]) o.oath = "conquete";
-  if (typeof o.style !== "string") o.style = ""; // paladin : style de combat
-  ["loh", "dsU", "cdU", "wsU"].forEach(k => { o[k] = Math.max(0, +o[k] || 0); }); // paladin : PV d'Imposition dépensés, Perception divine et Conduit divin utilisés
+  Object.values(CLASSES).forEach(c => { if (c.normalize) c.normalize(o); }); // champs propres à chaque classe
   ["cantrips","spells","prepared","extras"].forEach(k => { if (!Array.isArray(o[k])) o[k] = []; });
   o.spells = o.spells.filter(x => x && BY_ID[x.id]); o.cantrips = o.cantrips.filter(id => BY_ID[id]);
   // Magicien : un sort préparé doit être dans le grimoire. Paladin : dans la liste de sa classe.

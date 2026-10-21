@@ -69,10 +69,11 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 | Fichier | Rôle |
 |---|---|
-| `src/app.js` | Le code de l'application (interface, règles, stockage, fiche imprimable), en cours de découpage (voir `docs/ARCHITECTURE.md`). **À modifier ici.** |
-| `src/core/` | Le noyau : `state.js` (état de l'écran), `schema.js` (format d'un personnage, version et migrations), `store.js` (enregistrement sur l'appareil), `ui.js` (rendu, message d'annulation), `actions.js` (registre des actions des boutons et champs), `format.js` (mise en forme du texte). |
-| `src/rules/common.js` | Tables et règles des classes (emplacements, serments, cercles, préparation). |
-| `src/data.js` | Accès aux données (sorts, bêtes). |
+| `src/app.js` | Point d'entrée : écran principal (en-tête, onglets), démarrage. |
+| `src/classes/` | Une fiche par classe (magicien, paladin, druide, Forme sauvage), de même forme : voir `docs/ARCHITECTURE.md`. **Pour modifier une règle de classe, c'est ici.** |
+| `src/features/` | Mécaniques partagées : sorts, lancement et concentration, onglet du grimoire, bibliothèque, passage de niveau, sauvegarde, impression, création. |
+| `src/core/` | Le noyau : `state.js` (état de l'écran), `schema.js` (format d'un personnage, version et migrations), `store.js` (enregistrement sur l'appareil), `ui.js` (rendu, message d'annulation), `actions.js` (registre des actions des boutons et champs), `format.js` (mise en forme du texte), `pwa.js` (version installée). |
+| `src/rules/`, `src/ui/`, `src/data.js` | Tables et règles communes ; éléments d'interface réutilisables ; accès aux données. |
 | `src/styles/` | Les styles, un fichier par partie de l'écran ; `index.css` fixe l'ordre d'application. |
 | `src/app.html` | Le gabarit : structure de la page. |
 | `data/spells.json` | Les 310 sorts (magicien, paladin, druide, sorts de serment), un par ligne. |

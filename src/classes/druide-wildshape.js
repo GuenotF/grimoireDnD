@@ -1,5 +1,4 @@
 // Druide du Cercle de la Lune : Forme sauvage (formes possibles, forme active, Changeforme de combat) et Bestiaire.
-import { DRU } from "./druide.js";
 import { onChange, onClick, onInput } from "../core/actions.js";
 import { cap, esc, plural, signed } from "../core/format.js";
 import { G, S } from "../core/state.js";
@@ -9,6 +8,7 @@ import { BEAST, BEASTS } from "../data.js";
 import { concDD, concOf, slotsLeft } from "../features/cast.js";
 import { R } from "../rules/common.js";
 import { isFold } from "../ui/components.js";
+import { DRU } from "./druide.js";
 
 const SIZES = { TP: "Très petite", P: "Petite", M: "Moyenne", G: "Grande", TG: "Très grande", Gig: "Gigantesque" };
 const MV = { nage: "nage", escalade: "escalade", vol: "vol", creusement: "creusement" };

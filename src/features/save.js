@@ -1,4 +1,5 @@
 // Onglet Sauvegarde : export, partage au MJ, import, suppression.
+import { C } from "../classes/index.js";
 import { onChange, onClick } from "../core/actions.js";
 import { esc } from "../core/format.js";
 import { isIOS } from "../core/pwa.js";
@@ -6,7 +7,6 @@ import { norm } from "../core/schema.js";
 import { G, S } from "../core/state.js";
 import { newId, pickCurrent, removeDoc, save, setCur } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
-import { C, isWiz } from "../rules/common.js";
 
 function saveHTML(g) {
   return `<div class="rubric" style="margin-top:4px"><h2>Exporter</h2></div>
@@ -17,12 +17,12 @@ function saveHTML(g) {
   <div class="frow"><label class="btn" for="f-import">Choisir un fichier…</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden></div>
   <div class="rubric"><h3>Supprimer</h3></div>
   <p style="max-width:65ch">La suppression est définitive sur cet appareil. Exporte le grimoire avant si tu veux pouvoir le récupérer.</p>
-  ${S.confirm === "del" ? `<button class="btn confirm" data-a="del">Supprimer définitivement ${esc(g.name)} ?</button> <button class="btn ghost" data-a="cancel">Annuler</button>` : `<button class="btn" data-a="del">Supprimer ${isWiz(g) ? "ce grimoire" : "ce personnage"}</button>`}`;
+  ${S.confirm === "del" ? `<button class="btn confirm" data-a="del">Supprimer définitivement ${esc(g.name)} ?</button> <button class="btn ghost" data-a="cancel">Annuler</button>` : `<button class="btn" data-a="del">Supprimer ${C(g).book ? "ce grimoire" : "ce personnage"}</button>`}`;
 }
 // Nom des fichiers de sauvegarde, datés pour qu'ils se rangent d'eux-mêmes : « Grimoire - Némeia - 2026-10-19 »
 function backupName(g) {
   const d = new Date(), p = n => String(n).padStart(2, "0");
-  return `${isWiz(g) ? "Grimoire" : C(g).n} - ${g.name} - ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  return `${C(g).fileLabel || C(g).n} - ${g.name} - ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 const exportJSON = g => JSON.stringify({ format: "grimoire-5e", version: 1, grimoire: g }, null, 2);
 // Partage par le menu du téléphone (Web Share).

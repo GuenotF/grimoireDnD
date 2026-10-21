@@ -1,6 +1,10 @@
 // État de l'écran (onglet, filtres, volets ouverts…) et personnage en cours.
 // Les préférences d'affichage (onglet, mode, sections repliées) sont relues depuis l'appareil au démarrage.
 
+
+
+
+
 const S = { list: {}, cur: null, tab: "grimoire", view: "gerer", fxOpen: false, shortOpen: false, sr: {}, open: new Set(), concWarn: null, concPanel: false,
   f: { q: "", lvl: "all", school: "", conc: false, rit: false, hideOwned: false, reachable: false },
   bf: { q: "", fp: "all", mv: "", sz: "", reach: false, fav: false },

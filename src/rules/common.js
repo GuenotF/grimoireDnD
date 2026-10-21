@@ -1,26 +1,13 @@
 // Règles communes à toutes les classes : maîtrise, modificateurs, emplacements, préparation, sorts lançables.
-import { oathSpells } from "../classes/paladin.js";
+import { C, alwaysPrepared } from "../classes/index.js";
 import { BY_ID, SPELLS } from "../data.js";
-import { HALF, SLOTS } from "./tables.js";
 
-// Classes : caractéristique d'incantation, table d'emplacements, préparation, sous-classe
-const CLASSES = {
-  magicien: { n: "Magicien", ab: "int", abN: "Intelligence", slots: SLOTS, top: 9, book: true,
-    cantrips: lv => lv >= 10 ? 5 : lv >= 4 ? 4 : 3, prep: (g, m) => Math.max(1, m + g.level) },
-  paladin: { n: "Paladin", ab: "cha", abN: "Charisme", slots: HALF, top: 5, book: false,
-    cantrips: () => 0, prep: (g, m) => Math.max(1, m + Math.floor(g.level / 2)) },
-  druide: { n: "Druide", ab: "wis", abN: "Sagesse", slots: SLOTS, top: 9, book: false,
-    cantrips: lv => lv >= 10 ? 4 : lv >= 4 ? 3 : 2, prep: (g, m) => Math.max(1, m + g.level) },
-};
-const isPal = g => !!g && g.cls === "paladin", isDru = g => !!g && g.cls === "druide";
-const C = g => CLASSES[g && g.cls] || CLASSES.magicien;
-const isWiz = g => C(g) === CLASSES.magicien;
 const inClass = (g, s) => (s.cl || ["magicien"]).includes(g.cls || "magicien");
 const classSpells = g => SPELLS.filter(s => inClass(g, s));
-// Sorts lançables en jeu : préparés (+ sorts de serment pour le paladin)
+// Sorts lançables en jeu : préparés (+ sorts toujours préparés, comme ceux du serment du paladin)
 function castable(g) {
-  if (isWiz(g)) { const pr = new Set(g.prepared); return g.spells.map(x => BY_ID[x.id]).filter(s => s && pr.has(s.id)); }
-  const ids = [...new Set([...oathSpells(g), ...g.prepared])];
+  if (C(g).book) { const pr = new Set(g.prepared); return g.spells.map(x => BY_ID[x.id]).filter(s => s && pr.has(s.id)); }
+  const ids = [...new Set([...alwaysPrepared(g), ...g.prepared])];
   return ids.map(id => BY_ID[id]).filter(s => s && s.l <= R.maxLevel(g));
 }
 const R = {
@@ -38,4 +25,4 @@ const R = {
   copy: (g, s) => { const k = R.savant(g, s) ? 0.5 : 1; return { h: 2 * s.l * k, po: 50 * s.l * k }; },
 };
 
-export { CLASSES, isPal, isDru, C, isWiz, inClass, classSpells, castable, R };
+export { inClass, classSpells, castable, R };

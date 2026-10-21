@@ -1,6 +1,6 @@
 // Enregistrement des personnages sur l'appareil (localStorage) et choix du personnage affiché.
-import { S, G } from "./state.js";
 import { norm } from "./schema.js";
+import { G, S } from "./state.js";
 import { render, setStatus } from "./ui.js";
 
 function cacheLocal() { try { localStorage.setItem("grimoire.cache", JSON.stringify(S.list)); } catch (e) {} }

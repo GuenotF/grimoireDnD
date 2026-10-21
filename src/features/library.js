@@ -1,16 +1,17 @@
 // Onglet Bibliothèque : liste de la classe, filtres, apprentissage.
+import { C } from "../classes/index.js";
 import { onChange, onClick, onInput } from "../core/actions.js";
 import { byName, esc, fmt, fr } from "../core/format.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
-import { keyPills, spellBody, tags } from "./spells.js";
-import { C, R, classSpells, isWiz } from "../rules/common.js";
+import { R, classSpells } from "../rules/common.js";
 import { LVL_NAME, SCHOOLS } from "../rules/tables.js";
+import { keyPills, spellBody, tags } from "./spells.js";
 
 function biblioHTML(g) {
-  const f = S.f, max = R.maxLevel(g), wiz = isWiz(g), top = C(g).top;
+  const f = S.f, max = R.maxLevel(g), wiz = !!C(g).book, top = C(g).top;
   const hasC = C(g).cantrips(20) > 0;
   if ((!hasC && f.lvl === "0") || +f.lvl > top) f.lvl = "all";
   const owned = new Set(wiz ? [...g.spells.map(x => x.id), ...g.cantrips] : g.cantrips);
@@ -47,13 +48,13 @@ function biblioHTML(g) {
 }
 function libRow(g, s, owned, max, prefix) {
   const key = "lib:" + s.id, open = S.open.has(key);
-  const mark = owned.has(s.id) && (isWiz(g) || s.l === 0) ? `<span class="libmark ok">Déjà appris</span>` : s.l > max ? `<span class="libmark">Niveau ${R.unlockAt(g, s.l)} requis</span>` : "";
+  const mark = owned.has(s.id) && (C(g).book || s.l === 0) ? `<span class="libmark ok">Déjà appris</span>` : s.l > max ? `<span class="libmark">Niveau ${R.unlockAt(g, s.l)} requis</span>` : "";
   return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button><span class="kps">${keyPills(s, g)}</span></div>${mark}</div>
   ${open ? `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g, prefix)}<div class="rowact">${addBtns(g, s, owned, max)}</div></div>` : ""}</div>`;
 }
 function addBtns(g, s, owned, max) {
-  if (!isWiz(g) && s.l === 0) return owned.has(s.id) ? `<span class="origin">Déjà appris</span>` : `<button class="btn" data-a="add" data-id="${s.id}" data-how="mineur">Apprendre</button>`;
-  if (!isWiz(g)) return s.l > max ? `<span class="origin">Niveau ${R.unlockAt(g, s.l)} requis</span>` : `<span class="origin">Liste du ${C(g).n.toLowerCase()}</span>`;
+  if (!C(g).book && s.l === 0) return owned.has(s.id) ? `<span class="origin">Déjà appris</span>` : `<button class="btn" data-a="add" data-id="${s.id}" data-how="mineur">Apprendre</button>`;
+  if (!C(g).book) return s.l > max ? `<span class="origin">Niveau ${R.unlockAt(g, s.l)} requis</span>` : `<span class="origin">Liste du ${C(g).n.toLowerCase()}</span>`;
   if (owned.has(s.id)) return `<span class="origin">Déjà appris</span>`;
   if (s.l === 0) return `<button class="btn" data-a="add" data-id="${s.id}" data-how="mineur">Apprendre</button>`;
   if (s.l > max) return `<span class="origin">Niveau ${R.unlockAt(g, s.l)} requis</span>`;

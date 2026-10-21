@@ -1,21 +1,17 @@
 // Onglet du grimoire : modes Gérer et En jeu, préparation, autres sorts, capacités de classe, repos.
-import { wsActiveHTML, wsConcHTML } from "../classes/druide-wildshape.js";
-import { DRU_FEATS, druResHTML } from "../classes/druide.js";
-import { shortHTML } from "../classes/magicien.js";
-import { OATHS, PAL_FEATS, STYLES, isOath, oathSpells, palResHTML, smiteHTML } from "../classes/paladin.js";
+import { C, alwaysPrepared, classFeats, isAlwaysPrepared } from "../classes/index.js";
 import { NEXT, onChange, onClick, onInput, onSubmit } from "../core/actions.js";
 import { byName, esc, fmt, fr, plural } from "../core/format.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
+import { R, castable, classSpells } from "../rules/common.js";
+import { foldHead, isFold, removeBtn } from "../ui/components.js";
 import { castHTML, concWarnHTML, firstFree, liveMark, slotsLeft } from "./cast.js";
 import { keyPills, noteBox, noteGerer, noteMark, noteOf, notePen, pillsHTML, spellBody, tags } from "./spells.js";
-import { C, R, castable, classSpells, isDru, isPal, isWiz } from "../rules/common.js";
-import { foldHead, isFold, removeBtn } from "../ui/components.js";
 
-const classFeats = g => isDru(g) ? DRU_FEATS.filter(f => !f.circle || f.circle === g.circle) : PAL_FEATS.filter(f => !f.oath || f.oath === g.oath);
-function palFeatsHTML(g) {
+function featsHTML(g) {
   const feats = classFeats(g), have = feats.filter(f => f.lv <= g.level), next = feats.filter(f => f.lv > g.level).slice(0, 2);
   if (!have.length && !next.length) return "";
   const gerer = S.view !== "jeu";
@@ -24,8 +20,7 @@ function palFeatsHTML(g) {
   if (!have.length) h += `<div class="empty">Première capacité au niveau ${next[0].lv}.</div>`;
   have.forEach(f => {
     const key = "feat:" + f.id, open = S.open.has(key);
-    const right = f.id === "style" && gerer
-      ? `<select id="f-style" aria-label="Style de combat"><option value="">À choisir</option>${Object.entries(STYLES).map(([k, s]) => `<option value="${k}"${g.style === k ? " selected" : ""}>${s.n}</option>`).join("")}</select>`
+    const right = f.control && gerer ? f.control(g) // ex. paladin : choix du style de combat
       : `<span class="kp ${f.k}">${esc(f.pill(g))}</span>`;
     h += `<div class="jrow feat"><div class="jline"><span class="flv">niv. ${f.lv}</span><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${f.n}<span class="chev">${open ? "▴" : "▾"}</span></button></div>${right}</div>${open ? `<div class="jbody"><div class="eff">${esc(f.d(g))}</div></div>` : ""}</div>`;
   });
@@ -35,12 +30,12 @@ function palFeatsHTML(g) {
   }
   return h;
 }
-function palGererHTML(g) {
-  const max = R.maxLevel(g), pMax = R.prepMax(g), prepared = new Set(g.prepared), oath = oathSpells(g);
+function preparedGererHTML(g) {
+  const max = R.maxLevel(g), pMax = R.prepMax(g), prepared = new Set(g.prepared), oath = alwaysPrepared(g);
   let h = "";
   if (oath.length) {
-    const list = oath.map(id => BY_ID[id]).sort(byName);
-    h += foldHead("o", "oath", "Sorts de serment", `toujours préparés · ${esc(OATHS[g.oath].n)}`, plural(list.length, "sort"));
+    const list = oath.map(id => BY_ID[id]).sort(byName), ap = C(g).alwaysPreparedInfo(g);
+    h += foldHead("o", "oath", ap.title, ap.aside, plural(list.length, "sort"));
     if (!isFold("o")) list.forEach(s => { h += gererRow(g, s, null, s.l > max, true, false, true); });
   }
   if (C(g).cantrips(20) > 0) {
@@ -87,20 +82,18 @@ function extrasNotesHTML(g) {
 function grimoireHTML(g) {
   const slots = R.slots(g), max = slots.length, pMax = R.prepMax(g);
   let h = `<div class="viewsw" role="group" aria-label="Affichage du grimoire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
-  if (isDru(g) && g.wsForm) h += wsActiveHTML(g);
-  else if (isDru(g)) h += wsConcHTML(g);   // forme terminée par des dégâts : le rappel de concentration reste visible
+  if (C(g).beforeSlots) h += C(g).beforeSlots(g); // ex. druide : forme active
   h += `<div class="rubric" id="slots-top" style="margin-top:4px"><h2>Emplacements de sorts</h2><span class="aside">touche un cercle quand tu lances un sort</span></div><div class="slots">`;
   if (!slots.length) h += `<p class="muted" style="margin:0 0 6px">Pas encore d'emplacement : les sorts arrivent au niveau ${R.unlockAt(g, 1)}.</p>`;
   slots.forEach((n, i) => {
     const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0));
     h += `<div class="slotrow"><span class="lv">Niveau ${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
   });
-  h += `<div class="restbar"><button class="btn" data-a="longrest">Repos long</button>${isWiz(g) ? `<button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}">Repos court ${S.shortOpen ? "▴" : "▾"}</button>
-    <label class="check"><input type="checkbox" data-a="arcane"${g.arcane ? " checked" : ""}> Restauration arcanique utilisée</label>
-    <span class="muted">Au repos court, 1 fois par jour : récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</span>`
-    : `<button class="btn" data-a="short-pal">Repos court</button><span class="muted">Repos court : ${isDru(g) ? "Forme sauvage" : "Conduit divin"}. Repos long : tout.</span>`}</div></div>`;
-  if (S.shortOpen && isWiz(g)) h += shortHTML(g);
-  if (!isWiz(g)) { h += (isPal(g) ? palResHTML(g) : druResHTML(g)) + palFeatsHTML(g); return h + (S.view === "jeu" ? jeuHTML(g) : palGererHTML(g)); }
+  // Repos court : propre à la classe (Restauration arcanique du magicien) ou ressource récupérée (Conduit divin, Forme sauvage)
+  h += `<div class="restbar"><button class="btn" data-a="longrest">Repos long</button>${C(g).restBar ? C(g).restBar(g)
+    : `<button class="btn" data-a="short-pal">Repos court</button><span class="muted">Repos court : ${C(g).shortRest.label}. Repos long : tout.</span>`}</div></div>`;
+  if (S.shortOpen && C(g).shortPanel) h += C(g).shortPanel(g);
+  if (!C(g).book) { h += (C(g).resources ? C(g).resources(g) : "") + featsHTML(g); return h + (S.view === "jeu" ? jeuHTML(g) : preparedGererHTML(g)); }
   if (S.view === "jeu") return h + jeuHTML(g);
 
   // Sorts mineurs
@@ -136,14 +129,14 @@ function grimoireHTML(g) {
 }
 // Mode Gérer : une ligne par sort (case Préparer, nom, pastilles clés), détail complet au toucher du nom
 function gererRow(g, s, x, locked, p, cantrip, oath) {
-  const open = S.open.has(s.id), wiz = isWiz(g);
+  const open = S.open.has(s.id), wiz = !!C(g).book, ap = oath && C(g).alwaysPreparedInfo(g);
   const full = !p && !locked && g.prepared.length >= R.prepMax(g); // limite atteinte : on ne peut plus que décocher
-  const box = cantrip ? "" : oath ? `<span class="gstar" title="Sort de serment : toujours préparé, hors limite" aria-label="Sort de serment, toujours préparé">★</span>` : `<input type="checkbox" class="gprep${full ? " full" : ""}" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked ? " disabled" : full ? ' aria-disabled="true"' : ""}>`;
+  const box = cantrip ? "" : oath ? `<span class="gstar" title="${ap.tip}" aria-label="${ap.aria}">★</span>` : `<input type="checkbox" class="gprep${full ? " full" : ""}" data-a="prep" data-id="${s.id}" aria-label="Préparer ${esc(s.n)}"${p ? " checked" : ""}${locked ? " disabled" : full ? ' aria-disabled="true"' : ""}>`;
   let body = "";
   if (open) {
-    const origin = !wiz ? (oath ? `Sort de serment · ${esc(OATHS[g.oath].full)}` : cantrip ? "Sort mineur" : `Liste du ${C(g).n.toLowerCase()}`) : cantrip ? "Sort mineur" : x && x.how === "copie" ? `Copié · ${fmt(x.h)} h · ${fr(x.po)} po` : "Montée de niveau";
+    const origin = !wiz ? (oath ? ap.origin : cantrip ? "Sort mineur" : `Liste du ${C(g).n.toLowerCase()}`) : cantrip ? "Sort mineur" : x && x.how === "copie" ? `Copié · ${fmt(x.h)} h · ${fr(x.po)} po` : "Montée de niveau";
     body = `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g)}
-    ${isDru(g) && !cantrip && s.ri && !p ? `<div class="meta">Rituel : prépare-le pour pouvoir le lancer en rituel (+10 min, sans emplacement).</div>` : ""}
+    ${C(g).ritualNeedsPrep && !cantrip && s.ri && !p ? `<div class="meta">Rituel : prépare-le pour pouvoir le lancer en rituel (+10 min, sans emplacement).</div>` : ""}
     ${wiz && !cantrip && s.ri && !p ? `<div class="meta">Rituel : se lance depuis le grimoire sans être préparé (+10 min, sans emplacement).</div>` : ""}
     ${noteOf(g, s) && S.noteEdit !== s.id ? noteBox(g, s) : ""}
     ${(!cantrip || s.c) && !locked ? castHTML(g, s, p) : ""}
@@ -171,10 +164,10 @@ function jeuRow(g, s, kind) {
 }
 function jeuHTML(g) {
   const prepared = new Set(g.prepared), max = R.maxLevel(g), slots = R.slots(g), ready = castable(g);
-  let h = isPal(g) ? smiteHTML(g) : "";
-  // Paladin : sorts de serment dans leur propre section, comme dans Gérer
-  const oath = isWiz(g) ? [] : ready.filter(s => isOath(g, s)).sort((a, b) => a.l - b.l || byName(a, b));
-  if (oath.length) { h += foldHead("o", "oath", "Sorts de serment", `toujours préparés · ${esc(OATHS[g.oath].n)}`, plural(oath.length, "sort")); if (!isFold("o")) oath.forEach(s => { h += jeuRow(g, s, "prep"); }); }
+  let h = C(g).playTop ? C(g).playTop(g) : ""; // ex. paladin : Châtiment divin
+  // Sorts toujours préparés (serment du paladin) dans leur propre section, comme dans Gérer
+  const oath = C(g).book ? [] : ready.filter(s => isAlwaysPrepared(g, s)).sort((a, b) => a.l - b.l || byName(a, b));
+  if (oath.length) { const ap = C(g).alwaysPreparedInfo(g); h += foldHead("o", "oath", ap.title, ap.aside, plural(oath.length, "sort")); if (!isFold("o")) oath.forEach(s => { h += jeuRow(g, s, "prep"); }); }
   const cans = g.cantrips.map(id => BY_ID[id]).sort(byName);
   if (cans.length) {
     // Sorts mineurs : un par ligne, ceux qui ont un jet (attaque, sauvegarde) d'abord
@@ -183,7 +176,7 @@ function jeuHTML(g) {
     if (!isFold("c")) [...combat, ...util].forEach(s => { h += jeuRow(g, s, "cantrip"); });
   }
   for (let lv = 1; lv <= max; lv++) {
-    const list = ready.filter(s => s.l === lv && !isOath(g, s)).sort(byName);
+    const list = ready.filter(s => s.l === lv && !isAlwaysPrepared(g, s)).sort(byName);
     if (!list.length) continue;
     h += foldHead("l" + lv, "", `Niveau ${lv}`, `${slotsLeft(g, lv)} / ${slots[lv - 1]} restant${slotsLeft(g, lv) > 1 ? "s" : ""}`, plural(list.length, "sort"));
     if (!isFold("l" + lv)) list.forEach(s => { h += jeuRow(g, s, "prep"); });
@@ -198,7 +191,7 @@ function jeuHTML(g) {
   return h;
 }
 onClick("pip", (b) => { mutate(g => { const lv = +b.dataset.l, k = +b.dataset.k, u = +(g.used[lv] || 0); g.used[lv] = k < u ? k : k + 1; }); });
-onClick("longrest", () => { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.arcane = false; g.effects = []; g.loh = 0; g.dsU = 0; g.cdU = 0; g.wsU = 0; g.wsForm = null; S.wsDice = ""; S.wsConc = null; g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); });
+onClick("longrest", () => { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.effects = []; if (C(g).longRest) C(g).longRest(g); g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); });
 onClick("rm", (b) => {
   const k = b.dataset.k;
   if (S.confirm !== k) { S.confirm = k; render(); return; }
@@ -213,8 +206,8 @@ onClick("rm", (b) => {
 onClick("view", (b) => { S.view = b.dataset.v; S.open.clear(); S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); });
 onClick("row", (b) => { const k = b.dataset.id; if (S.open.has(k)) S.open.delete(k); else S.open.add(k); S.castOpen = null; render(); });
 onClick("short-pal", () => {
-  const g = G(); if (!g) return; const f = isDru(g) ? "wsU" : "cdU", prev = g[f];
-  mutate(g => { g[f] = 0; }); toast(`Repos court : ${isDru(g) ? "Forme sauvage" : "Conduit divin"} récupéré${isDru(g) ? "e" : ""}`, () => { mutate(g => { g[f] = prev; }); return "Repos court annulé"; });
+  const g = G(); if (!g) return; const sr = C(g).shortRest, f = sr.field, prev = g[f];
+  mutate(g => { g[f] = 0; }); toast(`Repos court : ${sr.label} ${sr.done}`, () => { mutate(g => { g[f] = prev; }); return "Repos court annulé"; });
 });
 onClick("xedit", (b) => { S.open.delete("x:" + b.dataset.i); S.editX = +b.dataset.i; S.xdraft = null; render(); const el = document.getElementById("x-ename"); if (el) { el.focus(); el.select(); } });
 onClick("xcancel", () => { S.editX = null; S.xdraft = null; render(); });
@@ -238,4 +231,4 @@ onSubmit("addx", () => {
   if (!n) return; mutate(g => g.extras.push({ name: n, note, used: false }));
 });
 
-export { classFeats, palFeatsHTML, palGererHTML, extrasNotesHTML, grimoireHTML, gererRow, extraRow, jeuRow, jeuHTML };
+export { featsHTML, preparedGererHTML, extrasNotesHTML, grimoireHTML, gererRow, extraRow, jeuRow, jeuHTML };

@@ -4,10 +4,10 @@ import { byName, cap, esc, signed } from "../core/format.js";
 import { G } from "../core/state.js";
 import { toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
-import { offer } from "./save.js";
-import { pillData } from "./spells.js";
 import { R } from "../rules/common.js";
 import { SLOTS } from "../rules/tables.js";
+import { offer } from "./save.js";
+import { pillData } from "./spells.js";
 
 function printHTML(g) {
   return `<div class="rubric" style="margin-top:4px"><h2>Fiche imprimable</h2></div>

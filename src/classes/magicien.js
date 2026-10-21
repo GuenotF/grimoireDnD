@@ -5,9 +5,11 @@ import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { BY_ID, SPELLS } from "../data.js";
-import { luNeed } from "../features/levelup.js";
+import { firstName, luNeed } from "../features/levelup.js";
+import { printHTML } from "../features/print.js";
 import { keyPills, metaLine, pText, pillsHTML, tags, tier } from "../features/spells.js";
-import { R } from "../rules/common.js";
+import { R, classSpells } from "../rules/common.js";
+import { SCHOOLS, SLOTS } from "../rules/tables.js";
 
 // Emplacements récupérables : niveaux 1 à 5, dans la limite de ceux dépensés ; budget = moitié du niveau de magicien (arrondi au supérieur).
 function arcaneLevels(g) { const out = []; for (let lv = 1; lv <= Math.min(5, R.maxLevel(g)); lv++) { const sp = +(g.used[lv] || 0); if (sp > 0) out.push([lv, sp]); } return out; }
@@ -151,3 +153,45 @@ onChange("arcane", t => { mutate(g => { g.arcane = t.checked; }); });
 onChange("#f-school", t => { mutate(g => { g.school = t.value; }); });
 
 export { arcaneLevels, srTotal, arcaneCombos, srLabel, shortHTML, rulesHTML, luStep1, luStep2, luStep3 };
+
+// ---------- Définition de la classe (contrat : voir docs/ARCHITECTURE.md) ----------
+export default {
+  n: "Magicien", ab: "int", abN: "Intelligence", slots: SLOTS, top: 9,
+  book: true,                 // grimoire : apprend des sorts (montée de niveau, copie), prépare parmi eux
+  fileLabel: "Grimoire",      // nom des fichiers de sauvegarde
+  cantrips: lv => lv >= 10 ? 5 : lv >= 4 ? 4 : 3,
+  prep: (g, m) => Math.max(1, m + g.level),
+  defaults: () => ({ school: "Évocation", arcane: false }),
+  subline: g => `Niveau ${g.level} · École ${/^[AÉEIO]/.test(g.school) ? "d'" : "de "}${esc(g.school)}`,
+  subclassField: g => `<div class="field"><label for="f-school">Tradition arcanique</label><select id="f-school">${SCHOOLS.map(s=>`<option${s===g.school?" selected":""}>${s}</option>`).join("")}</select></div>`,
+  heroStats: g => {
+    const exp = R.expected(g.level), nSp = g.spells.length, cMax = R.cantrips(g);
+    return `<div class="stat ${nSp < exp ? "alert" : ""}" role="listitem"><div class="v">${nSp}<small>/${exp}</small></div><div class="l">Grimoire (min.)</div></div>
+    <div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div><div class="l">Sorts mineurs</div></div>`;
+  },
+  tabs: g => [["grimoire","Grimoire", g.spells.length + g.cantrips.length],["biblio","Bibliothèque", classSpells(g).length],["imprimer","Imprimer"],["sauvegarde","Sauvegarde"],["regles","Règles"]],
+  panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },
+  canRitual: () => true,      // rituel depuis le grimoire, sans le préparer
+  restBar: g => `<button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}">Repos court ${S.shortOpen ? "▴" : "▾"}</button>
+    <label class="check"><input type="checkbox" data-a="arcane"${g.arcane ? " checked" : ""}> Restauration arcanique utilisée</label>
+    <span class="muted">Au repos court, 1 fois par jour : récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</span>`,
+  shortPanel: g => shortHTML(g),
+  longRest: g => { g.arcane = false; },
+  levelUp: {
+    step2: "Sorts gratuits",
+    init: g => ({ step: 1, to: g.level + 1, picks: [], cpicks: [], prep: [], flt: R.maxLevel(g, g.level + 1), open: null }),
+    steps: [luStep1, luStep2, luStep3],
+    nextLabel: (g, to) => luNeed(g, to).c ? "Choisir les sorts" : "Choisir les 2 sorts",
+    apply(L, g) {
+      const prev = JSON.parse(JSON.stringify({ level: g.level, spells: g.spells, cantrips: g.cantrips, prepared: g.prepared })), to = L.to, fn = firstName(g);
+      mutate(g => {
+        g.level = to;
+        L.picks.forEach(id => { if (!g.spells.some(x => x.id === id)) g.spells.push({ id, how: "niv" }); });
+        L.cpicks.forEach(id => { if (!g.cantrips.includes(id)) g.cantrips.push(id); });
+        L.prep.forEach(id => { if (!g.prepared.includes(id)) g.prepared.push(id); });
+      });
+      toast(`<b>${esc(fn)}</b> passe au niveau ${to}${L.picks.length + L.cpicks.length ? ` · ${plural(L.picks.length + L.cpicks.length, "sort ajouté", "sorts ajoutés")}` : ""}`,
+        () => { mutate(g => Object.assign(g, prev)); return "Passage de niveau annulé"; });
+    },
+  },
+};

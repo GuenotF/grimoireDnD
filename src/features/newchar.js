@@ -1,11 +1,11 @@
 // Création d'un personnage : choix de la classe.
+import { CLASSES } from "../classes/index.js";
 import { onClick, onInput } from "../core/actions.js";
 import { esc } from "../core/format.js";
 import { blank } from "../core/schema.js";
 import { S } from "../core/state.js";
 import { newId, save, setCur } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
-import { CLASSES } from "../rules/common.js";
 
 const CLASS_INFO = {
   magicien: { i: "M", col: "#2D4A9A", d: "Grimoire, sorts copiés, Restauration arcanique. Caractéristique : Intelligence.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },

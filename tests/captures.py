@@ -5,7 +5,7 @@
     python3 tests/captures.py prendre /tmp/apres        # après
     python3 tests/captures.py comparer /tmp/avant /tmp/apres
 
-34 écrans (magicien, paladin, druide, accueil ; thèmes clair et sombre), en page entière, comparés au pixel près.
+60 écrans (magicien, paladin, druide, passages de niveau, accueil ; thèmes clair et sombre), en page entière, comparés au pixel près.
 Pour comparer avec une version précédente sans la republier : GRIMOIRE_ROOT=/chemin/vers/une/copie python3 tests/captures.py prendre /tmp/avant
 """
 import os, sys
@@ -38,6 +38,20 @@ def prendre(out):
             a.click('[data-a="row"][data-id="res:cd"]'); full(a, f"{scheme}-kael-gerer")
             a.view("jeu"); full(a, f"{scheme}-kael-jeu"); a.click('[data-a="loh-open"]'); full(a, f"{scheme}-kael-loh")
             a.ctx.close()
+            a = App(b, p.devices, url, char=dict(KAEL, style=""), color_scheme=scheme)
+            a.click(".lvup"); full(a, f"{scheme}-kael-lu1"); a.click(".lufoot .primary"); a.click('[data-a="lu-style"][data-v="duel"]'); full(a, f"{scheme}-kael-lu2")
+            a.click(".lufoot .primary"); full(a, f"{scheme}-kael-lu3"); a.ctx.close()
+            a = App(b, p.devices, url, char=dict(KAEL, level=2, prepared=["bless"]), color_scheme=scheme)
+            a.click(".lvup"); full(a, f"{scheme}-kael2-lu1"); a.ctx.close()
+            a = App(b, p.devices, url, char=dict(MALFAEL, level=5), color_scheme=scheme)
+            a.click(".lvup"); full(a, f"{scheme}-mal-lu1"); a.click(".lufoot .primary"); a.click('[data-a="lu-wsfav"][data-id="ours-polaire"]'); full(a, f"{scheme}-mal-lu2")
+            a.click(".lufoot .primary"); full(a, f"{scheme}-mal-lu3"); a.ctx.close()
+            a = App(b, p.devices, url, char=dict(MALFAEL, level=1), color_scheme=scheme)
+            a.click(".lvup"); full(a, f"{scheme}-mal1-lu1"); a.click(".lufoot .primary"); full(a, f"{scheme}-mal1-lu2"); a.ctx.close()
+            a = App(b, p.devices, url, char=dict(NEMEIA, level=3), color_scheme=scheme)
+            a.click(".lvup"); full(a, f"{scheme}-nem3-lu1"); a.click(".lufoot .primary"); full(a, f"{scheme}-nem3-lu2"); a.click(".lufoot .primary"); full(a, f"{scheme}-nem3-lu3"); a.ctx.close()
+            a = App(b, p.devices, url, char=dict(MALFAEL, used={"1": 2}), color_scheme=scheme)
+            a.click('[data-a="row"][data-id="res:ws"]'); a.click('[data-a="row"][data-id="speak-with-animals"]'); full(a, f"{scheme}-mal-gerer2"); a.ctx.close()
             a = App(b, p.devices, url, char=dict(MALFAEL, wsForm={"id": "pieuvre-geante", "hp": 40, "max": 52}, favs=["loup"]), color_scheme=scheme)
             full(a, f"{scheme}-mal-gerer"); a.view("jeu"); full(a, f"{scheme}-mal-jeu")
             a.click('[data-a="row"][data-id="res:ws"]'); a.click('[data-a="ws-open"]'); a.click('#wssheet [data-a="row"][data-id="ws:ours-brun"]'); full(a, f"{scheme}-mal-ws")

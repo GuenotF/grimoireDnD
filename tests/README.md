@@ -24,7 +24,7 @@ Règle : on lance les tests avant chaque publication ; on ne publie que si tout 
 
 ## Captures de référence (restructuration)
 
-Pour vérifier qu'une modification ne change rien à l'écran : `tests/captures.py` photographie 34 écrans (trois classes, accueil, thèmes clair et sombre) et les compare au pixel près.
+Pour vérifier qu'une modification ne change rien à l'écran : `tests/captures.py` photographie 60 écrans (trois classes, passages de niveau, accueil, thèmes clair et sombre) et les compare au pixel près.
 
 ```
 python3 tests/captures.py prendre /tmp/avant      # avant la modification

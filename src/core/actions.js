@@ -1,6 +1,10 @@
 // Registre des actions : chaque partie de l'application déclare ce que font ses boutons et ses champs.
 // Les éléments portent data-a="nom-de-l-action" (boutons) ou un id (champs). Un seul écouteur par type d'évènement.
 
+
+
+
+
 const clicks = new Map();   // data-a → fn(bouton, nom, évènement)
 const changes = [];         // [test, fn(champ, évènement)], dans l'ordre de déclaration
 const inputs = [];
