@@ -110,7 +110,7 @@ Ce sont des besoins connus et simples. Chacun doit se faire **uniquement dans le
 
 1. ✓ **Onglet Règles** du paladin et du druide : fait uniquement dans `classes/paladin.js` et `classes/druide.js` (`tabs`, `panels`), avec les rubriques communes « Lancer un sort » et « Concentration » dans `features/rules.js`, reprises par le magicien. Aucun écran commun modifié.
 2. **Fiche imprimable** du paladin et du druide (`print(g)`).
-3. **Une sous-classe de plus**, par exemple le Serment de dévotion (`subclasses`). C'est le test le plus parlant pour la suite.
+3. ✓ **Une sous-classe de plus** : le Serment de dévotion. Fait uniquement dans `classes/paladin.js` (un objet de serment : sorts, options de Conduit divin avec leur message, source ; trois capacités) et dans les données (5 sorts ajoutés, voir `outils/archives/ajout_sorts_devotion.py`). Aucun autre fichier du code modifié.
 
 ## 8. Décisions
 

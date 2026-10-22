@@ -49,12 +49,15 @@ const PAL_FEATS = [
   { id: "extra", lv: 5, n: "Attaque supplémentaire", pill: () => "2 attaques par action", k: "f", d: () => "Quand tu prends l'action Attaquer, tu attaques deux fois au lieu d'une." },
   { id: "aprot", lv: 6, n: "Aura de protection", pill: g => `${signed(Math.max(1, R.am(g)))} aux JdS · ${auraR(g)}`, k: "s", d: g => `Toi et les créatures amicales à ${auraR(g)} ou moins ajoutez ton mod. de Charisme (${signed(Math.max(1, R.am(g)))}) à vos jets de sauvegarde, tant que tu es conscient.${g.level < 18 ? " 9 m au niveau 18." : ""}` },
   { id: "aconq", lv: 7, oath: "conquete", n: "Aura de conquête", pill: g => `${Math.floor(g.level / 2)} psychiques · ${auraR(g)}`, k: "d", d: g => `Une créature effrayée par toi qui commence son tour à ${auraR(g)} ou moins a une vitesse de 0 et subit ${Math.floor(g.level / 2)} dégâts psychiques (moitié de ton niveau de paladin). Se combine avec Présence conquérante.` },
+  { id: "adevot", lv: 7, oath: "devotion", n: "Aura de dévotion", pill: g => `pas de charme · ${auraR(g)}`, k: "s", d: g => `Toi et les créatures amicales à ${auraR(g)} ou moins ne pouvez pas être charmés tant que tu es conscient.` },
   { id: "acour", lv: 10, n: "Aura de courage", pill: g => `pas d'effroi · ${auraR(g)}`, k: "s", d: g => `Toi et les créatures amicales à ${auraR(g)} ou moins ne pouvez pas être effrayés tant que tu es conscient.` },
   { id: "ismite", lv: 11, n: "Châtiment divin amélioré", pill: () => "+1d8 radiant à chaque coup", k: "d", d: () => "Chaque coup au corps à corps avec une arme inflige 1d8 dégâts radiants de plus (cumulable avec le Châtiment divin)." },
   { id: "cleanse", lv: 14, n: "Contact purifiant", pill: g => `${Math.max(1, R.am(g))} fois · repos long`, k: "f", d: g => `Action : mets fin à un sort qui affecte toi ou une créature consentante que tu touches. ${Math.max(1, R.am(g))} fois par repos long (mod. de Charisme).` },
   { id: "rebuke", lv: 15, oath: "conquete", n: "Réprimande méprisante", pill: g => `${Math.max(1, R.am(g))} psychiques à qui te frappe`, k: "d", d: g => `Quand une créature te touche avec une attaque, elle subit ${Math.max(1, R.am(g))} dégâts psychiques (mod. de Charisme), si tu n'es pas neutralisé.` },
+  { id: "purity", lv: 15, oath: "devotion", n: "Pureté de l'esprit", pill: () => "Protection contre le mal et le bien", k: "f", d: () => "Tu es en permanence sous l'effet de Protection contre le mal et le bien : aberrations, célestes, élémentaires, fées, fiélons et morts-vivants ont un désavantage pour t'attaquer et ne peuvent ni te charmer, ni t'effrayer, ni te posséder." },
   { id: "aura18", lv: 18, n: "Améliorations des auras", pill: () => "auras à 9 m", k: "f", d: () => "La portée de tes auras passe à 9 m." },
   { id: "invinc", lv: 20, oath: "conquete", n: "Conquérant invincible", pill: () => "1 fois · repos long", k: "f", d: () => "Action, 1 minute : résistance à tous les dégâts, une attaque de plus par action Attaquer, critique sur 19 ou 20. Une fois par repos long." },
+  { id: "nimbus", lv: 20, oath: "devotion", n: "Nimbe sacré", pill: () => "1 fois · repos long", k: "f", d: () => "Action, 1 minute : lumière vive sur 9 m (faible sur 9 m de plus). Un ennemi qui commence son tour dans la lumière vive subit 10 dégâts radiants. Avantage aux jets de sauvegarde contre les sorts des fiélons et des morts-vivants. Une fois par repos long." },
 ];
 // Volet Imposition des mains
 function lohHTML(g) {
@@ -84,7 +87,7 @@ onClick("cd-use", (b) => {
   const g = G(); if (!g || g.cdU >= PAL.cd(g)) return; const x = (OATHS[g.oath].cd || []).find(o => o.k === b.dataset.v); if (!x) return;
   const prev = JSON.parse(JSON.stringify({ cdU: g.cdU, effects: g.effects }));
   mutate(g => { g.cdU += 1; if (x.fx) g.effects.push({ k: fxKey(), id: "cd-" + x.k, name: x.n, d: x.fx, c: false, note: "" }); });
-  toast(`<b>${x.n}</b> : Conduit divin utilisé${x.k === "guided" ? " · +10 au jet d'attaque" : ""}`, () => { mutate(g => { g.cdU = prev.cdU; g.effects = prev.effects; }); return "Conduit divin annulé"; });
+  toast(`<b>${x.n}</b> : Conduit divin utilisé${x.note ? x.note(g) : ""}`, () => { mutate(g => { g.cdU = prev.cdU; g.effects = prev.effects; }); return "Conduit divin annulé"; });
 });
 onClick("loh-open", () => { const g = G(); if (!g) return; const left = PAL.loh(g) - g.loh; S.lohAmt = Math.min(5, left); S.lohOpen = true; render(); });
 onClick("loh-close", () => { S.lohOpen = false; render(); });
@@ -105,15 +108,26 @@ onClick("smite", (b) => {
 onChange("smite-ud", t => { S.smiteUndead = t.checked; render(); });
 onChange("#f-oath", t => { mutate(g => { g.oath = t.value; }); });
 onChange("#f-style", t => { mutate(g => { g.style = t.value; }); });
-// Serments du paladin : sorts toujours préparés, par niveau de paladin (Guide de Xanathar pour la Conquête)
+// Serments du paladin : sorts toujours préparés (par niveau de paladin) et options de Conduit divin.
+// src : livre d'origine (onglet Règles). note(g) : précision ajoutée au message quand l'option est utilisée.
 const OATHS = {
-  conquete: { n: "Conquête", full: "Serment de la conquête",
+  conquete: { n: "Conquête", full: "Serment de la conquête", src: "Guide complet de Xanathar",
     cd: [
       { k: "presence", n: "Présence conquérante", fx: "1 minute", pills: g => [["f", "Effet", "Effrayée"], ["s", "Jet de la cible", `JdS SAG · DD ${8 + R.prof(g.level) + R.am(g)}`, "nouveau jet à chaque fin de tour"], ["n", "Zone", "9 m"], ["n", "Durée", "1 minute"]],
         e: "Action. Chaque créature de ton choix à 9 m ou moins qui rate son jet est effrayée." },
-      { k: "guided", n: "Frappe guidée", btn: "Frappe guidée · +10", e: "+10 à un jet d'attaque, après avoir vu le d20 mais avant de savoir s'il touche." },
+      { k: "guided", n: "Frappe guidée", btn: "Frappe guidée · +10", note: () => " · +10 au jet d'attaque", e: "+10 à un jet d'attaque, après avoir vu le d20 mais avant de savoir s'il touche." },
     ],
     sp: {3: ["armor-of-agathys", "command"], 5: ["hold-person", "spiritual-weapon"], 9: ["bestow-curse", "fear"], 13: ["dominate-beast", "stoneskin"], 17: ["cloudkill", "dominate-person"]} },
+  devotion: { n: "Dévotion", full: "Serment de dévotion", src: "Manuel des joueurs 2014",
+    cd: [
+      { k: "sacred", n: "Arme sacrée", fx: "1 minute", note: g => ` · +${Math.max(1, R.am(g))} aux attaques avec l'arme`,
+        pills: g => [["a", "Attaque", `+${Math.max(1, R.am(g))} avec l'arme`, "mod. de Charisme, au moins +1"], ["f", "Effet", "Arme magique, lumière 6 m"], ["n", "Durée", "1 minute"]],
+        e: "Action. L'arme que tu tiens devient magique et émet une lumière vive sur 6 m (faible sur 6 m de plus). Prend fin si tu lâches l'arme ou perds connaissance ; tu peux y mettre fin pendant ton tour." },
+      { k: "turn", n: "Renvoi des impies", fx: "1 minute",
+        pills: g => [["f", "Effet", "Renvoyé"], ["s", "Jet de la cible", `JdS SAG · DD ${8 + R.prof(g.level) + R.am(g)}`, "morts-vivants et fiélons"], ["n", "Zone", "9 m"], ["n", "Durée", "1 minute ou dégâts"]],
+        e: "Action. Chaque mort-vivant ou fiélon à 9 m ou moins qui te voit ou t'entend et rate son jet est renvoyé : il s'éloigne le plus possible de toi, ne peut pas s'approcher à 9 m ni prendre de réaction, et n'agit que pour Foncer ou se libérer (Esquiver s'il est coincé). Prend fin s'il subit des dégâts." },
+    ],
+    sp: {3: ["protection-from-evil-and-good", "sanctuary"], 5: ["lesser-restoration", "zone-of-truth"], 9: ["beacon-of-hope", "dispel-magic"], 13: ["freedom-of-movement", "guardian-of-faith"], 17: ["commune", "flame-strike"]} },
 };
 const oathSpells = g => { const o = OATHS[g.oath]; if (!o) return []; return Object.entries(o.sp).filter(([lv]) => g.level >= +lv).flatMap(([, ids]) => ids).filter(id => BY_ID[id]); };
 const PAL = {
@@ -143,7 +157,7 @@ function rulesHTML(g) {
   <p>Au niveau 3, <b>1 fois</b> par repos court ou long : une option de ton serment (${(o.cd || []).map(x => esc(x.n)).join(", ")}). Ses jets de sauvegarde utilisent ton DD de sorts.</p>
   <div class="rubric"><h3>Récupérer</h3></div>
   <p><b>Repos long :</b> emplacements, Imposition des mains, Perception divine, Conduit divin. <b>Repos court :</b> Conduit divin.</p>
-  <p class="muted">Sources : Manuel des joueurs 2014 (paladin), Guide complet de Xanathar (Serment de la conquête). Résumés rédigés pour la table, à vérifier dans le livre en cas de doute.</p></div></div>`;
+  <p class="muted">Sources : Manuel des joueurs 2014 (paladin)${o.src === "Manuel des joueurs 2014" ? ` et ${esc(o.full)}` : `, ${esc(o.src)} (${esc(o.full)})`}. Résumés rédigés pour la table, à vérifier dans le livre en cas de doute.</p></div></div>`;
 }
 
 // ---------- Définition de la classe (contrat : voir docs/ARCHITECTURE.md) ----------

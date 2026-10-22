@@ -68,3 +68,24 @@ def test_onglet_regles(browser, devices, url):
     for s in ["5 sorts", "DD de 13", "+5", "20 PV", "4 fois", "Présence conquérante", "Concentration", "Xanathar"]:
         check(s in t, f"règles du paladin : « {s} »")
     a.close()
+
+
+def test_serment_de_devotion(browser, devices, url):
+    a = App(browser, devices, url, char=dict(KAEL, level=9))
+    a.pg.select_option("#f-oath", "devotion"); a.pg.wait_for_timeout(80)
+    check(a.g("oath") == "devotion" and "Serment de dévotion" in a.text(".subline"), "serment choisi dans la fiche")
+    stars = a.texts('.jrow.oath .jname')
+    for n in ["Sanctuaire", "Protection contre le mal et le bien", "Zone de vérité", "Restauration partielle", "Lueur d'espoir", "Dissipation de la magie"]:
+        check(any(n in s for s in stars), f"sort de serment : {n} ({stars})")
+    check(a.count(".gstar") == 6, "6 sorts de serment au niveau 9")
+    a.click('[data-a="row"][data-id="res:cd"]')
+    check(a.texts(".capopt b") == ["Arme sacrée", "Renvoi des impies"], "options de Conduit divin")
+    a.click('[data-a="cd-use"][data-v="sacred"]')
+    check("+3 aux attaques" in a.toast() and a.g("effects[0].name") == "Arme sacrée", "Arme sacrée en cours")
+    feats = a.text("#panel")
+    check("Aura de dévotion" in feats and "Aura de conquête" not in feats, "capacités du serment")
+    a.view("jeu")
+    check("Lueur d'espoir" in a.text("#panel"), "sorts de serment en jeu")
+    a.tab("regles")
+    check("Renvoi des impies" in a.text("#panel") and "Serment de dévotion" in a.text("#panel"), "onglet Règles")
+    a.close()
