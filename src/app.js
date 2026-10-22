@@ -17,6 +17,8 @@ import { biblioHTML } from "./features/library.js";
 import { newHTML } from "./features/newchar.js";
 import { saveHTML } from "./features/save.js";
 import { sheetIncomplete } from "./rules/character.js";
+import { ABILITIES } from "./rules/tables.js";
+import { statLabel } from "./ui/components.js";
 import { R, inClass } from "./rules/common.js";
 import "./ui/components.js";
 import "./features/spells.js";
@@ -61,35 +63,39 @@ function renderPicker() {
   const ids = Object.keys(S.list).sort((a, b) => S.list[a].name.localeCompare(S.list[b].name, "fr"));
   const p = document.getElementById("picker");
   p.innerHTML = (ids.length ? `<select id="cur" aria-label="Grimoire affiché">${ids.map(id => `<option value="${esc(id)}"${id === S.cur ? " selected" : ""}>${esc(S.list[id].name)} · ${C(S.list[id]).n} ${S.list[id].level}</option>`).join("")}</select>` : "")
-    + (ids.length ? `<button class="btn" data-a="new">Nouveau personnage</button>` : "") + `<span class="status" id="status"></span>`;
+    + (ids.length ? `<button class="btn newbtn" data-a="new" aria-label="Nouveau personnage" title="Nouveau personnage"><span aria-hidden="true">＋</span><span class="lbl"> Nouveau personnage</span></button>` : "") + `<span class="status" id="status"></span>`;
 }
 function welcomeHTML() {
   return `<div class="welcome"><h1><span class="initial">G</span>rimoires</h1>
   <p>Aucun personnage pour l'instant. Crée un magicien, un paladin ou un druide : l'atelier calcule ses emplacements, ses sorts préparés et ses ressources d'après le Manuel des joueurs. Tu as déjà une sauvegarde (fichier .json ou .txt) ? Importe-la.</p>
   <div class="frow"><button class="btn primary" data-a="new">Créer un personnage</button><label class="btn" for="f-import">Importer une sauvegarde</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden></div></div>`;
 }
+// En-tête : nom, sous-titre, ↑ Niveau et ✎ Modifier (nom, niveau, sous-classe repliés), puis six cases selon l'onglet :
+// caractéristiques dans Personnage, statistiques de sorts ailleurs. Intitulés courts sur téléphone (statLabel).
 function heroHTML(g) {
   const prof = R.prof(g.level), mod = R.am(g), max = R.maxLevel(g);
-  const nPrep = g.prepared.length, pMax = R.prepMax(g);
+  const nPrep = g.prepared.length, pMax = R.prepMax(g), abShort = ABILITIES.find(a => a[0] === C(g).ab)[1];
   const first = esc(g.name.charAt(0)), rest = esc(g.name.slice(1));
-  return `<section class="hero">
-  <div>
-    <h1 class="title" id="title"><span class="initial">${first}</span>${rest}</h1>
-    <div class="subline">${C(g).subline(g)} · ${max ? `sorts jusqu'au niveau ${max}` : `sorts au niveau ${R.unlockAt(g, 1)}`}</div>
-  </div>
-  <div class="setup">
-    <div class="field"><label for="f-full">Nom complet</label><input id="f-full" type="text" value="${esc(g.name)}"></div>
-    <div class="field"><label for="f-level">Niveau de ${C(g).n.toLowerCase()}</label><div class="lvrow"><select id="f-level">${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select>${g.level < 20 ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}</div></div>
-    ${C(g).subclassField(g)}
-  </div>
-  ${S.tab === "perso" ? `<div class="statcap">Caractéristiques</div><div class="stats" role="list" aria-label="Caractéristiques">${heroAbilities(g)}</div>` : `<div class="statcap">Sorts</div><div class="stats" role="list" aria-label="Sorts">
-    <div class="stat" role="listitem"><div class="v">${signed(mod)}</div><div class="l">Mod. ${C(g).abN}</div></div>
-    <div class="stat" role="listitem"><div class="v">${8 + prof + mod}</div><div class="l">DD des sorts</div></div>
-    <div class="stat" role="listitem"><div class="v">${signed(prof + mod)}</div><div class="l">Attaque de sort</div></div>
-    <div class="stat ${nPrep > pMax ? "alert" : nPrep === pMax ? "good" : ""}" role="listitem"><div class="v">${nPrep}<small>/${pMax}</small></div><div class="l">Sorts préparés</div></div>
+  const spells = `<div class="statcap">Sorts</div><div class="stats" role="list" aria-label="Sorts">
+    <div class="stat" role="listitem"><div class="v">${signed(mod)}</div>${statLabel(`Mod. ${C(g).abN}`, `Mod. ${abShort}`)}</div>
+    <div class="stat" role="listitem"><div class="v">${8 + prof + mod}</div>${statLabel("DD des sorts", "DD")}</div>
+    <div class="stat" role="listitem"><div class="v">${signed(prof + mod)}</div>${statLabel("Attaque de sort", "Attaque")}</div>
+    <div class="stat ${nPrep > pMax ? "alert" : nPrep === pMax ? "good" : ""}" role="listitem"><div class="v">${nPrep}<small>/${pMax}</small></div>${statLabel("Sorts préparés", "Préparés")}</div>
     ${C(g).heroStats(g)}
-  </div>`}
-  <div class="banner">Tes personnages sont enregistrés sur cet appareil, dans ce navigateur. Exporte-les de temps en temps (menu Plus › Sauvegarde) pour les sauvegarder ou les passer sur un autre appareil.</div>
+  </div>`;
+  return `<section class="hero">
+  <div class="herohead">
+    <div class="ht"><h1 class="title" id="title"><span class="initial">${first}</span>${rest}</h1>
+    <div class="subline">${C(g).subline(g)} · ${max ? `sorts jusqu'au niveau ${max}` : `sorts au niveau ${R.unlockAt(g, 1)}`}</div></div>
+    <div class="hbtns">${g.level < 20 ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}<button class="btn edit" data-a="hero-edit" aria-expanded="${S.heroEdit}">✎ ${S.heroEdit ? "Fermer" : "Modifier"}</button></div>
+  </div>
+  ${S.heroEdit ? `<div class="setup">
+    <div class="field"><label for="f-full">Nom complet</label><input id="f-full" type="text" value="${esc(g.name)}"></div>
+    <div class="field"><label for="f-level">Niveau de ${C(g).n.toLowerCase()}</label><select id="f-level">${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select></div>
+    ${C(g).subclassField(g)}
+    <p class="help">Le niveau se change ici sans assistant (création, correction).${g.level < 20 ? ` Pour monter de niveau, utilise ↑ Niveau ${g.level + 1}.` : ""}</p>
+  </div>` : ""}
+  ${S.tab === "perso" ? `<div class="statcap">Caractéristiques</div><div class="stats" role="list" aria-label="Caractéristiques">${heroAbilities(g)}</div>` : spells}
   ${showIosTip() ? `<div class="banner">Sur iPhone ou iPad, installe l'atelier : bouton <b>Partager</b>, puis <b>Sur l'écran d'accueil</b>. Ouvre-le ensuite toujours depuis cette icône : c'est là que tes grimoires sont le mieux conservés. <button class="btn ghost" data-a="hide-ios">Masquer</button></div>` : ""}
   </section>`;
 }
@@ -113,6 +119,7 @@ function panelHTML(g) {
   return own ? own(g) : grimoireHTML(g);
 }
 beforeEachClick(a => { if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null; if (a !== "more" && a !== "tab") S.moreOpen = false; }); // un autre clic annule une confirmation en attente
+onClick("hero-edit", () => { S.heroEdit = !S.heroEdit; try { localStorage.setItem("grimoire.edit", S.heroEdit ? "1" : "0"); } catch (e) {} render(); });
 onClick("more", () => { S.moreOpen = !S.moreOpen; render(); });
 onClick("tab", (b) => { S.tab = b.dataset.v; S.moreOpen = false; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); });
 onClick("undo", () => { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } });

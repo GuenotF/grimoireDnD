@@ -12,7 +12,7 @@ def test_navigation_menu_plus(browser, devices, url):
     check(a.count(".moremenu") == 0, "Échap referme le menu")
     a.tab("regles")
     check(a.count(".moremenu") == 0 and a.pg.get_attribute('[data-a="more"]', "aria-selected") == "true", "Plus marqué quand un de ses onglets est affiché")
-    a.click('[data-a="more"]'); a.click(".moreback")
+    a.click('[data-a="more"]'); a.click(".moreback", position={"x": 5, "y": 5})
     check(a.count(".moremenu") == 0, "toucher à côté referme le menu")
     a.close()
 

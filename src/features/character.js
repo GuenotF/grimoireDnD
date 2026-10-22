@@ -60,7 +60,7 @@ function jeuHTML(g) {
 
 // En-tête de l'onglet Personnage : les six caractéristiques à la place des statistiques de sorts.
 function heroAbilities(g) {
-  return ABILITIES.map(([k, a, n]) => `<div class="stat ab${k === C(g).ab ? " mine" : ""}" role="listitem" title="${n}"><div class="l">${a}</div><div class="v">${signed(R.ab(g, k))}</div><div class="sc">${g.abil[k]} · <span class="js${saveProf(g, k) ? " on" : ""}" title="Jet de sauvegarde${saveProf(g, k) ? " maîtrisé" : ""}">JdS ${signed(saveBonus(g, k))}</span></div></div>`).join("");
+  return ABILITIES.map(([k, a, n]) => `<div class="stat ab${k === C(g).ab ? " mine" : ""}" role="listitem" title="${n}"><div class="l">${a}</div><div class="v">${signed(R.ab(g, k))}</div><div class="sc"><span>${g.abil[k]}</span><span class="dot"> · </span><span class="js${saveProf(g, k) ? " on" : ""}" title="Jet de sauvegarde${saveProf(g, k) ? " maîtrisé" : ""}">JdS ${signed(saveBonus(g, k))}</span></div></div>`).join("");
 }
 
 function characterHTML(g) {

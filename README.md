@@ -15,7 +15,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 **Le magicien**
 - Niveau, Intelligence (onglet Personnage) et tradition arcanique : DD, bonus d'attaque, emplacements, nombre de sorts préparés et de sorts mineurs calculés automatiquement.
 - Dés des sorts mineurs à dégâts ajustés au niveau (5, 11, 17).
-- **Passage de niveau** : le bouton *↑ Niveau N*, à côté du sélecteur, ouvre un assistant en 3 étapes : ce qui change (DD, attaque, emplacements, préparation, Restauration arcanique, sorts mineurs), choix des 2 sorts gratuits (et du sort mineur supplémentaire aux niveaux 4 et 10), validation avec préparation facultative. Annulable. Le sélecteur reste un réglage direct, sans assistant (création, correction).
+- **Passage de niveau** : le bouton *↑ Niveau N*, à droite du nom, ouvre un assistant en 3 étapes : ce qui change (DD, attaque, emplacements, préparation, Restauration arcanique, sorts mineurs), choix des 2 sorts gratuits (et du sort mineur supplémentaire aux niveaux 4 et 10), validation avec préparation facultative. Annulable. Le sélecteur de niveau (bouton *✎ Modifier*) reste un réglage direct, sans assistant (création, correction).
 - Plusieurs grimoires sur le même appareil.
 
 **Onglet Personnage** (toutes les classes)
@@ -24,6 +24,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 - Puce ♥ des PV dans la barre du bas de l'onglet Sorts (toucher : retour à la fiche). Druide : quand la forme de bête tombe à 0 PV, l'excédent de dégâts est retiré de ses PV.
 - L'en-tête s'adapte à l'onglet : dans *Personnage*, les six caractéristiques (modificateur, valeur, bonus de jet de sauvegarde en bleu si maîtrisé, caractéristique d'incantation en rouge) ; dans les autres onglets, les statistiques de sorts (DD, attaque, sorts préparés…).
 - Tant que la CA ou les PV maximum ne sont pas saisis, un message « Complète ta fiche » et un point rouge sur l'onglet le rappellent. Un nouveau personnage s'ouvre sur sa fiche.
+- En-tête compact : sélecteur du personnage et *＋* (nouveau personnage) sur une ligne ; nom, sous-titre, *↑ Niveau* et *✎ Modifier* (nom, niveau et sous-classe repliés, état mémorisé sur l'appareil) ; sur téléphone, les six cases de l'en-tête tiennent sur une rangée avec des intitulés courts.
 - Navigation : *Personnage* et *Sorts* (en gras), *Bibliothèque*, *Bestiaire* (druide) ; *Règles*, *Imprimer* et *Sauvegarde* dans le menu *Plus*.
 
 **Onglet Grimoire, mode « Gérer »** (préparer et organiser)

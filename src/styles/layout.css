@@ -1,10 +1,12 @@
 /* Barre du haut, en-tête du personnage, onglets, rubriques */
 /* Barre du haut */
 .top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; justify-content: space-between; }
-.brand { font-family: var(--f-sc); font-size: 15px; letter-spacing: .08em; color: var(--muted); }
+.brand { font-family: var(--f-sc); font-size: 13.5px; letter-spacing: .08em; color: var(--muted); margin-top: 40px; text-align: center; } /* bas de page */
 .brand b { color: var(--rubric); font-weight: 700; }
-.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.picker select { min-width: 0; max-width: 240px; }
+.top { justify-content: flex-start; }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; flex: 1; min-width: 0; }
+.picker select { min-width: 0; max-width: 300px; }
+.newbtn { white-space: nowrap; }
 .status { font-size: 13px; color: var(--muted); }
 .status.err { color: var(--warn); }
 
@@ -22,22 +24,42 @@ input[type=text], input[type=number], input[type=search], select, textarea {
 textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 
 /* En-tête du personnage */
-.hero { margin-top: 18px; display: grid; gap: 14px; }
-.title { font-family: var(--f-display); font-weight: 500; font-size: clamp(30px, 6vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
+.hero { margin-top: 14px; display: grid; gap: 12px; }
+.herohead { display: flex; align-items: flex-start; gap: 10px; }
+.herohead .ht { flex: 1; min-width: 0; }
+.hbtns { display: flex; gap: 6px; flex: none; align-items: center; }
+.hbtns .btn { white-space: nowrap; }
+.btn.edit[aria-expanded="true"] { background: var(--sunk); }
+.title { font-family: var(--f-display); font-weight: 500; font-size: clamp(26px, 6vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
 .title .initial { color: var(--rubric); font-weight: 700; }
 .subline { font-family: var(--f-display); font-style: italic; color: var(--muted); font-size: 17px; }
-.setup { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-@media (max-width: 640px) { .setup { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.setup { display: grid; grid-template-columns: 2fr 1fr 2fr; gap: 10px; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 10px 12px; }
+.setup .help { grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--muted); }
+@media (max-width: 640px) { .setup { grid-template-columns: 1fr 1.6fr; } .setup .field:first-child { grid-column: 1 / -1; } }
 
 .stats { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); border: 1px solid var(--rule); border-radius: var(--r); background: var(--surface); }
 .stat { padding: 10px 8px 9px; text-align: center; border-left: 1px solid var(--rule); min-width: 0; }
 .stat:first-child { border-left: 0; }
-.stat .v { font-family: var(--f-display); font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat .v { font-family: var(--f-display); font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .stat .v small { font-size: 16px; color: var(--muted); }
 .stat .l { font-family: var(--f-sc); font-size: 11.5px; letter-spacing: .06em; color: var(--muted); margin-top: 5px; }
+.stat .l .ls { display: none; }
 .stat.alert .v { color: var(--warn); }
 .stat.good .v { color: var(--ok); }
-@media (max-width: 760px) { .stats { grid-template-columns: repeat(3, minmax(0,1fr)); } .stat:nth-child(4) { border-left: 0; } .stat:nth-child(n+4) { border-top: 1px solid var(--rule); } }
+/* Téléphone : nom et boutons resserrés, six cases sur une rangée avec intitulés courts */
+@media (max-width: 560px) {
+  .herohead { flex-wrap: wrap; } .hbtns { flex-direction: column; align-items: stretch; gap: 5px; }
+  .hbtns .btn { font-size: 12.5px; padding: 4px 9px; }
+  .subline { font-size: 14px; }
+  .stat { padding: 6px 1px 5px; }
+  .stat .v { font-size: 20px; }
+  .stat .v small { font-size: 12.5px; }
+  .stat .l { font-size: 10.5px; letter-spacing: .02em; margin-top: 3px; }
+  .stat .l .lf { display: none; } .stat .l .ls { display: inline; }
+  .picker select { flex: 1; max-width: none; }
+  .newbtn .lbl, .status:not(.err) { display: none; }
+  .newbtn { font-size: 17px; padding: 3px 12px; }
+}
 
 /* Onglets */
 .tabs { display: flex; align-items: stretch; gap: 4px; margin-top: 22px; border-bottom: 1px solid var(--rule); }

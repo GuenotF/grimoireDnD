@@ -11,6 +11,7 @@ import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills, metaLine, pText, pillsHTML, tags, tier } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { SCHOOLS, SLOTS } from "../rules/tables.js";
+import { statLabel } from "../ui/components.js";
 
 // Emplacements récupérables : niveaux 1 à 5, dans la limite de ceux dépensés ; budget = moitié du niveau de magicien (arrondi au supérieur).
 function arcaneLevels(g) { const out = []; for (let lv = 1; lv <= Math.min(5, R.maxLevel(g)); lv++) { const sp = +(g.used[lv] || 0); if (sp > 0) out.push([lv, sp]); } return out; }
@@ -204,8 +205,8 @@ export default {
   subclassField: g => `<div class="field"><label for="f-school">Tradition arcanique</label><select id="f-school">${SCHOOLS.map(s=>`<option${s===g.school?" selected":""}>${s}</option>`).join("")}</select></div>`,
   heroStats: g => {
     const exp = R.expected(g.level), nSp = g.spells.length, cMax = R.cantrips(g);
-    return `<div class="stat ${nSp < exp ? "alert" : ""}" role="listitem"><div class="v">${nSp}<small>/${exp}</small></div><div class="l">Grimoire (min.)</div></div>
-    <div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div><div class="l">Sorts mineurs</div></div>`;
+    return `<div class="stat ${nSp < exp ? "alert" : ""}" role="listitem"><div class="v">${nSp}<small>/${exp}</small></div>${statLabel("Grimoire (min.)", "Grimoire")}</div>
+    <div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div>${statLabel("Sorts mineurs", "Mineurs")}</div>`;
   },
   tabs: g => [["grimoire","Grimoire", g.spells.length + g.cantrips.length],["biblio","Bibliothèque", classSpells(g).length]],
   moreTabs: () => [["regles","Règles"],["imprimer","Imprimer"]],

@@ -75,7 +75,13 @@ class App:
             self.click('[data-a="more"]')
         self.click(sel)
 
+    def edit(self):
+        """Déplie nom, niveau et sous-classe (bouton ✎ Modifier)."""
+        if self.count("#f-level") == 0:
+            self.click('[data-a="hero-edit"]')
+
     def level(self, n):
+        self.edit()
         self.pg.select_option("#f-level", str(n))
         self.pg.wait_for_timeout(60)
 

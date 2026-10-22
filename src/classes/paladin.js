@@ -12,7 +12,7 @@ import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { HALF } from "../rules/tables.js";
-import { capRow, pillsRaw } from "../ui/components.js";
+import { capRow, pillsRaw, statLabel } from "../ui/components.js";
 
 // Détail de Perception divine (capacité dépliable)
 function dsBody(g) {
@@ -214,8 +214,8 @@ export default {
   },
   subline: g => `Paladin niveau ${g.level}${g.level >= 3 ? ` · ${esc(OATHS[g.oath].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-oath">Serment sacré</label><select id="f-oath">${Object.entries(OATHS).map(([k, o]) => `<option value="${k}"${k === g.oath ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
-  heroStats: g => `<div class="stat" role="listitem"><div class="v">${oathSpells(g).length}</div><div class="l">Sorts de serment</div></div>
-    <div class="stat" role="listitem"><div class="v">${5 * g.level}</div><div class="l">Imposition (PV)</div></div>`,
+  heroStats: g => `<div class="stat" role="listitem"><div class="v">${oathSpells(g).length}</div>${statLabel("Sorts de serment", "Serment")}</div>
+    <div class="stat" role="listitem"><div class="v">${5 * g.level}</div>${statLabel("Imposition (PV)", "Imposition")}</div>`,
   tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length]],
   moreTabs: () => [["regles","Règles"],["imprimer","Imprimer"]],
   panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },

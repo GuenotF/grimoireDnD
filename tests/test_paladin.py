@@ -72,7 +72,7 @@ def test_onglet_regles(browser, devices, url):
 
 def test_serment_de_devotion(browser, devices, url):
     a = App(browser, devices, url, char=dict(KAEL, level=9))
-    a.pg.select_option("#f-oath", "devotion"); a.pg.wait_for_timeout(80)
+    a.edit(); a.pg.select_option("#f-oath", "devotion"); a.pg.wait_for_timeout(80)
     check(a.g("oath") == "devotion" and "Serment de dévotion" in a.text(".subline"), "serment choisi dans la fiche")
     stars = a.texts('.jrow.oath .jname')
     for n in ["Sanctuaire", "Protection contre le mal et le bien", "Zone de vérité", "Restauration partielle", "Lueur d'espoir", "Dissipation de la magie"]:

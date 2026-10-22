@@ -20,6 +20,8 @@ function capRow(g, r, name, rest, pipsHTML, sep, body) {
   if (open && body) body = body(g); else body = "";
   return `<div class="resrow${sep ? " sep" : ""}"><span class="rn"><button class="capname" data-a="row" data-id="${key}" aria-expanded="${open}">${name}<span class="chev">${open ? "▴" : "▾"}</span></button><small>${rest}</small></span><span class="pips">${pipsHTML}</span></div>${body ? `<div class="capbody">${body}</div>` : ""}`;
 }
+/** Intitulé d'une case de l'en-tête : complet, ou court sur téléphone (ex. « DD des sorts » / « DD »). */
+const statLabel = (full, short) => `<div class="l"><span class="lf">${full}</span><span class="ls">${short || full}</span></div>`;
 function removeBtn(key) {
   return S.confirm === key ? `<button class="btn confirm" data-a="rm" data-k="${esc(key)}">Retirer ?</button>` : `<button class="btn ghost" data-a="rm" data-k="${esc(key)}" aria-label="Retirer">Retirer</button>`;
 }
@@ -32,4 +34,4 @@ onClick("fold", (b, a) => {
   const el = document.querySelector(`[data-a="fold"][data-k="${b.dataset.k}"]`); if (el) el.focus({ preventScroll: true });
 });
 
-export { foldKey, isFold, foldHead, pillsRaw, capRow, removeBtn };
+export { foldKey, isFold, foldHead, pillsRaw, capRow, removeBtn, statLabel };
