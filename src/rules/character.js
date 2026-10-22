@@ -5,7 +5,7 @@ import { acOf } from "./equipment.js";
 import { SKILLS } from "./tables.js";
 
 /** Le personnage maîtrise-t-il les jets de sauvegarde de cette caractéristique ? (classe, ou ajout comme le don Résilience) */
-const saveFromClass = (g, k) => (C(g).saves || []).includes(k);
+const saveFromClass = (g, k) => (typeof C(g).saves === "function" ? C(g).saves(g) : C(g).saves || []).includes(k); // liste, ou fonction du niveau
 const saveProf = (g, k) => saveFromClass(g, k) || (g.saveX || []).includes(k);
 const saveBonus = (g, k) => R.ab(g, k) + (saveProf(g, k) ? R.prof(g.level) : 0);
 /** Initiative : modificateur de DEX + bonus divers saisi (don Vigilant…). */

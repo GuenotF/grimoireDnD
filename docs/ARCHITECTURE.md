@@ -48,6 +48,7 @@ src/
     magicien.js             contrat + Restauration arcanique, onglet Règles, assistant de niveau du grimoire
     paladin.js              contrat + serments, Imposition des mains, Perception et Conduit divins, Châtiment
     druide.js               contrat + cercles, ressource Forme sauvage
+    roublard.js             classe sans sorts : Attaque sournoise, Ruse, Esquive instinctive, Assassin
     barbare.js              classe sans sorts : Rage, Frénésie (Berserker), Défense sans armure, Attaque téméraire
     druide-wildshape.js     Forme sauvage : formes possibles, forme active, Changeforme de combat, Bestiaire
   ui/components.js          éléments réutilisables : sections repliables, capacités dépliables, bouton Retirer
@@ -87,6 +88,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `capsTop(g)`, `attackOptions(g)`, `extraAttacks(g, liste)` | Carte en tête de l'onglet Capacités (Rage), cases d'options sous les attaques (Attaque téméraire), attaques ajoutées (Frénésie) | | | |
 | `acBase(g)`, `speedBonus(g)` | CA sans armure (Défense sans armure), bonus de vitesse (Déplacement rapide) | | | |
 | `halfDamage(g)`, `onDown(g)` | Résistance active : bouton « Dégâts ½ » de la carte des PV ; effet d'une chute à 0 PV (fin de la rage) | | | |
+| `saves` en fonction, `shortRest` en fonction | Sauvegardes selon le niveau (Esprit fuyant du roublard) ; ressource de repos court selon le niveau (Coup de chance) | | | |
 | `asiLevels` | Niveaux d'amélioration de caractéristiques, si différents de 4, 8, 12, 16, 19 (guerrier, roublard plus tard) | | | |
 | `saves` | Jets de sauvegarde maîtrisés par la classe (codes `str`, `dex`, `con`, `int`, `wis`, `cha`) | ✓ | ✓ | ✓ |
 | `defaults()`, `normalize(o)` | Champs propres au personnage et leur contrôle à l'ouverture | ✓ | ✓ | ✓ |

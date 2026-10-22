@@ -43,11 +43,11 @@ const acOf = g => acMode(g) === "calc" ? acCalc(g).total : g.ac;
  * Attaque avec une arme : caractéristique (finesse : la meilleure de FOR et DEX ; distance : DEX ; sinon FOR),
  * maîtrise si la classe maîtrise l'arme, bonus de classe (attackMods). Renvoie { hit, ab, dmg (texte), pills, notes }.
  */
-function attackOf(g, w) {
+function attackOf(g, w, off = false) { // off : main secondaire (pas de modificateur positif aux dégâts)
   const str = R.ab(g, "str"), dex = R.ab(g, "dex");
   const ab = w.finesse ? (dex > str ? "dex" : "str") : w.rng === "ranged" ? "dex" : "str", mod = ab === "dex" ? dex : str;
   const prof = weaponProf(g, w) ? R.prof(g.level) : 0, x = C(g).attackMods ? C(g).attackMods(g, w, ab) : {};
-  const hit = mod + prof + (x.hit || 0), dmod = mod + (x.dmg || 0), plus = n => n ? ` ${n > 0 ? "+" : "−"} ${Math.abs(n)}` : "";
+  const hit = mod + prof + (x.hit || 0), dmod = (off ? Math.min(0, mod) : mod) + (x.dmg || 0), plus = n => n ? ` ${n > 0 ? "+" : "−"} ${Math.abs(n)}` : "";
   const pills = [];
   if (w.vers) pills.push(`à deux mains : ${w.vers}${plus(mod + (x.dmg2 != null ? x.dmg2 : x.dmg || 0))}`);
   if (w.reach) pills.push("allonge 3 m");
@@ -60,8 +60,15 @@ function attackOf(g, w) {
 }
 /** Attaques du personnage : armes équipées du catalogue, puis mains nues (1 + FOR, maîtrisée par tous). */
 function attacks(g) {
-  const list = equipped(g, "weapon").map(({ item, gear }) => ({ n: item.n, q: item.q, ...attackOf(g, gear) }));
+  const list = equipped(g, "weapon").map(({ item, gear }) => { const a = attackOf(g, gear); return { n: item.n, q: item.q, ...a, notes: [item.note, ...a.notes].filter(Boolean) }; }); // la note de l'objet (ex. +1d4 nécrotique) suit l'attaque
   const str = R.ab(g, "str");
+  // Combat à deux armes : deux armes légères de corps à corps équipées (deux objets, ou un objet en 2 exemplaires),
+  // aucune arme à deux mains : attaque de la main secondaire en action bonus, sans modificateur positif aux dégâts.
+  const light = equipped(g, "weapon").filter(({ gear }) => gear.light && gear.rng === "melee");
+  if (light.reduce((n, { item }) => n + Math.max(1, item.q), 0) >= 2 && !equipped(g, "weapon").some(({ gear }) => gear.two)) {
+    const { item, gear } = light.length > 1 ? light[1] : light[0], a = attackOf(g, gear, true);
+    list.splice(list.findIndex(x => x.n === item.n) + 1, 0, { ...a, n: `${item.n} (main secondaire)`, q: 1, pills: ["action bonus", ...a.pills.filter(p => !p.startsWith("lancer") && p !== "légère")], offhand: true });
+  }
   if (C(g).extraAttacks) C(g).extraAttacks(g, list); // ex. Frénésie du berserker
   const x = C(g).attackMods ? C(g).attackMods(g, { id: "unarmed", rng: "melee", cat: "simple" }, "str") : {}; // attaque d'arme au corps à corps (Rage…)
   list.push({ n: "Mains nues", q: 1, hit: str + R.prof(g.level) + (x.hit || 0), ab: "str", melee: true, prof: true, dmg: `${Math.max(1, 1 + str + (x.dmg || 0))} contondant`, pills: x.pills || [], notes: [] });

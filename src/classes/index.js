@@ -5,8 +5,9 @@ import magicien from "./magicien.js";
 import paladin from "./paladin.js";
 import druide from "./druide.js";
 import barbare from "./barbare.js";
+import roublard from "./roublard.js";
 
-export const CLASSES = { magicien, paladin, druide, barbare };
+export const CLASSES = { magicien, paladin, druide, barbare, roublard };
 /** Définition de la classe d'un personnage (magicien pour les anciens fichiers sans classe). */
 export const C = g => CLASSES[g && g.cls] || CLASSES.magicien;
 /** Sorts toujours préparés, hors limite (sorts de serment du paladin). */

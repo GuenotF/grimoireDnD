@@ -11,10 +11,12 @@ import { hitDieSize } from "../rules/character.js";
 import { R } from "../rules/common.js";
 import { hdLeft, hpCur, isDown, longRestHP, spendHitDie } from "../rules/hp.js";
 
+/** Ressource récupérée au repos court : objet, ou fonction du personnage (ex. Coup de chance du roublard au niveau 20). */
+const SR = g => typeof C(g).shortRest === "function" ? C(g).shortRest(g) : C(g).shortRest;
 /** Boutons de repos ; C(g).restBar ajoute ce qui est propre à la classe (case Restauration arcanique…). */
 function restBarHTML(g) {
   return `<div class="restbar"><button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}">Repos court ${S.shortOpen ? "▴" : "▾"}</button><button class="btn" data-a="longrest">Repos long</button>${C(g).restBar ? C(g).restBar(g)
-    : `<span class="muted">Repos court : dés de vie${C(g).shortRest ? `, ${C(g).shortRest.label}` : ""}. Repos long : tout.</span>`}</div>${S.shortOpen ? shortRestHTML(g) : ""}`;
+    : `<span class="muted">Repos court : dés de vie${SR(g) ? `, ${SR(g).label}` : ""}. Repos long : tout.</span>`}</div>${S.shortOpen ? shortRestHTML(g) : ""}`;
 }
 
 function diceHTML(g) {
@@ -27,7 +29,7 @@ function diceHTML(g) {
   return h + `<div class="hpin"><input id="hd-n" type="number" inputmode="numeric" min="1" max="${d}" placeholder="1d${d}" aria-label="Résultat du dé de vie"><button class="btn cast-go sm" data-a="hp-hd">Dépenser 1 dé</button></div>`;
 }
 function shortRestHTML(g) {
-  const sr = C(g).shortRest;
+  const sr = SR(g);
   let h = `<div class="short" id="short-panel"><div><h3>Repos court</h3>${diceHTML(g)}</div>`;
   if (C(g).shortPanel) return h + `<button class="btn ghost" data-a="short-close" style="justify-self:start">Fermer</button></div>` + C(g).shortPanel(g); // magicien : Restauration arcanique
   if (!sr) return h + `<div class="cast"><button class="btn ghost" data-a="short-close">Fermer</button></div></div>`; // rien d'autre à récupérer (barbare, roublard)
@@ -39,7 +41,7 @@ const snapHP = g => JSON.parse(JSON.stringify({ hp: g.hp, hdU: g.hdU }));
 onClick("short-open", () => { S.shortOpen = !S.shortOpen; S.sr = {}; render(); });
 onClick("short-close", () => { S.shortOpen = false; S.sr = {}; render(); });
 onClick("short-done", () => {
-  const g = G(); if (!g || !C(g).shortRest) return; const sr = C(g).shortRest, f = sr.field, prev = g[f]; S.shortOpen = false;
+  const g = G(); if (!g || !SR(g)) return; const sr = SR(g), f = sr.field, prev = g[f]; S.shortOpen = false;
   mutate(g => { g[f] = 0; }); toast(`Repos court : ${sr.label} ${sr.done}`, () => { mutate(g => { g[f] = prev; }); return "Repos court annulé"; });
 });
 onClick("hp-hd", () => {

@@ -14,7 +14,7 @@ ROOT = os.environ.get("GRIMOIRE_ROOT", ROOT)  # autre copie du dépôt à servir
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-MODULES = ["test_commun", "test_magicien", "test_paladin", "test_druide", "test_forme_sauvage", "test_personnage", "test_equipement", "test_barbare"]
+MODULES = ["test_commun", "test_magicien", "test_paladin", "test_druide", "test_forme_sauvage", "test_personnage", "test_equipement", "test_barbare", "test_roublard"]
 
 
 class Quiet(http.server.SimpleHTTPRequestHandler):
