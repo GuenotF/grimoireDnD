@@ -10,7 +10,7 @@ def money(a, n, coin, act):
 
 def test_bourse(browser, devices, url):
     a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, money={"po": 2, "pa": 3}), tab="perso", view="jeu")
-    check("2 po · 3 pa" in a.text("#panel"), "résumé de la bourse")
+    check("0 objet" in a.text('[data-k="ch-eqj"]') and a.count(".purse") == 1, "nombre d'objets à côté du titre, bourse affichée")
     a.click('.purse')
     money(a, 15, "pc", "m-gain")
     check(a.g("money.pc") == 15, "gain de 15 pc")

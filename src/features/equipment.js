@@ -57,7 +57,7 @@ function equipmentGerer(g) {
 }
 function equipmentJeu(g) {
   if (!g.items.length && !Object.values(g.money).some(Boolean)) return "";
-  let h = foldHead("ch-eqj", "", "Équipement", purseText(g.money), purseText(g.money));
+  let h = foldHead("ch-eqj", "", "Équipement", `${g.items.length} objet${g.items.length > 1 ? "s" : ""}`, purseText(g.money)); // comme en Gérer
   if (isFold("ch-eqj")) return h;
   h += purseHTML(g);
   if (g.items.length) h += `<div class="chbox itbox">${order(g).map(i => { const x = g.items[i];
