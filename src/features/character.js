@@ -11,6 +11,7 @@ import { R } from "../rules/common.js";
 import { ABILITIES } from "../rules/tables.js";
 import { foldHead, isFold } from "../ui/components.js";
 import { hpCardHTML } from "./hp.js";
+import { restBarHTML } from "./rest.js";
 
 const viewSwitch = () => `<div class="viewsw" role="group" aria-label="Affichage de la fiche"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
 const speedTxt = g => `${fmt(g.speed)} m`;
@@ -54,7 +55,7 @@ function savesGerer(g) {
 function jeuHTML(g) {
   const st = (v, l, cls = "") => `<div class="chstat${cls}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
   const stats = `<div class="chstats">${st(g.ac ?? "?", "CA")}${st(signed(initiative(g)), "Initiative")}${st(speedTxt(g), "Vitesse")}${st(signed(R.prof(g.level)), "Maîtrise")}</div>`;
-  return hpCardHTML(g) + stats; // les caractéristiques sont dans l'en-tête (heroAbilities)
+  return hpCardHTML(g) + restBarHTML(g) + stats; // les caractéristiques sont dans l'en-tête (heroAbilities)
 }
 
 // En-tête de l'onglet Personnage : les six caractéristiques à la place des statistiques de sorts.

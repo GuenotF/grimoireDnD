@@ -7,8 +7,7 @@ import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { BEAST } from "../data.js";
 import { hitDieSize, saveBonus } from "../rules/character.js";
-import { R } from "../rules/common.js";
-import { damage, deathSave, hdLeft, heal, hpCur, isDead, isDown, setTemp, spendHitDie } from "../rules/hp.js";
+import { damage, deathSave, hdLeft, heal, hpCur, isDead, isDown, setTemp } from "../rules/hp.js";
 import { concDD, concOf } from "./cast.js";
 
 const snap = g => JSON.parse(JSON.stringify({ hp: g.hp, hpTemp: g.hpTemp, death: g.death, hdU: g.hdU, effects: g.effects }));
@@ -38,7 +37,7 @@ function hpCardHTML(g) {
     return h;
   }
   const hd = hdLeft(g);
-  h += input + `<div class="hpdice"><span>Dés de vie <b>${hd}/${g.level} d${hitDieSize(g)}</b></span>${hd && cur < g.hpMax ? `<button class="btn ghost sm" data-a="hp-hd" title="Repos court : lance le dé, tape le résultat, puis touche ici">Dépenser 1 dé</button>` : ""}<span class="muted">${hd && cur < g.hpMax ? `repos court : lance 1d${hitDieSize(g)}, tape le résultat (CON ${signed(R.ab(g, "con"))} ajoutée)` : "la moitié revient au repos long"}</span></div>`;
+  h += input + `<div class="hpdice"><span>Dés de vie <b>${hd}/${g.level} d${hitDieSize(g)}</b></span><span class="muted">à dépenser au repos court</span></div>`;
   if (g.wsForm && BEAST[g.wsForm.id]) h += `<p class="hpnote">Tu es en <b>${esc(BEAST[g.wsForm.id].n)}</b> : les dégâts vont d'abord à la bête (carte Forme active, onglet Sorts). L'excédent revient ici tout seul.</p>`;
   return h + hpConcHTML(g) + `</section>`;
 }
@@ -70,12 +69,6 @@ const val = () => { const el = document.getElementById("hp-n"), n = Math.floor(+
 onClick("hp-dmg", () => { const g = G(), n = val(); if (!g || n < 1) return; const prev = snap(g); let msg = ""; mutate(g => { msg = takeDamage(g, n); }); toast(msg, () => { S.hpConc = null; restore(prev); return "Dégâts annulés"; }); });
 onClick("hp-heal", () => { const g = G(), n = val(); if (!g || n < 1) return; const prev = snap(g), down = isDown(g); let got = 0; S.hpConc = null; mutate(g => { got = heal(g, n); }); toast(`<b>+${got} PV</b>${down ? " : tu te relèves" : ""} · ${hpCur(G())}/${g.hpMax}`, () => { restore(prev); return "Soin annulé"; }); });
 onClick("hp-temp", () => { const g = G(), n = val(); if (!g || n < 1) return; const prev = snap(g); let up = false; mutate(g => { up = setTemp(g, n); }); toast(up ? `<b>${g.hpTemp} PV temporaires</b>` : `Tu gardes tes ${g.hpTemp} PV temporaires : ils ne se cumulent pas, on garde le plus élevé`, up ? () => { restore(prev); return "PV temporaires annulés"; } : null); });
-onClick("hp-hd", () => {
-  const g = G(), n = val(); if (!g || n < 1) return;
-  if (n > hitDieSize(g)) { toast(`Un d${hitDieSize(g)} donne au plus ${hitDieSize(g)} : tape le résultat du dé`); return; }
-  const prev = snap(g); let got = null; mutate(g => { got = spendHitDie(g, n); });
-  if (got != null) toast(`Dé de vie : ${n} ${signed(R.ab(g, "con"))} CON → <b>+${got} PV</b> · ${hpCur(G())}/${g.hpMax} · reste ${hdLeft(G())}`, () => { restore(prev); return "Dé de vie annulé"; });
-});
 onClick("ds", (b) => {
   const g = G(); if (!g) return; const prev = snap(g); let r = "";
   mutate(g => { r = deathSave(g, b.dataset.v); });

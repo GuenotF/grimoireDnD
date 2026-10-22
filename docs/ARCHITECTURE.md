@@ -51,6 +51,7 @@ src/
   features/                 mécaniques partagées par toutes les classes
     character.js            onglet Personnage : caractéristiques, combat, jets de sauvegarde (Gérer, En jeu)
     hp.js                   carte des points de vie, puce de la barre du bas, rappel de concentration
+    rest.js                 repos court (dés de vie + récupération de la classe) et repos long, dans Personnage et Sorts
     spells.js               affichage d'un sort, notes personnelles
     cast.js                 Lancer, barre des emplacements, concentration, sorts en cours
     grimoire.js             onglet Sorts/Grimoire : Gérer, En jeu, capacités de classe, repos
@@ -82,7 +83,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `features(g)` | Capacités de classe (avec `control(g)` pour un réglage, ex. style de combat) | | ✓ | ✓ |
 | `resources(g)`, `resourceMax` | Ressources en haut de l'onglet et maximum de chaque compteur | | ✓ | ✓ |
 | `beforeSlots(g)`, `playTop(g)`, `slotbarChips(g)` | Ajouts à l'écran : forme active, Châtiment divin, puce de la barre du bas | | ✓ | ✓ |
-| `restBar(g)`, `shortPanel(g)`, `shortRest`, `longRest(g)` | Repos court (propre ou ressource récupérée) et repos long | ✓ | ✓ | ✓ |
+| `restBar(g)`, `shortPanel(g)`, `shortRest`, `longRest(g)` | Ajouts à la barre de repos, panneau propre au repos court (Restauration arcanique) ou ressource récupérée, repos long (dés de vie et PV : communs, `features/rest.js`) | ✓ | ✓ | ✓ |
 | `renderSheets(g, levelUpOpen)` | Volets propres (Imposition des mains, formes possibles) | | ✓ | ✓ |
 | `levelUp` | Assistant : étapes propres (`init`, `steps`, `apply`…) ou crochets des étapes communes (`rowsBefore`, `rowsAfter`, `summaryExtra`, `notes`, `choicesFirst`, `choices`, `recapBefore`, `recapAfter`, `recapNotes`, `apply`) | ✓ | ✓ | ✓ |
 | `rules(g)`, `print(g)` | Onglet Règles et fiche imprimable (pilotes, à venir pour paladin et druide) | via `panels` | | |

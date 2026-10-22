@@ -35,7 +35,7 @@ def test_perception_et_conduit_divin(browser, devices, url):
     a.click('[data-a="row"][data-id="res:cd"]'); a.click('[data-a="cd-use"][data-v="presence"]')
     check(a.g("cdU") == 1 and a.g("effects[0].name") == "Présence conquérante", "Présence conquérante en cours")
     check(a.count('[data-a="cd-use"]:disabled') == 2, "Conduit divin épuisé")
-    a.click('[data-a="short-pal"]')
+    a.click('[data-a="short-open"]'); a.click('[data-a="short-done"]')
     check(a.g("cdU") == 0 and a.g("dsU") == 1, "repos court : Conduit divin seulement")
     a.close()
 

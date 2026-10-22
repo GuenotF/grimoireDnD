@@ -10,7 +10,7 @@ import { R, castable, classSpells } from "../rules/common.js";
 import { foldHead, isFold, removeBtn } from "../ui/components.js";
 import { castHTML, concWarnHTML, firstFree, liveMark, slotsLeft } from "./cast.js";
 import { keyPills, noteBox, noteGerer, noteMark, noteOf, notePen, pillsHTML, spellBody, tags } from "./spells.js";
-import { longRestHP } from "../rules/hp.js";
+import { restBarHTML } from "./rest.js";
 
 function featsHTML(g) {
   const feats = classFeats(g), have = feats.filter(f => f.lv <= g.level), next = feats.filter(f => f.lv > g.level).slice(0, 2);
@@ -90,10 +90,8 @@ function grimoireHTML(g) {
     const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0));
     h += `<div class="slotrow"><span class="lv">Niveau ${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
   });
-  // Repos court : propre à la classe (Restauration arcanique du magicien) ou ressource récupérée (Conduit divin, Forme sauvage)
-  h += `<div class="restbar"><button class="btn" data-a="longrest">Repos long</button>${C(g).restBar ? C(g).restBar(g)
-    : `<button class="btn" data-a="short-pal">Repos court</button><span class="muted">Repos court : ${C(g).shortRest.label}. Repos long : tout.</span>`}</div></div>`;
-  if (S.shortOpen && C(g).shortPanel) h += C(g).shortPanel(g);
+  // Repos court (dés de vie + récupération de la classe) et repos long : features/rest.js
+  h += `</div>` + restBarHTML(g);
   if (!C(g).book) { h += (C(g).resources ? C(g).resources(g) : "") + featsHTML(g); return h + (S.view === "jeu" ? jeuHTML(g) : preparedGererHTML(g)); }
   if (S.view === "jeu") return h + jeuHTML(g);
 
@@ -192,7 +190,6 @@ function jeuHTML(g) {
   return h;
 }
 onClick("pip", (b) => { mutate(g => { const lv = +b.dataset.l, k = +b.dataset.k, u = +(g.used[lv] || 0); g.used[lv] = k < u ? k : k + 1; }); });
-onClick("longrest", () => { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.effects = []; if (C(g).longRest) C(g).longRest(g); g.extras.forEach(x => x.used = false); longRestHP(g); toast(`Repos long : ${g.hpMax != null ? "PV au maximum, " : ""}emplacements et capacités récupérés, sorts en cours terminés`); }); });
 onClick("rm", (b) => {
   const k = b.dataset.k;
   if (S.confirm !== k) { S.confirm = k; render(); return; }
@@ -206,10 +203,6 @@ onClick("rm", (b) => {
 });
 onClick("view", (b) => { S.view = b.dataset.v; S.open.clear(); S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); });
 onClick("row", (b) => { const k = b.dataset.id; if (S.open.has(k)) S.open.delete(k); else S.open.add(k); S.castOpen = null; render(); });
-onClick("short-pal", () => {
-  const g = G(); if (!g) return; const sr = C(g).shortRest, f = sr.field, prev = g[f];
-  mutate(g => { g[f] = 0; }); toast(`Repos court : ${sr.label} ${sr.done}`, () => { mutate(g => { g[f] = prev; }); return "Repos court annulé"; });
-});
 onClick("xedit", (b) => { S.open.delete("x:" + b.dataset.i); S.editX = +b.dataset.i; S.xdraft = null; render(); const el = document.getElementById("x-ename"); if (el) { el.focus(); el.select(); } });
 onClick("xcancel", () => { S.editX = null; S.xdraft = null; render(); });
 // Limite de préparation (grimoire et assistant du magicien) : refus, sinon on passe au gestionnaire suivant

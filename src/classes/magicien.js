@@ -131,8 +131,6 @@ function luStep3(g, b) {
   <span>• Tu peux revenir au niveau ${g.level} avec le sélecteur de niveau : les sorts ajoutés restent au grimoire.</span></div>`;
   return h;
 }
-onClick("short-open", () => { S.shortOpen = !S.shortOpen; S.sr = {}; render(); });
-onClick("short-close", () => { S.shortOpen = false; S.sr = {}; render(); });
 onClick("sr-pick", (b) => { S.sr = JSON.parse(b.dataset.c); render(); });
 onClick(["sr-inc", "sr-dec"], (b, a) => { const lv = +b.dataset.l; S.sr[lv] = Math.max(0, (S.sr[lv] || 0) + (a === "sr-inc" ? 1 : -1)); if (!S.sr[lv]) delete S.sr[lv]; render(); });
 onClick("sr-go", () => {
@@ -216,8 +214,7 @@ export default {
   printTitle: g => `Grimoire de ${g.name}`,
   printDesc: "Elle contient le tableau de bord avec les cercles d'emplacements, le grimoire par niveau avec des cases « préparé » et des lignes vides à remplir au crayon, le journal de copie et le rappel des règles.",
   canRitual: () => true,      // rituel depuis le grimoire, sans le préparer
-  restBar: g => `<button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}">Repos court ${S.shortOpen ? "▴" : "▾"}</button>
-    <label class="check"><input type="checkbox" data-a="arcane"${g.arcane ? " checked" : ""}> Restauration arcanique utilisée</label>
+  restBar: g => `<label class="check"><input type="checkbox" data-a="arcane"${g.arcane ? " checked" : ""}> Restauration arcanique utilisée</label>
     <span class="muted">Au repos court, 1 fois par jour : récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</span>`,
   shortPanel: g => shortHTML(g),
   longRest: g => { g.arcane = false; },
