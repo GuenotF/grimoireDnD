@@ -7,6 +7,7 @@ import { render, toast } from "../core/ui.js";
 import { BY_ID, SPELLS } from "../data.js";
 import { firstName, luNeed } from "../features/levelup.js";
 import { printHTML } from "../features/print.js";
+import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills, metaLine, pText, pillsHTML, tags, tier } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { SCHOOLS, SLOTS } from "../rules/tables.js";
@@ -52,7 +53,9 @@ function rulesHTML(g) {
   <p><b>Copie de secours.</b> 1 h et 10 po par niveau de sort. Un grimoire perdu ne se reconstitue qu'avec les sorts préparés à ce moment-là.</p></div>
   <div><div class="rubric" style="margin-top:4px"><h3>Préparer</h3></div>
   <p>Après un repos long, choisis <b>${R.prepMax(g)} sorts</b> du grimoire (modificateur d'Intelligence + niveau). Les sorts mineurs ne comptent pas.</p>
-  <p>Lancer un sort dépense un emplacement de son niveau <b>ou supérieur</b>. Le préparer ne coûte rien.</p>
+  <p>Le préparer ne coûte rien.</p>
+  ${castingRules(g)}
+  ${concentrationRules()}
   <div class="rubric"><h3>Rituels</h3></div>
   <p>Un sort marqué <span class="tag r">R</span> se lance depuis le grimoire sans être préparé, en 10 minutes de plus, sans dépenser d'emplacement.</p>
   <div class="rubric"><h3>Récupérer</h3></div>

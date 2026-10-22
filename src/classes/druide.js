@@ -5,6 +5,7 @@ import { S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render } from "../core/ui.js";
 import { BEAST, BEASTS } from "../data.js";
+import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { SLOTS } from "../rules/tables.js";
 import { capRow, pillsRaw } from "../ui/components.js";
@@ -45,6 +46,29 @@ const DRU = {
 
 export { DRU_FEATS, druResHTML, CIRCLES, DRU };
 
+// ---------- Onglet Règles ----------
+function rulesHTML(g) {
+  const n = DRU.ws(g), fp = DRU.fp(g), fpTxt = fp === 0.125 ? "1/8" : fp === 0.25 ? "1/4" : fp === 0.5 ? "1/2" : String(fp);
+  return `<div class="cols rules">
+  <div><div class="rubric" style="margin-top:4px"><h3>Préparer</h3></div>
+  <p>Après un repos long, choisis <b>${R.prepMax(g)} sorts</b> dans toute la liste du druide (modificateur de Sagesse + niveau), parmi les niveaux que tu peux lancer. Tes <b>${R.cantrips(g)} sorts mineurs</b> sont connus et se lancent à volonté.</p>
+  <div class="rubric"><h3>Rituels</h3></div>
+  <p>Un sort <b>préparé</b> marqué <span class="tag r">R</span> se lance en 10 minutes de plus, sans dépenser d'emplacement.</p>
+  ${castingRules(g)}
+  ${concentrationRules(" En forme de bête, le jet se fait avec la Constitution de la bête.")}</div>
+  <div><div class="rubric" style="margin-top:4px"><h3>Forme sauvage</h3></div>
+  ${n ? `<p><b>${n > 10 ? "Sans limite" : n + " fois"}</b> par repos court ou long, en <b>action bonus</b> (Cercle de la Lune), pour <b>${DRU.hours(g)} h</b> au plus (moitié du niveau). Bêtes déjà vues de <b>FP ${fpTxt}</b> au plus ; nage dès le niveau 4, vol dès le niveau 8 ; FP = niveau ÷ 3 dès le niveau 6.</p>` : `<p>Au niveau 2.</p>`}
+  <div class="rubric"><h3>Dans la forme</h3></div>
+  <p>La bête remplace tes statistiques physiques (FOR, DEX, CON) et tes PV. Tu gardes INT, SAG, CHA, tes maîtrises et ta personnalité ; pour une compétence ou une sauvegarde que vous maîtrisez tous les deux, prends le meilleur bonus.</p>
+  <p><b>À 0 PV</b>, tu reprends ta forme : l'excédent de dégâts passe sur tes PV. Tu reprends aussi ta forme en action bonus, ou en perdant connaissance.</p>
+  <p><b>Sorts :</b> ${g.level >= 18 ? "Sorts bestiaux : tu peux lancer tes sorts à composantes verbales et somatiques." : "aucun sort dans la forme"}, mais la concentration continue. L'équipement tombe, s'intègre à la forme ou reste porté si la bête le peut (au choix).</p>
+  <div class="rubric"><h3>Changeforme de combat</h3></div>
+  <p>En forme de bête, action bonus : dépense un emplacement pour regagner <span class="kp f">1d8 PV par niveau</span> d'emplacement.</p>
+  <div class="rubric"><h3>Récupérer</h3></div>
+  <p><b>Repos long :</b> emplacements et Forme sauvage. <b>Repos court :</b> Forme sauvage.</p>
+  <p class="muted">Sources : Manuel des joueurs 2014 (druide, Cercle de la Lune), Guide complet de Xanathar (Embrasement), Manuel des monstres (bêtes). Résumés rédigés pour la table, à vérifier dans le livre en cas de doute.</p></div></div>`;
+}
+
 // ---------- Définition de la classe (contrat : voir docs/ARCHITECTURE.md) ----------
 const row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
 export default {
@@ -64,8 +88,8 @@ export default {
   subclassField: g => `<div class="field"><label for="f-circle">Cercle druidique</label><select id="f-circle">${Object.entries(CIRCLES).map(([k, o]) => `<option value="${k}"${k === g.circle ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
   heroStats: g => { const cMax = R.cantrips(g); return `<div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div><div class="l">Sorts mineurs</div></div>
     <div class="stat" role="listitem"><div class="v">${DRU.ws(g) ? `FP ${DRU.fp(g)}` : "—"}</div><div class="l">Forme sauvage</div></div>`; },
-  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["bestiaire","Bestiaire", BEASTS.filter(b => wsAllowed(g, b)).length],["sauvegarde","Sauvegarde"]],
-  panels: { bestiaire: g => bestiaryHTML(g) },
+  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["bestiaire","Bestiaire", BEASTS.filter(b => wsAllowed(g, b)).length],["sauvegarde","Sauvegarde"],["regles","Règles"]],
+  panels: { bestiaire: g => bestiaryHTML(g), regles: g => rulesHTML(g) },
   features: g => DRU_FEATS.filter(f => !f.circle || f.circle === g.circle),
   resources: g => druResHTML(g),
   resourceMax: { ws: g => DRU.ws(g) },

@@ -57,3 +57,11 @@ def test_passage_de_niveau_nouvelles_formes(browser, devices, url):
     check(a.g("level") == 6 and a.g("favs.includes('ours-polaire')"), "favori ajouté à la validation")
     a.undo(); check(a.g("level") == 5 and a.g("favs.length") == 0, "annulé")
     a.close()
+
+
+def test_onglet_regles(browser, devices, url):
+    a = App(browser, devices, url, char=MALFAEL, tab="regles")
+    t = a.text("#panel")
+    for s in ["7 sorts", "3 sorts mineurs", "DD de 13", "2 fois", "2 h", "FP 1", "Constitution de la bête", "Changeforme de combat"]:
+        check(s in t, f"règles du druide : « {s} »")
+    a.close()

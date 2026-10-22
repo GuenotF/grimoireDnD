@@ -7,6 +7,7 @@ import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
 import { slotsLeft } from "../features/cast.js";
+import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { HALF } from "../rules/tables.js";
@@ -124,6 +125,27 @@ const PAL = {
 
 export { palResHTML, STYLES, auraR, PAL_FEATS, lohHTML, smiteHTML, OATHS, oathSpells, PAL };
 
+// ---------- Onglet Règles ----------
+function rulesHTML(g) {
+  const pool = PAL.loh(g), ds = PAL.ds(g), o = OATHS[g.oath];
+  return `<div class="cols rules">
+  <div><div class="rubric" style="margin-top:4px"><h3>Préparer</h3></div>
+  <p>Après un repos long, choisis <b>${R.prepMax(g)} sorts</b> dans toute la liste du paladin (modificateur de Charisme + moitié du niveau), parmi les niveaux que tu peux lancer. Les <b>sorts de serment</b> (${esc(o.full)}) sont toujours préparés, en plus. Pas de sort mineur, pas de rituel.</p>
+  ${castingRules(g)}
+  <div class="rubric"><h3>Châtiment divin</h3></div>
+  <p>Quand une attaque d'arme au corps à corps touche, dépense un emplacement : <span class="kp d">2d8 radiants</span> au niveau 1, <b>+1d8 par niveau</b> d'emplacement au-dessus, <b>5d8 au plus</b>. <b>+1d8</b> contre un mort-vivant ou un fiélon. Tu décides après avoir vu l'attaque toucher ; sur un critique, tous les dés sont doublés.</p>
+  ${concentrationRules()}</div>
+  <div><div class="rubric" style="margin-top:4px"><h3>Imposition des mains</h3></div>
+  <p>Action, au contact : une réserve de <b>${pool} PV</b> (5 × niveau) à répartir comme tu veux. Ou <b>5 PV</b> de la réserve pour guérir une maladie ou neutraliser un poison. Sans effet sur les morts-vivants et les artificiels.</p>
+  <div class="rubric"><h3>Perception divine</h3></div>
+  <p>Action, <b>${ds} fois</b> par repos long (1 + modificateur de Charisme) : jusqu'à la fin de ton prochain tour, tu sais où sont les célestes, fiélons et morts-vivants à 18 m (hors abri total), et les lieux ou objets consacrés ou profanés.</p>
+  <div class="rubric"><h3>Conduit divin</h3></div>
+  <p>Au niveau 3, <b>1 fois</b> par repos court ou long : une option de ton serment (${(o.cd || []).map(x => esc(x.n)).join(", ")}). Ses jets de sauvegarde utilisent ton DD de sorts.</p>
+  <div class="rubric"><h3>Récupérer</h3></div>
+  <p><b>Repos long :</b> emplacements, Imposition des mains, Perception divine, Conduit divin. <b>Repos court :</b> Conduit divin.</p>
+  <p class="muted">Sources : Manuel des joueurs 2014 (paladin), Guide complet de Xanathar (Serment de la conquête). Résumés rédigés pour la table, à vérifier dans le livre en cas de doute.</p></div></div>`;
+}
+
 // ---------- Définition de la classe (contrat : voir docs/ARCHITECTURE.md) ----------
 const row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
 export default {
@@ -141,7 +163,8 @@ export default {
   subclassField: g => `<div class="field"><label for="f-oath">Serment sacré</label><select id="f-oath">${Object.entries(OATHS).map(([k, o]) => `<option value="${k}"${k === g.oath ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
   heroStats: g => `<div class="stat" role="listitem"><div class="v">${oathSpells(g).length}</div><div class="l">Sorts de serment</div></div>
     <div class="stat" role="listitem"><div class="v">${5 * g.level}</div><div class="l">Imposition (PV)</div></div>`,
-  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["sauvegarde","Sauvegarde"]],
+  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["sauvegarde","Sauvegarde"],["regles","Règles"]],
+  panels: { regles: g => rulesHTML(g) },
   alwaysPrepared: g => oathSpells(g),
   alwaysPreparedInfo: g => ({ title: "Sorts de serment", aside: `toujours préparés · ${esc(OATHS[g.oath].n)}`, origin: `Sort de serment · ${esc(OATHS[g.oath].full)}`,
     tip: "Sort de serment : toujours préparé, hors limite", aria: "Sort de serment, toujours préparé" }),

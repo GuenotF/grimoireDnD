@@ -79,3 +79,11 @@ def test_passage_de_niveau(browser, devices, url):
     a.undo()
     check(a.g("level") == 4 and a.g("spells.length") == 9, "passage annulé")
     a.close()
+
+
+def test_onglet_regles(browser, devices, url):
+    a = App(browser, devices, url, char=NEMEIA, tab="regles")
+    t = a.text("#panel")
+    for s in ["Concentration", "Jet de sauvegarde", "DD de 14", "Attaque de sort", "+6", "Restauration arcanique"]:
+        check(s in t, f"règles du magicien : « {s} »")
+    a.close()

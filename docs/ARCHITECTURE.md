@@ -108,7 +108,7 @@ Pendant les étapes 0 à 5, il n'y a pas de nouvelle fonctionnalité.
 
 Ce sont des besoins connus et simples. Chacun doit se faire **uniquement dans les fichiers de classe**, sans toucher aux écrans. Si ce n'est pas le cas, l'architecture est à corriger.
 
-1. **Onglet Règles** du paladin et du druide (`rules(g)`).
+1. ✓ **Onglet Règles** du paladin et du druide : fait uniquement dans `classes/paladin.js` et `classes/druide.js` (`tabs`, `panels`), avec les rubriques communes « Lancer un sort » et « Concentration » dans `features/rules.js`, reprises par le magicien. Aucun écran commun modifié.
 2. **Fiche imprimable** du paladin et du druide (`print(g)`).
 3. **Une sous-classe de plus**, par exemple le Serment de dévotion (`subclasses`). C'est le test le plus parlant pour la suite.
 

@@ -60,3 +60,11 @@ def test_passage_de_niveau(browser, devices, url):
     check(a.g("level") == 5 and a.g("prepared.includes('bless')"), "niveau 5 avec Bénédiction")
     a.undo(); check(a.g("level") == 4, "annulé")
     a.close()
+
+
+def test_onglet_regles(browser, devices, url):
+    a = App(browser, devices, url, char=KAEL, tab="regles")
+    t = a.text("#panel")
+    for s in ["5 sorts", "DD de 13", "+5", "20 PV", "4 fois", "Présence conquérante", "Concentration", "Xanathar"]:
+        check(s in t, f"règles du paladin : « {s} »")
+    a.close()
