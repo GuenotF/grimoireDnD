@@ -29,7 +29,9 @@ function blank(name, cls) {
   // Champs communs, puis champs propres à chaque classe (tous présents : un personnage peut changer de classe dans un fichier)
   return { v: VERSION, cls, name: name || "Nouveau " + CLASSES[cls].n.toLowerCase(), level: 1, cantrips: [],
     // Fiche du personnage : caractéristiques, CA (null = pas encore saisie), PV max, vitesse en mètres, bonus d'initiative en plus de DEX, sauvegardes maîtrisées en plus de la classe
-    abil: Object.fromEntries(ABILITIES.map(([k]) => [k, 10])), ac: null, hpMax: null, speed: 9, initX: 0, saveX: [], spells: [],
+    abil: Object.fromEntries(ABILITIES.map(([k]) => [k, 10])), ac: null, hpMax: null, speed: 9, initX: 0, saveX: [],
+    // Points de vie : actuels (null = au maximum), temporaires, jets contre la mort, dés de vie dépensés
+    hp: null, hpTemp: 0, death: { s: 0, f: 0, stable: false }, hdU: 0, spells: [],
     prepared: [], used: {}, extras: [], effects: [], notes: "", snotes: {}, ...Object.assign({}, ...Object.values(CLASSES).map(c => c.defaults ? c.defaults() : {})), updatedAt: Date.now() };
 }
 const fxKey = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -43,6 +45,10 @@ function norm(g) {
   const num = (v, lo, hi) => v == null || v === "" || !isFinite(+v) ? null : Math.min(hi, Math.max(lo, Math.round(+v)));
   o.ac = num(o.ac, 0, 40); o.hpMax = num(o.hpMax, 1, 999); o.initX = num(o.initX, -20, 20) || 0;
   o.speed = isFinite(+o.speed) && o.speed !== null && o.speed !== "" ? Math.min(60, Math.max(0, +o.speed)) : 9;
+  o.hp = o.hp == null ? null : Math.max(0, Math.round(+o.hp) || 0); if (o.hpMax != null && o.hp != null && o.hp >= o.hpMax) o.hp = null;
+  o.hpTemp = Math.max(0, Math.round(+o.hpTemp) || 0); o.hdU = Math.min(o.level, Math.max(0, Math.round(+o.hdU) || 0));
+  const d = o.death && typeof o.death === "object" ? o.death : {};
+  o.death = { s: Math.min(3, Math.max(0, +d.s || 0)), f: Math.min(3, Math.max(0, +d.f || 0)), stable: !!d.stable };
   o.saveX = Array.isArray(o.saveX) ? [...new Set(o.saveX)].filter(k => ABILITIES.some(a => a[0] === k)) : [];
   Object.values(CLASSES).forEach(c => { if (c.normalize) c.normalize(o); }); // champs propres à chaque classe
   ["cantrips","spells","prepared","extras"].forEach(k => { if (!Array.isArray(o[k])) o[k] = []; });

@@ -10,6 +10,7 @@ import { R, castable, classSpells } from "../rules/common.js";
 import { foldHead, isFold, removeBtn } from "../ui/components.js";
 import { castHTML, concWarnHTML, firstFree, liveMark, slotsLeft } from "./cast.js";
 import { keyPills, noteBox, noteGerer, noteMark, noteOf, notePen, pillsHTML, spellBody, tags } from "./spells.js";
+import { longRestHP } from "../rules/hp.js";
 
 function featsHTML(g) {
   const feats = classFeats(g), have = feats.filter(f => f.lv <= g.level), next = feats.filter(f => f.lv > g.level).slice(0, 2);
@@ -191,7 +192,7 @@ function jeuHTML(g) {
   return h;
 }
 onClick("pip", (b) => { mutate(g => { const lv = +b.dataset.l, k = +b.dataset.k, u = +(g.used[lv] || 0); g.used[lv] = k < u ? k : k + 1; }); });
-onClick("longrest", () => { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.effects = []; if (C(g).longRest) C(g).longRest(g); g.extras.forEach(x => x.used = false); toast("Repos long : emplacements et capacités récupérés, sorts en cours terminés"); }); });
+onClick("longrest", () => { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.effects = []; if (C(g).longRest) C(g).longRest(g); g.extras.forEach(x => x.used = false); longRestHP(g); toast(`Repos long : ${g.hpMax != null ? "PV au maximum, " : ""}emplacements et capacités récupérés, sorts en cours terminés`); }); });
 onClick("rm", (b) => {
   const k = b.dataset.k;
   if (S.confirm !== k) { S.confirm = k; render(); return; }

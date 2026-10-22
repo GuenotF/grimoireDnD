@@ -10,6 +10,7 @@ import { render, setRenderer, setStatus, toast } from "./core/ui.js";
 import { BEAST, BEASTS, BY_ID, SPELLS } from "./data.js";
 import { concOf, concPanelHTML, fxSheetHTML, slotbarHTML } from "./features/cast.js";
 import { grimoireHTML } from "./features/grimoire.js";
+import { hpChipHTML } from "./features/hp.js";
 import { luHTML } from "./features/levelup.js";
 import { characterHTML, heroAbilities } from "./features/character.js";
 import { biblioHTML } from "./features/library.js";
@@ -37,7 +38,7 @@ function renderApp() {
   if (keep) { const el = document.querySelector(keep.sel); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
   setStatus(S.statusText || "", S.statusErr);
   const bar = document.getElementById("slotbar"), showBar = !!g && S.tab === "grimoire" && R.slots(g).length > 0;
-  bar.hidden = !showBar; if (showBar) bar.innerHTML = slotbarHTML(g);
+  bar.hidden = !showBar; if (showBar) bar.innerHTML = slotbarHTML(g, hpChipHTML(g));
   document.body.classList.toggle("has-slotbar", showBar);
   document.documentElement.style.setProperty("--barh", (showBar ? bar.offsetHeight : 0) + "px");
   document.getElementById("toast").classList.toggle("above-bar", showBar);

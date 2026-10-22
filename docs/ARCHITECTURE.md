@@ -1,6 +1,6 @@
 # Architecture cible de l'Atelier du Grimoire
 
-*Validé le 21 octobre 2026. Étapes 0 à 4 faites le 21 octobre 2026. Onglet Personnage (étape 1) le 22 octobre 2026.*
+*Validé le 21 octobre 2026. Étapes 0 à 4 faites le 21 octobre 2026. Onglet Personnage (étapes 1 et 2 : caractéristiques, PV) le 22 octobre 2026.*
 
 ## 1. Objectifs
 
@@ -40,6 +40,7 @@ src/
     tables.js               tables sans dépendance : écoles, emplacements (lanceur complet, demi-lanceur), caractéristiques
     common.js               règles communes : maîtrise, modificateurs, emplacements, préparation, sorts lançables
     character.js            fiche de personnage : sauvegardes, initiative, PV moyens, fiche à compléter
+    hp.js                   points de vie : dégâts, soins, PV temporaires, jets contre la mort, dés de vie, repos long
   classes/
     index.js                registre des classes : C(g), sorts toujours préparés, capacités
     magicien.js             contrat + Restauration arcanique, onglet Règles, assistant de niveau du grimoire
@@ -49,6 +50,7 @@ src/
   ui/components.js          éléments réutilisables : sections repliables, capacités dépliables, bouton Retirer
   features/                 mécaniques partagées par toutes les classes
     character.js            onglet Personnage : caractéristiques, combat, jets de sauvegarde (Gérer, En jeu)
+    hp.js                   carte des points de vie, puce de la barre du bas, rappel de concentration
     spells.js               affichage d'un sort, notes personnelles
     cast.js                 Lancer, barre des emplacements, concentration, sorts en cours
     grimoire.js             onglet Sorts/Grimoire : Gérer, En jeu, capacités de classe, repos
@@ -90,7 +92,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 - Chaque personnage porte un numéro de version, `"v": 3`. Les fichiers sans numéro sont la version 1.
 - `schema.js` contient la liste des migrations. À l'ouverture d'un fichier, on applique les migrations dans l'ordre.
   - v1 → v2 : ajout du numéro de version.
-  - v2 → v3 : les six caractéristiques dans `abil` (`str`, `dex`, `con`, `int`, `wis`, `cha`). La caractéristique d'incantation saisie (`int`, `cha` ou `wis`) est reprise, les autres valent 10. Nouveaux champs : `ac` et `hpMax` (null tant qu'ils ne sont pas saisis), `speed` (mètres), `initX` (bonus d'initiative en plus de DEX), `saveX` (sauvegardes maîtrisées en plus de la classe).
+  - v2 → v3 : les six caractéristiques dans `abil` (`str`, `dex`, `con`, `int`, `wis`, `cha`). La caractéristique d'incantation saisie (`int`, `cha` ou `wis`) est reprise, les autres valent 10. Nouveaux champs : `ac` et `hpMax` (null tant qu'ils ne sont pas saisis), `speed` (mètres), `initX` (bonus d'initiative en plus de DEX), `saveX` (sauvegardes maîtrisées en plus de la classe), `hp` (PV actuels, null = au maximum), `hpTemp`, `death` (`s`, `f`, `stable`), `hdU` (dés de vie dépensés).
 - Les champs propres à une classe viennent de `defauts` et `normaliser` de cette classe.
 - Les anciens fichiers de tes joueurs restent lisibles. Un test vérifie l'import d'un fichier version 1.
 

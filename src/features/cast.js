@@ -33,10 +33,11 @@ function castHTML(g, s, prepared) {
   }
   return h;
 }
-function slotbarHTML(g) {
+// pre : puces placées en tête (PV, fournis par app.js)
+function slotbarHTML(g, pre = "") {
   const cur = concOf(g);
   const others = g.effects.filter(e => !e.c);
-  const wf = C(g).slotbarChips ? C(g).slotbarChips(g) : ""; // ex. druide : forme active
+  const wf = pre + (C(g).slotbarChips ? C(g).slotbarChips(g) : ""); // ex. druide : forme active
   const fx = g.effects.length || wf ? `<div class="fx">${wf}${cur ? `<button class="chip conc" data-a="conc-panel" aria-expanded="${S.concPanel}">◉ ${esc(cur.name)} · conc.</button>` : ""}${others.map(e => `<button class="chip" data-a="fx-open">${esc(e.name)} · ${esc(e.d)}</button>`).join("")}${g.effects.length > 1 || (g.effects.length && !cur) ? `<button class="chip" data-a="fx-open" style="background:transparent;border-color:var(--rule);color:var(--muted)">Tout voir</button>` : ""}</div>` : "";
   return `${fx}<button class="line" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g).map((n, i) => {
     const used = Math.min(n, +(g.used[i + 1] || 0));

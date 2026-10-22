@@ -6,6 +6,8 @@ import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { BEAST, BEASTS } from "../data.js";
 import { concDD, concOf, slotsLeft } from "../features/cast.js";
+import { takeDamage } from "../features/hp.js";
+import { saveBonus } from "../rules/character.js";
 import { R } from "../rules/common.js";
 import { isFold } from "../ui/components.js";
 import { DRU } from "./druide.js";
@@ -106,7 +108,7 @@ function bstRow(g, b, full) {
 // Rappel du jet de concentration après des dégâts en forme de bête (la concentration continue en Forme sauvage)
 function wsConcHTML(g) {
   const w = S.wsConc, cur = concOf(g); if (!w || !cur) { S.wsConc = null; return ""; }
-  const con = w.con != null ? `avec la CON de la bête (${signed(w.con)})` : "avec ta propre CON (tu as repris ta forme)";
+  const con = w.con != null ? `avec la CON de la bête (${signed(w.con)})` : `avec ta propre CON (${signed(saveBonus(g, "con"))}, tu as repris ta forme)`;
   return `<div class="concwarn wsconc" role="alert"><div><b>◉ ${esc(cur.name)}</b> : jet de sauvegarde de Constitution, <b>DD ${w.dd}</b> (${plural(w.n, "dégât")}), ${con}.</div>
   <div class="cast"><button class="btn" data-a="wsconc-ok">Réussi</button><button class="btn" data-a="conc-end" style="border-color:var(--rubric);color:var(--pa-fg)">Raté : concentration perdue</button></div></div>`;
 }
@@ -149,7 +151,12 @@ onClick(["ws-dmg", "ws-heal"], (b, a) => {
   const cc = a === "ws-dmg" && concOf(g); S.wsConc = cc ? { dd: concDD(n), n, beast: bt.n, con: n < prev.hp ? Math.floor((bt.st[2] - 10) / 2) : null } : S.wsConc;
   if (a === "ws-heal") { const hp = Math.min(prev.max, prev.hp + n); mutate(g => { g.wsForm.hp = hp; }); toast(`${esc(bt.n)} : +${hp - prev.hp} PV (${hp}/${prev.max})`, () => { mutate(g => { g.wsForm = prev; }); return "Soin annulé"; }); }
   else if (n < prev.hp) { mutate(g => { g.wsForm.hp = prev.hp - n; }); toast(`${esc(bt.n)} : −${n} PV (${prev.hp - n}/${prev.max})${cc ? ` · concentration : DD ${concDD(n)}` : ""}`, () => { S.wsConc = null; mutate(g => { g.wsForm = prev; }); return "Dégâts annulés"; }); }
-  else { const over = n - prev.hp; mutate(g => { g.wsForm = null; }); toast(`${esc(bt.n)} à 0 PV : tu reprends ta forme${over ? `. <b>${over} dégât${over > 1 ? "s" : ""}</b> à retirer de tes PV` : ", sans dégât en plus"}`, () => { S.wsConc = null; mutate(g => { g.wsForm = prev; }); return "Forme rétablie"; }); }
+  else {
+    // 0 PV : retour à la forme de druide ; l'excédent de dégâts passe sur ses PV (onglet Personnage), s'ils sont saisis
+    const over = n - prev.hp, before = JSON.parse(JSON.stringify({ hp: g.hp, hpTemp: g.hpTemp, death: g.death, effects: g.effects })); let msg = "";
+    mutate(g => { g.wsForm = null; if (over && g.hpMax != null) msg = takeDamage(g, over, true); });
+    toast(`${esc(bt.n)} à 0 PV : tu reprends ta forme${!over ? ", sans dégât en plus" : msg ? `. ${msg}` : `. <b>${over} dégât${over > 1 ? "s" : ""}</b> à retirer de tes PV`}`, () => { S.wsConc = null; mutate(g => { g.wsForm = prev; Object.assign(g, before); }); return "Forme rétablie"; });
+  }
 });
 onClick("ws-cf", (b) => {
   const g = G(), lv = +b.dataset.l; if (!g || !g.wsForm || slotsLeft(g, lv) < 1) return;

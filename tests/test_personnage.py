@@ -45,7 +45,7 @@ def test_creation_puis_fiche(browser, devices, url):
     a.click('[data-a="save-tog"][data-v="con"]')
     check(a.g("saveX.join()") == "con" and "+4" in a.text('[data-a="save-tog"][data-v="con"]'), "maîtrise ajoutée en Constitution")
     a.view("jeu")
-    check(a.texts(".chstat .v") == ["14", "31", "+2", "10,5 m", "+2"], f"En jeu : {a.texts('.chstat .v')}")
+    check(a.texts(".chstat .v") == ["14", "+2", "10,5 m", "+2"], f"En jeu : {a.texts('.chstat .v')}")
     check(a.texts(".stats .stat.ab .v") == ["+0", "+0", "+2", "+1", "+3", "−1"], f"caractéristiques dans l'en-tête : {a.texts('.stats .stat.ab .v')}")
     check(a.texts(".stats .js.on") == ["JdS +4", "JdS +3", "JdS +5"], f"JdS maîtrisés : {a.texts('.stats .js.on')}")
     check(a.text(".statcap") == "Caractéristiques" and a.count(".stat.ab.mine") == 1, "intitulé de l'en-tête, Sagesse marquée")
@@ -61,4 +61,59 @@ def test_migration_v2(browser, devices, url):
     a.tab("perso")
     check(a.count(".chtodo") == 1, "fiche à compléter")
     check(a.texts(".sv.lock .n") == ["Sagesse", "Charisme"], "sauvegardes du paladin")
+    a.close()
+
+
+FICHE = {"abil": {"str": 10, "dex": 14, "con": 14, "int": 12, "wis": 16, "cha": 8}, "ac": 14, "hpMax": 31, "v": 3}
+CONC = {"k": "x1", "id": "moonbeam", "name": "Rayon de lune", "d": "1 minute", "c": True}
+
+
+def hp_in(a, n, act):
+    a.pg.fill("#hp-n", str(n)); a.click(f'[data-a="{act}"]')
+
+
+def test_points_de_vie(browser, devices, url):
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, effects=[CONC]), tab="perso", view="jeu")
+    check(a.text(".hph .v").replace(" ", "") == "31/31", "PV au maximum au départ")
+    hp_in(a, 5, "hp-temp"); hp_in(a, 3, "hp-temp")
+    check(a.g("hpTemp") == 5 and "ne se cumulent pas" in a.toast(), "PV temporaires : le plus élevé")
+    hp_in(a, 7, "hp-dmg")
+    check(a.g("hpTemp") == 0 and a.g("hp") == 29 and "5 absorbés" in a.toast(), "les PV temporaires absorbent d'abord")
+    check("DD 10" in a.text(".hpcard .concwarn") and "+2" in a.text(".hpcard .concwarn"), "rappel de concentration avec le bonus de CON")
+    a.undo()
+    check(a.g("hp") is None and a.g("hpTemp") == 5, "dégâts annulés")
+    a.click('[data-a="hpconc-ok"]') if a.count('[data-a="hpconc-ok"]') else None
+    hp_in(a, 45, "hp-dmg")
+    check(a.g("hp") == 0 and a.count(".hpcard.down") == 1 and a.g("effects.length") == 0, "à terre, concentration perdue")
+    a.click('[data-a="ds"][data-v="s"]'); a.click('[data-a="ds"][data-v="f"]')
+    hp_in(a, 3, "hp-dmg")
+    check(a.g("death.f") == 2, "dégâts à 0 PV : un échec")
+    a.click('[data-a="ds"][data-v="s"]'); a.click('[data-a="ds"][data-v="s"]')
+    check(a.g("death.stable") and a.count('[data-a="ds"]') == 0, "3 réussites : stabilisé")
+    hp_in(a, 4, "hp-heal")
+    check(a.g("hp") == 4 and a.g("death.f") == 0 and a.count(".hpcard.down") == 0, "un soin relève le personnage")
+    hp_in(a, 5, "hp-hd")
+    check(a.g("hp") == 11 and a.g("hdU") == 1 and "reste 3" in a.toast(), "dé de vie : 5 + CON 2")
+    hp_in(a, 9, "hp-hd")
+    check(a.g("hdU") == 1 and "au plus 8" in a.toast(), "résultat impossible pour un d8")
+    hp_in(a, 11 + 31, "hp-dmg")
+    check(a.count(".hpcard.down") == 1 and "Mort" in a.text(".hph .k") and "atteignent tes PV maximum" in a.toast(), "mort instantanée")
+    a.click('[data-a="hp-revive"]')
+    check(a.g("hp") == 1, "ramené à la vie")
+    a.tab("grimoire")
+    check(a.text(".slotbar .chip.hp").strip() == "♥ 1/31", f"puce des PV : {a.text('.slotbar .chip.hp')}")
+    a.click('[data-a="longrest"]')
+    check(a.g("hp") is None and a.g("hdU") == 0 and "PV au maximum" in a.toast(), "repos long : PV et dés de vie")
+    a.click(".slotbar .chip.hp")
+    check(a.js("S.tab") == "perso" and a.count("#hp-card") == 1, "la puce ouvre la fiche")
+    a.close()
+
+
+def test_forme_sauvage_excedent(browser, devices, url):
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, wsU=1, wsForm={"id": "loup", "hp": 5, "max": 11}), view="jeu")
+    a.pg.fill("#ws-n", "8"); a.click('[data-a="ws-dmg"]')
+    check(a.g("wsForm") is None and a.g("hp") == 28, "l'excédent de 3 dégâts passe sur les PV du druide")
+    check("excédent" in a.toast(), f"message : {a.toast()}")
+    a.undo()
+    check(a.g("wsForm.hp") == 5 and a.g("hp") is None, "annulation : forme et PV rétablis")
     a.close()
