@@ -126,7 +126,7 @@ def test_forme_sauvage_excedent(browser, devices, url):
 
 def test_competences(browser, devices, url):
     a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, skills={"nature": 1, "bidon": 1}), tab="perso", view="gerer")
-    check(a.count(".skrow") == 18 and a.g("skills.bidon") is None, "18 compétences, code inconnu ignoré")
+    check(a.count(".sklist .skrow") == 18 and a.g("skills.bidon") is None, "18 compétences, code inconnu ignoré")
     check("+3" in a.text('[data-a="skill"][data-v="nature"]'), "Nature maîtrisée : INT +1 + 2")
     for _ in range(2):
         a.click('[data-a="skill"][data-v="perception"]')

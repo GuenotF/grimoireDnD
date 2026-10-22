@@ -116,7 +116,8 @@ export default {
   n: "Druide", ab: "wis", abN: "Sagesse", abArticle: "la Sagesse", slots: SLOTS, top: 9, hitDie: "1d8",
   saves: ["int", "wis"],
   weaponProf: ["club", "dagger", "dart", "javelin", "mace", "quarterstaff", "scimitar", "sickle", "sling", "spear"],
-  armorProf: ["light", "medium", "shield"], noMetal: true,   // les druides refusent de porter du métal             // jets de sauvegarde maîtrisés par la classe
+  armorProf: ["light", "medium", "shield"], noMetal: true,
+  tools: () => ["Kit d'herboriste"], langs: () => ["Druidique"],   // les druides refusent de porter du métal             // jets de sauvegarde maîtrisés par la classe
   cantrips: lv => lv >= 10 ? 4 : lv >= 4 ? 3 : 2,
   prep: (g, m) => Math.max(1, m + g.level),
   ritualNeedsPrep: true,       // un rituel se lance s'il est préparé

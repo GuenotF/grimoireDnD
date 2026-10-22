@@ -168,3 +168,10 @@
 .atk small { font-size: 12.5px; color: var(--muted); line-height: 1.35; } .atk small.aw { color: var(--warn); }
 .atknotes { display: grid; gap: 3px; font-size: 13px; color: var(--muted); padding-top: 6px; line-height: 1.4; } .atknotes b { color: var(--rubric); }
 .itref { display: grid; gap: 2px; } .itref span { font-family: var(--f-sc); font-size: 11.5px; letter-spacing: .05em; color: var(--muted); }
+
+/* Outils et langues */
+.tlbox { display: grid; gap: 4px; padding: 6px 12px 10px; max-width: 760px; }
+.tlrow { display: flex; align-items: center; gap: 4px; } .tlrow .skrow { flex: 1; }
+.tlh { font-family: var(--f-sc); font-size: 12px; letter-spacing: .05em; color: var(--muted); margin-top: 8px; }
+.tljeu p { margin: 0 0 6px; font-size: 14px; line-height: 1.6; } .tljeu b { font-family: var(--f-sc); font-weight: 500; color: var(--muted); margin-right: 4px; }
+.tlrow .skrow b { width: auto; white-space: nowrap; }

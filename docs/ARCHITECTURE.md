@@ -41,6 +41,7 @@ src/
     common.js               règles communes : maîtrise, modificateurs, emplacements, préparation, sorts lançables
     character.js            fiche de personnage : sauvegardes, initiative, PV moyens, fiche à compléter
     money.js                bourse : pièces, dépense avec monnaie
+    feats.js                dons qui modifient les calculs (Vigilant, Maître d'armes lourdes, Tireur d'élite)
     equipment.js            armes et armures : maîtrises, CA calculée, attaques
     hp.js                   points de vie : dégâts, soins, PV temporaires, jets contre la mort, dés de vie, repos long
   classes/
@@ -58,6 +59,7 @@ src/
     equipment.js            équipement : bourse et objets (Gérer, En jeu)
     abilities.js            onglet Capacités des classes sans sorts
     attacks.js              section Attaques (Personnage ou Capacités)
+    tools.js                outils (maîtrise, expertise) et langues
     traits.js               défenses, dons et traits, historique, notes du personnage (Gérer, En jeu)
     rest.js                 repos court (dés de vie + récupération de la classe) et repos long, dans Personnage et Sorts
     spells.js               affichage d'un sort, notes personnelles
@@ -89,6 +91,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `acBase(g)`, `speedBonus(g)` | CA sans armure (Défense sans armure), bonus de vitesse (Déplacement rapide) | | | |
 | `halfDamage(g)`, `onDown(g)` | Résistance active : bouton « Dégâts ½ » de la carte des PV ; effet d'une chute à 0 PV (fin de la rage) | | | |
 | `saves` en fonction, `shortRest` en fonction | Sauvegardes selon le niveau (Esprit fuyant du roublard) ; ressource de repos court selon le niveau (Coup de chance) | | | |
+| `tools(g)`, `langs(g)` | Outils et langues donnés d'office par la classe (outils de voleur, Jargon des voleurs, druidique) | | | ✓ |
 | `asiLevels` | Niveaux d'amélioration de caractéristiques, si différents de 4, 8, 12, 16, 19 (guerrier, roublard plus tard) | | | |
 | `saves` | Jets de sauvegarde maîtrisés par la classe (codes `str`, `dex`, `con`, `int`, `wis`, `cha`) | ✓ | ✓ | ✓ |
 | `defaults()`, `normalize(o)` | Champs propres au personnage et leur contrôle à l'ouverture | ✓ | ✓ | ✓ |
@@ -109,7 +112,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 - Chaque personnage porte un numéro de version, `"v": 3`. Les fichiers sans numéro sont la version 1.
 - `schema.js` contient la liste des migrations. À l'ouverture d'un fichier, on applique les migrations dans l'ordre.
   - v1 → v2 : ajout du numéro de version.
-  - v2 → v3 : les six caractéristiques dans `abil` (`str`, `dex`, `con`, `int`, `wis`, `cha`). La caractéristique d'incantation saisie (`int`, `cha` ou `wis`) est reprise, les autres valent 10. Nouveaux champs : `ac` et `hpMax` (null tant qu'ils ne sont pas saisis), `speed` (mètres), `initX` (bonus d'initiative en plus de DEX), `saveX` (sauvegardes maîtrisées en plus de la classe), `hp` (PV actuels, null = au maximum), `hpTemp`, `death` (`s`, `f`, `stable`), `hdU` (dés de vie dépensés), `skills` (`{ code: 1 maîtrise | 2 expertise }`, codes dans `rules/tables.js`), `defs` (`[{ t: res | imm | vul | adv, v }]`), `traits` (`[{ n, o, d }]`), `bg` (`{ n, d }`), `pnotes`, `items` (`[{ n, q, eq, c, note }]`), `money` (`{ pp, po, pe, pa, pc }`) ; un objet peut porter `ref` (arme ou armure de `data/equipment.json`) ; `acMode` (`calc` ou `manual`, null : saisie si elle existe, sinon calcul dès qu'une armure est équipée).
+  - v2 → v3 : les six caractéristiques dans `abil` (`str`, `dex`, `con`, `int`, `wis`, `cha`). La caractéristique d'incantation saisie (`int`, `cha` ou `wis`) est reprise, les autres valent 10. Nouveaux champs : `ac` et `hpMax` (null tant qu'ils ne sont pas saisis), `speed` (mètres), `initX` (bonus d'initiative en plus de DEX), `saveX` (sauvegardes maîtrisées en plus de la classe), `hp` (PV actuels, null = au maximum), `hpTemp`, `death` (`s`, `f`, `stable`), `hdU` (dés de vie dépensés), `skills` (`{ code: 1 maîtrise | 2 expertise }`, codes dans `rules/tables.js`), `defs` (`[{ t: res | imm | vul | adv, v }]`), `traits` (`[{ n, o, d }]`), `bg` (`{ n, d }`), `pnotes`, `tools` (`{ nom: 1 | 2 }`), `langs`, un trait peut porter `feat` (don de `rules/feats.js`), `exh` (épuisement), `items` (`[{ n, q, eq, c, note }]`), `money` (`{ pp, po, pe, pa, pc }`) ; un objet peut porter `ref` (arme ou armure de `data/equipment.json`) ; `acMode` (`calc` ou `manual`, null : saisie si elle existe, sinon calcul dès qu'une armure est équipée).
 - Les champs propres à une classe viennent de `defauts` et `normaliser` de cette classe.
 - Les anciens fichiers de tes joueurs restent lisibles. Un test vérifie l'import d'un fichier version 1.
 

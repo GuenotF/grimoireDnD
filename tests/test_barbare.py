@@ -58,3 +58,12 @@ def test_rage_prend_fin_a_0_pv_et_niveau_5(browser, devices, url):
     b.click(".lufoot .primary"); b.click(".lufoot .primary"); b.click('[data-a="lu-go"]')
     check(b.g("level") == 5 and "12 m" in b.texts(".stats .v")[3] and "Attaque supplémentaire" in b.text(".atknotes"), "niveau 5 : Déplacement rapide, Attaque supplémentaire")
     b.close()
+
+
+def test_maitre_d_armes_lourdes(browser, devices, url):
+    a = App(browser, devices, url, char=dict(GARAL, raging=True, traits=[{"n": "Maître d'armes lourdes", "o": "don", "d": "", "feat": "gwm"}]), view="jeu")
+    a.pg.check('[data-a="opt-feat"][data-v="gwm"]'); a.pg.wait_for_timeout(50)
+    atk = a.texts(".atk .ah")
+    check(atk[0] == "Hache à deux mains +0 1d12 + 15 tranchant" and atk[1].startswith("Hachette ×2 +5 1d6 + 5"), f"MAL sur l'arme lourde seulement : {atk}")
+    check("Maître d'armes lourdes" in a.text(".atknotes"), "rappel de l'attaque bonus")
+    a.close()

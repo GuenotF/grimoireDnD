@@ -11,6 +11,7 @@ import { acOf, attacks } from "../rules/equipment.js";
 import { COINS } from "../rules/money.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { offer } from "./save.js";
+import { toolsPrint } from "./tools.js";
 import { pillData } from "./spells.js";
 
 function printHTML(g) {
@@ -107,7 +108,7 @@ function pCharacter(g) {
 <div class="res"><span class="l">Dés de vie (d${hitDieSize(g)})</span>${Array.from({ length: g.level }, () => '<span class="box"></span>').join(" ")}<span class="r">cocher un dé dépensé · repos court : dé + CON · repos long : la moitié revient</span></div>
 <div class="res"><span class="l">Jets contre la mort</span><span>Réussites ${pDots(3)}</span><span>Échecs ${pDots(3)}</span><span class="r">10 ou plus : réussite · 1 : deux échecs · 20 : 1 PV</span></div>
 <h2>Compétences <small>● maîtrise · ◉ expertise</small></h2>
-<div class="skills">${sk}</div>
+<div class="skills">${sk}</div>${toolsPrint(g)}
 ${g.defs.length ? `<h2>Défenses</h2><p style="margin:0">${g.defs.map(d => `<b>${DEFN[d.t]}</b> ${esc(d.v)}`).join(" · ")}</p>` : ""}
 ${g.traits.length ? `<h2>Dons et traits</h2>${g.traits.map(t => `<p class="trait"><b>${esc(t.n)}</b>${t.d ? ` · ${esc(t.d)}` : ""}</p>`).join("")}` : ""}
 ${g.bg.n || g.bg.d ? `<h2>Historique${g.bg.n ? ` <small>${esc(g.bg.n)}</small>` : ""}</h2>${g.bg.d ? `<p class="trait">${esc(g.bg.d)}</p>` : ""}` : ""}

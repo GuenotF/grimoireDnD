@@ -24,7 +24,7 @@ const ROU_FEATS = [
   { id: "cant", lv: 1, n: "Jargon des voleurs", pill: () => "langue secrète", k: "f", d: () => "Argot, signes et symboles des voleurs : tu peux cacher un message dans une conversation banale (quatre fois plus long à dire)." },
   { id: "cunning", lv: 2, n: "Ruse", pill: () => "action bonus : Foncer, Se désengager, Se cacher", k: "f", d: () => "À chacun de tes tours, en action bonus : Foncer, Se désengager ou Se cacher." },
   { id: "arch", lv: 3, n: "Archétype de roublard", pill: g => ARCH[g.arch].full, k: "f", d: g => `Tu suis l'archétype ${ARCH[g.arch].full} ; ses capacités arrivent aux niveaux 3, 9, 13 et 17.` },
-  { id: "bonusprof", lv: 3, arch: "assassin", n: "Maîtrises supplémentaires", pill: () => "kit de déguisement, matériel d'empoisonneur", k: "f", d: () => "Tu maîtrises le kit de déguisement et le matériel d'empoisonneur (onglet Personnage › Outils et langues)." },
+  { id: "bonusprof", lv: 3, arch: "assassin", n: "Maîtrises supplémentaires", pill: () => "kit de déguisement, matériel d'empoisonneur", k: "f", d: () => "Tu maîtrises le kit de déguisement et le matériel d'empoisonneur (ajoutés d'office dans Personnage › Outils et langues)." },
   { id: "assassinate", lv: 3, arch: "assassin", n: "Assassinat", pill: () => "avantage · critique si surprise", k: "d", d: () => "Avantage aux attaques contre toute créature qui n'a pas encore joué son tour dans le combat. Tout coup réussi contre une créature surprise est un coup critique (dés de dégâts doublés, Attaque sournoise comprise)." },
   { id: "uncanny", lv: 5, n: "Esquive instinctive", pill: () => "réaction : dégâts ½", k: "s", d: () => "Quand un attaquant que tu vois te touche, ta réaction divise par deux les dégâts de cette attaque (bouton « Dégâts ½ » de la carte des PV)." },
   { id: "evasion", lv: 7, n: "Dérobade", pill: () => "JdS DEX : 0 ou ½", k: "s", d: () => "Contre un effet qui permet un jet de sauvegarde de Dextérité pour moitié des dégâts (souffle, boule de feu…) : aucun dégât si tu réussis, la moitié si tu échoues." },
@@ -95,6 +95,8 @@ export default {
   saves: g => g.level >= 15 ? ["dex", "int", "wis"] : ["dex", "int"],   // Esprit fuyant au niveau 15
   weaponProf: ["simple", "crossbow-hand", "longsword", "rapier", "shortsword"], armorProf: ["light"],
   asiLevels: [4, 8, 10, 12, 16, 19],
+  tools: g => ["Outils de voleur", ...(g.level >= 3 && g.arch === "assassin" ? ["Kit de déguisement", "Matériel d'empoisonneur"] : [])],
+  langs: () => ["Jargon des voleurs"],
   defaults: () => ({ arch: "assassin", luckU: 0 }),
   normalize(o) { if (!ARCH[o.arch]) o.arch = "assassin"; o.luckU = Math.max(0, +o.luckU || 0); },
   subline: g => `Roublard niveau ${g.level}${g.level >= 3 ? ` · ${esc(ARCH[g.arch].full)}` : ""}`,
@@ -125,7 +127,7 @@ export default {
   levelUp: {
     step2: "Choix",
     rowsAfter: (g, b) => { const o = `${ROU.sneak(g)}d6`, n = `${ROU.sneak(b)}d6`; return `<div class="${o === n ? "same" : ""}"><span>Attaque sournoise</span><span class="old">${o}</span><span class="ar">→</span><b${o !== n ? ' style="color:var(--pd-fg)"' : ""}>${n}</b></div>`; },
-    notes: (g, to) => [to === 3 ? `<span><b>Archétype</b> : vérifie l'archétype choisi dans ✎ Modifier (${esc(ARCH[g.arch].full)}). Assassin : ajoute le kit de déguisement et le matériel d'empoisonneur dans Outils et langues.</span>` : "",
+    notes: (g, to) => [to === 3 ? `<span><b>Archétype</b> : vérifie l'archétype choisi dans ✎ Modifier (${esc(ARCH[g.arch].full)}). Assassin : kit de déguisement et matériel d'empoisonneur ajoutés dans Outils et langues.</span>` : "",
       to === 6 ? `<span><b>Expertise</b> : deux compétences de plus (onglet Personnage, toucher deux fois la compétence).</span>` : ""].filter(Boolean),
   },
 };

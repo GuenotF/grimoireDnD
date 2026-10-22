@@ -1,6 +1,7 @@
 // Format d'un personnage : valeurs par défaut, contrôle à l'ouverture, version et migrations.
 import { CLASSES } from "../classes/index.js";
 import { BY_ID, GEAR } from "../data.js";
+import { FEATS } from "../rules/feats.js";
 import { COINS, blankPurse } from "../rules/money.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 
@@ -35,7 +36,7 @@ function blank(name, cls) {
     // Fiche du personnage : caractéristiques, CA (null = pas encore saisie), PV max, vitesse en mètres, bonus d'initiative en plus de DEX, sauvegardes maîtrisées en plus de la classe
     abil: Object.fromEntries(ABILITIES.map(([k]) => [k, 10])), ac: null, hpMax: null, speed: 9, initX: 0, saveX: [],
     // Points de vie : actuels (null = au maximum), temporaires, jets contre la mort, dés de vie dépensés
-    skills: {},
+    skills: {}, tools: {}, langs: [], // outils { nom: 1 maîtrise | 2 expertise }, langues
     // Bas de fiche : défenses [{t: res|imm|vul|adv, v}], dons et traits [{n, o (origine), d}], historique, notes du personnage
     defs: [], traits: [], bg: { n: "", d: "" }, pnotes: "",
     // Équipement : objets [{n, q, eq, c (à décompter), note}] et bourse {pp, po, pe, pa, pc}
@@ -59,11 +60,14 @@ function norm(g) {
   o.hpTemp = Math.max(0, Math.round(+o.hpTemp) || 0); o.hdU = Math.min(o.level, Math.max(0, Math.round(+o.hdU) || 0));
   const d = o.death && typeof o.death === "object" ? o.death : {};
   o.death = { s: Math.min(3, Math.max(0, +d.s || 0)), f: Math.min(3, Math.max(0, +d.f || 0)), stable: !!d.stable };
+  const tl = o.tools && typeof o.tools === "object" && !Array.isArray(o.tools) ? o.tools : {};
+  o.tools = Object.fromEntries(Object.entries(tl).filter(([n, l]) => n.trim() && (l === 1 || l === 2)));
+  o.langs = Array.isArray(o.langs) ? o.langs.filter(l => typeof l === "string" && l.trim()) : [];
   const sk = o.skills && typeof o.skills === "object" && !Array.isArray(o.skills) ? o.skills : {};
   o.skills = Object.fromEntries(SKILLS.filter(([k]) => sk[k] === 1 || sk[k] === 2).map(([k]) => [k, sk[k]]));
   const str = v => typeof v === "string" ? v : "";
   o.defs = (Array.isArray(o.defs) ? o.defs : []).filter(d => d && ["res", "imm", "vul", "adv"].includes(d.t) && str(d.v).trim()).map(d => ({ t: d.t, v: str(d.v).trim() }));
-  o.traits = (Array.isArray(o.traits) ? o.traits : []).filter(t => t && str(t.n).trim()).map(t => ({ n: str(t.n).trim(), o: str(t.o) || "autre", d: str(t.d) }));
+  o.traits = (Array.isArray(o.traits) ? o.traits : []).filter(t => t && str(t.n).trim()).map(t => ({ n: str(t.n).trim(), o: str(t.o) || "autre", d: str(t.d), ...(FEATS[t.feat] ? { feat: t.feat } : {}) }));
   o.bg = { n: str((o.bg || {}).n), d: str((o.bg || {}).d) }; o.pnotes = str(o.pnotes);
   o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : {}) }));
   o.acMode = ["calc", "manual"].includes(o.acMode) ? o.acMode : null; // null : saisie si elle existe, sinon calcul

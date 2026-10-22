@@ -5,6 +5,7 @@ import { esc } from "../core/format.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
+import { FEATS } from "../rules/feats.js";
 import { foldHead, isFold } from "../ui/components.js";
 
 // ---------- Défenses : [code, libellé, suggestions]
@@ -38,6 +39,7 @@ function traitForm(t, i) {
   return `<form class="trform" data-a="trait-save" data-i="${i}">
     <div class="frow2"><input id="t-name" type="text" value="${esc(t.n)}" placeholder="Nom (ex. Vision dans le noir)" aria-label="Nom" required>
     <select id="t-orig" aria-label="Origine">${ORIG.map(([k, n]) => `<option value="${k}"${k === t.o ? " selected" : ""}>${n}</option>`).join("")}</select></div>
+    <label class="itref"><span>Don du Manuel pris en compte dans les calculs</span><select id="t-feat" aria-label="Don du Manuel"><option value="">Aucun (texte seulement)</option>${Object.entries(FEATS).map(([k, f]) => `<option value="${k}"${k === t.feat ? " selected" : ""}>${f.n}</option>`).join("")}</select></label>
     <textarea id="t-desc" placeholder="Effet, tel qu'écrit sur ta feuille" aria-label="Description">${esc(t.d)}</textarea>
     <div class="cast"><button class="btn primary" type="submit">Enregistrer</button><button class="btn ghost" type="button" data-a="trait-cancel">Annuler</button>${i !== "new" ? `<button class="btn ghost" type="button" data-a="trait-del" data-i="${i}" style="margin-left:auto">Retirer</button>` : ""}</div></form>`;
 }
@@ -88,13 +90,18 @@ onSubmit("def-add", () => {
 onClick("def-del", (b) => { const i = +b.dataset.i, prev = G().defs[i]; if (!prev) return; mutate(g => { g.defs.splice(i, 1); }); toast(`${defName(prev.t)} retirée : ${esc(prev.v)}`, () => { mutate(g => { g.defs.splice(i, 0, prev); }); return "Rétablie"; }); });
 onClick("trait-edit", (b) => { const v = b.dataset.i; S.trEdit = v === "new" ? "new" : +v; S.trDraft = null; render(); const el = document.getElementById("t-name"); if (el) el.focus(); });
 onClick("trait-cancel", () => { S.trEdit = null; S.trDraft = null; render(); });
-onInput(t => ["t-name", "t-desc"].includes(t.id), () => { S.trDraft = { n: document.getElementById("t-name").value, o: document.getElementById("t-orig").value, d: document.getElementById("t-desc").value }; });
-onChange("#t-orig", () => { S.trDraft = { n: document.getElementById("t-name").value, o: document.getElementById("t-orig").value, d: document.getElementById("t-desc").value }; });
+onInput(t => ["t-name", "t-desc"].includes(t.id), () => { S.trDraft = { n: document.getElementById("t-name").value, o: document.getElementById("t-orig").value, d: document.getElementById("t-desc").value, feat: document.getElementById("t-feat").value }; });
+onChange("#t-feat", t => { const f = FEATS[t.value], n = document.getElementById("t-name"); if (f && !n.value.trim()) n.value = f.n; S.trDraft = { n: n.value, o: f ? "don" : document.getElementById("t-orig").value, d: document.getElementById("t-desc").value, feat: t.value }; render(); });
+onChange("#t-orig", () => { S.trDraft = { n: document.getElementById("t-name").value, o: document.getElementById("t-orig").value, d: document.getElementById("t-desc").value, feat: document.getElementById("t-feat").value }; });
 onSubmit("trait-save", f => {
   const n = document.getElementById("t-name").value.trim(); if (!n) return;
-  const t = { n, o: document.getElementById("t-orig").value, d: document.getElementById("t-desc").value.trim() }, i = f.dataset.i;
+  const feat = document.getElementById("t-feat").value, i = f.dataset.i, g0 = G();
+  const t = { n, o: feat ? "don" : document.getElementById("t-orig").value, d: document.getElementById("t-desc").value.trim() || (FEATS[feat] ? FEATS[feat].d : ""), ...(FEATS[feat] ? { feat } : {}) };
+  // Vigilant ajouté alors que +5 était déjà saisi en bonus d'initiative : on retire ce bonus pour ne pas le compter deux fois
+  const fixInit = feat === "alert" && !g0.traits.some(x => x.feat === "alert") && g0.initX >= 5;
   S.trEdit = null; S.trDraft = null;
-  mutate(g => { if (i === "new") g.traits.push(t); else g.traits[+i] = t; }); toast(i === "new" ? `Ajouté : <b>${esc(n)}</b>` : "Modification enregistrée");
+  mutate(g => { if (i === "new") g.traits.push(t); else g.traits[+i] = t; if (fixInit) g.initX -= 5; });
+  toast(`${i === "new" ? `Ajouté : <b>${esc(n)}</b>` : "Modification enregistrée"}${fixInit ? " · le +5 de Vigilant sort du bonus divers d'initiative" : ""}`);
 });
 onClick("trait-del", (b) => { const i = +b.dataset.i, prev = G().traits[i]; if (!prev) return; S.trEdit = null; S.trDraft = null; mutate(g => { g.traits.splice(i, 1); }); toast(`Retiré : <b>${esc(prev.n)}</b>`, () => { mutate(g => { g.traits.splice(i, 0, prev); }); return "Rétabli"; }); });
 onInput("#bg-name", t => { mutate(g => { g.bg.n = t.value; }, false); });

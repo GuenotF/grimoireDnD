@@ -10,12 +10,14 @@ import { render } from "../core/ui.js";
 import { speedOf, hitDieSize, hpAverage, initiative, passivePerception, saveBonus, saveFromClass, saveProf, sheetIncomplete, skillBonus, skillLevel } from "../rules/character.js";
 import { R } from "../rules/common.js";
 import { acCalc, acMode, acOf } from "../rules/equipment.js";
+import { featInit } from "../rules/feats.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { foldHead, isFold } from "../ui/components.js";
 import { attacksHTML } from "./attacks.js";
 import { equipmentGerer, equipmentJeu } from "./equipment.js";
 import { hpCardHTML } from "./hp.js";
 import { restBarHTML } from "./rest.js";
+import { toolsGerer, toolsJeu } from "./tools.js";
 import { traitsSheetGerer, traitsSheetJeu } from "./traits.js";
 
 const viewSwitch = () => `<div class="viewsw" role="group" aria-label="Affichage de la fiche"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
@@ -43,7 +45,7 @@ function combatGerer(g) {
   return h + `<div class="chbox">
     ${acBlock(g, num)}
     ${row("f-speed", "Vitesse", `<span class="unit">${num("f-speed", g.speed, 'min="0" max="60" step="1.5" inputmode="decimal"')} m</span>`)}
-    ${row("f-init", "Initiative", `<input id="f-init" type="text" inputmode="numeric" value="${signed(initiative(g)).replace("−", "-")}">`, `DEX ${signed(R.ab(g, "dex"))}${g.initX ? `, bonus ${signed(g.initX)}` : ", bonus divers"}`)}
+    ${row("f-init", "Initiative", `<input id="f-init" type="text" inputmode="numeric" value="${signed(initiative(g)).replace("−", "-")}">`, `DEX ${signed(R.ab(g, "dex"))}${featInit(g) ? `, Vigilant ${signed(featInit(g))}` : ""}${g.initX ? `, bonus ${signed(g.initX)}` : ", bonus divers"}`)}
     ${row("f-hpmax", "PV maximum", num("f-hpmax", g.hpMax, 'min="1" max="999"'), `d${hitDieSize(g)} · niveau ${g.level} · moyenne ${hpAverage(g)}`)}
   </div>`;
 }
@@ -81,7 +83,7 @@ function jeuHTML(g) {
   const stats = `<div class="chstats">${st(acOf(g) ?? "?", "CA")}${st(signed(initiative(g)), "Initiative")}${st(speedTxt(g), "Vitesse")}${st(signed(R.prof(g.level)), "Maîtrise")}</div>`;
   let sk = foldHead("ch-skj", "", "Compétences", `Perception passive ${passivePerception(g)}`);
   if (!isFold("ch-skj")) sk += `<div class="skplay">${SKILLS.map(([k, n]) => { const l = skillLevel(g, k); return `<div class="${l ? "on" : ""}"><span class="mk" aria-hidden="true">${l === 2 ? "◉" : l ? "●" : ""}</span><span class="n">${n}${l ? `<span class="sr"> (${LV_NAME[l]})</span>` : ""}</span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("")}</div>`;
-  return hpCardHTML(g) + restBarHTML(g) + stats + (C(g).noSpells ? "" : attacksHTML(g)) + sk + equipmentJeu(g) + traitsSheetJeu(g); // les caractéristiques sont dans l'en-tête (heroAbilities)
+  return hpCardHTML(g) + restBarHTML(g) + stats + (C(g).noSpells ? "" : attacksHTML(g)) + sk + toolsJeu(g) + equipmentJeu(g) + traitsSheetJeu(g); // les caractéristiques sont dans l'en-tête (heroAbilities)
 }
 
 // En-tête de l'onglet Personnage : les six caractéristiques à la place des statistiques de sorts.
@@ -90,7 +92,7 @@ function heroAbilities(g) {
 }
 
 function characterHTML(g) {
-  return viewSwitch() + incompleteHTML(g) + (S.view === "jeu" ? jeuHTML(g) : abilitiesGerer(g) + combatGerer(g) + savesGerer(g) + skillsGerer(g) + equipmentGerer(g) + traitsSheetGerer(g));
+  return viewSwitch() + incompleteHTML(g) + (S.view === "jeu" ? jeuHTML(g) : abilitiesGerer(g) + combatGerer(g) + savesGerer(g) + skillsGerer(g) + toolsGerer(g) + equipmentGerer(g) + traitsSheetGerer(g));
 }
 
 // ---------- Actions
@@ -102,7 +104,7 @@ onClick("ac-mode", (b) => { mutate(g => { g.acMode = b.dataset.v; if (b.dataset.
 onChange("#f-ac", t => later(g => { const n = intOrNull(t.value); g.ac = n == null ? null : Math.min(40, Math.max(0, n)); }));
 onChange("#f-hpmax", t => later(g => { const n = intOrNull(t.value); g.hpMax = n == null ? null : Math.min(999, Math.max(1, n)); }));
 onChange("#f-speed", t => later(g => { const n = parseFloat(String(t.value).replace(",", ".")); g.speed = isFinite(n) ? Math.min(60, Math.max(0, n)) : 9; }));
-onChange("#f-init", t => later(g => { const n = intOrNull(t.value); g.initX = n == null ? 0 : Math.max(-20, Math.min(20, n - R.ab(g, "dex"))); }));
+onChange("#f-init", t => later(g => { const n = intOrNull(t.value); g.initX = n == null ? 0 : Math.max(-20, Math.min(20, n - R.ab(g, "dex") - featInit(g))); }));
 onClick("skill", (b) => { mutate(g => { const k = b.dataset.v, l = ((g.skills[k] || 0) + 1) % 3; if (l) g.skills[k] = l; else delete g.skills[k]; }); });
 onClick("save-tog", (b) => { mutate(g => { const k = b.dataset.v; g.saveX = g.saveX.includes(k) ? g.saveX.filter(x => x !== k) : [...g.saveX, k]; }); });
 
