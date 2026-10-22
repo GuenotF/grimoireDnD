@@ -182,6 +182,7 @@ def test_passage_de_niveau_pv_et_amelioration(browser, devices, url):
     check(a.count('[data-a="lu-asi"]:disabled') == 5, "2 points utilisés")
     a.click('[data-a="lu-asi"][data-v="con"]'); a.click('[data-a="lu-asi"][data-v="wis"]'); a.click('[data-a="lu-asi"][data-v="wis"]')
     check("16 → 18" in a.text('[data-a="lu-asi"][data-v="wis"]'), "Sagesse +2")
+    check(a.texts(".lutab > div:nth-child(2) b")[0] == "14", f"le tableau tient compte de la Sagesse 18 : DD {a.texts('.lutab > div:nth-child(2) b')}")
     a.click(".lufoot .primary"); a.click(".lufoot .primary")
     check("20 → 28" in a.text(".lubody") or "23 → 28" in a.text(".lubody"), f"récapitulatif : {a.text('.lubody')[-200:]}")
     a.click('[data-a="lu-go"]')

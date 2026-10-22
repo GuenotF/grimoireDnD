@@ -64,7 +64,7 @@ function rulesHTML(g) {
   <p class="muted">Source des sorts : liste du magicien du Manuel des joueurs 2014 (le Guide du maître et le Manuel des monstres n'en ajoutent pas). Noms français officiels ; résumés rédigés pour la table, à vérifier dans le livre en cas de doute.</p></div></div>`;
 }
 function luStep1(g, b) {
-  const from = g.level, to = b.level, a0 = R.slots(g, from), a1 = R.slots(g, to), mod = R.am(g);
+  const from = g.level, to = b.level, a0 = R.slots(g, from), a1 = R.slots(g, to), mod = R.am(g), mod1 = R.am(b);
   let h = "";
   if (a1.length > a0.length) {
     const lv = a1.length, n = a1[lv - 1];
@@ -75,8 +75,8 @@ function luStep1(g, b) {
   const row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
   const need = luNeed(g, to);
   h += `<div class="lutab"><div class="hd"><span></span><span>Niv. ${from}</span><span></span><span>Niv. ${to}</span></div>
-  ${row("DD des sorts", 8 + R.prof(from) + mod, 8 + R.prof(to) + mod, "--ps-fg")}
-  ${row("Attaque de sort", signed(R.prof(from) + mod), signed(R.prof(to) + mod), "--pa-fg")}
+  ${row("DD des sorts", 8 + R.prof(from) + mod, 8 + R.prof(to) + mod1, "--ps-fg")}
+  ${row("Attaque de sort", signed(R.prof(from) + mod), signed(R.prof(to) + mod1), "--pa-fg")}
   ${row("Sorts préparés", R.prepMax(g), R.prepMax(b))}
   ${row("Restauration arcanique", R.arcane(from) + " niv.", R.arcane(to) + " niv.")}
   <div><span>Sorts gratuits à choisir</span><span></span><span></span><b style="color:var(--rubric)">+${need.s}</b></div>

@@ -56,7 +56,10 @@ function luCommonApply(g, L) {
 const luNeed = (g, to) => ({ s: 2, c: Math.max(0, R.cantrips(g, to) - R.cantrips(g)) });
 const firstName = g => g.name.trim() || g.name; // nom complet (« Ser Kael », pas « Ser »)
 function luHTML(g) {
-  const L = S.lu, to = L.to, b = { ...g, level: to }, step = L.step, fn = firstName(g);
+  // b : le personnage au nouveau niveau, amélioration de caractéristiques comprise (DD, sorts préparés… en tiennent compte)
+  const L = S.lu, to = L.to, step = L.step, fn = firstName(g), abil = { ...g.abil };
+  Object.entries(L.asi || {}).forEach(([k, n]) => { abil[k] = Math.min(20, abil[k] + n); });
+  const b = { ...g, level: to, abil };
   const lu = LU(g), names = ["Ce qui change", lu.step2 || "Préparation", "Valider"], steps = lu.steps || [preparedLu1, preparedLu2, preparedLu3];
   const head = `<div class="luhead"><div class="t"><h2><span class="initial">${esc(fn.charAt(0))}</span>${esc(fn.slice(1))} passe au niveau ${to}</h2><button class="x" data-a="lu-close" aria-label="Fermer l'assistant">✕</button></div>
   <div class="lusteps">${names.map((n, i) => `<div class="${i + 1 < step ? "done" : i + 1 === step ? "cur" : ""}"${i + 1 === step ? ' aria-current="step"' : ""}>${i + 1} · ${n}</div>`).join("")}</div></div>`;
@@ -76,10 +79,10 @@ function preparedLu1(g, b) {
     const more = a1.map((n, i) => [i + 1, n - (a0[i] || 0)]).filter(([, d]) => d > 0);
     if (more.length) h += `<div class="lunew"><span class="k">Nouveau</span><div class="sl">${more.map(([lv, d]) => `<span>+${d} emplacement${d > 1 ? "s" : ""} de niveau ${lv}</span>`).join(" · ")}</div></div>`;
   }
-  const mod = R.am(g), row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
+  const mod = R.am(g), mod1 = R.am(b), row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
   h += `<div class="lutab"><div class="hd"><span></span><span>Niv. ${from}</span><span></span><span>Niv. ${to}</span></div>
-  ${row("DD des sorts", 8 + R.prof(from) + mod, 8 + R.prof(to) + mod, "--ps-fg")}
-  ${row("Attaque de sort", signed(R.prof(from) + mod), signed(R.prof(to) + mod), "--pa-fg")}
+  ${row("DD des sorts", 8 + R.prof(from) + mod, 8 + R.prof(to) + mod1, "--ps-fg")}
+  ${row("Attaque de sort", signed(R.prof(from) + mod), signed(R.prof(to) + mod1), "--pa-fg")}
   ${lu.rowsBefore ? lu.rowsBefore(g, b) : ""}
   ${row("Sorts préparés", R.maxLevel(g) ? R.prepMax(g) : 0, R.maxLevel(b) ? R.prepMax(b) : 0)}
   ${lu.rowsAfter ? lu.rowsAfter(g, b) : ""}</div>`;
