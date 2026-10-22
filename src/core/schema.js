@@ -31,7 +31,10 @@ function blank(name, cls) {
     // Fiche du personnage : caractéristiques, CA (null = pas encore saisie), PV max, vitesse en mètres, bonus d'initiative en plus de DEX, sauvegardes maîtrisées en plus de la classe
     abil: Object.fromEntries(ABILITIES.map(([k]) => [k, 10])), ac: null, hpMax: null, speed: 9, initX: 0, saveX: [],
     // Points de vie : actuels (null = au maximum), temporaires, jets contre la mort, dés de vie dépensés
-    skills: {}, hp: null, hpTemp: 0, death: { s: 0, f: 0, stable: false }, hdU: 0, spells: [],
+    skills: {},
+    // Bas de fiche : défenses [{t: res|imm|vul|adv, v}], dons et traits [{n, o (origine), d}], historique, notes du personnage
+    defs: [], traits: [], bg: { n: "", d: "" }, pnotes: "",
+    hp: null, hpTemp: 0, death: { s: 0, f: 0, stable: false }, hdU: 0, spells: [],
     prepared: [], used: {}, extras: [], effects: [], notes: "", snotes: {}, ...Object.assign({}, ...Object.values(CLASSES).map(c => c.defaults ? c.defaults() : {})), updatedAt: Date.now() };
 }
 const fxKey = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -51,6 +54,10 @@ function norm(g) {
   o.death = { s: Math.min(3, Math.max(0, +d.s || 0)), f: Math.min(3, Math.max(0, +d.f || 0)), stable: !!d.stable };
   const sk = o.skills && typeof o.skills === "object" && !Array.isArray(o.skills) ? o.skills : {};
   o.skills = Object.fromEntries(SKILLS.filter(([k]) => sk[k] === 1 || sk[k] === 2).map(([k]) => [k, sk[k]]));
+  const str = v => typeof v === "string" ? v : "";
+  o.defs = (Array.isArray(o.defs) ? o.defs : []).filter(d => d && ["res", "imm", "vul", "adv"].includes(d.t) && str(d.v).trim()).map(d => ({ t: d.t, v: str(d.v).trim() }));
+  o.traits = (Array.isArray(o.traits) ? o.traits : []).filter(t => t && str(t.n).trim()).map(t => ({ n: str(t.n).trim(), o: str(t.o) || "autre", d: str(t.d) }));
+  o.bg = { n: str((o.bg || {}).n), d: str((o.bg || {}).d) }; o.pnotes = str(o.pnotes);
   o.saveX = Array.isArray(o.saveX) ? [...new Set(o.saveX)].filter(k => ABILITIES.some(a => a[0] === k)) : [];
   Object.values(CLASSES).forEach(c => { if (c.normalize) c.normalize(o); }); // champs propres à chaque classe
   ["cantrips","spells","prepared","extras"].forEach(k => { if (!Array.isArray(o[k])) o[k] = []; });

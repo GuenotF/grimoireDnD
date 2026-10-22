@@ -1,4 +1,5 @@
-// Onglet Personnage : caractéristiques, combat (CA, vitesse, initiative, PV max) et jets de sauvegarde.
+// Onglet Personnage : caractéristiques, combat (CA, vitesse, initiative, PV max), jets de sauvegarde, compétences ;
+// PV et repos (hp.js, rest.js) ; défenses, dons et traits, historique, notes (traits.js).
 // Gérer : on recopie la feuille du joueur. En jeu : on consulte les valeurs calculées.
 import { C } from "../classes/index.js";
 import { onChange, onClick } from "../core/actions.js";
@@ -12,6 +13,7 @@ import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { foldHead, isFold } from "../ui/components.js";
 import { hpCardHTML } from "./hp.js";
 import { restBarHTML } from "./rest.js";
+import { traitsSheetGerer, traitsSheetJeu } from "./traits.js";
 
 const viewSwitch = () => `<div class="viewsw" role="group" aria-label="Affichage de la fiche"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
 const speedTxt = g => `${fmt(g.speed)} m`;
@@ -67,7 +69,7 @@ function jeuHTML(g) {
   const stats = `<div class="chstats">${st(g.ac ?? "?", "CA")}${st(signed(initiative(g)), "Initiative")}${st(speedTxt(g), "Vitesse")}${st(signed(R.prof(g.level)), "Maîtrise")}</div>`;
   let sk = foldHead("ch-skj", "", "Compétences", `Perception passive ${passivePerception(g)}`);
   if (!isFold("ch-skj")) sk += `<div class="skplay">${SKILLS.map(([k, n]) => { const l = skillLevel(g, k); return `<div class="${l ? "on" : ""}"><span class="mk" aria-hidden="true">${l === 2 ? "◉" : l ? "●" : ""}</span><span class="n">${n}${l ? `<span class="sr"> (${LV_NAME[l]})</span>` : ""}</span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("")}</div>`;
-  return hpCardHTML(g) + restBarHTML(g) + stats + sk; // les caractéristiques sont dans l'en-tête (heroAbilities)
+  return hpCardHTML(g) + restBarHTML(g) + stats + sk + traitsSheetJeu(g); // les caractéristiques sont dans l'en-tête (heroAbilities)
 }
 
 // En-tête de l'onglet Personnage : les six caractéristiques à la place des statistiques de sorts.
@@ -76,7 +78,7 @@ function heroAbilities(g) {
 }
 
 function characterHTML(g) {
-  return viewSwitch() + incompleteHTML(g) + (S.view === "jeu" ? jeuHTML(g) : abilitiesGerer(g) + combatGerer(g) + savesGerer(g) + skillsGerer(g));
+  return viewSwitch() + incompleteHTML(g) + (S.view === "jeu" ? jeuHTML(g) : abilitiesGerer(g) + combatGerer(g) + savesGerer(g) + skillsGerer(g) + traitsSheetGerer(g));
 }
 
 // ---------- Actions
