@@ -69,4 +69,4 @@ for row in list(wb["Armures"].iter_rows(values_only=True))[1:]:
 assert len(weapons) == 37 and len(armors) == 13, (len(weapons), len(armors))
 json.dump({"source": "Manuel des joueurs 2014, chapitre 5", "weapons": weapons, "armors": armors},
           open(A.sortie, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-print(f"{len(weapons)} armes, {len(armors)} armures et bouclier → {A.sortie}")
+print(f"{len(weapons)} armes, {len(armors) - 1} armures et le bouclier → {A.sortie}")
