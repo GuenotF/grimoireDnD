@@ -109,7 +109,7 @@ Pendant les étapes 0 à 5, il n'y a pas de nouvelle fonctionnalité.
 Ce sont des besoins connus et simples. Chacun doit se faire **uniquement dans les fichiers de classe**, sans toucher aux écrans. Si ce n'est pas le cas, l'architecture est à corriger.
 
 1. ✓ **Onglet Règles** du paladin et du druide : fait uniquement dans `classes/paladin.js` et `classes/druide.js` (`tabs`, `panels`), avec les rubriques communes « Lancer un sort » et « Concentration » dans `features/rules.js`, reprises par le magicien. Aucun écran commun modifié.
-2. **Fiche imprimable** du paladin et du druide (`print(g)`).
+2. ✓ **Fiche imprimable** du paladin et du druide : `print(g)`, `printTitle`, `printDesc` dans chaque classe, avec les briques communes de `features/print.js` (en-tête, emplacements, sorts mineurs, liste à cocher, concentration, notes). La fiche du magicien utilise les mêmes briques (sortie vérifiée identique).
 3. ✓ **Une sous-classe de plus** : le Serment de dévotion. Fait uniquement dans `classes/paladin.js` (un objet de serment : sorts, options de Conduit divin avec leur message, source ; trois capacités) et dans les données (5 sorts ajoutés, voir `outils/archives/ajout_sorts_devotion.py`). Aucun autre fichier du code modifié.
 
 ## 8. Décisions

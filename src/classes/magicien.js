@@ -1,12 +1,12 @@
 // Magicien : Restauration arcanique (repos court), onglet Règles, étapes de son passage de niveau.
 import { onChange, onClick } from "../core/actions.js";
-import { esc, plural, signed } from "../core/format.js";
+import { byName, esc, plural, signed } from "../core/format.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { BY_ID, SPELLS } from "../data.js";
 import { firstName, luNeed } from "../features/levelup.js";
-import { printHTML } from "../features/print.js";
+import { pCantrips, pConc, pExtras, pFoot, pHeader, pNotes, pSlots, pSpellRow, printHTML } from "../features/print.js";
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills, metaLine, pText, pillsHTML, tags, tier } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
@@ -157,6 +157,42 @@ onChange("#f-school", t => { mutate(g => { g.school = t.value; }); });
 
 export { arcaneLevels, srTotal, arcaneCombos, srLabel, shortHTML, rulesHTML, luStep1, luStep2, luStep3 };
 
+// ---------- Fiche imprimable ----------
+function printSheet(g) {
+  const prof = R.prof(g.level), mod = R.am(g), slots = R.slots(g), max = slots.length, pMax = R.prepMax(g), next = Math.min(9, max + 1);
+  const sp = lv => g.spells.map(x => BY_ID[x.id]).filter(s => s.l === lv).sort(byName);
+  let rows = "";
+  for (let lv = 1; lv <= next; lv++) {
+    const locked = lv > max;
+    rows += `<tr class="lvl"><td colspan="4">Niveau ${lv}<span>${locked ? `s'ouvre au niveau ${R.unlockAt(g, lv)}` : `${slots[lv - 1]} emplacement${slots[lv - 1] > 1 ? "s" : ""}`}</span></td></tr>`;
+    sp(lv).forEach(s => { rows += pSpellRow(g, s, true); });
+    for (let i = 0; i < (locked ? 3 : 2); i++) rows += `<tr class="blank"><td class="c"><span class="box"></span></td><td></td><td></td><td></td></tr>`;
+  }
+  return `${pHeader(g, `Magicien, niveau ${g.level} · École ${/^[AÉEIO]/.test(g.school) ? "d'" : "de "}${esc(g.school)}`, [[signed(mod), "MOD. INTELLIGENCE"], [8 + prof + mod, "DD DES SORTS"], [signed(prof + mod), "ATTAQUE DE SORT"], [pMax, "SORTS PRÉPARÉS"], [R.cantrips(g), "SORTS MINEURS"]])}
+${pSlots(g)}
+<div class="callout"><span class="box"></span> <b>Restauration arcanique</b> : une fois par jour, après un repos court, récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</div>
+${pCantrips(g)}
+${pExtras(g)}
+${pConc()}
+<div class="brk"></div>
+<h2 style="margin-top:0">Le grimoire <small>sorts préparés aujourd'hui : ____ / ${pMax}</small></h2>
+<table><tr><th>Prép.</th><th>Sort</th><th>Incantation · composantes</th><th>Effet</th></tr>${rows}</table>
+<div class="callout"><span class="tag">C</span> concentration · <span class="tag r">R</span> rituel : se lance depuis le grimoire sans être préparé, en 10 minutes de plus, sans emplacement.</div>
+<div class="brk"></div>
+<h2 style="margin-top:0">Journal de copie <small>sorts trouvés en aventure</small></h2>
+<table><tr><th>Sort</th><th>Niv.</th><th>Source</th><th>Temps · coût</th><th>Réussi</th></tr>${Array.from({length: 6}, () => `<tr class="blank"><td></td><td></td><td></td><td></td><td class="c"><span class="box"></span></td></tr>`).join("")}</table>
+<h2>Règles du grimoire</h2><div class="cols"><div>
+<h3>Apprendre</h3><p><b>Montée de niveau :</b> 2 sorts gratuits par niveau, d'un niveau accessible.</p><p><b>Copie :</b> 2 h et 50 po par niveau du sort.</p>
+${g.level >= 2 ? `<p><b>Savant en ${esc(g.school)} :</b> temps et or divisés par deux pour ton école.</p>` : ""}<p><b>Parchemin :</b> test d'Intelligence (Arcanes) DD 10 + niveau du sort ; le parchemin est détruit.</p>
+<h3>Protéger</h3><p><b>Copie de secours :</b> 1 h et 10 po par niveau de sort.</p></div><div>
+<h3>Préparer</h3><p>Après un repos long, ${pMax} sorts du grimoire (mod. d'Intelligence + niveau). Un sort se lance avec un emplacement de son niveau ou supérieur.</p>
+<h3>Rituels</h3><p>Un sort <span class="tag r">R</span> se lance depuis le grimoire sans préparation, +10 minutes, sans emplacement.</p>
+<h3>Récupérer</h3><p><b>Repos long :</b> tous les emplacements. <b>Repos court :</b> Restauration arcanique (1 fois par jour).</p></div></div>
+${pNotes(g)}
+${pFoot("GRIMOIRE")}
+`;
+}
+
 // ---------- Définition de la classe (contrat : voir docs/ARCHITECTURE.md) ----------
 export default {
   n: "Magicien", ab: "int", abN: "Intelligence", slots: SLOTS, top: 9,
@@ -174,6 +210,9 @@ export default {
   },
   tabs: g => [["grimoire","Grimoire", g.spells.length + g.cantrips.length],["biblio","Bibliothèque", classSpells(g).length],["imprimer","Imprimer"],["sauvegarde","Sauvegarde"],["regles","Règles"]],
   panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },
+  print: g => printSheet(g),
+  printTitle: g => `Grimoire de ${g.name}`,
+  printDesc: "Elle contient le tableau de bord avec les cercles d'emplacements, le grimoire par niveau avec des cases « préparé » et des lignes vides à remplir au crayon, le journal de copie et le rappel des règles.",
   canRitual: () => true,      // rituel depuis le grimoire, sans le préparer
   restBar: g => `<button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}">Repos court ${S.shortOpen ? "▴" : "▾"}</button>
     <label class="check"><input type="checkbox" data-a="arcane"${g.arcane ? " checked" : ""}> Restauration arcanique utilisée</label>

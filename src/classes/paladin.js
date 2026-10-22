@@ -1,12 +1,13 @@
 // Paladin : serments, Imposition des mains, Perception divine, Conduit divin, Châtiment divin, capacités.
 import { onChange, onClick, onKey } from "../core/actions.js";
-import { esc, signed } from "../core/format.js";
+import { byName, esc, signed } from "../core/format.js";
 import { fxKey } from "../core/schema.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
 import { slotsLeft } from "../features/cast.js";
+import { pClassList, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, pSpellRow, printHTML } from "../features/print.js";
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
@@ -160,6 +161,43 @@ function rulesHTML(g) {
   <p class="muted">Sources : Manuel des joueurs 2014 (paladin)${o.src === "Manuel des joueurs 2014" ? ` et ${esc(o.full)}` : `, ${esc(o.src)} (${esc(o.full)})`}. Résumés rédigés pour la table, à vérifier dans le livre en cas de doute.</p></div></div>`;
 }
 
+// ---------- Fiche imprimable ----------
+function printSheet(g) {
+  const prof = R.prof(g.level), mod = R.am(g), dd = 8 + prof + mod, o = OATHS[g.oath], max = R.maxLevel(g), pMax = R.prepMax(g);
+  const pool = PAL.loh(g), ds = PAL.ds(g), cd = PAL.cd(g), oath = oathSpells(g).map(id => BY_ID[id]).sort((a, b) => a.l - b.l || byName(a, b));
+  const feats = PAL_FEATS.filter(f => (!f.oath || f.oath === g.oath) && f.lv <= g.level);
+  const smite = Array.from({ length: max }, (_, i) => `<span class="pl d">Niv. ${i + 1} : ${PAL.smite(i + 1)}d8</span>`).join("");
+  return `${pHeader(g, `Paladin, niveau ${g.level} · ${g.level >= 3 ? esc(o.full) : `serment au niveau 3 (${esc(o.n)})`}`, [[signed(mod), "MOD. CHARISME"], [dd, "DD DES SORTS"], [signed(prof + mod), "ATTAQUE DE SORT"], [pMax, "SORTS PRÉPARÉS"], [pool, "IMPOSITION (PV)"]])}
+${pSlots(g)}
+<h2>Ressources <small>cocher à l'usage</small></h2>
+<div class="res"><span class="l">Imposition des mains</span>reste <span class="write"></span> / ${pool} PV<span class="r">${pool} PV · repos long</span></div>
+<div class="res"><span class="l">Perception divine</span>${pDots(ds)}<span class="r">action · repos long</span></div>
+${cd ? `<div class="res"><span class="l">Conduit divin</span>${pDots(cd)}<span class="r">repos court ou long</span></div>
+<div class="callout">${(o.cd || []).map(x => `<b>${esc(x.n)}</b> : ${esc(x.e)}`).join("<br>")} <i>Jet de sauvegarde : DD ${dd}.</i></div>` : `<div class="res"><span class="l" style="color:#9aa0ae">Conduit divin</span>${pDots(1, true)}<span class="r">au niveau 3</span></div>`}
+${max ? `<h2>Châtiment divin <small>après un coup d'arme au corps à corps</small></h2>
+<div class="pls">${smite}</div><p style="margin:1mm 0 0;font-size:9pt">Dépense un emplacement : dégâts radiants selon son niveau (5d8 au plus). <b>+1d8</b> contre un mort-vivant ou un fiélon. Sur un critique, tous les dés sont doublés.</p>` : ""}
+<h2>Capacités de classe <small>niveau ${g.level}</small></h2>
+<table>${feats.map(f => `<tr><td class="n">${f.n}</td><td>${esc(f.d(g))}</td></tr>`).join("")}</table>
+${pExtras(g)}
+${pConc()}
+<div class="brk"></div>
+${oath.length ? `<h2 style="margin-top:0">Sorts de serment <small>${esc(o.full)} · toujours préparés, hors limite</small></h2>
+<table><tr><th>Sort</th><th>Incantation · composantes</th><th>Effet</th></tr>${oath.map(s => pSpellRow(g, s, false)).join("")}</table>` : ""}
+<h2${oath.length ? "" : ' style="margin-top:0"'}>Sorts de paladin <small>sorts préparés aujourd'hui : ____ / ${pMax}</small></h2>
+${max ? pClassList(g, oathSpells(g)) : `<p>Le paladin prépare ses sorts à partir du niveau ${R.unlockAt(g, 1)}.</p>`}
+<div class="callout"><span class="tag">C</span> concentration. Après un repos long, coche les ${pMax} sorts préparés (mod. de Charisme + moitié du niveau).</div>
+<h2>Règles du paladin</h2><div class="cols"><div>
+<h3>Préparer</h3><p>Après un repos long, ${pMax} sorts de la liste du paladin. Les sorts de serment s'y ajoutent. Un sort se lance avec un emplacement de son niveau ou supérieur.</p>
+<h3>Lancer un sort</h3><p><b>Jet de sauvegarde :</b> la cible fait d20 + modificateur contre ton DD de ${dd}. <b>Attaque de sort :</b> d20 ${signed(prof + mod)} contre la CA.</p>
+<h3>Imposition des mains</h3><p>Action, au contact : soigne en puisant dans la réserve (${pool} PV), ou 5 PV pour une maladie ou un poison. Sans effet sur les morts-vivants et les artificiels.</p></div><div>
+<h3>Perception divine</h3><p>Action, ${ds} fois par repos long : célestes, fiélons et morts-vivants à 18 m, lieux consacrés ou profanés.</p>
+<h3>Conduit divin</h3><p>Au niveau 3, 1 fois par repos court ou long : une option du serment.</p>
+<h3>Récupérer</h3><p><b>Repos long :</b> emplacements, Imposition, Perception et Conduit divins. <b>Repos court :</b> Conduit divin.</p></div></div>
+${pNotes(g)}
+${pFoot("PALADIN")}
+`;
+}
+
 // ---------- Définition de la classe (contrat : voir docs/ARCHITECTURE.md) ----------
 const row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
 export default {
@@ -177,8 +215,11 @@ export default {
   subclassField: g => `<div class="field"><label for="f-oath">Serment sacré</label><select id="f-oath">${Object.entries(OATHS).map(([k, o]) => `<option value="${k}"${k === g.oath ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
   heroStats: g => `<div class="stat" role="listitem"><div class="v">${oathSpells(g).length}</div><div class="l">Sorts de serment</div></div>
     <div class="stat" role="listitem"><div class="v">${5 * g.level}</div><div class="l">Imposition (PV)</div></div>`,
-  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["sauvegarde","Sauvegarde"],["regles","Règles"]],
-  panels: { regles: g => rulesHTML(g) },
+  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["imprimer","Imprimer"],["sauvegarde","Sauvegarde"],["regles","Règles"]],
+  panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },
+  print: g => printSheet(g),
+  printTitle: g => `Fiche de sorts de ${g.name}`,
+  printDesc: "Elle contient le tableau de bord (emplacements, Imposition des mains, Perception et Conduit divins à cocher), le Châtiment divin, les capacités de classe, les sorts de serment, la liste du paladin avec des cases « préparé » et le rappel des règles.",
   alwaysPrepared: g => oathSpells(g),
   alwaysPreparedInfo: g => ({ title: "Sorts de serment", aside: `toujours préparés · ${esc(OATHS[g.oath].n)}`, origin: `Sort de serment · ${esc(OATHS[g.oath].full)}`,
     tip: "Sort de serment : toujours préparé, hors limite", aria: "Sort de serment, toujours préparé" }),

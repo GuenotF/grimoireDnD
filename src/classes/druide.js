@@ -1,15 +1,16 @@
 // Druide : cercles, Forme sauvage (utilisations, FP), capacités.
 import { onChange, onKey } from "../core/actions.js";
-import { cap, esc, plural } from "../core/format.js";
+import { cap, esc, plural, signed } from "../core/format.js";
 import { S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render } from "../core/ui.js";
 import { BEAST, BEASTS } from "../data.js";
+import { pCantrips, pClassList, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, printHTML } from "../features/print.js";
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { SLOTS } from "../rules/tables.js";
 import { capRow, pillsRaw } from "../ui/components.js";
-import { MV, bestiaryHTML, fpLabel, newForms, wsActiveHTML, wsAllowed, wsConcHTML, wsSheetHTML } from "./druide-wildshape.js";
+import { MV, SIZES, actRest, bestiaryHTML, fpLabel, modOf, newForms, spdTxt, wsActiveHTML, wsAllowed, wsConcHTML, wsSheetHTML } from "./druide-wildshape.js";
 
 const DRU_FEATS = [
   { id: "druidic", lv: 1, n: "Druidique", pill: () => "langue secrète", k: "f", d: () => "Tu connais le druidique, la langue secrète des druides, et peux y laisser des messages cachés." },
@@ -69,6 +70,46 @@ function rulesHTML(g) {
   <p class="muted">Sources : Manuel des joueurs 2014 (druide, Cercle de la Lune), Guide complet de Xanathar (Embrasement), Manuel des monstres (bêtes). Résumés rédigés pour la table, à vérifier dans le livre en cas de doute.</p></div></div>`;
 }
 
+// ---------- Fiche imprimable ----------
+// Fiche d'une bête favorite : statistiques, compétences, traits et attaques
+function beastPrint(b) {
+  const acts = b.ac.map(a => a.b != null && a.d ? `<p><b>${esc(a.n)}</b>${a.r ? " <i>(1 fois par repos)</i>" : ""} <span class="pl a">${signed(a.b)}</span> <span class="pl d">${esc(a.d)}</span> ${esc(actRest(a))}</p>` : `<p><b>${esc(a.n)}</b>${a.r ? " <i>(1 fois par repos)</i>" : ""} ${esc(a.t)}</p>`).join("");
+  return `<div class="beast"><h3>${esc(b.n)}<small>FP ${esc(b.fp)} · ${esc(SIZES[b.sz] || b.sz)}</small></h3>
+  <div class="bs"><span class="pl">CA ${b.ca}</span><span class="pl">PV ${b.pv} (${esc(b.pvd)})</span><span class="pl">${esc(spdTxt(b))}</span></div>
+  <div class="bs"><span class="pl">FOR ${b.st[0]} (${modOf(b.st[0])})</span><span class="pl">DEX ${b.st[1]} (${modOf(b.st[1])})</span><span class="pl">CON ${b.st[2]} (${modOf(b.st[2])})</span>${b.cp ? `<span class="pl">${esc(b.cp)}</span>` : ""}</div>
+  ${b.sens ? `<p><i>${esc(b.sens)}</i></p>` : ""}${b.tr.map(([n, d]) => `<p><b>${esc(n)}.</b> ${esc(d)}</p>`).join("")}${acts}
+  <p>PV : <span class="write"></span> / ${b.pv}</p></div>`;
+}
+function printSheet(g) {
+  const prof = R.prof(g.level), mod = R.am(g), dd = 8 + prof + mod, pMax = R.prepMax(g), n = DRU.ws(g), fp = fpLabel(DRU.fp(g));
+  const favs = g.favs.map(id => BEAST[id]).filter(Boolean);
+  const empty = `<div class="beast"><h3><span class="write" style="min-width:45mm"></span><small>FP ____</small></h3><p>CA ____ · PV ____ · vitesses ________________</p><p>FOR ____ · DEX ____ · CON ____</p><p>Attaques :</p><div class="line"></div><div class="line"></div><p>PV : <span class="write"></span> / ____</p></div>`;
+  return `${pHeader(g, `Druide, niveau ${g.level} · ${g.level >= 2 ? esc(CIRCLES[g.circle].full) : `cercle au niveau 2 (${esc(CIRCLES[g.circle].n)})`}`, [[signed(mod), "MOD. SAGESSE"], [dd, "DD DES SORTS"], [signed(prof + mod), "ATTAQUE DE SORT"], [pMax, "SORTS PRÉPARÉS"], [R.cantrips(g), "SORTS MINEURS"]])}
+${pSlots(g)}
+<h2>Forme sauvage <small>${n ? `${n > 10 ? "sans limite" : n + " fois"} · repos court ou long` : "au niveau 2"}</small></h2>
+${n ? `<div class="res"><span class="l">Utilisations</span>${n > 10 ? "illimitées" : pDots(n)}<span class="r">action bonus · ${DRU.hours(g)} h au plus · FP ${fp} · ${g.level < 4 ? "ni nage ni vol" : g.level < 8 ? "nage, pas de vol" : "nage et vol"}</span></div>
+<div class="res"><span class="l">Forme active</span><span class="write" style="min-width:55mm"></span><span>PV <span class="write"></span> / <span class="write" style="min-width:12mm"></span></span></div>
+<div class="callout">La bête remplace FOR, DEX, CON et les PV ; tu gardes INT, SAG, CHA et tes maîtrises (le meilleur bonus). <b>À 0 PV</b>, retour à ta forme : l'excédent de dégâts passe sur tes PV. ${g.level >= 18 ? "Sorts à composantes verbales et somatiques possibles" : "Pas de sort"}, la concentration continue.${g.level >= 6 ? " Attaques magiques (Frappe primitive)." : ""}<br><b>Changeforme de combat</b> : action bonus, un emplacement = <b>1d8 PV par niveau</b> d'emplacement.</div>` : ""}
+${pCantrips(g)}
+${pExtras(g)}
+${pConc(" En forme de bête : avec la Constitution de la bête.")}
+<div class="brk"></div>
+<h2 style="margin-top:0">Mes formes <small>${favs.length ? "formes ★ de l'application" : "à compléter (ajoute des formes ★ dans l'application)"}</small></h2>
+<div class="beasts">${favs.map(beastPrint).join("")}${favs.length % 2 ? empty : ""}${favs.length ? "" : empty + empty}</div>
+<div class="brk"></div>
+<h2 style="margin-top:0">Sorts de druide <small>sorts préparés aujourd'hui : ____ / ${pMax}</small></h2>
+${pClassList(g)}
+<div class="callout"><span class="tag">C</span> concentration · <span class="tag r">R</span> rituel : un sort préparé se lance en 10 minutes de plus, sans emplacement.</div>
+<h2>Règles du druide</h2><div class="cols"><div>
+<h3>Préparer</h3><p>Après un repos long, ${pMax} sorts de la liste du druide (mod. de Sagesse + niveau). Un sort se lance avec un emplacement de son niveau ou supérieur.</p>
+<h3>Lancer un sort</h3><p><b>Jet de sauvegarde :</b> la cible fait d20 + modificateur contre ton DD de ${dd}. <b>Attaque de sort :</b> d20 ${signed(prof + mod)} contre la CA.</p></div><div>
+<h3>Forme sauvage</h3><p>Bêtes déjà vues, FP ${fp} au plus ; nage au niveau 4, vol au niveau 8, FP = niveau ÷ 3 dès le niveau 6.</p>
+<h3>Récupérer</h3><p><b>Repos long :</b> emplacements et Forme sauvage. <b>Repos court :</b> Forme sauvage.</p></div></div>
+${pNotes(g)}
+${pFoot("DRUIDE")}
+`;
+}
+
 // ---------- Définition de la classe (contrat : voir docs/ARCHITECTURE.md) ----------
 const row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
 export default {
@@ -88,8 +129,11 @@ export default {
   subclassField: g => `<div class="field"><label for="f-circle">Cercle druidique</label><select id="f-circle">${Object.entries(CIRCLES).map(([k, o]) => `<option value="${k}"${k === g.circle ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
   heroStats: g => { const cMax = R.cantrips(g); return `<div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div><div class="l">Sorts mineurs</div></div>
     <div class="stat" role="listitem"><div class="v">${DRU.ws(g) ? `FP ${DRU.fp(g)}` : "—"}</div><div class="l">Forme sauvage</div></div>`; },
-  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["bestiaire","Bestiaire", BEASTS.filter(b => wsAllowed(g, b)).length],["sauvegarde","Sauvegarde"],["regles","Règles"]],
-  panels: { bestiaire: g => bestiaryHTML(g), regles: g => rulesHTML(g) },
+  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["bestiaire","Bestiaire", BEASTS.filter(b => wsAllowed(g, b)).length],["imprimer","Imprimer"],["sauvegarde","Sauvegarde"],["regles","Règles"]],
+  panels: { bestiaire: g => bestiaryHTML(g), imprimer: g => printHTML(g), regles: g => rulesHTML(g) },
+  print: g => printSheet(g),
+  printTitle: g => `Fiche de sorts de ${g.name}`,
+  printDesc: "Elle contient le tableau de bord (emplacements, Forme sauvage à cocher, forme active à remplir), les sorts mineurs, les fiches de tes formes ★ avec leurs attaques, la liste du druide avec des cases « préparé » et le rappel des règles.",
   features: g => DRU_FEATS.filter(f => !f.circle || f.circle === g.circle),
   resources: g => druResHTML(g),
   resourceMax: { ws: g => DRU.ws(g) },

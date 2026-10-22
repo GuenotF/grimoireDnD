@@ -21,13 +21,17 @@ const wsAllowed = (g, b) => g.level >= wsNeed(b)[0];
 const spdTxt = b => [b.v.marche && b.v.marche !== "0" ? `${b.v.marche} m` : "", ...Object.keys(MV).filter(k => b.v[k]).map(k => `${k} ${b.v[k]} m`)].filter(Boolean).join(" · ");
 const modOf = n => signed(Math.floor((n - 10) / 2));
 const rchg = r => r ? `<span class="kp f rchg">${/repos/.test(r) ? "1 fois par repos" : esc(r.replace(/^Recharge/, "recharge"))}</span>` : "";
+/** Pour une attaque : allonge ou portée, puis ce qui suit les dégâts (agrippé, jet de sauvegarde…). */
+function actRest(a) {
+  const reach = (a.t.match(/(?:allonge|portée) [\d,\/ ]+m(?:, [^.]+)?/) || [""])[0];
+  let after = a.t.replace(/^.*?Touché ?: ?\d+(?: \([^)]*\))? dégâts? \S+/, "").replace(/^[,.]?\s*(?:et\s+)?/, "");
+  if (after === a.t) after = "";
+  return [reach && cap(reach) + ".", after && cap(after)].filter(Boolean).join(" ");
+}
 function beastActs(b, compact) {
   return b.ac.map(a => {
     if (a.b != null && a.d) {
-      const reach = (a.t.match(/(?:allonge|portée) [\d,\/ ]+m(?:, [^.]+)?/) || [""])[0];
-      let after = a.t.replace(/^.*?Touché ?: ?\d+(?: \([^)]*\))? dégâts? \S+/, "").replace(/^[,.]?\s*(?:et\s+)?/, "");
-      if (after === a.t) after = "";
-      const rest = [reach && cap(reach) + ".", after && cap(after)].filter(Boolean).join(" ");
+      const rest = actRest(a);
       return `<div class="bact"><b>${esc(a.n)}</b>${rchg(a.r)}<span class="kp a">${signed(a.b)}</span><span class="kp d">${esc(a.d)}</span>${!compact && rest ? `<span class="brest">${esc(rest)}</span>` : ""}</div>`;
     }
     return `<div class="bact txt"><b>${esc(a.n)}</b>${rchg(a.r)} <span>${esc(compact && a.t.length > 90 ? a.t.slice(0, a.t.indexOf(".", 40) + 1 || 90) : a.t)}</span></div>`;
@@ -160,4 +164,4 @@ onChange("btog", t => { S.bf[t.dataset.v] = t.checked; render(); });
 onInput("#ws-q", t => { if (!S.ws) return; S.ws.q = t.value; const box = document.getElementById("wssheet"); box.innerHTML = wsSheetHTML(G()); const q = document.getElementById("ws-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); });
 onInput("#b-q", t => { S.bf.q = t.value; const p = document.getElementById("panel"); if (p) { p.innerHTML = bestiaryHTML(G()); const q = document.getElementById("b-q"); q.focus(); q.setSelectionRange(t.value.length, t.value.length); }; });
 
-export { SIZES, MV, wsNeed, wsAllowed, spdTxt, modOf, rchg, beastActs, beastCard, wsSheetHTML, fpLabel, SZ_ORDER, bestiaryHTML, bstRow, wsConcHTML, wsActiveHTML, newForms };
+export { actRest, SIZES, MV, wsNeed, wsAllowed, spdTxt, modOf, rchg, beastActs, beastCard, wsSheetHTML, fpLabel, SZ_ORDER, bestiaryHTML, bstRow, wsConcHTML, wsActiveHTML, newForms };

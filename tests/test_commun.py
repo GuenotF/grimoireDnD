@@ -122,3 +122,21 @@ def test_chaque_action_a_un_gestionnaire(browser, devices, url):
     check(not missing, f"actions sans gestionnaire : {missing}")
     unused = sorted(declared - used)
     check(not unused, f"gestionnaires sans élément qui les déclenche : {unused}")
+
+
+def test_fiches_imprimables(browser, devices, url):
+    """Onglet Imprimer des trois classes : fichier téléchargé et contenu propre à chaque classe."""
+    cases = [(NEMEIA, "Grimoire - Némeia.html", ["Le grimoire", "Restauration arcanique", "Journal de copie"]),
+             (KAEL, "Paladin - Ser Kael.html", ["Imposition des mains", "reste", "/ 20 PV", "Châtiment divin", "Sorts de serment", "Agathys", "Sorts de paladin", "Style de combat"]),
+             (dict(MALFAEL, favs=["ours-brun"]), "Druide - Malfaël Clanchombre.html", ["Forme sauvage", "Forme active", "Mes formes", "Ours brun", "Griffes", "Sorts de druide", "Changeforme de combat"])]
+    for char, name, words in cases:
+        a = App(browser, devices, url, char=char, tab="imprimer")
+        check(a.count('[data-a="open-print"]') == 1, f"onglet Imprimer : {name}")
+        with a.pg.expect_download() as dl:
+            a.click('[data-a="dl-print"]')
+        d = dl.value
+        check(d.suggested_filename == name, f"nom du fichier : {d.suggested_filename}")
+        path = str(tmp_path() / name); d.save_as(path); html = open(path, encoding="utf-8").read()
+        for w in words:
+            check(w in html, f"{name} : « {w} »")
+        a.close()
