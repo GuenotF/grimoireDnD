@@ -41,3 +41,15 @@ def test_objets(browser, devices, url):
     check(a.g("items.length") == 2, "objet retiré"); a.undo()
     check(a.g("items.length") == 3 and a.g("items[2].n") == "Potion de soins", "retrait annulé")
     a.close()
+
+
+def test_donnees_armes_et_armures(browser, devices, url):
+    """data/equipment.json (outils/equipement_xlsx.py) : catalogue complet du Manuel des joueurs."""
+    import json, pathlib
+    d = json.load(open(pathlib.Path(__file__).parent.parent / "data" / "equipment.json", encoding="utf-8"))
+    W = {w["id"]: w for w in d["weapons"]}; A = {a["id"]: a for a in d["armors"]}
+    check(len(W) == 37 and len(A) == 13, "37 armes, 12 armures et le bouclier")
+    check(sum(w["cat"] == "simple" for w in W.values()) == 14 and sum(w["rng"] == "ranged" for w in W.values()) == 9, "catégories")
+    check(W["rapier"]["finesse"] and W["longsword"]["vers"] == "1d10" and W["longbow"]["range"] == "45 m/180 m", "propriétés lues")
+    check(W["crossbow-heavy"].get("two") and "deux mains" in W["crossbow-heavy"]["props"], "propriétés sur deux lignes recollées")
+    check(A["half-plate"]["dexMax"] == 2 and A["plate"]["str"] == 15 and A["plate"]["stealth"] and "metal" not in A["hide"], "armures")
