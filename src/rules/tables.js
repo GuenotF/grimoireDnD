@@ -14,4 +14,11 @@ const LVL_NAME = ["Sorts mineurs","Niveau 1","Niveau 2","Niveau 3","Niveau 4","N
 // Caractéristiques : [code, abréviation, nom]. Les codes sont ceux des sauvegardes (abil.str…).
 const ABILITIES = [["str","FOR","Force"],["dex","DEX","Dextérité"],["con","CON","Constitution"],["int","INT","Intelligence"],["wis","SAG","Sagesse"],["cha","CHA","Charisme"]];
 
-export { SCHOOLS, SCHOOL_VAR, SLOTS, HALF, LVL_NAME, ABILITIES };
+// Les 18 compétences du Manuel des joueurs : [code, nom, caractéristique], dans l'ordre alphabétique français.
+const SKILLS = [["acrobatics","Acrobaties","dex"],["arcana","Arcanes","int"],["athletics","Athlétisme","str"],["stealth","Discrétion","dex"],
+  ["animal","Dressage","wis"],["sleight","Escamotage","dex"],["history","Histoire","int"],["intimidation","Intimidation","cha"],
+  ["insight","Intuition","wis"],["investigation","Investigation","int"],["medicine","Médecine","wis"],["nature","Nature","int"],
+  ["perception","Perception","wis"],["persuasion","Persuasion","cha"],["religion","Religion","int"],["performance","Représentation","cha"],
+  ["deception","Supercherie","cha"],["survival","Survie","wis"]];
+
+export { SCHOOLS, SCHOOL_VAR, SLOTS, HALF, LVL_NAME, ABILITIES, SKILLS };

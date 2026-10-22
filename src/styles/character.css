@@ -70,3 +70,24 @@
 .dsd.ko { border-color: #E06A5C; } .dsd.ko.on { background: #E06A5C; }
 .chip.hp { background: var(--rubric); border-color: var(--rubric); color: var(--surface); font-weight: 700; }
 .chip.hp.down { background: #1B2136; border-color: #1B2136; color: #F9FAFB; }
+
+/* Compétences */
+.skd { width: 16px; height: 16px; border-radius: 50%; border: 1.6px solid var(--pn-bd); box-sizing: border-box; flex: none; display: inline-block; vertical-align: -3px; }
+.skd.l1 { background: var(--rubric); border-color: var(--rubric); }
+.skd.l2 { background: var(--rubric); border-color: var(--rubric); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.6px var(--rubric); }
+.sklegend { display: flex; gap: 6px 10px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+.sklegend .skd { margin-left: 4px; }
+.sklist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; max-width: 760px; }
+@media (max-width: 640px) { .sklist { grid-template-columns: 1fr; } }
+.skrow { display: flex; align-items: center; gap: 10px; padding: 7px 2px; border: 0; border-bottom: 1px solid var(--sunk); background: transparent; text-align: left; font-size: 15px; }
+.skrow .n { flex: 1; }
+.skrow .ab { font-size: 12px; color: var(--muted); width: 32px; }
+.skrow b { width: 30px; text-align: right; }
+.skplay { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 18px; max-width: 760px; }
+@media (min-width: 900px) { .skplay { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.skplay > div { display: flex; gap: 5px; align-items: baseline; font-size: 14.5px; color: var(--muted); }
+.skplay > div.on { color: var(--ink); font-weight: 700; }
+.skplay .mk { width: 12px; color: var(--rubric); font-size: 11px; flex: none; }
+.skplay .n { flex: 1; min-width: 0; }
+.skplay b { color: var(--ink); font-weight: inherit; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

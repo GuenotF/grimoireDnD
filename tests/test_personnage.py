@@ -122,3 +122,20 @@ def test_forme_sauvage_excedent(browser, devices, url):
     a.undo()
     check(a.g("wsForm.hp") == 5 and a.g("hp") is None, "annulation : forme et PV rétablis")
     a.close()
+
+
+def test_competences(browser, devices, url):
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, skills={"nature": 1, "bidon": 1}), tab="perso", view="gerer")
+    check(a.count(".skrow") == 18 and a.g("skills.bidon") is None, "18 compétences, code inconnu ignoré")
+    check("+3" in a.text('[data-a="skill"][data-v="nature"]'), "Nature maîtrisée : INT +1 + 2")
+    for _ in range(2):
+        a.click('[data-a="skill"][data-v="perception"]')
+    check(a.g("skills.perception") == 2 and "+7" in a.text('[data-a="skill"][data-v="perception"]'), "expertise : SAG +3 + 2 × 2")
+    a.click('[data-a="skill"][data-v="perception"]')
+    check(a.g("skills.perception") is None, "troisième toucher : plus de maîtrise")
+    a.click('[data-a="skill"][data-v="perception"]')
+    a.view("jeu")
+    check("Perception passive 15" in a.text("#panel"), "Perception passive : 10 + 5")
+    on = a.texts(".skplay > .on")
+    check(len(on) == 2 and "Nature" in on[0] and "Perception" in on[1] and on[1].endswith("+5"), f"compétences maîtrisées en gras : {on}")
+    a.close()

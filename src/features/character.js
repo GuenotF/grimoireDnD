@@ -6,9 +6,9 @@ import { cap, fmt, signed } from "../core/format.js";
 import { S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render } from "../core/ui.js";
-import { hitDieSize, hpAverage, initiative, saveBonus, saveFromClass, saveProf, sheetIncomplete } from "../rules/character.js";
+import { hitDieSize, hpAverage, initiative, passivePerception, saveBonus, saveFromClass, saveProf, sheetIncomplete, skillBonus, skillLevel } from "../rules/character.js";
 import { R } from "../rules/common.js";
-import { ABILITIES } from "../rules/tables.js";
+import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { foldHead, isFold } from "../ui/components.js";
 import { hpCardHTML } from "./hp.js";
 import { restBarHTML } from "./rest.js";
@@ -51,11 +51,23 @@ function savesGerer(g) {
   <p class="chhelp">Touche une sauvegarde pour ajouter une maîtrise (don Résilience, par exemple).</p>`;
 }
 
+const dot = lv => `<span class="skd l${lv}" aria-hidden="true"></span>`;
+const LV_NAME = ["aucune maîtrise", "maîtrise", "expertise"];
+function skillsGerer(g) {
+  const n = SKILLS.filter(([k]) => skillLevel(g, k)).length;
+  let h = foldHead("ch-sk", "", "Compétences", "toucher pour changer", `${n} maîtrisée${n > 1 ? "s" : ""}`);
+  if (isFold("ch-sk")) return h;
+  return h + `<div class="sklegend">${dot(0)} aucune ${dot(1)} maîtrise ${dot(2)} expertise (bonus doublé)</div>
+  <div class="sklist">${SKILLS.map(([k, n, a]) => `<button class="skrow" data-a="skill" data-v="${k}" aria-label="${n} : ${LV_NAME[skillLevel(g, k)]}">${dot(skillLevel(g, k))}<span class="n">${n}</span><span class="ab">${ABILITIES.find(x => x[0] === a)[1]}</span><b>${signed(skillBonus(g, k))}</b></button>`).join("")}</div>`;
+}
+
 // ---------- En jeu
 function jeuHTML(g) {
   const st = (v, l, cls = "") => `<div class="chstat${cls}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
   const stats = `<div class="chstats">${st(g.ac ?? "?", "CA")}${st(signed(initiative(g)), "Initiative")}${st(speedTxt(g), "Vitesse")}${st(signed(R.prof(g.level)), "Maîtrise")}</div>`;
-  return hpCardHTML(g) + restBarHTML(g) + stats; // les caractéristiques sont dans l'en-tête (heroAbilities)
+  let sk = foldHead("ch-skj", "", "Compétences", `Perception passive ${passivePerception(g)}`);
+  if (!isFold("ch-skj")) sk += `<div class="skplay">${SKILLS.map(([k, n]) => { const l = skillLevel(g, k); return `<div class="${l ? "on" : ""}"><span class="mk" aria-hidden="true">${l === 2 ? "◉" : l ? "●" : ""}</span><span class="n">${n}${l ? `<span class="sr"> (${LV_NAME[l]})</span>` : ""}</span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("")}</div>`;
+  return hpCardHTML(g) + restBarHTML(g) + stats + sk; // les caractéristiques sont dans l'en-tête (heroAbilities)
 }
 
 // En-tête de l'onglet Personnage : les six caractéristiques à la place des statistiques de sorts.
@@ -64,7 +76,7 @@ function heroAbilities(g) {
 }
 
 function characterHTML(g) {
-  return viewSwitch() + incompleteHTML(g) + (S.view === "jeu" ? jeuHTML(g) : abilitiesGerer(g) + combatGerer(g) + savesGerer(g));
+  return viewSwitch() + incompleteHTML(g) + (S.view === "jeu" ? jeuHTML(g) : abilitiesGerer(g) + combatGerer(g) + savesGerer(g) + skillsGerer(g));
 }
 
 // ---------- Actions
@@ -76,6 +88,7 @@ onChange("#f-ac", t => later(g => { const n = intOrNull(t.value); g.ac = n == nu
 onChange("#f-hpmax", t => later(g => { const n = intOrNull(t.value); g.hpMax = n == null ? null : Math.min(999, Math.max(1, n)); }));
 onChange("#f-speed", t => later(g => { const n = parseFloat(String(t.value).replace(",", ".")); g.speed = isFinite(n) ? Math.min(60, Math.max(0, n)) : 9; }));
 onChange("#f-init", t => later(g => { const n = intOrNull(t.value); g.initX = n == null ? 0 : Math.max(-20, Math.min(20, n - R.ab(g, "dex"))); }));
+onClick("skill", (b) => { mutate(g => { const k = b.dataset.v, l = ((g.skills[k] || 0) + 1) % 3; if (l) g.skills[k] = l; else delete g.skills[k]; }); });
 onClick("save-tog", (b) => { mutate(g => { const k = b.dataset.v; g.saveX = g.saveX.includes(k) ? g.saveX.filter(x => x !== k) : [...g.saveX, k]; }); });
 
 export { characterHTML, heroAbilities };

@@ -1,7 +1,7 @@
 // Format d'un personnage : valeurs par défaut, contrôle à l'ouverture, version et migrations.
 import { CLASSES } from "../classes/index.js";
 import { BY_ID } from "../data.js";
-import { ABILITIES } from "../rules/tables.js";
+import { ABILITIES, SKILLS } from "../rules/tables.js";
 
 /** Version actuelle du format. Les fichiers sans numéro sont la version 1. */
 export const VERSION = 3;
@@ -31,7 +31,7 @@ function blank(name, cls) {
     // Fiche du personnage : caractéristiques, CA (null = pas encore saisie), PV max, vitesse en mètres, bonus d'initiative en plus de DEX, sauvegardes maîtrisées en plus de la classe
     abil: Object.fromEntries(ABILITIES.map(([k]) => [k, 10])), ac: null, hpMax: null, speed: 9, initX: 0, saveX: [],
     // Points de vie : actuels (null = au maximum), temporaires, jets contre la mort, dés de vie dépensés
-    hp: null, hpTemp: 0, death: { s: 0, f: 0, stable: false }, hdU: 0, spells: [],
+    skills: {}, hp: null, hpTemp: 0, death: { s: 0, f: 0, stable: false }, hdU: 0, spells: [],
     prepared: [], used: {}, extras: [], effects: [], notes: "", snotes: {}, ...Object.assign({}, ...Object.values(CLASSES).map(c => c.defaults ? c.defaults() : {})), updatedAt: Date.now() };
 }
 const fxKey = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -49,6 +49,8 @@ function norm(g) {
   o.hpTemp = Math.max(0, Math.round(+o.hpTemp) || 0); o.hdU = Math.min(o.level, Math.max(0, Math.round(+o.hdU) || 0));
   const d = o.death && typeof o.death === "object" ? o.death : {};
   o.death = { s: Math.min(3, Math.max(0, +d.s || 0)), f: Math.min(3, Math.max(0, +d.f || 0)), stable: !!d.stable };
+  const sk = o.skills && typeof o.skills === "object" && !Array.isArray(o.skills) ? o.skills : {};
+  o.skills = Object.fromEntries(SKILLS.filter(([k]) => sk[k] === 1 || sk[k] === 2).map(([k]) => [k, sk[k]]));
   o.saveX = Array.isArray(o.saveX) ? [...new Set(o.saveX)].filter(k => ABILITIES.some(a => a[0] === k)) : [];
   Object.values(CLASSES).forEach(c => { if (c.normalize) c.normalize(o); }); // champs propres à chaque classe
   ["cantrips","spells","prepared","extras"].forEach(k => { if (!Array.isArray(o[k])) o[k] = []; });
