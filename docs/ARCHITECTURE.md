@@ -40,6 +40,7 @@ src/
     tables.js               tables sans dépendance : écoles, emplacements (lanceur complet, demi-lanceur), caractéristiques
     common.js               règles communes : maîtrise, modificateurs, emplacements, préparation, sorts lançables
     character.js            fiche de personnage : sauvegardes, initiative, PV moyens, fiche à compléter
+    money.js                bourse : pièces, dépense avec monnaie
     hp.js                   points de vie : dégâts, soins, PV temporaires, jets contre la mort, dés de vie, repos long
   classes/
     index.js                registre des classes : C(g), sorts toujours préparés, capacités
@@ -51,6 +52,7 @@ src/
   features/                 mécaniques partagées par toutes les classes
     character.js            onglet Personnage : caractéristiques, combat, jets de sauvegarde (Gérer, En jeu)
     hp.js                   carte des points de vie, puce de la barre du bas, rappel de concentration
+    equipment.js            équipement : bourse et objets (Gérer, En jeu)
     traits.js               défenses, dons et traits, historique, notes du personnage (Gérer, En jeu)
     rest.js                 repos court (dés de vie + récupération de la classe) et repos long, dans Personnage et Sorts
     spells.js               affichage d'un sort, notes personnelles
@@ -95,7 +97,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 - Chaque personnage porte un numéro de version, `"v": 3`. Les fichiers sans numéro sont la version 1.
 - `schema.js` contient la liste des migrations. À l'ouverture d'un fichier, on applique les migrations dans l'ordre.
   - v1 → v2 : ajout du numéro de version.
-  - v2 → v3 : les six caractéristiques dans `abil` (`str`, `dex`, `con`, `int`, `wis`, `cha`). La caractéristique d'incantation saisie (`int`, `cha` ou `wis`) est reprise, les autres valent 10. Nouveaux champs : `ac` et `hpMax` (null tant qu'ils ne sont pas saisis), `speed` (mètres), `initX` (bonus d'initiative en plus de DEX), `saveX` (sauvegardes maîtrisées en plus de la classe), `hp` (PV actuels, null = au maximum), `hpTemp`, `death` (`s`, `f`, `stable`), `hdU` (dés de vie dépensés), `skills` (`{ code: 1 maîtrise | 2 expertise }`, codes dans `rules/tables.js`), `defs` (`[{ t: res | imm | vul | adv, v }]`), `traits` (`[{ n, o, d }]`), `bg` (`{ n, d }`), `pnotes`.
+  - v2 → v3 : les six caractéristiques dans `abil` (`str`, `dex`, `con`, `int`, `wis`, `cha`). La caractéristique d'incantation saisie (`int`, `cha` ou `wis`) est reprise, les autres valent 10. Nouveaux champs : `ac` et `hpMax` (null tant qu'ils ne sont pas saisis), `speed` (mètres), `initX` (bonus d'initiative en plus de DEX), `saveX` (sauvegardes maîtrisées en plus de la classe), `hp` (PV actuels, null = au maximum), `hpTemp`, `death` (`s`, `f`, `stable`), `hdU` (dés de vie dépensés), `skills` (`{ code: 1 maîtrise | 2 expertise }`, codes dans `rules/tables.js`), `defs` (`[{ t: res | imm | vul | adv, v }]`), `traits` (`[{ n, o, d }]`), `bg` (`{ n, d }`), `pnotes`, `items` (`[{ n, q, eq, c, note }]`), `money` (`{ pp, po, pe, pa, pc }`).
 - Les champs propres à une classe viennent de `defauts` et `normaliser` de cette classe.
 - Les anciens fichiers de tes joueurs restent lisibles. Un test vérifie l'import d'un fichier version 1.
 

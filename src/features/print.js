@@ -7,6 +7,7 @@ import { toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
 import { hitDieSize, initiative, passivePerception, saveBonus, saveProf, skillBonus, skillLevel } from "../rules/character.js";
 import { R, classSpells } from "../rules/common.js";
+import { COINS } from "../rules/money.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { offer } from "./save.js";
 import { pillData } from "./spells.js";
@@ -107,6 +108,9 @@ function pCharacter(g) {
 ${g.defs.length ? `<h2>Défenses</h2><p style="margin:0">${g.defs.map(d => `<b>${DEFN[d.t]}</b> ${esc(d.v)}`).join(" · ")}</p>` : ""}
 ${g.traits.length ? `<h2>Dons et traits</h2>${g.traits.map(t => `<p class="trait"><b>${esc(t.n)}</b>${t.d ? ` · ${esc(t.d)}` : ""}</p>`).join("")}` : ""}
 ${g.bg.n || g.bg.d ? `<h2>Historique${g.bg.n ? ` <small>${esc(g.bg.n)}</small>` : ""}</h2>${g.bg.d ? `<p class="trait">${esc(g.bg.d)}</p>` : ""}` : ""}
+<h2>Équipement <small>bourse au crayon</small></h2>
+<div class="res">${COINS.map(([k]) => `<span>${k} <span class="write" style="min-width:12mm">${g.money[k] || ""}</span></span>`).join("")}</div>
+${g.items.length ? `<p class="trait">${g.items.map(x => `${x.eq ? "<b>" : ""}${esc(x.n)}${x.eq ? "</b>" : ""}${x.q !== 1 ? ` ×${x.q}` : ""}${x.note ? ` <i>(${esc(x.note)})</i>` : ""}`).join(" · ")}</p>` : ""}<div class="line"></div>
 <h2>Notes du personnage</h2>${g.pnotes ? `<p style="white-space:pre-wrap;font-size:9.5pt;margin:0 0 2mm">${esc(g.pnotes)}</p>` : ""}${Array.from({ length: 3 }, () => '<div class="line"></div>').join("")}
 <div class="brk"></div>`;
 }
