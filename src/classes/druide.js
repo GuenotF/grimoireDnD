@@ -114,7 +114,9 @@ ${pFoot("DRUIDE")}
 const row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
 export default {
   n: "Druide", ab: "wis", abN: "Sagesse", abArticle: "la Sagesse", slots: SLOTS, top: 9, hitDie: "1d8",
-  saves: ["int", "wis"],             // jets de sauvegarde maîtrisés par la classe
+  saves: ["int", "wis"],
+  weaponProf: ["club", "dagger", "dart", "javelin", "mace", "quarterstaff", "scimitar", "sickle", "sling", "spear"],
+  armorProf: ["light", "medium", "shield"], noMetal: true,   // les druides refusent de porter du métal             // jets de sauvegarde maîtrisés par la classe
   cantrips: lv => lv >= 10 ? 4 : lv >= 4 ? 3 : 2,
   prep: (g, m) => Math.max(1, m + g.level),
   ritualNeedsPrep: true,       // un rituel se lance s'il est préparé

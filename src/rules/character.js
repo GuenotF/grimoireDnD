@@ -1,6 +1,7 @@
 // Règles de la fiche de personnage : sauvegardes, initiative, PV moyens, compétences. Calculs purs, sans affichage.
 import { C } from "../classes/index.js";
 import { R } from "./common.js";
+import { acOf } from "./equipment.js";
 import { SKILLS } from "./tables.js";
 
 /** Le personnage maîtrise-t-il les jets de sauvegarde de cette caractéristique ? (classe, ou ajout comme le don Résilience) */
@@ -31,6 +32,6 @@ function hpGain(g, hp, asi = {}) {
   return { die, d, roll, con: con1, retro: (con1 - con0) * g.level, total: die == null ? null : die + (con1 - con0) * g.level };
 }
 /** Fiche à compléter : la CA ou les PV maximum n'ont jamais été saisis. */
-const sheetIncomplete = g => g.ac == null || g.hpMax == null;
+const sheetIncomplete = g => acOf(g) == null || g.hpMax == null;
 
 export { asiLevels, hpGain, skillLevel, skillBonus, passivePerception, saveFromClass, saveProf, saveBonus, initiative, hitDieSize, hpAverage, sheetIncomplete };

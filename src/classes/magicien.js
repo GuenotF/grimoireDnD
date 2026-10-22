@@ -194,7 +194,8 @@ ${pFoot("GRIMOIRE")}
 // ---------- Définition de la classe (contrat : voir docs/ARCHITECTURE.md) ----------
 export default {
   n: "Magicien", ab: "int", abN: "Intelligence", slots: SLOTS, top: 9, hitDie: "1d6",
-  saves: ["int", "wis"],             // jets de sauvegarde maîtrisés par la classe
+  saves: ["int", "wis"],
+  weaponProf: ["dagger", "dart", "sling", "quarterstaff", "crossbow-light"], armorProf: [],   // maîtrises d'armes et d'armures             // jets de sauvegarde maîtrisés par la classe
   book: true,                 // grimoire : apprend des sorts (montée de niveau, copie), prépare parmi eux
   fileLabel: "Grimoire",      // nom des fichiers de sauvegarde
   cantrips: lv => lv >= 10 ? 5 : lv >= 4 ? 4 : 3,

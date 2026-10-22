@@ -3,12 +3,13 @@
 // Gérer : on recopie la feuille du joueur. En jeu : on consulte les valeurs calculées.
 import { C } from "../classes/index.js";
 import { onChange, onClick } from "../core/actions.js";
-import { cap, fmt, signed } from "../core/format.js";
+import { cap, esc, fmt, signed } from "../core/format.js";
 import { S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render } from "../core/ui.js";
 import { hitDieSize, hpAverage, initiative, passivePerception, saveBonus, saveFromClass, saveProf, sheetIncomplete, skillBonus, skillLevel } from "../rules/character.js";
 import { R } from "../rules/common.js";
+import { acCalc, acMode, acOf, attacks } from "../rules/equipment.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { foldHead, isFold } from "../ui/components.js";
 import { equipmentGerer, equipmentJeu } from "./equipment.js";
@@ -33,17 +34,26 @@ function abilitiesGerer(g) {
   return h + `<p class="chhelp">Le modificateur se calcule seul. ${cap(C(g).abArticle || "l'" + C(g).abN)} sert aussi à tes sorts : DD, attaque et sorts préparés la lisent ici.</p>`;
 }
 function combatGerer(g) {
-  const sum = `CA ${g.ac ?? "?"} · PV ${g.hpMax ?? "?"} · ${speedTxt(g)}`;
+  const sum = `CA ${acOf(g) ?? "?"} · PV ${g.hpMax ?? "?"} · ${speedTxt(g)}`;
   let h = foldHead("ch-cb", "", "Combat", "", sum);
   if (isFold("ch-cb")) return h;
   const row = (id, label, input, hint = "") => `<div class="chrow"><label for="${id}">${label}</label>${hint ? `<span class="hint">${hint}</span>` : ""}${input}</div>`;
   const num = (id, v, attrs = "") => `<input id="${id}" type="number" inputmode="numeric" value="${v ?? ""}" placeholder="?" ${attrs}>`;
   return h + `<div class="chbox">
-    ${row("f-ac", "Classe d'armure", num("f-ac", g.ac, 'min="0" max="40"'))}
+    ${acBlock(g, num)}
     ${row("f-speed", "Vitesse", `<span class="unit">${num("f-speed", g.speed, 'min="0" max="60" step="1.5" inputmode="decimal"')} m</span>`)}
     ${row("f-init", "Initiative", `<input id="f-init" type="text" inputmode="numeric" value="${signed(initiative(g)).replace("−", "-")}">`, `DEX ${signed(R.ab(g, "dex"))}${g.initX ? `, bonus ${signed(g.initX)}` : ", bonus divers"}`)}
     ${row("f-hpmax", "PV maximum", num("f-hpmax", g.hpMax, 'min="1" max="999"'), `d${hitDieSize(g)} · niveau ${g.level} · moyenne ${hpAverage(g)}`)}
   </div>`;
+}
+// Classe d'armure : calculée (armure et bouclier équipés, DEX, bonus de classe) ou saisie à la main ; alertes
+function acBlock(g, num) {
+  const c = acCalc(g), mode = acMode(g), man = mode === "manual";
+  const lines = c.parts.map(([l, n], i) => `<span>${l}</span><b>${n == null ? "—" : i === 0 ? n : signed(n)}</b>`).join("");
+  return `<div class="acblock"><div class="ach"><label for="f-ac">Classe d'armure</label>${man ? num("f-ac", g.ac, 'min="0" max="40"') : `<b class="acv">${c.total}</b>`}</div>
+    ${man ? `<p class="chhelp" style="margin:0">Saisie à la main${g.ac != null && g.ac !== c.total ? ` · le calcul donne <b>${c.total}</b>` : ""} (armure et bouclier cochés « équipé », DEX, capacités).</p>` : `<div class="acparts">${lines}</div>`}
+    <div class="chips"><button class="chip" data-a="ac-mode" data-v="calc" aria-pressed="${!man}">Calculée</button><button class="chip" data-a="ac-mode" data-v="manual" aria-pressed="${man}">Saisie à la main</button></div>
+    ${c.warn.length ? `<div class="acwarn">${c.warn.map(w => `<span>• ${w}</span>`).join("")}</div>` : ""}</div>`;
 }
 function savesGerer(g) {
   let h = foldHead("ch-sv", "", "Jets de sauvegarde", "★ donnés par la classe", ABILITIES.filter(([k]) => saveProf(g, k)).map(a => a[1]).join(", "));
@@ -65,12 +75,22 @@ function skillsGerer(g) {
 }
 
 // ---------- En jeu
+function attacksHTML(g) {
+  const list = attacks(g), notes = C(g).attackNotes ? C(g).attackNotes(g) : [];
+  let h = foldHead("ch-atk", "", "Attaques", `FOR ${signed(R.ab(g, "str"))} · DEX ${signed(R.ab(g, "dex"))} · maîtrise ${signed(R.prof(g.level))}`, list.map(a => a.n).join(", "));
+  if (isFold("ch-atk")) return h;
+  h += `<div class="chbox atkbox">${list.map(a => `<div class="atk"><div class="ah"><b>${esc(a.n)}${a.q > 1 ? ` ×${a.q}` : ""}</b><span class="kp a" title="Bonus pour toucher (${a.ab === "dex" ? "DEX" : "FOR"}${a.prof ? " + maîtrise" : ", arme non maîtrisée"})">${signed(a.hit)}</span><span class="kp d">${esc(a.dmg)}</span></div>
+    ${a.pills.length ? `<div class="ap">${a.pills.map(p => `<span class="kp n">${esc(p)}</span>`).join("")}</div>` : ""}${!a.prof ? `<small class="aw">Arme non maîtrisée : pas de bonus de maîtrise.</small>` : ""}${a.notes.map(n => `<small>${esc(n)}</small>`).join("")}</div>`).join("")}
+    ${notes.length ? `<div class="atknotes">${notes.map(n => `<span>${n}</span>`).join("")}</div>` : ""}
+    ${list.length === 1 ? `<p class="chhelp" style="margin:4px 0 0">Ajoute tes armes dans l'équipement (mode Gérer) et coche « équipé » : elles apparaîtront ici.</p>` : ""}</div>`;
+  return h;
+}
 function jeuHTML(g) {
   const st = (v, l, cls = "") => `<div class="chstat${cls}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
-  const stats = `<div class="chstats">${st(g.ac ?? "?", "CA")}${st(signed(initiative(g)), "Initiative")}${st(speedTxt(g), "Vitesse")}${st(signed(R.prof(g.level)), "Maîtrise")}</div>`;
+  const stats = `<div class="chstats">${st(acOf(g) ?? "?", "CA")}${st(signed(initiative(g)), "Initiative")}${st(speedTxt(g), "Vitesse")}${st(signed(R.prof(g.level)), "Maîtrise")}</div>`;
   let sk = foldHead("ch-skj", "", "Compétences", `Perception passive ${passivePerception(g)}`);
   if (!isFold("ch-skj")) sk += `<div class="skplay">${SKILLS.map(([k, n]) => { const l = skillLevel(g, k); return `<div class="${l ? "on" : ""}"><span class="mk" aria-hidden="true">${l === 2 ? "◉" : l ? "●" : ""}</span><span class="n">${n}${l ? `<span class="sr"> (${LV_NAME[l]})</span>` : ""}</span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("")}</div>`;
-  return hpCardHTML(g) + restBarHTML(g) + stats + sk + equipmentJeu(g) + traitsSheetJeu(g); // les caractéristiques sont dans l'en-tête (heroAbilities)
+  return hpCardHTML(g) + restBarHTML(g) + stats + attacksHTML(g) + sk + equipmentJeu(g) + traitsSheetJeu(g); // les caractéristiques sont dans l'en-tête (heroAbilities)
 }
 
 // En-tête de l'onglet Personnage : les six caractéristiques à la place des statistiques de sorts.
@@ -87,6 +107,7 @@ function characterHTML(g) {
 const later = fn => { mutate(fn, false); setTimeout(render); };
 const intOrNull = v => { const n = parseInt(String(v).replace("−", "-"), 10); return isFinite(n) ? n : null; };
 onChange(t => !!t.dataset.abil, t => later(g => { g.abil[t.dataset.abil] = Math.min(30, Math.max(1, intOrNull(t.value) ?? 10)); }));
+onClick("ac-mode", (b) => { mutate(g => { g.acMode = b.dataset.v; if (b.dataset.v === "manual" && g.ac == null) g.ac = acCalc(g).total; }); });
 onChange("#f-ac", t => later(g => { const n = intOrNull(t.value); g.ac = n == null ? null : Math.min(40, Math.max(0, n)); }));
 onChange("#f-hpmax", t => later(g => { const n = intOrNull(t.value); g.hpMax = n == null ? null : Math.min(999, Math.max(1, n)); }));
 onChange("#f-speed", t => later(g => { const n = parseFloat(String(t.value).replace(",", ".")); g.speed = isFinite(n) ? Math.min(60, Math.max(0, n)) : 9; }));

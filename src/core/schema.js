@@ -1,6 +1,6 @@
 // Format d'un personnage : valeurs par défaut, contrôle à l'ouverture, version et migrations.
 import { CLASSES } from "../classes/index.js";
-import { BY_ID } from "../data.js";
+import { BY_ID, GEAR } from "../data.js";
 import { COINS, blankPurse } from "../rules/money.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 
@@ -36,7 +36,7 @@ function blank(name, cls) {
     // Bas de fiche : défenses [{t: res|imm|vul|adv, v}], dons et traits [{n, o (origine), d}], historique, notes du personnage
     defs: [], traits: [], bg: { n: "", d: "" }, pnotes: "",
     // Équipement : objets [{n, q, eq, c (à décompter), note}] et bourse {pp, po, pe, pa, pc}
-    items: [], money: blankPurse(),
+    items: [], money: blankPurse(), acMode: null,
     hp: null, hpTemp: 0, death: { s: 0, f: 0, stable: false }, hdU: 0, spells: [],
     prepared: [], used: {}, extras: [], effects: [], notes: "", snotes: {}, ...Object.assign({}, ...Object.values(CLASSES).map(c => c.defaults ? c.defaults() : {})), updatedAt: Date.now() };
 }
@@ -61,7 +61,8 @@ function norm(g) {
   o.defs = (Array.isArray(o.defs) ? o.defs : []).filter(d => d && ["res", "imm", "vul", "adv"].includes(d.t) && str(d.v).trim()).map(d => ({ t: d.t, v: str(d.v).trim() }));
   o.traits = (Array.isArray(o.traits) ? o.traits : []).filter(t => t && str(t.n).trim()).map(t => ({ n: str(t.n).trim(), o: str(t.o) || "autre", d: str(t.d) }));
   o.bg = { n: str((o.bg || {}).n), d: str((o.bg || {}).d) }; o.pnotes = str(o.pnotes);
-  o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note) }));
+  o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(GEAR[x.ref] ? { ref: x.ref } : {}) }));
+  o.acMode = ["calc", "manual"].includes(o.acMode) ? o.acMode : null; // null : saisie si elle existe, sinon calcul
   const mo = o.money && typeof o.money === "object" ? o.money : {};
   o.money = Object.fromEntries(COINS.map(([k]) => [k, Math.max(0, Math.floor(+mo[k]) || 0)]));
   o.saveX = Array.isArray(o.saveX) ? [...new Set(o.saveX)].filter(k => ABILITIES.some(a => a[0] === k)) : [];

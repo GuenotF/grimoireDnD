@@ -41,6 +41,7 @@ src/
     common.js               règles communes : maîtrise, modificateurs, emplacements, préparation, sorts lançables
     character.js            fiche de personnage : sauvegardes, initiative, PV moyens, fiche à compléter
     money.js                bourse : pièces, dépense avec monnaie
+    equipment.js            armes et armures : maîtrises, CA calculée, attaques
     hp.js                   points de vie : dégâts, soins, PV temporaires, jets contre la mort, dés de vie, repos long
   classes/
     index.js                registre des classes : C(g), sorts toujours préparés, capacités
@@ -77,6 +78,8 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `slots`, `top`, `cantrips(lv)`, `prep(g, mod)` | Emplacements, niveau de sort maximal, sorts mineurs, sorts préparés | ✓ | ✓ | ✓ |
 | `book` | Modèle du grimoire (apprend, puis prépare parmi ses sorts) ; sinon prépare dans toute la liste | ✓ | | |
 | `hitDie`, `fileLabel`, `prepNote` | Dé de vie (PV moyens, rappel), nom des sauvegardes, précision sur la préparation | ✓ | ✓ | ✓ |
+| `weaponProf`, `armorProf`, `noMetal` | Maîtrises d'armes (catégories `simple`, `martial` ou identifiants) et d'armures (`light`, `medium`, `heavy`, `shield`) ; refus du métal (druide) | ✓ | ✓ | ✓ |
+| `acBonus(g, armure)`, `attackMods(g, arme)`, `attackNotes(g)` | Bonus de CA (style Défense), modificateurs d'attaque (Duel, Arme à deux mains), rappels sous les attaques (Châtiment divin) | | ✓ | |
 | `asiLevels` | Niveaux d'amélioration de caractéristiques, si différents de 4, 8, 12, 16, 19 (guerrier, roublard plus tard) | | | |
 | `saves` | Jets de sauvegarde maîtrisés par la classe (codes `str`, `dex`, `con`, `int`, `wis`, `cha`) | ✓ | ✓ | ✓ |
 | `defaults()`, `normalize(o)` | Champs propres au personnage et leur contrôle à l'ouverture | ✓ | ✓ | ✓ |
@@ -97,7 +100,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 - Chaque personnage porte un numéro de version, `"v": 3`. Les fichiers sans numéro sont la version 1.
 - `schema.js` contient la liste des migrations. À l'ouverture d'un fichier, on applique les migrations dans l'ordre.
   - v1 → v2 : ajout du numéro de version.
-  - v2 → v3 : les six caractéristiques dans `abil` (`str`, `dex`, `con`, `int`, `wis`, `cha`). La caractéristique d'incantation saisie (`int`, `cha` ou `wis`) est reprise, les autres valent 10. Nouveaux champs : `ac` et `hpMax` (null tant qu'ils ne sont pas saisis), `speed` (mètres), `initX` (bonus d'initiative en plus de DEX), `saveX` (sauvegardes maîtrisées en plus de la classe), `hp` (PV actuels, null = au maximum), `hpTemp`, `death` (`s`, `f`, `stable`), `hdU` (dés de vie dépensés), `skills` (`{ code: 1 maîtrise | 2 expertise }`, codes dans `rules/tables.js`), `defs` (`[{ t: res | imm | vul | adv, v }]`), `traits` (`[{ n, o, d }]`), `bg` (`{ n, d }`), `pnotes`, `items` (`[{ n, q, eq, c, note }]`), `money` (`{ pp, po, pe, pa, pc }`).
+  - v2 → v3 : les six caractéristiques dans `abil` (`str`, `dex`, `con`, `int`, `wis`, `cha`). La caractéristique d'incantation saisie (`int`, `cha` ou `wis`) est reprise, les autres valent 10. Nouveaux champs : `ac` et `hpMax` (null tant qu'ils ne sont pas saisis), `speed` (mètres), `initX` (bonus d'initiative en plus de DEX), `saveX` (sauvegardes maîtrisées en plus de la classe), `hp` (PV actuels, null = au maximum), `hpTemp`, `death` (`s`, `f`, `stable`), `hdU` (dés de vie dépensés), `skills` (`{ code: 1 maîtrise | 2 expertise }`, codes dans `rules/tables.js`), `defs` (`[{ t: res | imm | vul | adv, v }]`), `traits` (`[{ n, o, d }]`), `bg` (`{ n, d }`), `pnotes`, `items` (`[{ n, q, eq, c, note }]`), `money` (`{ pp, po, pe, pa, pc }`) ; un objet peut porter `ref` (arme ou armure de `data/equipment.json`) ; `acMode` (`calc` ou `manual`, null : saisie si elle existe, sinon calcul dès qu'une armure est équipée).
 - Les champs propres à une classe viennent de `defauts` et `normaliser` de cette classe.
 - Les anciens fichiers de tes joueurs restent lisibles. Un test vérifie l'import d'un fichier version 1.
 

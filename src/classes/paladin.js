@@ -202,7 +202,19 @@ ${pFoot("PALADIN")}
 const row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
 export default {
   n: "Paladin", ab: "cha", abN: "Charisme", abArticle: "le Charisme", slots: HALF, top: 5, hitDie: "1d10",
-  saves: ["wis", "cha"],             // jets de sauvegarde maîtrisés par la classe
+  saves: ["wis", "cha"],
+  weaponProf: ["simple", "martial"], armorProf: ["light", "medium", "heavy", "shield"],
+  acBonus: (g, armor) => g.level >= 2 && g.style === "defense" && armor ? [["Style de combat : Défense", 1]] : [],
+  // Duel : +2 aux dégâts à une main (corps à corps, sans arme à deux mains) ; Arme à deux mains : relance des 1 et 2
+  attackMods: (g, w) => {
+    if (g.level < 2) return {};
+    if (g.style === "duel" && w.rng === "melee" && !w.two) return { dmg: 2, dmg2: 0, pills: ["Duel : +2 à une main"] };
+    if (g.style === "deuxmains" && w.rng === "melee" && (w.two || w.vers)) return { pills: ["relance les 1 et 2 (à deux mains)"] };
+    return {};
+  },
+  attackNotes: g => [g.level >= 5 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "",
+    g.level >= 2 ? `Touché au corps à corps ? <b>Châtiment divin</b> : dépense un emplacement, +2d8 radiant (+1d8 par niveau au-dessus du 1er, +1d8 contre morts-vivants et fiélons).` : "",
+    (g.effects || []).some(e => e.name === "Arme sacrée") ? `<b>Arme sacrée</b> active : +${Math.max(1, R.am(g))} au toucher avec l'arme choisie.` : ""].filter(Boolean),             // jets de sauvegarde maîtrisés par la classe
   cantrips: () => 0,
   prep: (g, m) => Math.max(1, m + Math.floor(g.level / 2)),
   prepNote: " (sans compter le serment)",
