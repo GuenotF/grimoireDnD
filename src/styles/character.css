@@ -175,3 +175,14 @@
 .tlh { font-family: var(--f-sc); font-size: 12px; letter-spacing: .05em; color: var(--muted); margin-top: 8px; }
 .tljeu p { margin: 0 0 6px; font-size: 14px; line-height: 1.6; } .tljeu b { font-family: var(--f-sc); font-weight: 500; color: var(--muted); margin-right: 4px; }
 .tlrow .skrow b { width: auto; white-space: nowrap; }
+
+/* Objets magiques */
+.itmagic { border: 1px solid var(--rule); border-radius: 8px; padding: 6px 10px 8px; margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 10px; align-items: end; }
+.itmagic legend { font-family: var(--f-sc); font-size: 12px; letter-spacing: .05em; color: var(--gold); padding: 0 4px; }
+.itmagic label { display: grid; gap: 2px; } .itmagic label > span { font-size: 11.5px; color: var(--muted); }
+.itmagic .wide { grid-column: span 1; } .itmagic .row.wide, .itmagic p.wide { grid-column: 1 / -1; }
+.itmagic input[type=number] { width: 4.5em; } .itmagic select { width: auto; }
+.itmagic p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.35; }
+.itn .mg { font-style: normal; font-size: 12px; color: var(--gold); margin-left: 4px; }
+.itch { display: flex; gap: 5px; align-items: center; margin-top: 4px; flex-wrap: wrap; } .itch .pip { width: 18px; height: 18px; } .itch small { font-size: 12px; color: var(--muted); margin-left: 4px; }
+.itmagic .row { display: flex; gap: 6px 16px; flex-wrap: wrap; } .itmagic .row label.check { display: flex; align-items: center; gap: 6px; }

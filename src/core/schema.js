@@ -29,6 +29,14 @@ export function migrate(o) {
 // Objet libre portant exactement le nom d'une arme ou armure du Manuel (accents et majuscules ignorés) : relié au catalogue
 const plain = t => String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[’']/g, "'").trim();
 const gearByName = n => Object.values(GEAR).find(x => plain(x.n) === plain(n));
+// Objet magique : bonus 0 à 3, dégâts en plus, harmonisation, charges (max, utilisées, recharge) ; champs absents si non magique
+function magicOf(x) {
+  const m = {}, b = Math.max(0, Math.min(3, Math.floor(+x.bonus) || 0)), ch = Math.max(0, Math.min(50, Math.floor(+x.chMax) || 0));
+  if (b) m.bonus = b; if (typeof x.xdmg === "string" && x.xdmg.trim()) m.xdmg = x.xdmg.trim();
+  if (x.att) { m.att = true; m.attuned = !!x.attuned; }
+  if (ch) { m.chMax = ch; m.chU = Math.max(0, Math.min(ch, Math.floor(+x.chU) || 0)); m.rec = ["aube", "long", "court", ""].includes(x.rec) ? x.rec : "aube"; }
+  return m;
+}
 function blank(name, cls) {
   cls = CLASSES[cls] ? cls : "magicien";
   // Champs communs, puis champs propres à chaque classe (tous présents : un personnage peut changer de classe dans un fichier)
@@ -69,7 +77,7 @@ function norm(g) {
   o.defs = (Array.isArray(o.defs) ? o.defs : []).filter(d => d && ["res", "imm", "vul", "adv"].includes(d.t) && str(d.v).trim()).map(d => ({ t: d.t, v: str(d.v).trim() }));
   o.traits = (Array.isArray(o.traits) ? o.traits : []).filter(t => t && str(t.n).trim()).map(t => ({ n: str(t.n).trim(), o: str(t.o) || "autre", d: str(t.d), ...(FEATS[t.feat] ? { feat: t.feat } : {}) }));
   o.bg = { n: str((o.bg || {}).n), d: str((o.bg || {}).d) }; o.pnotes = str(o.pnotes);
-  o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : {}) }));
+  o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...magicOf(x), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : {}) }));
   o.acMode = ["calc", "manual"].includes(o.acMode) ? o.acMode : null; // null : saisie si elle existe, sinon calcul
   const mo = o.money && typeof o.money === "object" ? o.money : {};
   o.money = Object.fromEntries(COINS.map(([k]) => [k, Math.max(0, Math.floor(+mo[k]) || 0)]));

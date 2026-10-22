@@ -8,6 +8,7 @@ import { BY_ID } from "../data.js";
 import { speedOf, hitDieSize, initiative, passivePerception, saveBonus, saveProf, skillBonus, skillLevel } from "../rules/character.js";
 import { R, classSpells } from "../rules/common.js";
 import { acOf, attacks } from "../rules/equipment.js";
+import { recLabel } from "../rules/magic.js";
 import { COINS } from "../rules/money.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { offer } from "./save.js";
@@ -114,7 +115,7 @@ ${g.traits.length ? `<h2>Dons et traits</h2>${g.traits.map(t => `<p class="trait
 ${g.bg.n || g.bg.d ? `<h2>Historique${g.bg.n ? ` <small>${esc(g.bg.n)}</small>` : ""}</h2>${g.bg.d ? `<p class="trait">${esc(g.bg.d)}</p>` : ""}` : ""}
 <h2>Équipement <small>bourse au crayon</small></h2>
 <div class="res">${COINS.map(([k]) => `<span>${k} <span class="write" style="min-width:12mm">${g.money[k] || ""}</span></span>`).join("")}</div>
-${g.items.length ? `<p class="trait">${g.items.map(x => `${x.eq ? "<b>" : ""}${esc(x.n)}${x.eq ? "</b>" : ""}${x.q !== 1 ? ` ×${x.q}` : ""}${x.note ? ` <i>(${esc(x.note)})</i>` : ""}`).join(" · ")}</p>` : ""}<div class="line"></div>
+${g.items.length ? `<p class="trait">${g.items.map(x => `${x.eq ? "<b>" : ""}${esc(x.n)}${x.eq ? "</b>" : ""}${x.q !== 1 ? ` ×${x.q}` : ""}${x.bonus ? ` +${x.bonus}` : ""}${x.att ? (x.attuned ? " (harmonisé)" : " (à harmoniser)") : ""}${x.chMax ? ` ${pDots(x.chMax)} <i>${recLabel(x.rec)}</i>` : ""}${x.note ? ` <i>(${esc(x.note)})</i>` : ""}`).join(" · ")}</p>` : ""}<div class="line"></div>
 <h2>Notes du personnage</h2>${g.pnotes ? `<p style="white-space:pre-wrap;font-size:9.5pt;margin:0 0 2mm">${esc(g.pnotes)}</p>` : ""}${Array.from({ length: 3 }, () => '<div class="line"></div>').join("")}
 <div class="brk"></div>`;
 }

@@ -111,3 +111,36 @@ def test_lien_catalogue_conserve(browser, devices, url):
     a.view("jeu")
     check(a.texts(".atk .ah b")[0] == "Bâton", "attaque au bâton")
     a.close()
+
+
+def test_objets_magiques(browser, devices, url):
+    from helpers import KAEL
+    a = App(browser, devices, url, char=dict(KAEL, **KAEL_F), tab="perso", view="gerer")
+    a.click('[data-a="it-edit"][data-i="2"]')  # épée longue
+    a.pg.select_option("#it-bonus", "1"); a.pg.fill("#it-xdmg", "1d6 radiant"); a.pg.check("#it-att"); a.click('.itform [type="submit"]')
+    check(a.g("items[2].bonus") == 1 and a.g("items[2].att") and not a.g("items[2].attuned"), "épée +1 à harmoniser")
+    a.view("jeu")
+    check("non harmonisée" in a.text(".atkbox") and a.texts(".atk .ah")[0] == "Épée longue +5 1d8 + 3 tranchant", "non harmonisée : pas de bonus")
+    a.view("gerer"); a.click('[data-a="it-edit"][data-i="2"]'); a.pg.check("#it-attuned"); a.click('.itform [type="submit"]')
+    a.view("jeu")
+    check(a.texts(".atk .ah")[0] == "Épée longue +6 1d8 + 4 tranchant + 1d6 radiant" and "+1 magique" in a.text(".atkbox"), f"harmonisée : +1 et dégâts en plus : {a.texts('.atk .ah')[0]}")
+    a.view("gerer"); a.click('[data-a="it-edit"][data-i="1"]'); a.pg.select_option("#it-bonus", "1"); a.click('.itform [type="submit"]')
+    check(a.text(".acv") == "20" and "Bouclier +1" in a.text(".acparts"), "bouclier +1 : CA 20")
+    a.click('[data-a="it-edit"][data-i="3"]'); a.pg.fill("#it-ch", "3"); a.pg.select_option("#it-rec", "court"); a.click('.itform [type="submit"]')
+    a.view("jeu")
+    a.click('[data-a="it-chg"][data-i="3"][data-k="0"]'); a.click('[data-a="it-chg"][data-i="3"][data-k="1"]')
+    check(a.g("items[3].chU") == 2 and "1/3 charges" in a.text(".itbox"), "2 charges dépensées")
+    a.tab("grimoire"); a.click('[data-a="short-open"]')
+    check("charges récupérées" in a.text("#short-panel"), "repos court : objet rechargé annoncé")
+    a.click('[data-a="short-done"]')
+    check(a.g("items[3].chU") == 0, "charges récupérées au repos court")
+    a.close()
+
+
+def test_limite_harmonisation(browser, devices, url):
+    items = [{"n": f"Anneau {k}", "q": 1, "eq": True, "att": True, "attuned": k < 3} for k in range(4)]
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="perso", view="gerer")
+    check("harmonisation 3/3" in a.text('[data-k="ch-eq"]'), "compteur d'harmonisation")
+    a.click('[data-a="it-edit"][data-i="3"]'); a.pg.check("#it-attuned"); a.click('.itform [type="submit"]')
+    check(not a.g("items[3].attuned") and "Déjà 3" in a.toast(), "pas plus de 3 objets harmonisés")
+    a.close()
