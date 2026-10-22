@@ -30,11 +30,10 @@
 .chstat { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; text-align: center; padding: 6px 2px 5px; min-width: 0; }
 .chstat .v { font-family: var(--f-display); font-size: 21px; font-weight: 700; line-height: 1.15; white-space: nowrap; }
 .chstat .l { font-family: var(--f-sc); font-size: 11.5px; letter-spacing: .05em; color: var(--muted); }
-.abtiles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
-.abtile { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; text-align: center; padding: 5px 0 6px; display: grid; min-width: 0; }
-.abtile .abk { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--muted); }
-.abtile b { font-family: var(--f-display); font-size: 23px; line-height: 1.1; }
-.abtile .sc { font-size: 12.5px; color: var(--muted); }
-.abtile .js { padding-top: 2px; font-size: 12px; color: var(--muted); white-space: nowrap; }
-.abtile .js.on { color: var(--ps-fg); font-weight: 700; }
-@media (max-width: 400px) { .chstat .v { font-size: 18px; } .chstat .l { font-size: 10.5px; } .abtile .js { font-size: 11px; } }
+/* En-tête de l'onglet Personnage : les six caractéristiques */
+.statcap { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--muted); margin: 14px 0 4px; }
+.stat.ab .l { margin: 0 0 3px; }
+.stat.ab.mine .l { color: var(--rubric); }
+.stat.ab .sc { font-size: 12.5px; color: var(--muted); margin-top: 4px; white-space: nowrap; }
+.stat.ab .js.on { color: var(--ps-fg); font-weight: 700; }
+@media (max-width: 400px) { .chstat .v { font-size: 18px; } .chstat .l { font-size: 10.5px; } }

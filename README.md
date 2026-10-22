@@ -20,7 +20,8 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 **Onglet Personnage** (toutes les classes)
 - *Gérer* : les six caractéristiques (modificateurs calculés ; la caractéristique d'incantation sert au DD, à l'attaque et aux sorts préparés), classe d'armure, vitesse, initiative (DEX + bonus divers), PV maximum (avec la moyenne selon le dé de vie, le niveau et la CON), jets de sauvegarde (★ ceux de la classe, et maîtrises ajoutées au toucher).
-- *En jeu* : CA, PV max, initiative, vitesse, maîtrise ; les six caractéristiques avec leur bonus de jet de sauvegarde (en bleu si maîtrisé).
+- *En jeu* : CA, PV max, initiative, vitesse, maîtrise.
+- L'en-tête s'adapte à l'onglet : dans *Personnage*, les six caractéristiques (modificateur, valeur, bonus de jet de sauvegarde en bleu si maîtrisé, caractéristique d'incantation en rouge) ; dans les autres onglets, les statistiques de sorts (DD, attaque, sorts préparés…).
 - Tant que la CA ou les PV maximum ne sont pas saisis, un message « Complète ta fiche » et un point rouge sur l'onglet le rappellent. Un nouveau personnage s'ouvre sur sa fiche.
 - Navigation : *Personnage* et *Sorts* (en gras), *Bibliothèque*, *Bestiaire* (druide) ; *Règles*, *Imprimer* et *Sauvegarde* dans le menu *Plus*.
 

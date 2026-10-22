@@ -53,8 +53,12 @@ function savesGerer(g) {
 function jeuHTML(g) {
   const st = (v, l, cls = "") => `<div class="chstat${cls}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
   const stats = `<div class="chstats">${st(g.ac ?? "?", "CA")}${st(g.hpMax ?? "?", "PV max")}${st(signed(initiative(g)), "Initiative")}${st(speedTxt(g), "Vitesse")}${st(signed(R.prof(g.level)), "Maîtrise")}</div>`;
-  const tiles = `<div class="abtiles">${ABILITIES.map(([k, a, n]) => `<div class="abtile" title="${n}"><span class="abk">${a}</span><b>${signed(R.ab(g, k))}</b><span class="sc">${g.abil[k]}</span><span class="js${saveProf(g, k) ? " on" : ""}" title="Jet de sauvegarde${saveProf(g, k) ? " maîtrisé" : ""}">JdS ${signed(saveBonus(g, k))}</span></div>`).join("")}</div>`;
-  return stats + tiles;
+  return stats; // les caractéristiques sont dans l'en-tête (heroAbilities)
+}
+
+// En-tête de l'onglet Personnage : les six caractéristiques à la place des statistiques de sorts.
+function heroAbilities(g) {
+  return ABILITIES.map(([k, a, n]) => `<div class="stat ab${k === C(g).ab ? " mine" : ""}" role="listitem" title="${n}"><div class="l">${a}</div><div class="v">${signed(R.ab(g, k))}</div><div class="sc">${g.abil[k]} · <span class="js${saveProf(g, k) ? " on" : ""}" title="Jet de sauvegarde${saveProf(g, k) ? " maîtrisé" : ""}">JdS ${signed(saveBonus(g, k))}</span></div></div>`).join("");
 }
 
 function characterHTML(g) {
@@ -72,4 +76,4 @@ onChange("#f-speed", t => later(g => { const n = parseFloat(String(t.value).repl
 onChange("#f-init", t => later(g => { const n = intOrNull(t.value); g.initX = n == null ? 0 : Math.max(-20, Math.min(20, n - R.ab(g, "dex"))); }));
 onClick("save-tog", (b) => { mutate(g => { const k = b.dataset.v; g.saveX = g.saveX.includes(k) ? g.saveX.filter(x => x !== k) : [...g.saveX, k]; }); });
 
-export { characterHTML };
+export { characterHTML, heroAbilities };

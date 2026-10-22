@@ -26,7 +26,8 @@ def test_creation_puis_fiche(browser, devices, url):
         a.pg.fill(f"#ab-{k}", str(v)); a.pg.press(f"#ab-{k}", "Tab"); a.pg.wait_for_timeout(40)
     check(a.js("JSON.stringify(G().abil)") == '{"str":10,"dex":14,"con":14,"int":12,"wis":16,"cha":8}', "caractéristiques enregistrées")
     check(a.texts(".abcell .abm") == ["+0", "+2", "+2", "+1", "+3", "−1"], f"modificateurs : {a.texts('.abcell .abm')}")
-    check("13" in a.texts(".stats .stat .v")[1], "le DD des sorts lit la Sagesse de la fiche")
+    check(a.texts(".stats .stat.ab .v")[4] == "+3", "l'en-tête suit la saisie")
+    check(a.js("8 + R.prof(G().level) + R.am(G())") == 13, "le DD des sorts lit la Sagesse de la fiche")
     a.pg.fill("#ab-wis", "17"); a.pg.press("#ab-wis", "Tab"); a.pg.wait_for_timeout(40)
     check(a.pg.evaluate("document.activeElement.id") == "ab-cha", "Tab passe au champ suivant malgré l'enregistrement")
     a.pg.fill("#ab-wis", "16"); a.pg.press("#ab-wis", "Tab"); a.pg.wait_for_timeout(40)
@@ -45,7 +46,11 @@ def test_creation_puis_fiche(browser, devices, url):
     check(a.g("saveX.join()") == "con" and "+4" in a.text('[data-a="save-tog"][data-v="con"]'), "maîtrise ajoutée en Constitution")
     a.view("jeu")
     check(a.texts(".chstat .v") == ["14", "31", "+2", "10,5 m", "+2"], f"En jeu : {a.texts('.chstat .v')}")
-    check(a.texts(".abtile .js.on") == ["JdS +4", "JdS +3", "JdS +5"], f"JdS maîtrisés : {a.texts('.abtile .js.on')}")
+    check(a.texts(".stats .stat.ab .v") == ["+0", "+0", "+2", "+1", "+3", "−1"], f"caractéristiques dans l'en-tête : {a.texts('.stats .stat.ab .v')}")
+    check(a.texts(".stats .js.on") == ["JdS +4", "JdS +3", "JdS +5"], f"JdS maîtrisés : {a.texts('.stats .js.on')}")
+    check(a.text(".statcap") == "Caractéristiques" and a.count(".stat.ab.mine") == 1, "intitulé de l'en-tête, Sagesse marquée")
+    a.tab("grimoire")
+    check(a.text(".statcap") == "Sorts" and a.count(".stat.ab") == 0 and "DD des sorts" in a.text(".stats"), "en-tête des sorts dans l'onglet Sorts")
     a.close()
 
 

@@ -11,7 +11,7 @@ import { BEAST, BEASTS, BY_ID, SPELLS } from "./data.js";
 import { concOf, concPanelHTML, fxSheetHTML, slotbarHTML } from "./features/cast.js";
 import { grimoireHTML } from "./features/grimoire.js";
 import { luHTML } from "./features/levelup.js";
-import { characterHTML } from "./features/character.js";
+import { characterHTML, heroAbilities } from "./features/character.js";
 import { biblioHTML } from "./features/library.js";
 import { newHTML } from "./features/newchar.js";
 import { saveHTML } from "./features/save.js";
@@ -81,13 +81,13 @@ function heroHTML(g) {
     <div class="field"><label for="f-level">Niveau de ${C(g).n.toLowerCase()}</label><div class="lvrow"><select id="f-level">${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select>${g.level < 20 ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}</div></div>
     ${C(g).subclassField(g)}
   </div>
-  <div class="stats" role="list">
+  ${S.tab === "perso" ? `<div class="statcap">Caractéristiques</div><div class="stats" role="list" aria-label="Caractéristiques">${heroAbilities(g)}</div>` : `<div class="statcap">Sorts</div><div class="stats" role="list" aria-label="Sorts">
     <div class="stat" role="listitem"><div class="v">${signed(mod)}</div><div class="l">Mod. ${C(g).abN}</div></div>
     <div class="stat" role="listitem"><div class="v">${8 + prof + mod}</div><div class="l">DD des sorts</div></div>
     <div class="stat" role="listitem"><div class="v">${signed(prof + mod)}</div><div class="l">Attaque de sort</div></div>
     <div class="stat ${nPrep > pMax ? "alert" : nPrep === pMax ? "good" : ""}" role="listitem"><div class="v">${nPrep}<small>/${pMax}</small></div><div class="l">Sorts préparés</div></div>
     ${C(g).heroStats(g)}
-  </div>
+  </div>`}
   <div class="banner">Tes personnages sont enregistrés sur cet appareil, dans ce navigateur. Exporte-les de temps en temps (menu Plus › Sauvegarde) pour les sauvegarder ou les passer sur un autre appareil.</div>
   ${showIosTip() ? `<div class="banner">Sur iPhone ou iPad, installe l'atelier : bouton <b>Partager</b>, puis <b>Sur l'écran d'accueil</b>. Ouvre-le ensuite toujours depuis cette icône : c'est là que tes grimoires sont le mieux conservés. <button class="btn ghost" data-a="hide-ios">Masquer</button></div>` : ""}
   </section>`;
