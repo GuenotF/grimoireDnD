@@ -14,7 +14,7 @@ import { hdLeft, hpCur, isDown, longRestHP, spendHitDie } from "../rules/hp.js";
 /** Boutons de repos ; C(g).restBar ajoute ce qui est propre à la classe (case Restauration arcanique…). */
 function restBarHTML(g) {
   return `<div class="restbar"><button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}">Repos court ${S.shortOpen ? "▴" : "▾"}</button><button class="btn" data-a="longrest">Repos long</button>${C(g).restBar ? C(g).restBar(g)
-    : `<span class="muted">Repos court : dés de vie, ${C(g).shortRest.label}. Repos long : tout.</span>`}</div>${S.shortOpen ? shortRestHTML(g) : ""}`;
+    : `<span class="muted">Repos court : dés de vie${C(g).shortRest ? `, ${C(g).shortRest.label}` : ""}. Repos long : tout.</span>`}</div>${S.shortOpen ? shortRestHTML(g) : ""}`;
 }
 
 function diceHTML(g) {
@@ -30,6 +30,7 @@ function shortRestHTML(g) {
   const sr = C(g).shortRest;
   let h = `<div class="short" id="short-panel"><div><h3>Repos court</h3>${diceHTML(g)}</div>`;
   if (C(g).shortPanel) return h + `<button class="btn ghost" data-a="short-close" style="justify-self:start">Fermer</button></div>` + C(g).shortPanel(g); // magicien : Restauration arcanique
+  if (!sr) return h + `<div class="cast"><button class="btn ghost" data-a="short-close">Fermer</button></div></div>`; // rien d'autre à récupérer (barbare, roublard)
   return h + `<p><b>${sr.label.charAt(0).toUpperCase() + sr.label.slice(1)}</b> : ${sr.done} en terminant le repos.</p>
   <div class="cast"><button class="btn cast-go" data-a="short-done">Terminer le repos court</button><button class="btn ghost" data-a="short-close">Fermer</button></div></div>`;
 }
@@ -38,7 +39,7 @@ const snapHP = g => JSON.parse(JSON.stringify({ hp: g.hp, hdU: g.hdU }));
 onClick("short-open", () => { S.shortOpen = !S.shortOpen; S.sr = {}; render(); });
 onClick("short-close", () => { S.shortOpen = false; S.sr = {}; render(); });
 onClick("short-done", () => {
-  const g = G(); if (!g) return; const sr = C(g).shortRest, f = sr.field, prev = g[f]; S.shortOpen = false;
+  const g = G(); if (!g || !C(g).shortRest) return; const sr = C(g).shortRest, f = sr.field, prev = g[f]; S.shortOpen = false;
   mutate(g => { g[f] = 0; }); toast(`Repos court : ${sr.label} ${sr.done}`, () => { mutate(g => { g[f] = prev; }); return "Repos court annulé"; });
 });
 onClick("hp-hd", () => {

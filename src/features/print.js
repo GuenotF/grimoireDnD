@@ -5,7 +5,7 @@ import { byName, cap, esc, fmt, signed } from "../core/format.js";
 import { G } from "../core/state.js";
 import { toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
-import { hitDieSize, initiative, passivePerception, saveBonus, saveProf, skillBonus, skillLevel } from "../rules/character.js";
+import { speedOf, hitDieSize, initiative, passivePerception, saveBonus, saveProf, skillBonus, skillLevel } from "../rules/character.js";
 import { R, classSpells } from "../rules/common.js";
 import { acOf, attacks } from "../rules/equipment.js";
 import { COINS } from "../rules/money.js";
@@ -99,7 +99,7 @@ function pCharacter(g) {
   return `<h1><b>${esc(g.name.charAt(0))}</b>${esc(g.name.slice(1))}</h1>
 <div class="sub">${C(g).n} niveau ${g.level}${g.bg.n ? ` · ${esc(g.bg.n)}` : ""} · Remplir au crayon</div>
 <div class="stats s6">${ABILITIES.map(([k, a]) => `<div${k === C(g).ab ? ' class="mine"' : ""}><span>${a}</span><b>${signed(R.ab(g, k))}</b><small>${g.abil[k]} · JdS ${saveProf(g, k) ? "<u>" : ""}${signed(saveBonus(g, k))}${saveProf(g, k) ? "</u>" : ""}</small></div>`).join("")}</div>
-<div class="stats">${[[acOf(g) ?? "____", "CA"], [signed(initiative(g)), "INITIATIVE"], [`${fmt(g.speed)} m`, "VITESSE"], [signed(R.prof(g.level)), "MAÎTRISE"], [passivePerception(g), "PERCEPTION PASSIVE"]].map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+<div class="stats">${[[acOf(g) ?? "____", "CA"], [signed(initiative(g)), "INITIATIVE"], [`${fmt(speedOf(g))} m`, "VITESSE"], [signed(R.prof(g.level)), "MAÎTRISE"], [passivePerception(g), "PERCEPTION PASSIVE"]].map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("")}</div>
 <h2>Attaques <small>armes équipées</small></h2>
 <table><tr><th>Arme</th><th>Toucher</th><th>Dégâts</th><th>Propriétés</th></tr>${attacks(g).map(a => `<tr><td class="n">${esc(a.n)}${a.q > 1 ? ` ×${a.q}` : ""}</td><td>${signed(a.hit)}</td><td>${esc(a.dmg)}</td><td>${esc([...a.pills, ...a.notes].join(" · "))}</td></tr>`).join("")}<tr class="blank"><td></td><td></td><td></td><td></td></tr></table>
 <h2>Points de vie <small>JdS soulignés : maîtrisés</small></h2>

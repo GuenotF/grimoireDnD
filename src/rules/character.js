@@ -10,6 +10,8 @@ const saveProf = (g, k) => saveFromClass(g, k) || (g.saveX || []).includes(k);
 const saveBonus = (g, k) => R.ab(g, k) + (saveProf(g, k) ? R.prof(g.level) : 0);
 /** Initiative : modificateur de DEX + bonus divers saisi (don Vigilant…). */
 const initiative = g => R.ab(g, "dex") + (g.initX || 0);
+/** Vitesse en mètres : saisie + bonus de classe (Déplacement rapide du barbare…). */
+const speedOf = g => g.speed + (C(g).speedBonus ? C(g).speedBonus(g) : 0);
 /** Taille du dé de vie de la classe (8 pour « 1d8 »). */
 const hitDieSize = g => +String(C(g).hitDie || "1d8").split("d")[1] || 8;
 /** PV maximum à la moyenne : dé plein au niveau 1, puis moyenne arrondie au-dessus ; + mod. de CON à chaque niveau. */
@@ -34,4 +36,4 @@ function hpGain(g, hp, asi = {}) {
 /** Fiche à compléter : la CA ou les PV maximum n'ont jamais été saisis. */
 const sheetIncomplete = g => acOf(g) == null || g.hpMax == null;
 
-export { asiLevels, hpGain, skillLevel, skillBonus, passivePerception, saveFromClass, saveProf, saveBonus, initiative, hitDieSize, hpAverage, sheetIncomplete };
+export { speedOf, asiLevels, hpGain, skillLevel, skillBonus, passivePerception, saveFromClass, saveProf, saveBonus, initiative, hitDieSize, hpAverage, sheetIncomplete };

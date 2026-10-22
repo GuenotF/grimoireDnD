@@ -81,10 +81,10 @@ function preparedLu1(g, b) {
   }
   const mod = R.am(g), mod1 = R.am(b), row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
   h += `<div class="lutab"><div class="hd"><span></span><span>Niv. ${from}</span><span></span><span>Niv. ${to}</span></div>
-  ${row("DD des sorts", 8 + R.prof(from) + mod, 8 + R.prof(to) + mod1, "--ps-fg")}
-  ${row("Attaque de sort", signed(R.prof(from) + mod), signed(R.prof(to) + mod1), "--pa-fg")}
+  ${C(g).noSpells ? row("Bonus de maîtrise", signed(R.prof(from)), signed(R.prof(to)), "--ps-fg") : `${row("DD des sorts", 8 + R.prof(from) + mod, 8 + R.prof(to) + mod1, "--ps-fg")}
+  ${row("Attaque de sort", signed(R.prof(from) + mod), signed(R.prof(to) + mod1), "--pa-fg")}`}
   ${lu.rowsBefore ? lu.rowsBefore(g, b) : ""}
-  ${row("Sorts préparés", R.maxLevel(g) ? R.prepMax(g) : 0, R.maxLevel(b) ? R.prepMax(b) : 0)}
+  ${C(g).noSpells ? "" : row("Sorts préparés", R.maxLevel(g) ? R.prepMax(g) : 0, R.maxLevel(b) ? R.prepMax(b) : 0)}
   ${lu.rowsAfter ? lu.rowsAfter(g, b) : ""}</div>`;
   const feats = classFeats(g).filter(f => f.lv === to);
   if (feats.length) h += `<div style="display:grid;gap:6px"><span class="lusub">Nouvelle capacité</span>${feats.map(f => `<div class="lucan"><span class="n">${f.n}</span><span class="kp ${f.k}">${esc(f.pill(b))}</span></div>`).join("")}</div>`;
@@ -102,6 +102,7 @@ function preparedLu2(g, b) {
     h += `<div class="rubric"><h3>Sort mineur à apprendre</h3><span class="aside">${L.cpicks.length} / ${needC}</span></div><div class="luplist">${list.map(s => { const on = L.cpicks.includes(s.id); return `<label class="lurowp${on ? " on" : ""}"><input type="checkbox" data-a="lu-cpick" data-id="${s.id}"${on ? " checked" : ""}${!on && fullC ? ' class="full" aria-disabled="true"' : ""}><span class="n">${esc(s.n)}${tags(s)}</span><span class="kps">${keyPills(s, b)}</span></label>`; }).join("")}</div>`;
   }
   if (lu.choices) h += lu.choices(g, b, L); // ex. paladin : style de combat
+  if (C(g).noSpells) return h || `<div class="empty">Rien à choisir à ce niveau : passe à l'étape suivante.</div>`;
   if (!max) return h + `<div class="empty">Le ${C(g).n.toLowerCase()} prépare ses sorts à partir du niveau ${R.unlockAt(g, 1)}.</div>`;
   const prep = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id)), full = prep.length >= pMax;
   const box = (s, on) => `<label class="lurowp${on ? " on" : ""}"><input type="checkbox" data-a="lu-pprep" data-id="${s.id}"${on ? " checked" : ""}${!on && full ? ' class="full" aria-disabled="true"' : ""}><span class="n">${esc(s.n)}${tags(s)}</span><span class="kps">${keyPills(s, b)}</span></label>`;
@@ -131,7 +132,7 @@ function preparedLu3(g, b) {
   <div style="display:grid;gap:4px;font-size:13.5px;color:var(--muted);line-height:1.45">
     ${gained.length ? `<span>• ${cap(gained.map(([lv, d]) => `${d > 1 ? `les ${d} emplacements` : "le nouvel emplacement"} de niveau ${lv}`).join(" et "))} ${gained.length > 1 || gained[0][1] > 1 ? "sont disponibles" : "est disponible"} tout de suite.</span>` : ""}
     ${lu.recapNotes ? lu.recapNotes(g, b) : ""}
-    <span>• DD, attaque et capacités sont mis à jour partout.</span>
+    <span>• ${C(g).noSpells ? "Capacités, attaques et ressources" : "DD, attaque et capacités"} sont mis à jour partout.</span>
     <span>• Tu peux revenir au niveau ${g.level} avec le sélecteur de niveau.</span></div>`;
 }
 onClick("lu-open", () => { const g = G(); if (!g || g.level >= 20) return; luOpen(g); render(); const x = document.querySelector("#lvlup .lufoot .primary"); if (x) x.focus({ preventScroll: true }); });

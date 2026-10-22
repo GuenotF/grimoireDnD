@@ -1,6 +1,7 @@
 // Armes et armures (Manuel des joueurs 2014, ch. 5) : maîtrises, classe d'armure, attaques. Calculs purs.
 // La classe déclare weaponProf (catégories « simple », « martial » ou identifiants d'armes), armorProf (« light »,
-// « medium », « heavy », « shield »), noMetal (druide) ; crochets acBonus(g, armure) et attackMods(g, arme).
+// « medium », « heavy », « shield »), noMetal (druide) ; crochets acBase(g, bouclier) (sans armure), acBonus(g, armure),
+// attackMods(g, arme) et extraAttacks(g, liste).
 import { C } from "../classes/index.js";
 import { GEAR } from "../data.js";
 import { R } from "./common.js";
@@ -24,7 +25,8 @@ function acCalc(g) {
     parts.push([armor.dex ? `DEX${armor.dexMax != null && dex > armor.dexMax ? ` (plafonnée à +${armor.dexMax})` : ""}` : "DEX (aucune en armure lourde)", armor.dex ? d : null]);
     if (armor.stealth) warn.push(`${armor.n} : <b>désavantage en Discrétion</b>.`);
     if (armor.str && g.abil.str < armor.str) warn.push(`${armor.n} : Force ${armor.str} requise (tu as ${g.abil.str}) : <b>−3 m de vitesse</b>.`);
-  } else parts.push(["Sans armure : 10 + DEX", 10 + dex]);
+  } else if (C(g).acBase) C(g).acBase(g, !!shield).forEach(p => parts.push(p)); // ex. barbare : Défense sans armure
+  else parts.push(["Sans armure : 10 + DEX", 10 + dex]);
   if (shield) parts.push(["Bouclier", shield.ac]);
   for (const [l, n] of (C(g).acBonus ? C(g).acBonus(g, armor) : [])) parts.push([l, n]);
   [armor, shield].filter(Boolean).forEach(a => {
@@ -34,7 +36,7 @@ function acCalc(g) {
   return { total: parts.reduce((t, [, n]) => t + (n || 0), 0), parts, warn, armor, shield };
 }
 /** CA affichée : calculée ou saisie (acMode). Sans choix : la saisie si elle existe, sinon le calcul dès qu'une armure ou un bouclier du Manuel est équipé (sinon : à saisir). */
-const acMode = g => g.acMode || (g.ac == null && equipped(g, "armor").length ? "calc" : "manual");
+const acMode = g => g.acMode || (g.ac == null && (equipped(g, "armor").length || C(g).acBase) ? "calc" : "manual"); // classe à Défense sans armure : calcul par défaut
 const acOf = g => acMode(g) === "calc" ? acCalc(g).total : g.ac;
 
 /**
@@ -44,7 +46,7 @@ const acOf = g => acMode(g) === "calc" ? acCalc(g).total : g.ac;
 function attackOf(g, w) {
   const str = R.ab(g, "str"), dex = R.ab(g, "dex");
   const ab = w.finesse ? (dex > str ? "dex" : "str") : w.rng === "ranged" ? "dex" : "str", mod = ab === "dex" ? dex : str;
-  const prof = weaponProf(g, w) ? R.prof(g.level) : 0, x = C(g).attackMods ? C(g).attackMods(g, w) : {};
+  const prof = weaponProf(g, w) ? R.prof(g.level) : 0, x = C(g).attackMods ? C(g).attackMods(g, w, ab) : {};
   const hit = mod + prof + (x.hit || 0), dmod = mod + (x.dmg || 0), plus = n => n ? ` ${n > 0 ? "+" : "−"} ${Math.abs(n)}` : "";
   const pills = [];
   if (w.vers) pills.push(`à deux mains : ${w.vers}${plus(mod + (x.dmg2 != null ? x.dmg2 : x.dmg || 0))}`);
@@ -54,13 +56,15 @@ function attackOf(g, w) {
   else if (w.thrown && w.rng === "ranged") pills.push(`lancer ${w.range}`);
   if (w.two) pills.push("à deux mains"); if (w.heavy) pills.push("lourde"); if (w.light) pills.push("légère");
   (x.pills || []).forEach(p => pills.push(p));
-  return { hit, ab, prof: !!prof, dmg: w.dmg ? `${w.dmg}${plus(dmod)} ${w.dt}` : "aucun dégât", pills, notes: [w.special, ...(x.notes || [])].filter(Boolean) };
+  return { hit, ab, melee: w.rng === "melee", prof: !!prof, dmg: w.dmg ? `${w.dmg}${plus(dmod)} ${w.dt}` : "aucun dégât", pills, notes: [w.special, ...(x.notes || [])].filter(Boolean) };
 }
 /** Attaques du personnage : armes équipées du catalogue, puis mains nues (1 + FOR, maîtrisée par tous). */
 function attacks(g) {
   const list = equipped(g, "weapon").map(({ item, gear }) => ({ n: item.n, q: item.q, ...attackOf(g, gear) }));
   const str = R.ab(g, "str");
-  list.push({ n: "Mains nues", q: 1, hit: str + R.prof(g.level), ab: "str", prof: true, dmg: `${Math.max(1, 1 + str)} contondant`, pills: [], notes: [] });
+  if (C(g).extraAttacks) C(g).extraAttacks(g, list); // ex. Frénésie du berserker
+  const x = C(g).attackMods ? C(g).attackMods(g, { id: "unarmed", rng: "melee", cat: "simple" }, "str") : {}; // attaque d'arme au corps à corps (Rage…)
+  list.push({ n: "Mains nues", q: 1, hit: str + R.prof(g.level) + (x.hit || 0), ab: "str", melee: true, prof: true, dmg: `${Math.max(1, 1 + str + (x.dmg || 0))} contondant`, pills: x.pills || [], notes: [] });
   return list;
 }
 

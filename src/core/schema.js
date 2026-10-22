@@ -40,7 +40,7 @@ function blank(name, cls) {
     defs: [], traits: [], bg: { n: "", d: "" }, pnotes: "",
     // Équipement : objets [{n, q, eq, c (à décompter), note}] et bourse {pp, po, pe, pa, pc}
     items: [], money: blankPurse(), acMode: null,
-    hp: null, hpTemp: 0, death: { s: 0, f: 0, stable: false }, hdU: 0, spells: [],
+    hp: null, hpTemp: 0, death: { s: 0, f: 0, stable: false }, hdU: 0, exh: 0, spells: [],
     prepared: [], used: {}, extras: [], effects: [], notes: "", snotes: {}, ...Object.assign({}, ...Object.values(CLASSES).map(c => c.defaults ? c.defaults() : {})), updatedAt: Date.now() };
 }
 const fxKey = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -55,6 +55,7 @@ function norm(g) {
   o.ac = num(o.ac, 0, 40); o.hpMax = num(o.hpMax, 1, 999); o.initX = num(o.initX, -20, 20) || 0;
   o.speed = isFinite(+o.speed) && o.speed !== null && o.speed !== "" ? Math.min(60, Math.max(0, +o.speed)) : 9;
   o.hp = o.hp == null ? null : Math.max(0, Math.round(+o.hp) || 0); if (o.hpMax != null && o.hp != null && o.hp >= o.hpMax) o.hp = null;
+  o.exh = Math.min(6, Math.max(0, Math.round(+o.exh) || 0)); // niveaux d'épuisement
   o.hpTemp = Math.max(0, Math.round(+o.hpTemp) || 0); o.hdU = Math.min(o.level, Math.max(0, Math.round(+o.hdU) || 0));
   const d = o.death && typeof o.death === "object" ? o.death : {};
   o.death = { s: Math.min(3, Math.max(0, +d.s || 0)), f: Math.min(3, Math.max(0, +d.f || 0)), stable: !!d.stable };

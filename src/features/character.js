@@ -3,22 +3,23 @@
 // Gérer : on recopie la feuille du joueur. En jeu : on consulte les valeurs calculées.
 import { C } from "../classes/index.js";
 import { onChange, onClick } from "../core/actions.js";
-import { cap, esc, fmt, signed } from "../core/format.js";
+import { cap, fmt, signed } from "../core/format.js";
 import { S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render } from "../core/ui.js";
-import { hitDieSize, hpAverage, initiative, passivePerception, saveBonus, saveFromClass, saveProf, sheetIncomplete, skillBonus, skillLevel } from "../rules/character.js";
+import { speedOf, hitDieSize, hpAverage, initiative, passivePerception, saveBonus, saveFromClass, saveProf, sheetIncomplete, skillBonus, skillLevel } from "../rules/character.js";
 import { R } from "../rules/common.js";
-import { acCalc, acMode, acOf, attacks } from "../rules/equipment.js";
+import { acCalc, acMode, acOf } from "../rules/equipment.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { foldHead, isFold } from "../ui/components.js";
+import { attacksHTML } from "./attacks.js";
 import { equipmentGerer, equipmentJeu } from "./equipment.js";
 import { hpCardHTML } from "./hp.js";
 import { restBarHTML } from "./rest.js";
 import { traitsSheetGerer, traitsSheetJeu } from "./traits.js";
 
 const viewSwitch = () => `<div class="viewsw" role="group" aria-label="Affichage de la fiche"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
-const speedTxt = g => `${fmt(g.speed)} m`;
+const speedTxt = g => `${fmt(speedOf(g))} m`;
 
 function incompleteHTML(g) {
   if (!sheetIncomplete(g)) return "";
@@ -31,7 +32,7 @@ function abilitiesGerer(g) {
   let h = foldHead("ch-ab", "", "Caractéristiques", "valeurs de ta feuille", sum);
   if (isFold("ch-ab")) return h;
   h += `<div class="abgrid">${ABILITIES.map(([k, a, n]) => `<label class="abcell${k === C(g).ab ? " mine" : ""}" title="${n}"><span class="abk">${a}</span><input id="ab-${k}" data-abil="${k}" type="number" inputmode="numeric" min="1" max="30" value="${g.abil[k]}" aria-label="${n}"><b class="abm">${signed(R.ab(g, k))}</b></label>`).join("")}</div>`;
-  return h + `<p class="chhelp">Le modificateur se calcule seul. ${cap(C(g).abArticle || "l'" + C(g).abN)} sert aussi à tes sorts : DD, attaque et sorts préparés la lisent ici.</p>`;
+  return h + `<p class="chhelp">Le modificateur se calcule seul.${C(g).noSpells ? "" : ` ${cap(C(g).abArticle || "l'" + C(g).abN)} sert aussi à tes sorts : DD, attaque et sorts préparés la lisent ici.`}</p>`;
 }
 function combatGerer(g) {
   const sum = `CA ${acOf(g) ?? "?"} · PV ${g.hpMax ?? "?"} · ${speedTxt(g)}`;
@@ -75,22 +76,12 @@ function skillsGerer(g) {
 }
 
 // ---------- En jeu
-function attacksHTML(g) {
-  const list = attacks(g), notes = C(g).attackNotes ? C(g).attackNotes(g) : [];
-  let h = foldHead("ch-atk", "", "Attaques", `FOR ${signed(R.ab(g, "str"))} · DEX ${signed(R.ab(g, "dex"))} · maîtrise ${signed(R.prof(g.level))}`, list.map(a => a.n).join(", "));
-  if (isFold("ch-atk")) return h;
-  h += `<div class="chbox atkbox">${list.map(a => `<div class="atk"><div class="ah"><b>${esc(a.n)}${a.q > 1 ? ` ×${a.q}` : ""}</b><span class="kp a" title="Bonus pour toucher (${a.ab === "dex" ? "DEX" : "FOR"}${a.prof ? " + maîtrise" : ", arme non maîtrisée"})">${signed(a.hit)}</span><span class="kp d">${esc(a.dmg)}</span></div>
-    ${a.pills.length ? `<div class="ap">${a.pills.map(p => `<span class="kp n">${esc(p)}</span>`).join("")}</div>` : ""}${!a.prof ? `<small class="aw">Arme non maîtrisée : pas de bonus de maîtrise.</small>` : ""}${a.notes.map(n => `<small>${esc(n)}</small>`).join("")}</div>`).join("")}
-    ${notes.length ? `<div class="atknotes">${notes.map(n => `<span>${n}</span>`).join("")}</div>` : ""}
-    ${list.length === 1 ? `<p class="chhelp" style="margin:4px 0 0">Ajoute tes armes dans l'équipement (mode Gérer) et coche « équipé » : elles apparaîtront ici.</p>` : ""}</div>`;
-  return h;
-}
 function jeuHTML(g) {
   const st = (v, l, cls = "") => `<div class="chstat${cls}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
   const stats = `<div class="chstats">${st(acOf(g) ?? "?", "CA")}${st(signed(initiative(g)), "Initiative")}${st(speedTxt(g), "Vitesse")}${st(signed(R.prof(g.level)), "Maîtrise")}</div>`;
   let sk = foldHead("ch-skj", "", "Compétences", `Perception passive ${passivePerception(g)}`);
   if (!isFold("ch-skj")) sk += `<div class="skplay">${SKILLS.map(([k, n]) => { const l = skillLevel(g, k); return `<div class="${l ? "on" : ""}"><span class="mk" aria-hidden="true">${l === 2 ? "◉" : l ? "●" : ""}</span><span class="n">${n}${l ? `<span class="sr"> (${LV_NAME[l]})</span>` : ""}</span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("")}</div>`;
-  return hpCardHTML(g) + restBarHTML(g) + stats + attacksHTML(g) + sk + equipmentJeu(g) + traitsSheetJeu(g); // les caractéristiques sont dans l'en-tête (heroAbilities)
+  return hpCardHTML(g) + restBarHTML(g) + stats + (C(g).noSpells ? "" : attacksHTML(g)) + sk + equipmentJeu(g) + traitsSheetJeu(g); // les caractéristiques sont dans l'en-tête (heroAbilities)
 }
 
 // En-tête de l'onglet Personnage : les six caractéristiques à la place des statistiques de sorts.

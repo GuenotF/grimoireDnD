@@ -54,7 +54,7 @@ function spendHitDie(g, roll) {
 /** Repos long : PV au maximum, PV temporaires perdus, jets contre la mort effacés, moitié des dés de vie récupérés (au moins 1). */
 function longRestHP(g) {
   if (isDead(g)) return;
-  g.hp = null; g.hpTemp = 0; g.death = freshDeath();
+  g.hp = null; g.hpTemp = 0; g.death = freshDeath(); if (g.exh) g.exh--; // un niveau d'épuisement en moins (avec nourriture et eau)
   g.hdU = Math.max(0, (g.hdU || 0) - Math.max(1, Math.floor(g.level / 2)));
 }
 

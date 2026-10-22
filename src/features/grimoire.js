@@ -9,8 +9,8 @@ import { BY_ID } from "../data.js";
 import { R, castable, classSpells } from "../rules/common.js";
 import { foldHead, isFold, removeBtn } from "../ui/components.js";
 import { castHTML, concWarnHTML, firstFree, liveMark, slotsLeft } from "./cast.js";
-import { keyPills, noteBox, noteGerer, noteMark, noteOf, notePen, pillsHTML, spellBody, tags } from "./spells.js";
 import { restBarHTML } from "./rest.js";
+import { keyPills, noteBox, noteGerer, noteMark, noteOf, notePen, pillsHTML, spellBody, tags } from "./spells.js";
 
 function featsHTML(g) {
   const feats = classFeats(g), have = feats.filter(f => f.lv <= g.level), next = feats.filter(f => f.lv > g.level).slice(0, 2);

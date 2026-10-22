@@ -9,17 +9,17 @@ import { loadLocal, mutate, pickCurrent, setCur } from "./core/store.js";
 import { render, setRenderer, setStatus, toast } from "./core/ui.js";
 import { BEAST, BEASTS, BY_ID, SPELLS } from "./data.js";
 import { concOf, concPanelHTML, fxSheetHTML, slotbarHTML } from "./features/cast.js";
+import { characterHTML, heroAbilities } from "./features/character.js";
 import { grimoireHTML } from "./features/grimoire.js";
 import { hpChipHTML } from "./features/hp.js";
 import { luHTML } from "./features/levelup.js";
-import { characterHTML, heroAbilities } from "./features/character.js";
 import { biblioHTML } from "./features/library.js";
 import { newHTML } from "./features/newchar.js";
 import { saveHTML } from "./features/save.js";
 import { sheetIncomplete } from "./rules/character.js";
+import { R, inClass } from "./rules/common.js";
 import { ABILITIES } from "./rules/tables.js";
 import { statLabel } from "./ui/components.js";
-import { R, inClass } from "./rules/common.js";
 import "./ui/components.js";
 import "./features/spells.js";
 
@@ -38,8 +38,11 @@ function renderApp() {
     main.innerHTML = heroHTML(g) + tabsHTML(g) + `<div class="panel" id="panel">${panelHTML(g)}</div>`;
   }
   setStatus(S.statusText || "", S.statusErr);
-  const bar = document.getElementById("slotbar"), showBar = !!g && S.tab === "grimoire" && R.slots(g).length > 0;
-  bar.hidden = !showBar; if (showBar) bar.innerHTML = slotbarHTML(g, hpChipHTML(g));
+  // Barre du bas : dans l'onglet principal de la classe, s'il y a des emplacements de sorts ou des puces (PV, Rage…)
+  const barChips = g ? hpChipHTML(g) : "", mainTab = g ? C(g).tabs(g)[0][0] : "";
+  const showBar = !!g && S.tab === mainTab && (R.slots(g).length > 0 || !!barChips || !!(C(g).slotbarChips && C(g).slotbarChips(g)));
+  const bar = document.getElementById("slotbar");
+  bar.hidden = !showBar; if (showBar) bar.innerHTML = slotbarHTML(g, barChips);
   document.body.classList.toggle("has-slotbar", showBar);
   document.documentElement.style.setProperty("--barh", (showBar ? bar.offsetHeight : 0) + "px");
   document.getElementById("toast").classList.toggle("above-bar", showBar);
@@ -75,7 +78,7 @@ function welcomeHTML() {
 // caractéristiques dans Personnage, statistiques de sorts ailleurs. Intitulés courts sur téléphone (statLabel).
 function heroHTML(g) {
   const prof = R.prof(g.level), mod = R.am(g), max = R.maxLevel(g);
-  const nPrep = g.prepared.length, pMax = R.prepMax(g), abShort = ABILITIES.find(a => a[0] === C(g).ab)[1];
+  const nPrep = g.prepared.length, pMax = R.prepMax(g), abShort = (ABILITIES.find(a => a[0] === C(g).ab) || [])[1];
   const first = esc(g.name.charAt(0)), rest = esc(g.name.slice(1));
   const spells = `<div class="statcap">Sorts</div><div class="stats" role="list" aria-label="Sorts">
     <div class="stat" role="listitem"><div class="v">${signed(mod)}</div>${statLabel(`Mod. ${C(g).abN}`, `Mod. ${abShort}`)}</div>
@@ -87,7 +90,7 @@ function heroHTML(g) {
   return `<section class="hero">
   <div class="herohead">
     <div class="ht"><h1 class="title" id="title"><span class="initial">${first}</span>${rest}</h1>
-    <div class="subline">${C(g).subline(g)} · ${max ? `sorts jusqu'au niveau ${max}` : `sorts au niveau ${R.unlockAt(g, 1)}`}</div></div>
+    <div class="subline">${C(g).subline(g)}${C(g).noSpells ? "" : ` · ${max ? `sorts jusqu'au niveau ${max}` : `sorts au niveau ${R.unlockAt(g, 1)}`}`}</div></div>
     <div class="hbtns">${g.level < 20 ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}<button class="btn edit" data-a="hero-edit" aria-expanded="${S.heroEdit}">✎ ${S.heroEdit ? "Fermer" : "Modifier"}</button></div>
   </div>
   ${S.heroEdit ? `<div class="setup">
@@ -96,7 +99,8 @@ function heroHTML(g) {
     ${C(g).subclassField(g)}
     <p class="help">Le niveau se change ici sans assistant (création, correction).${g.level < 20 ? ` Pour monter de niveau, utilise ↑ Niveau ${g.level + 1}.` : ""}</p>
   </div>` : ""}
-  ${S.tab === "perso" ? `<div class="statcap">Caractéristiques</div><div class="stats" role="list" aria-label="Caractéristiques">${heroAbilities(g)}</div>` : spells}
+  ${S.tab === "perso" ? `<div class="statcap">Caractéristiques</div><div class="stats" role="list" aria-label="Caractéristiques">${heroAbilities(g)}</div>`
+    : C(g).noSpells ? `<div class="statcap">${C(g).n}</div><div class="stats" role="list" aria-label="${C(g).n}">${C(g).heroStats(g)}</div>` : spells}
   ${showIosTip() ? `<div class="banner">Sur iPhone ou iPad, installe l'atelier : bouton <b>Partager</b>, puis <b>Sur l'écran d'accueil</b>. Ouvre-le ensuite toujours depuis cette icône : c'est là que tes grimoires sont le mieux conservés. <button class="btn ghost" data-a="hide-ios">Masquer</button></div>` : ""}
   </section>`;
 }
@@ -105,7 +109,7 @@ function heroHTML(g) {
 const PLAY_TABS = 2; // Personnage et Sorts : les écrans de jeu, mis en avant
 function tabsHTML(g) {
   const main = [["perso", "Personnage"], ...C(g).tabs(g)], more = [...(C(g).moreTabs ? C(g).moreTabs(g) : []), ["sauvegarde", "Sauvegarde"]];
-  if (![...main, ...more].some(x => x[0] === S.tab)) S.tab = "grimoire";
+  if (![...main, ...more].some(x => x[0] === S.tab)) S.tab = main[1][0]; // onglet principal de la classe (Sorts, Capacités…)
   const inMore = more.some(x => x[0] === S.tab);
   const tab = ([k, l, c], i) => `<button class="tab${i < PLAY_TABS ? " play" : ""}" role="tab" data-a="tab" data-v="${k}" aria-selected="${S.tab === k}">${l}${k === "perso" && sheetIncomplete(g) ? `<span class="todo" title="Fiche à compléter"></span>` : ""}${c != null ? `<span class="count">${c}</span>` : ""}</button>${i === PLAY_TABS - 1 ? `<span class="tabsep" aria-hidden="true"></span>` : ""}`;
   return `<div class="tabs" role="tablist">${main.map(tab).join("")}

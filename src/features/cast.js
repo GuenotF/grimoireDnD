@@ -39,6 +39,7 @@ function slotbarHTML(g, pre = "") {
   const others = g.effects.filter(e => !e.c);
   const wf = pre + (C(g).slotbarChips ? C(g).slotbarChips(g) : ""); // ex. druide : forme active
   const fx = g.effects.length || wf ? `<div class="fx">${wf}${cur ? `<button class="chip conc" data-a="conc-panel" aria-expanded="${S.concPanel}">◉ ${esc(cur.name)} · conc.</button>` : ""}${others.map(e => `<button class="chip" data-a="fx-open">${esc(e.name)} · ${esc(e.d)}</button>`).join("")}${g.effects.length > 1 || (g.effects.length && !cur) ? `<button class="chip" data-a="fx-open" style="background:transparent;border-color:var(--rule);color:var(--muted)">Tout voir</button>` : ""}</div>` : "";
+  if (!R.slots(g).length) return fx; // classe sans sorts (ou pas encore d'emplacement) : seulement les puces
   return `${fx}<button class="line" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g).map((n, i) => {
     const used = Math.min(n, +(g.used[i + 1] || 0));
     return `<span class="lv" aria-label="Niveau ${i + 1} : ${n - used} sur ${n}"><b>${i + 1}</b>${Array.from({ length: n }, (_, k) => `<span class="d${k < used ? " u" : ""}"></span>`).join("")}</span>`;
