@@ -87,7 +87,7 @@ function luStep1(g, b) {
   const notes = [];
   if (need.c) notes.push(`<span><b>Un sort mineur de plus</b> : tu le choisis à l'étape suivante.</span>`);
   if ([2, 6, 10, 14].includes(to)) notes.push(`<span><b>Capacité de tradition arcanique</b> (${esc(g.school)}) : voir le Manuel des joueurs.</span>`);
-  if ([4, 8, 12, 16, 19].includes(to)) notes.push(`<span><b>Amélioration de caractéristiques</b> : si tu augmentes l'Intelligence, change sa valeur dans la fiche, le DD et l'attaque suivront.</span>`);
+  if ([4, 8, 12, 16, 19].includes(to)) notes.push(`<span><b>Amélioration de caractéristiques</b> : si tu augmentes l'Intelligence, change sa valeur dans l'onglet Personnage, le DD et l'attaque suivront.</span>`);
   if (to === 18) notes.push(`<span><b>Maîtrise des sorts</b> : un sort de niveau 1 et un de niveau 2 lancés à volonté.</span>`);
   if (to === 20) notes.push(`<span><b>Sorts de prédilection</b> : deux sorts de niveau 3, une fois chacun par repos court sans emplacement.</span>`);
   notes.push(`<span>Hors grimoire, à vérifier sur ta fiche : points de vie, capacités de race${g.extras.length ? " et autres sorts (certains se débloquent avec le niveau)" : ""}.</span>`);
@@ -196,6 +196,7 @@ ${pFoot("GRIMOIRE")}
 // ---------- Définition de la classe (contrat : voir docs/ARCHITECTURE.md) ----------
 export default {
   n: "Magicien", ab: "int", abN: "Intelligence", slots: SLOTS, top: 9,
+  saves: ["int", "wis"],             // jets de sauvegarde maîtrisés par la classe
   book: true,                 // grimoire : apprend des sorts (montée de niveau, copie), prépare parmi eux
   fileLabel: "Grimoire",      // nom des fichiers de sauvegarde
   cantrips: lv => lv >= 10 ? 5 : lv >= 4 ? 4 : 3,
@@ -208,7 +209,8 @@ export default {
     return `<div class="stat ${nSp < exp ? "alert" : ""}" role="listitem"><div class="v">${nSp}<small>/${exp}</small></div><div class="l">Grimoire (min.)</div></div>
     <div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div><div class="l">Sorts mineurs</div></div>`;
   },
-  tabs: g => [["grimoire","Grimoire", g.spells.length + g.cantrips.length],["biblio","Bibliothèque", classSpells(g).length],["imprimer","Imprimer"],["sauvegarde","Sauvegarde"],["regles","Règles"]],
+  tabs: g => [["grimoire","Grimoire", g.spells.length + g.cantrips.length],["biblio","Bibliothèque", classSpells(g).length]],
+  moreTabs: () => [["regles","Règles"],["imprimer","Imprimer"]],
   panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },
   print: g => printSheet(g),
   printTitle: g => `Grimoire de ${g.name}`,

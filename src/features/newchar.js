@@ -24,10 +24,10 @@ function newHTML() {
 onClick("new", () => { S.newOpen = true; S.newCls = null; S.newName = ""; render(); });
 onClick("nw-close", () => { S.newOpen = false; render(); });
 onClick("nw-cls", (b) => { S.newCls = b.dataset.v; render(); const el = document.getElementById("nw-name"); if (el) el.focus({ preventScroll: true }); });
-onClick("nw-go", () => {
+onClick("nw-go", () => { // on commence par recopier la fiche : onglet Personnage, mode Gérer
   if (!CLASSES[S.newCls]) return;
   const g = blank((S.newName || "").trim(), S.newCls), id = newId(g.name);
-  S.list[id] = g; S.newOpen = false; S.tab = "grimoire"; setCur(id); save(id); toast(`${esc(g.name)} créé`);
+  S.list[id] = g; S.newOpen = false; S.tab = "perso"; S.view = "gerer"; setCur(id); save(id); toast(`${esc(g.name)} créé`);
 });
 onInput("#nw-name", t => { S.newName = t.value; });
 

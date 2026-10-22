@@ -70,7 +70,10 @@ class App:
         self.click(f'[data-a="view"][data-v="{v}"]')
 
     def tab(self, v):
-        self.click(f'[data-a="tab"][data-v="{v}"]')
+        sel = f'[data-a="tab"][data-v="{v}"]'
+        if self.count(sel) == 0:  # onglet rangé dans le menu Plus
+            self.click('[data-a="more"]')
+        self.click(sel)
 
     def level(self, n):
         self.pg.select_option("#f-level", str(n))

@@ -7,6 +7,8 @@ def test_fiche_et_preparation(browser, devices, url):
     a.new_character("druide", "Malfaël Clanchombre", 4)
     check("Druide niveau 4 · Cercle de la Lune" in a.text(".subline"), "sous-titre")
     check(a.js("R.slots(G()).join()") == "4,3", "emplacements du niveau 4")
+    a.pg.fill("#ab-wis", "16"); a.pg.press("#ab-wis", "Tab"); a.pg.wait_for_timeout(60)
+    a.tab("grimoire")
     for sid in ["entangle", "cure-wounds", "fog-cloud", "speak-with-animals", "moonbeam", "lesser-restoration", "healing-word"]:
         a.pg.check(f'.gprep[data-id="{sid}"]'); a.pg.wait_for_timeout(20)
     check(a.g("prepared.length") == 7 and a.count(".gprep.full") > 0, "7 sorts préparés (SAG +3, niveau 4)")

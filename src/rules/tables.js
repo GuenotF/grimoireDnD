@@ -11,4 +11,7 @@ const HALF = {1:[],2:[2],3:[3],4:[3],5:[4,2],6:[4,2],7:[4,3],8:[4,3],9:[4,3,2],1
   15:[4,3,3,2],16:[4,3,3,2],17:[4,3,3,3,1],18:[4,3,3,3,1],19:[4,3,3,3,2],20:[4,3,3,3,2]};
 const LVL_NAME = ["Sorts mineurs","Niveau 1","Niveau 2","Niveau 3","Niveau 4","Niveau 5","Niveau 6","Niveau 7","Niveau 8","Niveau 9"];
 
-export { SCHOOLS, SCHOOL_VAR, SLOTS, HALF, LVL_NAME };
+// Caractéristiques : [code, abréviation, nom]. Les codes sont ceux des sauvegardes (abil.str…).
+const ABILITIES = [["str","FOR","Force"],["dex","DEX","Dextérité"],["con","CON","Constitution"],["int","INT","Intelligence"],["wis","SAG","Sagesse"],["cha","CHA","Charisme"]];
+
+export { SCHOOLS, SCHOOL_VAR, SLOTS, HALF, LVL_NAME, ABILITIES };

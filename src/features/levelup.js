@@ -49,7 +49,7 @@ function preparedLu1(g, b) {
   if (feats.length) h += `<div style="display:grid;gap:6px"><span class="lusub">Nouvelle capacité</span>${feats.map(f => `<div class="lucan"><span class="n">${f.n}</span><span class="kp ${f.k}">${esc(f.pill(b))}</span></div>`).join("")}</div>`;
   if (lu.summaryExtra) h += lu.summaryExtra(g, b); // ex. nouveaux sorts de serment, nouvelles formes
   const notes = [`<span>Hors appli, à vérifier sur ta fiche : points de vie (${C(g).hitDie} + mod. CON)${R.prof(to) > R.prof(from) ? ` et bonus de maîtrise (${signed(R.prof(to))}), qui monte aussi le toucher de tes armes` : ""}.</span>`];
-  if ([4, 8, 12, 16, 19].includes(to)) notes.unshift(`<span><b>Amélioration de caractéristiques</b> : si tu augmentes ${C(g).abArticle}, change sa valeur dans la fiche, le DD et l'attaque suivront.</span>`);
+  if ([4, 8, 12, 16, 19].includes(to)) notes.unshift(`<span><b>Amélioration de caractéristiques</b> : si tu augmentes ${C(g).abArticle}, change sa valeur dans l'onglet Personnage, le DD et l'attaque suivront.</span>`);
   if (lu.notes) notes.unshift(...lu.notes(g, to)); // ex. rappel du serment ou du cercle
   return h + `<div class="lunote">${notes.join("")}</div>`;
 }

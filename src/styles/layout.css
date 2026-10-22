@@ -40,12 +40,22 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 @media (max-width: 760px) { .stats { grid-template-columns: repeat(3, minmax(0,1fr)); } .stat:nth-child(4) { border-left: 0; } .stat:nth-child(n+4) { border-top: 1px solid var(--rule); } }
 
 /* Onglets */
-.tabs { display: flex; gap: 4px; margin-top: 22px; border-bottom: 1px solid var(--rule); overflow-x: auto; }
+.tabs { display: flex; align-items: stretch; gap: 4px; margin-top: 22px; border-bottom: 1px solid var(--rule); }
 .tab { border: 0; background: transparent; padding: 9px 14px 8px; font-family: var(--f-sc); font-size: 15px; letter-spacing: .05em; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
 .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--rubric); }
 .tab .count { font-family: var(--f-body); font-size: 12px; color: var(--muted); margin-left: 4px; }
+.tab.play { color: var(--ink); font-weight: 700; }              /* Personnage et Sorts : les écrans de jeu */
+.tab .todo { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--rubric); margin-left: 4px; vertical-align: 3px; }
+.tabsep { align-self: center; width: 1px; height: 18px; background: var(--rule); margin: 0 4px; flex: none; }
+.tabmore { margin-left: auto; position: relative; display: flex; }
+.moreback { position: fixed; inset: 0; z-index: 30; }
+.moremenu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 31; min-width: 190px; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 8px 24px rgba(27,33,54,.18); padding: 5px; display: grid; }
+.moremenu button { border: 0; background: transparent; text-align: left; padding: 10px 12px; border-radius: 6px; font-size: 15.5px; }
+.moremenu button:hover { background: var(--sunk); }
+.moremenu button[aria-current="true"] { color: var(--rubric); font-weight: 700; }
 .panel { margin-top: 18px; }
-@media (max-width: 560px) { .tabs { flex-wrap: wrap; overflow: visible; } .tab { padding: 8px 10px 7px; font-size: 14px; } .tab .count { display: none; } }
+@media (max-width: 560px) { .tabs { gap: 0; } .tab { padding: 8px 5px 7px; font-size: 14px; letter-spacing: .03em; } .tab .count { display: none; } .tabsep { margin: 0 3px; } }
+@media (max-width: 370px) { .tab { padding: 8px 3px 7px; font-size: 13px; letter-spacing: .01em; } .tabsep { margin: 0 1px; } }
 
 /* Rubriques */
 .rubric { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; border-bottom: 1.5px solid var(--rubric); padding-bottom: 4px; margin: 26px 0 8px; }

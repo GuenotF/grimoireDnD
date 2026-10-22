@@ -114,6 +114,7 @@ ${pFoot("DRUIDE")}
 const row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
 export default {
   n: "Druide", ab: "wis", abN: "Sagesse", abArticle: "la Sagesse", slots: SLOTS, top: 9, hitDie: "1d8",
+  saves: ["int", "wis"],             // jets de sauvegarde maîtrisés par la classe
   cantrips: lv => lv >= 10 ? 4 : lv >= 4 ? 3 : 2,
   prep: (g, m) => Math.max(1, m + g.level),
   ritualNeedsPrep: true,       // un rituel se lance s'il est préparé
@@ -129,7 +130,8 @@ export default {
   subclassField: g => `<div class="field"><label for="f-circle">Cercle druidique</label><select id="f-circle">${Object.entries(CIRCLES).map(([k, o]) => `<option value="${k}"${k === g.circle ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
   heroStats: g => { const cMax = R.cantrips(g); return `<div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div><div class="l">Sorts mineurs</div></div>
     <div class="stat" role="listitem"><div class="v">${DRU.ws(g) ? `FP ${DRU.fp(g)}` : "—"}</div><div class="l">Forme sauvage</div></div>`; },
-  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["bestiaire","Bestiaire", BEASTS.filter(b => wsAllowed(g, b)).length],["imprimer","Imprimer"],["sauvegarde","Sauvegarde"],["regles","Règles"]],
+  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["bestiaire","Bestiaire", BEASTS.filter(b => wsAllowed(g, b)).length]],
+  moreTabs: () => [["regles","Règles"],["imprimer","Imprimer"]],
   panels: { bestiaire: g => bestiaryHTML(g), imprimer: g => printHTML(g), regles: g => rulesHTML(g) },
   print: g => printSheet(g),
   printTitle: g => `Fiche de sorts de ${g.name}`,

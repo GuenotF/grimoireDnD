@@ -13,10 +13,16 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 - *Nouveau personnage* : choix de la classe à la création. Un fichier importé garde sa classe ; les anciens fichiers sans classe sont des magiciens.
 
 **Le magicien**
-- Niveau, Intelligence et tradition arcanique : DD, bonus d'attaque, emplacements, nombre de sorts préparés et de sorts mineurs calculés automatiquement.
+- Niveau, Intelligence (onglet Personnage) et tradition arcanique : DD, bonus d'attaque, emplacements, nombre de sorts préparés et de sorts mineurs calculés automatiquement.
 - Dés des sorts mineurs à dégâts ajustés au niveau (5, 11, 17).
 - **Passage de niveau** : le bouton *↑ Niveau N*, à côté du sélecteur, ouvre un assistant en 3 étapes : ce qui change (DD, attaque, emplacements, préparation, Restauration arcanique, sorts mineurs), choix des 2 sorts gratuits (et du sort mineur supplémentaire aux niveaux 4 et 10), validation avec préparation facultative. Annulable. Le sélecteur reste un réglage direct, sans assistant (création, correction).
 - Plusieurs grimoires sur le même appareil.
+
+**Onglet Personnage** (toutes les classes)
+- *Gérer* : les six caractéristiques (modificateurs calculés ; la caractéristique d'incantation sert au DD, à l'attaque et aux sorts préparés), classe d'armure, vitesse, initiative (DEX + bonus divers), PV maximum (avec la moyenne selon le dé de vie, le niveau et la CON), jets de sauvegarde (★ ceux de la classe, et maîtrises ajoutées au toucher).
+- *En jeu* : CA, PV max, initiative, vitesse, maîtrise ; les six caractéristiques avec leur bonus de jet de sauvegarde (en bleu si maîtrisé).
+- Tant que la CA ou les PV maximum ne sont pas saisis, un message « Complète ta fiche » et un point rouge sur l'onglet le rappellent. Un nouveau personnage s'ouvre sur sa fiche.
+- Navigation : *Personnage* et *Sorts* (en gras), *Bibliothèque*, *Bestiaire* (druide) ; *Règles*, *Imprimer* et *Sauvegarde* dans le menu *Plus*.
 
 **Onglet Grimoire, mode « Gérer »** (préparer et organiser)
 - Une ligne par sort : case *Préparer*, nom, pastilles clés (dégâts, jet ou effet). Toucher le nom déplie le détail complet, les boutons de lancement, l'origine et *Retirer*.
@@ -46,7 +52,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 - Une ligne par sort par défaut ; les résultats d'une recherche s'affichent avec leur description complète.
 - Ajout par montée de niveau ou par copie (coût calculé, moitié prix pour l'école du magicien).
 
-**Onglets Imprimer, Sauvegarde, Règles**
+**Menu Plus : Règles, Imprimer, Sauvegarde**
 - Fiche imprimable A4 pour chaque classe, même présentation : tableau de bord à cocher au crayon, sorts, règles et notes (magicien : grimoire et journal de copie ; paladin : ressources et Châtiment divin ; druide : Forme sauvage et fiches des formes ★).
 - *Envoyer au MJ* (menu de partage du téléphone), export et import, suppression.
 - Onglet *Règles* pour chaque classe : préparation, lancer un sort (emplacement, jet de sauvegarde, attaque de sort, pastilles), concentration, repos, et les règles propres à la classe (grimoire, Châtiment divin, Imposition des mains, Forme sauvage…), avec les valeurs du personnage.
@@ -61,7 +67,7 @@ L'application est une seule page web. Elle s'installe sur l'écran d'accueil (An
 
 - **Sur l'appareil**, dans le stockage du navigateur (ou de l'application installée). Rien n'est envoyé à GitHub ni ailleurs.
 - Chaque appareil a ses propres grimoires : il n'y a pas de synchronisation.
-- **Sauvegarde et transfert** : onglet *Sauvegarde* › *Envoyer au MJ* (ou *Exporter*), puis *Importer* sur l'autre appareil. Les fichiers sont datés (`Grimoire - Némeia - 2026-10-19.json`). Sur Android, le partage produit un `.txt` au contenu identique, que l'import accepte aussi.
+- **Sauvegarde et transfert** : menu *Plus* › *Sauvegarde* › *Envoyer au MJ* (ou *Exporter*), puis *Importer* sur l'autre appareil. Les fichiers sont datés (`Grimoire - Némeia - 2026-10-19.json`). Sur Android, le partage produit un `.txt` au contenu identique, que l'import accepte aussi.
 - L'import **ajoute** un grimoire : il ne remplace pas celui qui existe déjà.
 - Vider les données du navigateur, utiliser la navigation privée ou désinstaller l'icône sur iOS efface les grimoires : exporte-les régulièrement.
 

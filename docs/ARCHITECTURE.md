@@ -1,6 +1,6 @@
 # Architecture cible de l'Atelier du Grimoire
 
-*Validé le 21 octobre 2026. Étapes 0 à 3 faites le 21 octobre 2026.*
+*Validé le 21 octobre 2026. Étapes 0 à 4 faites le 21 octobre 2026. Onglet Personnage (étape 1) le 22 octobre 2026.*
 
 ## 1. Objectifs
 
@@ -30,15 +30,16 @@ src/
   styles/                   CSS, un fichier par partie de l'écran (index.css fixe l'ordre)
   core/
     state.js                état de l'écran (S) et personnage en cours (G)
-    schema.js               format d'un personnage : valeurs par défaut, contrôle, version (v2) et migrations
+    schema.js               format d'un personnage : valeurs par défaut, contrôle, version (v3) et migrations
     store.js                enregistrement sur l'appareil, personnage affiché, mutate
     ui.js                   rendu (fourni par app.js), message d'annulation, statut
     actions.js              registre des actions : onClick, onChange, onInput, onSubmit, onKey
     format.js               mise en forme du texte (signes, pluriels, échappement)
     pwa.js                  version installée : service worker, astuce iPhone
   rules/
-    tables.js               tables sans dépendance : écoles, emplacements (lanceur complet, demi-lanceur)
+    tables.js               tables sans dépendance : écoles, emplacements (lanceur complet, demi-lanceur), caractéristiques
     common.js               règles communes : maîtrise, modificateurs, emplacements, préparation, sorts lançables
+    character.js            fiche de personnage : sauvegardes, initiative, PV moyens, fiche à compléter
   classes/
     index.js                registre des classes : C(g), sorts toujours préparés, capacités
     magicien.js             contrat + Restauration arcanique, onglet Règles, assistant de niveau du grimoire
@@ -47,6 +48,7 @@ src/
     druide-wildshape.js     Forme sauvage : formes possibles, forme active, Changeforme de combat, Bestiaire
   ui/components.js          éléments réutilisables : sections repliables, capacités dépliables, bouton Retirer
   features/                 mécaniques partagées par toutes les classes
+    character.js            onglet Personnage : caractéristiques, combat, jets de sauvegarde (Gérer, En jeu)
     spells.js               affichage d'un sort, notes personnelles
     cast.js                 Lancer, barre des emplacements, concentration, sorts en cours
     grimoire.js             onglet Sorts/Grimoire : Gérer, En jeu, capacités de classe, repos
@@ -68,10 +70,11 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `n`, `ab`, `abN`, `abArticle` | Nom, caractéristique d'incantation (code, nom, « la Sagesse ») | ✓ | ✓ | ✓ |
 | `slots`, `top`, `cantrips(lv)`, `prep(g, mod)` | Emplacements, niveau de sort maximal, sorts mineurs, sorts préparés | ✓ | ✓ | ✓ |
 | `book` | Modèle du grimoire (apprend, puis prépare parmi ses sorts) ; sinon prépare dans toute la liste | ✓ | | |
-| `hitDie`, `fileLabel`, `prepNote` | Dé de vie (rappel), nom des sauvegardes, précision sur la préparation | ✓ | ✓ | ✓ |
+| `hitDie`, `fileLabel`, `prepNote` | Dé de vie (PV moyens, rappel), nom des sauvegardes, précision sur la préparation | ✓ | ✓ | ✓ |
+| `saves` | Jets de sauvegarde maîtrisés par la classe (codes `str`, `dex`, `con`, `int`, `wis`, `cha`) | ✓ | ✓ | ✓ |
 | `defaults()`, `normalize(o)` | Champs propres au personnage et leur contrôle à l'ouverture | ✓ | ✓ | ✓ |
 | `subline(g)`, `subclassField(g)`, `heroStats(g)` | En-tête : sous-titre, champ de sous-classe, statistiques | ✓ | ✓ | ✓ |
-| `tabs(g)`, `panels` | Onglets et contenu des onglets propres (Règles, Imprimer, Bestiaire) | ✓ | ✓ | ✓ |
+| `tabs(g)`, `moreTabs(g)`, `panels` | Onglets de la rangée principale (Sorts, Bibliothèque, Bestiaire), onglets du menu Plus (Règles, Imprimer), contenu des onglets propres. Personnage et Sauvegarde sont ajoutés par l'application | ✓ | ✓ | ✓ |
 | `alwaysPrepared(g)`, `alwaysPreparedInfo(g)` | Sorts toujours préparés et leurs libellés (serment) | | ✓ | |
 | `canRitual(prepared)`, `ritualNeedsPrep` | Lancer en rituel | ✓ | | ✓ |
 | `features(g)` | Capacités de classe (avec `control(g)` pour un réglage, ex. style de combat) | | ✓ | ✓ |
@@ -84,8 +87,10 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 
 ## 5. Format de sauvegarde versionné
 
-- Chaque personnage porte un numéro de version, `"v": 2`. Les fichiers actuels, sans numéro, sont la version 1.
-- `schema.js` contient la liste des migrations (v1 → v2, puis v2 → v3 le jour où les PV arrivent…). À l'ouverture d'un fichier, on applique les migrations dans l'ordre.
+- Chaque personnage porte un numéro de version, `"v": 3`. Les fichiers sans numéro sont la version 1.
+- `schema.js` contient la liste des migrations. À l'ouverture d'un fichier, on applique les migrations dans l'ordre.
+  - v1 → v2 : ajout du numéro de version.
+  - v2 → v3 : les six caractéristiques dans `abil` (`str`, `dex`, `con`, `int`, `wis`, `cha`). La caractéristique d'incantation saisie (`int`, `cha` ou `wis`) est reprise, les autres valent 10. Nouveaux champs : `ac` et `hpMax` (null tant qu'ils ne sont pas saisis), `speed` (mètres), `initX` (bonus d'initiative en plus de DEX), `saveX` (sauvegardes maîtrisées en plus de la classe).
 - Les champs propres à une classe viennent de `defauts` et `normaliser` de cette classe.
 - Les anciens fichiers de tes joueurs restent lisibles. Un test vérifie l'import d'un fichier version 1.
 

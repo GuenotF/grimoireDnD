@@ -11,9 +11,11 @@ import { BEAST, BEASTS, BY_ID, SPELLS } from "./data.js";
 import { concOf, concPanelHTML, fxSheetHTML, slotbarHTML } from "./features/cast.js";
 import { grimoireHTML } from "./features/grimoire.js";
 import { luHTML } from "./features/levelup.js";
+import { characterHTML } from "./features/character.js";
 import { biblioHTML } from "./features/library.js";
 import { newHTML } from "./features/newchar.js";
 import { saveHTML } from "./features/save.js";
+import { sheetIncomplete } from "./rules/character.js";
 import { R, inClass } from "./rules/common.js";
 import "./ui/components.js";
 import "./features/spells.js";
@@ -22,14 +24,17 @@ function boot() {
   loadLocal(); pickCurrent(); setStatus("Enregistré sur cet appareil"); render();
 }
 function renderApp() {
-  const a = document.activeElement; const keep = a && a.id ? { id: a.id, s: a.selectionStart, e: a.selectionEnd } : null;
+  // Élément qui a le focus, retrouvé après le dessin : par son id, sinon par son action (data-a, data-k, data-v)
+  const a = document.activeElement, d = a && a.dataset || {};
+  const sel = !a || a === document.body ? null : a.id ? "#" + CSS.escape(a.id) : d.a ? `[data-a="${CSS.escape(d.a)}"]` + (d.k ? `[data-k="${CSS.escape(d.k)}"]` : "") + (d.v ? `[data-v="${CSS.escape(d.v)}"]` : "") + (d.id ? `[data-id="${CSS.escape(d.id)}"]` : "") : null;
+  const keep = sel ? { sel, s: a.selectionStart, e: a.selectionEnd } : null;
   renderPicker();
   const g = G(); const main = document.getElementById("main");
   if (!g) { main.innerHTML = welcomeHTML(); }
   else {
     main.innerHTML = heroHTML(g) + tabsHTML(g) + `<div class="panel" id="panel">${panelHTML(g)}</div>`;
   }
-  if (keep) { const el = document.getElementById(keep.id); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
+  if (keep) { const el = document.querySelector(keep.sel); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
   setStatus(S.statusText || "", S.statusErr);
   const bar = document.getElementById("slotbar"), showBar = !!g && S.tab === "grimoire" && R.slots(g).length > 0;
   bar.hidden = !showBar; if (showBar) bar.innerHTML = slotbarHTML(g);
@@ -74,7 +79,6 @@ function heroHTML(g) {
   <div class="setup">
     <div class="field"><label for="f-full">Nom complet</label><input id="f-full" type="text" value="${esc(g.name)}"></div>
     <div class="field"><label for="f-level">Niveau de ${C(g).n.toLowerCase()}</label><div class="lvrow"><select id="f-level">${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select>${g.level < 20 ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}</div></div>
-    <div class="field"><label for="f-${C(g).ab}">${C(g).abN} (valeur)</label><input id="f-${C(g).ab}" data-ab="${C(g).ab}" type="number" min="1" max="30" value="${g[C(g).ab]}"></div>
     ${C(g).subclassField(g)}
   </div>
   <div class="stats" role="list">
@@ -84,31 +88,39 @@ function heroHTML(g) {
     <div class="stat ${nPrep > pMax ? "alert" : nPrep === pMax ? "good" : ""}" role="listitem"><div class="v">${nPrep}<small>/${pMax}</small></div><div class="l">Sorts préparés</div></div>
     ${C(g).heroStats(g)}
   </div>
-  <div class="banner">Tes personnages sont enregistrés sur cet appareil, dans ce navigateur. Exporte-les de temps en temps (onglet Sauvegarde) pour les sauvegarder ou les passer sur un autre appareil.</div>
+  <div class="banner">Tes personnages sont enregistrés sur cet appareil, dans ce navigateur. Exporte-les de temps en temps (menu Plus › Sauvegarde) pour les sauvegarder ou les passer sur un autre appareil.</div>
   ${showIosTip() ? `<div class="banner">Sur iPhone ou iPad, installe l'atelier : bouton <b>Partager</b>, puis <b>Sur l'écran d'accueil</b>. Ouvre-le ensuite toujours depuis cette icône : c'est là que tes grimoires sont le mieux conservés. <button class="btn ghost" data-a="hide-ios">Masquer</button></div>` : ""}
   </section>`;
 }
+// Onglets : [identifiant, libellé, compteur facultatif]. Rangée principale : Personnage, puis les onglets de la classe
+// (Sorts ou Grimoire en premier, Bibliothèque, Bestiaire…). Menu Plus : onglets secondaires de la classe (Règles, Imprimer), puis Sauvegarde.
+const PLAY_TABS = 2; // Personnage et Sorts : les écrans de jeu, mis en avant
 function tabsHTML(g) {
-  // Onglets fournis par la classe : [identifiant, libellé, compteur facultatif]
-  const t = C(g).tabs(g);
-  if (!t.some(x => x[0] === S.tab)) S.tab = "grimoire";
-  return `<div class="tabs" role="tablist">${t.map(([k,l,c])=>`<button class="tab" role="tab" data-a="tab" data-v="${k}" aria-selected="${S.tab===k}">${l}${c!=null?`<span class="count">${c}</span>`:""}</button>`).join("")}</div>`;
+  const main = [["perso", "Personnage"], ...C(g).tabs(g)], more = [...(C(g).moreTabs ? C(g).moreTabs(g) : []), ["sauvegarde", "Sauvegarde"]];
+  if (![...main, ...more].some(x => x[0] === S.tab)) S.tab = "grimoire";
+  const inMore = more.some(x => x[0] === S.tab);
+  const tab = ([k, l, c], i) => `<button class="tab${i < PLAY_TABS ? " play" : ""}" role="tab" data-a="tab" data-v="${k}" aria-selected="${S.tab === k}">${l}${k === "perso" && sheetIncomplete(g) ? `<span class="todo" title="Fiche à compléter"></span>` : ""}${c != null ? `<span class="count">${c}</span>` : ""}</button>${i === PLAY_TABS - 1 ? `<span class="tabsep" aria-hidden="true"></span>` : ""}`;
+  return `<div class="tabs" role="tablist">${main.map(tab).join("")}
+    <div class="tabmore"><button class="tab" data-a="more" aria-haspopup="menu" aria-expanded="${!!S.moreOpen}" aria-selected="${inMore}">Plus <span aria-hidden="true">${S.moreOpen ? "▴" : "▾"}</span></button>
+    ${S.moreOpen ? `<div class="moreback" data-a="more"></div><div class="moremenu" role="menu">${more.map(([k, l]) => `<button role="menuitem" data-a="tab" data-v="${k}" aria-current="${S.tab === k}">${l}</button>`).join("")}</div>` : ""}</div></div>`;
 }
 function panelHTML(g) {
+  if (S.tab === "perso") return characterHTML(g);
   if (S.tab === "biblio") return biblioHTML(g);
   if (S.tab === "sauvegarde") return saveHTML(g);
   const own = C(g).panels && C(g).panels[S.tab]; // onglets propres à la classe (Règles, Bestiaire…)
   return own ? own(g) : grimoireHTML(g);
 }
-beforeEachClick(a => { if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null; }); // un autre clic annule une confirmation en attente
-onClick("tab", (b) => { S.tab = b.dataset.v; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); });
+beforeEachClick(a => { if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null; if (a !== "more" && a !== "tab") S.moreOpen = false; }); // un autre clic annule une confirmation en attente
+onClick("more", () => { S.moreOpen = !S.moreOpen; render(); });
+onClick("tab", (b) => { S.tab = b.dataset.v; S.moreOpen = false; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); });
 onClick("undo", () => { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } });
 onChange("#cur", t => { setCur(t.value); });
 onChange("#f-level", t => { mutate(g => { g.level = +t.value; }); });
-onChange(t => !!t.dataset.ab, t => { mutate(g => { g[t.dataset.ab] = Math.min(30, Math.max(1, +t.value || 10)); }); });
 onChange("#f-full", () => { renderPicker(); });
 onInput("#f-full", t => { mutate(g => { g.name = t.value || "Sans nom"; }, false); const g = G(), h = document.getElementById("title"); if (h && g) h.innerHTML = `<span class="initial">${esc(g.name.charAt(0))}</span>${esc(g.name.slice(1))}`; });
 onKey(e => {
+  if (e.key === "Escape" && S.moreOpen) { S.moreOpen = false; render(); return true; }
   if (e.key === "Escape" && S.lu) { S.lu = null; render(); return true; }
   if (e.key === "Escape" && S.newOpen) { S.newOpen = false; render(); return true; }
   if (e.key === "Enter" && S.newOpen && e.target.id === "nw-name" && S.newCls) { document.querySelector('[data-a="nw-go"]').click(); return true; }

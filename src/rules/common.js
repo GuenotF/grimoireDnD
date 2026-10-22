@@ -13,7 +13,8 @@ function castable(g) {
 const R = {
   prof: lv => 2 + Math.floor((lv - 1) / 4),
   mod: sc => Math.floor((sc - 10) / 2),
-  am: g => R.mod(+g[C(g).ab] || 10), // modificateur de la caractéristique d'incantation
+  ab: (g, k) => R.mod(+(g.abil || {})[k] || 10),  // modificateur d'une caractéristique (str, dex…)
+  am: g => R.ab(g, C(g).ab),                       // modificateur de la caractéristique d'incantation
   slots: (g, lv = g.level) => C(g).slots[lv] || [],
   maxLevel: (g, lv = g.level) => (C(g).slots[lv] || []).length,
   unlockAt: (g, sl) => { for (let lv = 1; lv <= 20; lv++) if ((C(g).slots[lv] || []).length >= sl) return lv; return 21; },

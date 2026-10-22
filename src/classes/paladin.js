@@ -202,6 +202,7 @@ ${pFoot("PALADIN")}
 const row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
 export default {
   n: "Paladin", ab: "cha", abN: "Charisme", abArticle: "le Charisme", slots: HALF, top: 5, hitDie: "1d10",
+  saves: ["wis", "cha"],             // jets de sauvegarde maîtrisés par la classe
   cantrips: () => 0,
   prep: (g, m) => Math.max(1, m + Math.floor(g.level / 2)),
   prepNote: " (sans compter le serment)",
@@ -215,7 +216,8 @@ export default {
   subclassField: g => `<div class="field"><label for="f-oath">Serment sacré</label><select id="f-oath">${Object.entries(OATHS).map(([k, o]) => `<option value="${k}"${k === g.oath ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
   heroStats: g => `<div class="stat" role="listitem"><div class="v">${oathSpells(g).length}</div><div class="l">Sorts de serment</div></div>
     <div class="stat" role="listitem"><div class="v">${5 * g.level}</div><div class="l">Imposition (PV)</div></div>`,
-  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["imprimer","Imprimer"],["sauvegarde","Sauvegarde"],["regles","Règles"]],
+  tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length]],
+  moreTabs: () => [["regles","Règles"],["imprimer","Imprimer"]],
   panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },
   print: g => printSheet(g),
   printTitle: g => `Fiche de sorts de ${g.name}`,
