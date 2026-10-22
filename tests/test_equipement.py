@@ -95,3 +95,19 @@ def test_alertes_druide_et_magicien(browser, devices, url):
     atk = b.texts(".atk .ah")
     check(atk[0].startswith("Épée longue +0") and atk[1].startswith("Dague +4 1d4 + 2"), f"maîtrise selon la classe, finesse : {atk}")
     b.close()
+
+
+def test_lien_catalogue_conserve(browser, devices, url):
+    """Régression : modifier un objet (note…) gardait le nom mais perdait le lien avec le Manuel (attaque et CA disparues)."""
+    a = App(browser, devices, url, char=dict(MALFAEL, **dict(FICHE, ac=None, abil=dict(FICHE["abil"], dex=12)),
+            items=[{"n": "Bâton", "q": 1, "eq": True}, {"n": "Armure en cuir clouté", "q": 1, "eq": True}]), tab="perso", view="gerer")
+    check(a.g("items[0].ref") == "quarterstaff" and a.g("items[1].ref") is None, "à l'ouverture : nom exact du Manuel relié, nom libre non")
+    a.click('[data-a="it-edit"][data-i="0"]'); a.pg.fill("#it-note", "focaliseur druidique"); a.click('.itform [type="submit"]')
+    check(a.g("items[0].ref") == "quarterstaff" and a.g("items[0].note") == "focaliseur druidique", "note ajoutée, lien conservé")
+    a.click('[data-a="it-edit"][data-i="1"]'); a.pg.select_option("#it-ref", "studded-leather"); a.click('.itform [type="submit"]')
+    check(a.g("items[1].ref") == "studded-leather", "lien choisi dans le formulaire")
+    a.click('[data-a="ac-mode"][data-v="calc"]')
+    check(a.text(".acv") == "13", f"CA : cuir clouté 12 + DEX 1 = 13 : {a.text('.acblock')}")
+    a.view("jeu")
+    check(a.texts(".atk .ah b")[0] == "Bâton", "attaque au bâton")
+    a.close()

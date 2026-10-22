@@ -167,3 +167,4 @@
 .atk .ap { display: flex; gap: 5px; flex-wrap: wrap; }
 .atk small { font-size: 12.5px; color: var(--muted); line-height: 1.35; } .atk small.aw { color: var(--warn); }
 .atknotes { display: grid; gap: 3px; font-size: 13px; color: var(--muted); padding-top: 6px; line-height: 1.4; } .atknotes b { color: var(--rubric); }
+.itref { display: grid; gap: 2px; } .itref span { font-family: var(--f-sc); font-size: 11.5px; letter-spacing: .05em; color: var(--muted); }

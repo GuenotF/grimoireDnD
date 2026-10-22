@@ -25,6 +25,9 @@ export function migrate(o) {
   return o;
 }
 
+// Objet libre portant exactement le nom d'une arme ou armure du Manuel (accents et majuscules ignorés) : relié au catalogue
+const plain = t => String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[’']/g, "'").trim();
+const gearByName = n => Object.values(GEAR).find(x => plain(x.n) === plain(n));
 function blank(name, cls) {
   cls = CLASSES[cls] ? cls : "magicien";
   // Champs communs, puis champs propres à chaque classe (tous présents : un personnage peut changer de classe dans un fichier)
@@ -61,7 +64,7 @@ function norm(g) {
   o.defs = (Array.isArray(o.defs) ? o.defs : []).filter(d => d && ["res", "imm", "vul", "adv"].includes(d.t) && str(d.v).trim()).map(d => ({ t: d.t, v: str(d.v).trim() }));
   o.traits = (Array.isArray(o.traits) ? o.traits : []).filter(t => t && str(t.n).trim()).map(t => ({ n: str(t.n).trim(), o: str(t.o) || "autre", d: str(t.d) }));
   o.bg = { n: str((o.bg || {}).n), d: str((o.bg || {}).d) }; o.pnotes = str(o.pnotes);
-  o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(GEAR[x.ref] ? { ref: x.ref } : {}) }));
+  o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : {}) }));
   o.acMode = ["calc", "manual"].includes(o.acMode) ? o.acMode : null; // null : saisie si elle existe, sinon calcul
   const mo = o.money && typeof o.money === "object" ? o.money : {};
   o.money = Object.fromEntries(COINS.map(([k]) => [k, Math.max(0, Math.floor(+mo[k]) || 0)]));
