@@ -18,7 +18,19 @@ const skillLevel = (g, k) => (g.skills || {})[k] || 0;
 const skillBonus = (g, k) => { const s = SKILLS.find(x => x[0] === k); return R.ab(g, s[2]) + skillLevel(g, k) * R.prof(g.level); };
 /** Perception passive : 10 + bonus de Perception. */
 const passivePerception = g => 10 + skillBonus(g, "perception");
+/** Niveaux d'amélioration de caractéristiques (classes actuelles ; une classe peut fournir les siens). */
+const asiLevels = g => C(g).asiLevels || [4, 8, 12, 16, 19];
+/**
+ * PV gagnés en passant au niveau suivant : moyenne du dé (d/2 + 1) ou jet saisi, + mod. de CON (au moins 1).
+ * Si l'amélioration augmente le mod. de CON, les PV max gagnent aussi 1 par niveau déjà atteint.
+ */
+function hpGain(g, hp, asi = {}) {
+  const d = hitDieSize(g), abil = { ...g.abil }; Object.entries(asi).forEach(([k, n]) => { abil[k] = Math.min(20, abil[k] + n); });
+  const con0 = R.ab(g, "con"), con1 = R.mod(abil.con), roll = hp.mode === "roll" ? Math.min(d, Math.max(1, Math.floor(+hp.roll) || 0)) : d / 2 + 1;
+  const die = hp.mode === "roll" && !(+hp.roll >= 1) ? null : Math.max(1, roll + con1);
+  return { die, d, roll, con: con1, retro: (con1 - con0) * g.level, total: die == null ? null : die + (con1 - con0) * g.level };
+}
 /** Fiche à compléter : la CA ou les PV maximum n'ont jamais été saisis. */
 const sheetIncomplete = g => g.ac == null || g.hpMax == null;
 
-export { skillLevel, skillBonus, passivePerception, saveFromClass, saveProf, saveBonus, initiative, hitDieSize, hpAverage, sheetIncomplete };
+export { asiLevels, hpGain, skillLevel, skillBonus, passivePerception, saveFromClass, saveProf, saveBonus, initiative, hitDieSize, hpAverage, sheetIncomplete };

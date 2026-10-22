@@ -1,5 +1,5 @@
 """Onglet Personnage : navigation (menu Plus), caractéristiques, combat, jets de sauvegarde, migration."""
-from helpers import App, check, KAEL, MALFAEL
+from helpers import App, check, KAEL, MALFAEL, NEMEIA
 
 
 def test_navigation_menu_plus(browser, devices, url):
@@ -166,3 +166,40 @@ def test_defenses_traits_historique_notes(browser, devices, url):
     b = App(browser, devices, url, char=dict(MALFAEL, **FICHE), tab="perso", view="jeu")
     check("Défenses" not in b.text("#panel") and "Historique" not in b.text("#panel"), "sections vides masquées en jeu")
     b.close()
+
+
+
+def test_passage_de_niveau_pv_et_amelioration(browser, devices, url):
+    a = App(browser, devices, url, char=dict(MALFAEL, **dict(FICHE, hpMax=23), level=3, hp=20), view="jeu")
+    a.click(".lvup")
+    check("23 → 30" in a.text(".luhpv"), f"moyenne : 5 + CON 2 : {a.text('.luhpv')}")
+    a.click('[data-a="lu-hp"][data-v="roll"]')
+    check("?" in a.text(".luhpv"), "jet à saisir")
+    a.pg.fill("#lu-roll", "3"); a.pg.wait_for_timeout(60)
+    check("23 → 28" in a.text(".luhpv") and a.pg.evaluate("document.activeElement.id") == "lu-roll", "jet de 3 + CON 2, focus gardé")
+    a.click('[data-a="lu-asi"][data-v="con"]'); a.click('[data-a="lu-asi"][data-v="con"]')
+    check("23 → 32" in a.text(".luhpv") and "+3 car ta CON" in a.text(".luhpv"), f"CON 16 : 3 + 3, et +1 par niveau déjà atteint : {a.text('.luhpv')}")
+    check(a.count('[data-a="lu-asi"]:disabled') == 5, "2 points utilisés")
+    a.click('[data-a="lu-asi"][data-v="con"]'); a.click('[data-a="lu-asi"][data-v="wis"]'); a.click('[data-a="lu-asi"][data-v="wis"]')
+    check("16 → 18" in a.text('[data-a="lu-asi"][data-v="wis"]'), "Sagesse +2")
+    a.click(".lufoot .primary"); a.click(".lufoot .primary")
+    check("20 → 28" in a.text(".lubody") or "23 → 28" in a.text(".lubody"), f"récapitulatif : {a.text('.lubody')[-200:]}")
+    a.click('[data-a="lu-go"]')
+    check(a.g("level") == 4 and a.g("hpMax") == 28 and a.g("hp") == 25 and a.g("abil.wis") == 18, "PV max, PV actuels et Sagesse mis à jour")
+    check(a.js("R.am(G())") == 4, "le DD suit la nouvelle Sagesse")
+    a.undo()
+    check(a.g("level") == 3 and a.g("hpMax") == 23 and a.g("abil.wis") == 16, "annulation complète")
+    a.close()
+
+
+def test_passage_de_niveau_magicien_annulable(browser, devices, url):
+    a = App(browser, devices, url, char=dict(NEMEIA, **dict(FICHE, hpMax=22, abil=dict(FICHE["abil"], int=18))), view="jeu")
+    a.click(".lvup")
+    check("22 → 28" in a.text(".luhpv") and a.count('[data-a="lu-asi"]') == 0, "magicien 4 → 5 : 4 + CON 2, pas d'amélioration")
+    a.click(".lufoot .primary")
+    a.click('[data-a="lu-pick"][data-id="fireball"]'); a.click('[data-a="lu-pick"][data-id="counterspell"]')
+    a.click(".lufoot .primary"); a.click('[data-a="lu-go"]')
+    check(a.g("level") == 5 and a.g("hpMax") == 28, "magicien : PV appliqués avec son assistant")
+    a.undo()
+    check(a.g("level") == 4 and a.g("hpMax") == 22 and a.g("spells.length") == 9, "annulation : niveau, sorts et PV")
+    a.close()

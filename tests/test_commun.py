@@ -138,6 +138,6 @@ def test_fiches_imprimables(browser, devices, url):
         d = dl.value
         check(d.suggested_filename == name, f"nom du fichier : {d.suggested_filename}")
         path = str(tmp_path() / name); d.save_as(path); html = open(path, encoding="utf-8").read()
-        for w in words:
+        for w in words + ["Points de vie", "Jets contre la mort", "Compétences", "PERCEPTION PASSIVE", "Notes du personnage"]:
             check(w in html, f"{name} : « {w} »")
         a.close()

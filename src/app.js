@@ -37,7 +37,6 @@ function renderApp() {
   else {
     main.innerHTML = heroHTML(g) + tabsHTML(g) + `<div class="panel" id="panel">${panelHTML(g)}</div>`;
   }
-  if (keep) { const el = document.querySelector(keep.sel); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
   setStatus(S.statusText || "", S.statusErr);
   const bar = document.getElementById("slotbar"), showBar = !!g && S.tab === "grimoire" && R.slots(g).length > 0;
   bar.hidden = !showBar; if (showBar) bar.innerHTML = slotbarHTML(g, hpChipHTML(g));
@@ -58,6 +57,8 @@ function renderApp() {
   // Volets propres aux classes (Imposition des mains, formes possibles) : chaque classe gère les siens, refermés si le personnage affiché est d'une autre classe
   const showSheet = Object.values(CLASSES).map(c => c.renderSheets ? c.renderSheets(g && C(g) === c ? g : null, showLu) : false).some(Boolean);
   document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showNw || showSheet);
+  // Focus retrouvé en dernier : les volets (assistant de niveau…) sont redessinés juste avant
+  if (keep) { const el = document.querySelector(keep.sel); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
 }
 function renderPicker() {
   const ids = Object.keys(S.list).sort((a, b) => S.list[a].name.localeCompare(S.list[b].name, "fr"));

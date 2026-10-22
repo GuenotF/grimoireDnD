@@ -1,11 +1,13 @@
 // Fiche imprimable A4.
 import { C } from "../classes/index.js";
 import { onClick } from "../core/actions.js";
-import { byName, cap, esc } from "../core/format.js";
+import { byName, cap, esc, fmt, signed } from "../core/format.js";
 import { G } from "../core/state.js";
 import { toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
+import { hitDieSize, initiative, passivePerception, saveBonus, saveProf, skillBonus, skillLevel } from "../rules/character.js";
 import { R, classSpells } from "../rules/common.js";
+import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { offer } from "./save.js";
 import { pillData } from "./spells.js";
 
@@ -33,6 +35,9 @@ tr.lvl td span{float:right;font-family:"Alegreya Sans",Arial,sans-serif;font-wei
 .tag{display:inline-block;font-family:"Alegreya Sans SC",Arial,sans-serif;font-size:6.5pt;border:1px solid #a2261c;color:#a2261c;padding:0 1mm;margin-left:1mm;vertical-align:1px;font-weight:500}.tag.r{border-color:#2f6b45;color:#2f6b45}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 6mm}.cols p{margin:0 0 2mm;font-size:9pt}.cols b{color:#a2261c;font-weight:700}h3{font-size:11pt;color:#a2261c;margin:3mm 0 1.2mm}
 .line{border-bottom:.8px solid #b8bdc8;height:7.5mm}
+.stats.s6{grid-template-columns:repeat(6,1fr)}.stats.s6 div.mine span{color:#a2261c}.stats small{display:block;font-size:8pt;color:#5a6176}.stats.s6+.stats{margin-top:2mm}
+.skills{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(6,auto);grid-auto-flow:column;gap:.6mm 6mm}.sk{display:flex;gap:1.5mm;align-items:baseline;font-size:9pt;border-bottom:.5px dotted #d5d9e0;padding:.6mm 0}.sk .mk{color:#a2261c;width:3mm}.sk .n{flex:1}.sk i{font-style:normal;font-size:7pt;color:#5a6176}.sk.on{font-weight:700}
+p.trait{margin:0 0 1.6mm;font-size:9pt;line-height:1.35}p.trait b{font-family:Alegreya,Georgia,serif}
 .res{display:flex;align-items:center;gap:3mm;padding:1.6mm 0;border-bottom:.6px dotted #b8bdc8;flex-wrap:wrap}.res .l{width:40mm;font-family:Alegreya,Georgia,serif;font-weight:700}.res .r{margin-left:auto;font-size:8.5pt;color:#5a6176;font-style:italic}
 .write{display:inline-block;border-bottom:.8px solid #9aa0ae;min-width:22mm;height:5mm;vertical-align:bottom}
 .beasts{display:grid;grid-template-columns:1fr 1fr;gap:3mm}.beast{border:1px solid #9aa0ae;border-radius:1.5mm;padding:2mm 3mm;page-break-inside:avoid;font-size:8.5pt;line-height:1.3}.beast h3{margin:0 0 1mm;display:flex;justify-content:space-between;align-items:baseline}.beast h3 small{font-family:"Alegreya Sans",Arial,sans-serif;font-size:8pt;color:#5a6176;font-weight:400}
@@ -85,6 +90,26 @@ function pClassList(g, exclude = []) {
   }
   return `<table><tr><th>Prép.</th><th>Sort</th><th>Incantation · composantes</th><th>Effet</th></tr>${rows}</table>`;
 }
+/** Page « Personnage » (commune) : caractéristiques, combat, PV à remplir, compétences, défenses, dons et traits, historique, notes. */
+function pCharacter(g) {
+  const sk = SKILLS.map(([k, n, a]) => { const l = skillLevel(g, k); return `<div class="sk${l ? " on" : ""}"><span class="mk">${l === 2 ? "◉" : l ? "●" : "○"}</span><span class="n">${n} <i>${ABILITIES.find(x => x[0] === a)[1]}</i></span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("");
+  const DEFN = { res: "Résistance", imm: "Immunité", vul: "Vulnérabilité", adv: "Avantage" };
+  return `<h1><b>${esc(g.name.charAt(0))}</b>${esc(g.name.slice(1))}</h1>
+<div class="sub">${C(g).n} niveau ${g.level}${g.bg.n ? ` · ${esc(g.bg.n)}` : ""} · Remplir au crayon</div>
+<div class="stats s6">${ABILITIES.map(([k, a]) => `<div${k === C(g).ab ? ' class="mine"' : ""}><span>${a}</span><b>${signed(R.ab(g, k))}</b><small>${g.abil[k]} · JdS ${saveProf(g, k) ? "<u>" : ""}${signed(saveBonus(g, k))}${saveProf(g, k) ? "</u>" : ""}</small></div>`).join("")}</div>
+<div class="stats">${[[g.ac ?? "____", "CA"], [signed(initiative(g)), "INITIATIVE"], [`${fmt(g.speed)} m`, "VITESSE"], [signed(R.prof(g.level)), "MAÎTRISE"], [passivePerception(g), "PERCEPTION PASSIVE"]].map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+<h2>Points de vie <small>JdS soulignés : maîtrisés</small></h2>
+<div class="res"><span class="l">PV maximum ${g.hpMax ?? "____"}</span><span>PV actuels <span class="write" style="min-width:30mm"></span></span><span>PV temporaires <span class="write"></span></span></div>
+<div class="res"><span class="l">Dés de vie (d${hitDieSize(g)})</span>${Array.from({ length: g.level }, () => '<span class="box"></span>').join(" ")}<span class="r">cocher un dé dépensé · repos court : dé + CON · repos long : la moitié revient</span></div>
+<div class="res"><span class="l">Jets contre la mort</span><span>Réussites ${pDots(3)}</span><span>Échecs ${pDots(3)}</span><span class="r">10 ou plus : réussite · 1 : deux échecs · 20 : 1 PV</span></div>
+<h2>Compétences <small>● maîtrise · ◉ expertise</small></h2>
+<div class="skills">${sk}</div>
+${g.defs.length ? `<h2>Défenses</h2><p style="margin:0">${g.defs.map(d => `<b>${DEFN[d.t]}</b> ${esc(d.v)}`).join(" · ")}</p>` : ""}
+${g.traits.length ? `<h2>Dons et traits</h2>${g.traits.map(t => `<p class="trait"><b>${esc(t.n)}</b>${t.d ? ` · ${esc(t.d)}` : ""}</p>`).join("")}` : ""}
+${g.bg.n || g.bg.d ? `<h2>Historique${g.bg.n ? ` <small>${esc(g.bg.n)}</small>` : ""}</h2>${g.bg.d ? `<p class="trait">${esc(g.bg.d)}</p>` : ""}` : ""}
+<h2>Notes du personnage</h2>${g.pnotes ? `<p style="white-space:pre-wrap;font-size:9.5pt;margin:0 0 2mm">${esc(g.pnotes)}</p>` : ""}${Array.from({ length: 3 }, () => '<div class="line"></div>').join("")}
+<div class="brk"></div>`;
+}
 const pFoot = label => `<div class="foot">${label} · D&amp;D 5E · MANUEL DES JOUEURS 2014</div>`;
 
 /** Fiche complète : page HTML autonome, prête à imprimer en A4. */
@@ -94,6 +119,7 @@ function printable(g) {
 <style>
 ${PRINT_CSS}
 </style></head><body>
+${pCharacter(g)}
 ${C(g).print(g)}</body></html>`;
 }
 onClick("dl-print", () => { const g = G(); offer(`${C(g).fileLabel || C(g).n} - ${g.name}.html`, printable(g)); });

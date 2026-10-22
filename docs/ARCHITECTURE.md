@@ -1,6 +1,6 @@
 # Architecture cible de l'Atelier du Grimoire
 
-*Validé le 21 octobre 2026. Étapes 0 à 4 faites le 21 octobre 2026. Onglet Personnage (étapes 1 à 4 : caractéristiques, PV, compétences, défenses, dons et traits, historique, notes) le 22 octobre 2026.*
+*Validé le 21 octobre 2026. Étapes 0 à 4 faites le 21 octobre 2026. Onglet Personnage (étapes 1 à 5 : caractéristiques, PV, compétences, défenses, dons et traits, historique, notes ; PV et amélioration au passage de niveau, page Personnage de la fiche imprimable) le 22 octobre 2026.*
 
 ## 1. Objectifs
 
@@ -75,6 +75,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `slots`, `top`, `cantrips(lv)`, `prep(g, mod)` | Emplacements, niveau de sort maximal, sorts mineurs, sorts préparés | ✓ | ✓ | ✓ |
 | `book` | Modèle du grimoire (apprend, puis prépare parmi ses sorts) ; sinon prépare dans toute la liste | ✓ | | |
 | `hitDie`, `fileLabel`, `prepNote` | Dé de vie (PV moyens, rappel), nom des sauvegardes, précision sur la préparation | ✓ | ✓ | ✓ |
+| `asiLevels` | Niveaux d'amélioration de caractéristiques, si différents de 4, 8, 12, 16, 19 (guerrier, roublard plus tard) | | | |
 | `saves` | Jets de sauvegarde maîtrisés par la classe (codes `str`, `dex`, `con`, `int`, `wis`, `cha`) | ✓ | ✓ | ✓ |
 | `defaults()`, `normalize(o)` | Champs propres au personnage et leur contrôle à l'ouverture | ✓ | ✓ | ✓ |
 | `subline(g)`, `subclassField(g)`, `heroStats(g)` | En-tête : sous-titre, champ de sous-classe, statistiques | ✓ | ✓ | ✓ |
