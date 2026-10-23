@@ -11,3 +11,29 @@
 .nwcard .tg { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
 .nwcard .tg i { font-style: normal; font-size: 12px; border: 1px solid var(--pn-bd); border-radius: 4px; padding: 0 5px; color: var(--muted); }
 .nwgo { padding: 11px; font-size: 15px; font-weight: 700; }
+
+/* Assistant de création (plein écran, structure de l'assistant de niveau) */
+.nwnext { padding: 11px; font-size: 15px; font-weight: 700; }
+.crbar { display: flex; gap: 4px; } .crbar span { flex: 1; height: 4px; border-radius: 2px; background: var(--rule); } .crbar span.on { background: var(--rubric); }
+.crstep { font-size: 13px; color: var(--muted); } .crstep b { color: var(--ink); }
+.crbox .lubody { display: grid; gap: 9px; align-content: start; }
+.crbox .lubody select, .crbox .lubody input[type="text"] { width: 100%; box-sizing: border-box; }
+.crbox .subx { display: grid; gap: 7px; margin: -2px 0 6px 28px; }
+.crmiss { font-size: 12.5px; color: var(--warn); align-self: center; text-align: center; flex: 1; }
+.crbudget { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-family: var(--f-display); font-size: 16px; } .crbudget b { color: var(--rubric); font-family: var(--f-body); } .crbudget b.lim { color: var(--warn); }
+.crab { display: grid; }
+.crabr { display: grid; grid-template-columns: 44px minmax(0, 1fr) 34px 64px; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid var(--sunk); }
+.crabr .k { font-family: var(--f-sc); letter-spacing: .05em; } .crabr .rb { color: var(--ok); font-weight: 700; text-align: center; } .crabr .tot { text-align: right; } .crabr .tot b { font-family: var(--f-display); font-size: 18px; } .crabr .tot small { color: var(--muted); }
+.crabr .ctl { display: flex; align-items: center; gap: 6px; } .crabr .ctl input { width: 70px; } .crabr .ctl select { width: auto; }
+.crpb { display: inline-flex; align-items: center; gap: 6px; } .crpb b { font-family: var(--f-display); font-size: 18px; min-width: 22px; text-align: center; } .crpb small { color: var(--muted); font-size: 12px; }
+.crcard { display: grid; gap: 6px; background: var(--surface); border: 1.5px solid var(--rule); border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 1.4; }
+.crcard .t { font-family: var(--f-display); font-size: 18px; }
+.crdup { background: var(--note-bg, #FDF3E1); border: 1.5px solid var(--warn); border-radius: 8px; padding: 7px 10px; font-size: 13.5px; display: grid; gap: 5px; }
+.cropt { display: flex; gap: 8px; align-items: center; text-align: left; border: 0; background: none; font: inherit; color: inherit; padding: 3px 0; cursor: pointer; }
+.cropt .rd { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--rule); flex: none; box-sizing: border-box; }
+.cropt.on .rd { background: var(--rubric); border-color: var(--rubric); box-shadow: inset 0 0 0 3px var(--surface); }
+.crgold { display: flex; gap: 8px; align-items: center; } .crgold input { width: 110px; }
+.crabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); text-align: center; border: 1px solid var(--rule); border-radius: 6px; }
+.crabs div { padding: 4px 0; display: grid; } .crabs div + div { border-left: 1px solid var(--rule); } .crabs b { font-family: var(--f-display); font-size: 16px; } .crabs small { font-size: 10.5px; color: var(--muted); }
+.crbox .viewsw:has(button:nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: none; }
+.crbox .viewsw button { white-space: nowrap; }

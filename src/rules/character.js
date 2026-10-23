@@ -32,7 +32,7 @@ const asiLevels = g => C(g).asiLevels || [4, 8, 12, 16, 19];
 function hpGain(g, hp, asi = {}) {
   const d = hitDieSize(g), abil = { ...g.abil }; Object.entries(asi).forEach(([k, n]) => { abil[k] = Math.min(20, abil[k] + n); });
   const con0 = R.ab(g, "con"), con1 = R.mod(abil.con), roll = hp.mode === "roll" ? Math.min(d, Math.max(1, Math.floor(+hp.roll) || 0)) : d / 2 + 1;
-  const die = hp.mode === "roll" && !(+hp.roll >= 1) ? null : Math.max(1, roll + con1) + featHpLv(g); // + Robuste
+  const die = hp.mode === "roll" && !(+hp.roll >= 1) ? null : Math.max(1, roll + con1) + featHpLv(g) + ((g.race || {}).hpLv || 0); // + Robuste, Ténacité naine
   return { die, d, roll, con: con1, retro: (con1 - con0) * g.level, total: die == null ? null : die + (con1 - con0) * g.level };
 }
 /** Fiche à compléter : la CA ou les PV maximum n'ont jamais été saisis. */

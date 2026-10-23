@@ -10,8 +10,8 @@ import { usable } from "./magic.js";
 
 const gearOf = x => x && x.ref ? GEAR[x.ref] : null;
 const equipped = (g, kind) => g.items.filter(x => x.eq && gearOf(x) && gearOf(x).kind === kind).map(x => ({ item: x, gear: gearOf(x) }));
-const weaponProf = (g, w) => (C(g).weaponProf || []).some(p => p === w.cat || p === w.id);
-const armorProf = (g, a) => (C(g).armorProf || []).includes(a.cat) || featArmor(g).includes(a.cat); // classe ou don (Protection légère…)
+const weaponProf = (g, w) => (C(g).weaponProf || []).some(p => p === w.cat || p === w.id) || ((g.race || {}).weapons || []).includes(w.id); // classe ou race (armes naines, elfiques…)
+const armorProf = (g, a) => (C(g).armorProf || []).includes(a.cat) || featArmor(g).includes(a.cat) || ((g.race || {}).armor || []).includes(a.cat); // classe, don ou race
 
 /**
  * Classe d'armure calculée : armure portée (base + DEX, plafonnée en intermédiaire, aucune en lourde), sinon 10 + DEX ;

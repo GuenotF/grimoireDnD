@@ -167,7 +167,9 @@ function preparedLu3(g, b) {
     <span>• Tu peux revenir au niveau ${g.level} avec le sélecteur de niveau.</span></div>`;
 }
 onClick("lu-open", () => { const g = G(); if (!g || g.level >= 20) return; luOpen(g); render(); const x = document.querySelector("#lvlup .lufoot .primary"); if (x) x.focus({ preventScroll: true }); });
-onClick("lu-close", () => { S.lu = null; render(); });
+onClick("lu-close", () => { S.lu = null; S.crTarget = null; render(); });
+/** Création au-delà du niveau 1 : l'assistant se rouvre jusqu'au niveau de départ choisi. */
+function chainLevel() { const g = G(); if (S.crTarget && g && g.level < S.crTarget) { luOpen(g); render(); } else S.crTarget = null; }
 onClick("lu-next", () => { if (!S.lu) return; S.lu.step = Math.min(3, S.lu.step + 1); if (S.lu.step === 2 && skip2(G())) S.lu.step = 3; S.lu.open = null; render(); });
 onClick("lu-back", () => { if (!S.lu) return; S.lu.step = Math.max(1, S.lu.step - 1); if (S.lu.step === 2 && skip2(G())) S.lu.step = 1; S.lu.open = null; render(); });
 onClick("lu-edit", () => { if (!S.lu) return; S.lu.step = skip2(G()) ? 1 : 2; render(); });
@@ -184,7 +186,7 @@ onClick("lu-go", () => {
     const prevC = JSON.parse(JSON.stringify({ abil: g.abil, hpMax: g.hpMax, hp: g.hp, traits: g.traits, skills: g.skills, langs: g.langs, school: g.school }));
     mutate(g => luCommonApply(g, L), false); LU(g).apply(L, g);
     const u = S.undo; if (u) S.undo = () => { mutate(g => Object.assign(g, prevC), false); return u(); };
-    return;
+    chainLevel(); return;
   }
   const to = L.to, fn = firstName(g), max = R.maxLevel(g, to), oath = alwaysPrepared({ ...g, level: to });
   const prev = JSON.parse(JSON.stringify(g));
@@ -196,6 +198,7 @@ onClick("lu-go", () => {
     g.prepared = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id));
   });
   toast(`<b>${esc(fn)}</b> passe au niveau ${to}`, () => { mutate(g => Object.assign(g, prev)); return "Passage de niveau annulé"; });
+  chainLevel();
 });
 onClick("lu-hp", (b) => { if (!S.lu) return; S.lu.hp.mode = b.dataset.v; S.luKeep = true; render(); if (b.dataset.v === "roll") { const el = document.getElementById("lu-roll"); if (el) el.focus({ preventScroll: true }); } });
 onInput("#lu-roll", t => { if (!S.lu) return; S.lu.hp.roll = t.value; S.luKeep = true; render(); }); // le focus reste dans le champ (rendu : focus retrouvé par id)

@@ -11,7 +11,7 @@ import { armorProf } from "../rules/equipment.js";
 import { ABN, FEATS, featAbil, featBlock, featTaken } from "../rules/feats.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 
-const state = ctx => { const o = ctx === "lu" ? S.lu : S; if (!o.fp) o.fp = { q: "", all: false, sel: null, ch: {} }; return o.fp; };
+const state = ctx => { const o = ctx === "lu" ? S.lu : ctx === "cr" ? S.cr : S; if (!o.fp) o.fp = { q: "", all: false, sel: null, ch: {} }; return o.fp; };
 const canArmor = g => cat => armorProf(g, { cat });
 const simple = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 const tag = f => f.calc ? `<span class="fptag calc">calculé</span>` : `<span class="fptag">rappel</span>`;
@@ -73,12 +73,12 @@ function featPickerHTML(g, ctx, b = g) {
 }
 
 /** Contexte du sélecteur ouvert : l'assistant s'il est affiché, sinon la fiche. */
-const cur = () => S.lu ? state("lu") : state("tr");
+const cur = () => S.cr ? state("cr") : S.lu ? state("lu") : state("tr");
 onInput("#fp-q", t => { cur().q = t.value; render(); });
 onClick("fp-all", (b) => { cur().all = b.dataset.v === "1"; render(); });
-onClick("fp-sel", (b) => { const st = cur(), id = b.dataset.v; st.sel = st.sel === id ? null : id; st.ch = {}; if (S.lu) S.luKeep = true; render(); });
-onClick("fp-abil", (b) => { const st = cur(); st.ch = { ...st.ch, abil: b.dataset.v }; if (S.lu) S.luKeep = true; render(); });
-onClick("fp-skill", (b) => { const st = cur(), k = b.dataset.v, s = st.ch.skills || []; st.ch = { ...st.ch, skills: s.includes(k) ? s.filter(x => x !== k) : [...s, k] }; if (S.lu) S.luKeep = true; render(); });
+onClick("fp-sel", (b) => { const st = cur(), id = b.dataset.v; st.sel = st.sel === id ? null : id; st.ch = {}; if (S.lu || S.cr) S.luKeep = true; render(); });
+onClick("fp-abil", (b) => { const st = cur(); st.ch = { ...st.ch, abil: b.dataset.v }; if (S.lu || S.cr) S.luKeep = true; render(); });
+onClick("fp-skill", (b) => { const st = cur(), k = b.dataset.v, s = st.ch.skills || []; st.ch = { ...st.ch, skills: s.includes(k) ? s.filter(x => x !== k) : [...s, k] }; if (S.lu || S.cr) S.luKeep = true; render(); });
 onInput(t => /^fp-l\d$/.test(t.id), (t) => { const st = cur(), l = [...(st.ch.langs || [])]; l[+t.id.slice(4)] = t.value; st.ch = { ...st.ch, langs: l }; });
 
 /** Le personnage remplit-il la condition du don ? (prise refusée sinon, dans la fiche comme dans l'assistant) */

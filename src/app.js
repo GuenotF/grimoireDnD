@@ -14,9 +14,11 @@ import { grimoireHTML } from "./features/grimoire.js";
 import { hpCardHTML, hpChipHTML } from "./features/hp.js";
 import { luHTML } from "./features/levelup.js";
 import { biblioHTML } from "./features/library.js";
+import { crHTML } from "./features/creation.js";
 import { newHTML } from "./features/newchar.js";
 import { saveHTML } from "./features/save.js";
 import { saveProf, sheetIncomplete, speedOf } from "./rules/character.js";
+import { acOf } from "./rules/equipment.js";
 import { R, inClass } from "./rules/common.js";
 import { ABILITIES } from "./rules/tables.js";
 import { statLabel } from "./ui/components.js";
@@ -56,13 +58,16 @@ function renderApp() {
   if (!showFx) S.fxOpen = false;
   const nw = document.getElementById("nwsheet"), showNw = !!S.newOpen;
   nw.hidden = !showNw; document.getElementById("nwback").hidden = !showNw; if (showNw) nw.innerHTML = newHTML();
+  // Assistant de création (plein écran), comme l'assistant de passage de niveau
+  const cr = document.getElementById("crsheet"), showCr = !!S.cr;
+  cr.hidden = !showCr; if (showCr) { const sc = cr.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; cr.innerHTML = crHTML(); const nb = cr.querySelector(".lubody"); if (nb && S.luKeep) nb.scrollTop = top; else if (nb) nb.scrollTop = 0; if (!S.lu) S.luKeep = false; }
   const lu = document.getElementById("lvlup"), showLu = !!g && !!S.lu;
   if (!showLu) S.lu = null;
   lu.hidden = !showLu; document.body.classList.toggle("lu-on", showLu);
   if (showLu) { const sc = lu.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; lu.innerHTML = luHTML(g); const nb = lu.querySelector(".lubody"); if (nb && S.luKeep) nb.scrollTop = top; S.luKeep = false; }
   // Volets propres aux classes (Imposition des mains, formes possibles) : chaque classe gère les siens, refermés si le personnage affiché est d'une autre classe
   const showSheet = Object.values(CLASSES).map(c => c.renderSheets ? c.renderSheets(g && C(g) === c ? g : null, showLu) : false).some(Boolean);
-  document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showNw || showSheet || showHp); // le message ne couvre pas le volet ouvert
+  document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showNw || showSheet || showHp || showCr); // le message ne couvre pas le volet ouvert
   // Focus retrouvé en dernier : les volets (assistant de niveau…) sont redessinés juste avant
   if (keep) { const el = document.querySelector(keep.sel); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
 }
@@ -156,4 +161,4 @@ if (window.visualViewport) {
   };
   vv.addEventListener("resize", kb); vv.addEventListener("scroll", kb); kb();
 }
-window.__t = { S, G, R, mutate, concOf, inClass, BY_ID, BEAST, BEASTS, SPELLS, saveProf, speedOf, alwaysPrepared };
+window.__t = { S, G, R, mutate, concOf, inClass, BY_ID, BEAST, BEASTS, SPELLS, saveProf, speedOf, alwaysPrepared, acOf };

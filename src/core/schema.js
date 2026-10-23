@@ -90,6 +90,9 @@ function norm(g) {
   });
   const fu = o.featU && typeof o.featU === "object" ? o.featU : {}; // ressources des dons dépensées : {id: n}
   o.featU = Object.fromEntries(Object.entries(fu).filter(([k, n]) => FEATS[k] && FEATS[k].res && +n > 0).map(([k, n]) => [k, Math.min(FEATS[k].res.n, Math.round(+n))]));
+  const rc = o.race && typeof o.race === "object" ? o.race : null; // race choisie à la création : maîtrises et PV par niveau
+  o.race = rc && str(rc.id) ? { id: str(rc.id), sub: rc.sub ? str(rc.sub) : null, n: str(rc.n), hpLv: Math.max(0, Math.min(2, Math.round(+rc.hpLv) || 0)),
+    weapons: (Array.isArray(rc.weapons) ? rc.weapons : []).filter(id => GEAR[id]), armor: (Array.isArray(rc.armor) ? rc.armor : []).filter(a => ["light", "medium", "heavy", "shield"].includes(a)) } : null;
   o.bg = { n: str((o.bg || {}).n), d: str((o.bg || {}).d) }; o.pnotes = str(o.pnotes);
   o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(x.oh ? { oh: true } : {}), ...magicOf(x), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : {}) }));
   o.acMode = ["calc", "manual"].includes(o.acMode) ? o.acMode : null; // null : saisie si elle existe, sinon calcul
