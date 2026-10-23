@@ -66,3 +66,7 @@
 @media (prefers-reduced-motion: no-preference) { .pip { transition: transform .1s, background .12s; } }
 /* Capacités de classe : la pastille de résumé peut passer à la ligne (jamais de débordement horizontal) */
 .jrow.feat .jline > .kp { white-space: normal; text-align: right; max-width: 55%; }
+/* Sorts innés (race) */
+.jrow.inn .jline { flex-wrap: wrap; }
+.innsub { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; padding: 0 0 6px; }
+.innsub .pip { width: 16px; height: 16px; }

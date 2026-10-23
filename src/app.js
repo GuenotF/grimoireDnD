@@ -15,6 +15,7 @@ import { hpCardHTML, hpChipHTML } from "./features/hp.js";
 import { luHTML } from "./features/levelup.js";
 import { biblioHTML } from "./features/library.js";
 import { crHTML } from "./features/creation.js";
+import { raceField } from "./features/innate.js";
 import { newHTML } from "./features/newchar.js";
 import { saveHTML } from "./features/save.js";
 import { saveProf, sheetIncomplete, speedOf } from "./rules/character.js";
@@ -105,6 +106,7 @@ function heroHTML(g) {
     <div class="field"><label for="f-full">Nom complet</label><input id="f-full" type="text" value="${esc(g.name)}"></div>
     <div class="field"><label for="f-level">Niveau de ${C(g).n.toLowerCase()}</label><select id="f-level">${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select></div>
     ${C(g).subclassField(g)}
+    ${raceField(g)}
     <p class="help">Le niveau se change ici sans assistant (création, correction).${g.level < 20 ? ` Pour monter de niveau, utilise ↑ Niveau ${g.level + 1}.` : ""}</p>
   </div>` : ""}
   ${S.tab === "perso" ? `<div class="statcap">Caractéristiques</div><div class="stats" role="list" aria-label="Caractéristiques">${heroAbilities(g)}</div>`

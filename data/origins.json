@@ -1,77 +1,1059 @@
 {
-"source": "Manuel des joueurs 2014 (races et historiques, résumés d'après AideDD)",
-"races": [
- {"id": "nain", "n": "Nain", "size": "M", "speed": 7.5, "asi": {"con": 2}, "langs": ["Commun", "Nain"], "dv": 18,
-  "defs": [{"t": "res", "v": "poison"}, {"t": "adv", "v": "JdS contre le poison"}],
-  "weapons": ["handaxe", "battleaxe", "light-hammer", "warhammer"], "toolChoice": {"n": 1, "list": ["Outils de forgeron", "Matériel de brasseur", "Outils de maçon"]},
-  "traits": [{"n": "Vision dans le noir", "d": "18 m, en nuances de gris dans l'obscurité."}, {"n": "Résistance naine", "d": "Avantage aux JdS contre le poison, résistance aux dégâts de poison."}, {"n": "Entraînement aux armes naines", "d": "Hachette, hache d'armes, marteau léger, marteau de guerre."}, {"n": "Connaissance de la pierre", "d": "Histoire liée à un travail de la pierre : bonus de maîtrise doublé."}, {"n": "Vitesse", "d": "7,5 m, non réduite par une armure lourde."}],
-  "sum": "vision 18 m · résistance au poison · armes naines",
-  "subs": [{"id": "collines", "n": "Nain des collines", "asi": {"wis": 1}, "hpLv": 1, "traits": [{"n": "Ténacité naine", "d": "+1 PV maximum par niveau."}], "sum": "+1 SAG · +1 PV par niveau"},
-           {"id": "montagnes", "n": "Nain des montagnes", "asi": {"str": 2}, "armor": ["light", "medium"], "traits": [{"n": "Formation au port des armures naines", "d": "Armures légères et intermédiaires."}], "sum": "+2 FOR · armures légères et intermédiaires"}]},
- {"id": "elfe", "n": "Elfe", "size": "M", "speed": 9, "asi": {"dex": 2}, "langs": ["Commun", "Elfique"], "dv": 18, "skills": ["perception"],
-  "defs": [{"t": "adv", "v": "JdS contre charmé"}, {"t": "imm", "v": "sommeil magique"}],
-  "traits": [{"n": "Vision dans le noir", "d": "18 m, en nuances de gris dans l'obscurité."}, {"n": "Sens aiguisés", "d": "Maîtrise de Perception."}, {"n": "Ascendance féerique", "d": "Avantage aux JdS contre le charme ; la magie ne peut pas t'endormir."}, {"n": "Transe", "d": "4 heures de méditation valent 8 heures de sommeil."}],
-  "sum": "vision 18 m · Perception · Transe",
-  "subs": [{"id": "haut", "n": "Haut-elfe", "asi": {"int": 1}, "weapons": ["longsword", "shortsword", "shortbow", "longbow"], "langChoice": 1, "cantripFrom": "magicien", "traits": [{"n": "Entraînement aux armes elfiques", "d": "Épée longue, épée courte, arc court, arc long."}, {"n": "Sort mineur", "d": "Un sort mineur de magicien (INT)."}, {"n": "Langue supplémentaire", "d": "Une langue au choix."}], "sum": "+1 INT · un sort mineur de magicien · une langue"},
-           {"id": "bois", "n": "Elfe des bois", "asi": {"wis": 1}, "speed": 10.5, "weapons": ["longsword", "shortsword", "shortbow", "longbow"], "traits": [{"n": "Entraînement aux armes elfiques", "d": "Épée longue, épée courte, arc court, arc long."}, {"n": "Foulée légère", "d": "Vitesse 10,5 m."}, {"n": "Cachette naturelle", "d": "Tu peux te cacher dans une zone à visibilité réduite (feuillage, pluie, neige, brume)."}], "sum": "+1 SAG · 10,5 m · Cachette naturelle"},
-           {"id": "drow", "n": "Elfe noir (drow)", "asi": {"cha": 1}, "dv": 36, "weapons": ["rapier", "shortsword", "crossbow-hand"], "traits": [{"n": "Vision dans le noir supérieure", "d": "36 m."}, {"n": "Sensibilité au soleil", "d": "Désavantage aux attaques et à la Perception basée sur la vue en plein soleil."}, {"n": "Magie drow", "d": "Lumières dansantes ; niveau 3 : Lueurs féeriques, niveau 5 : Ténèbres, une fois par repos long chacun (CHA)."}, {"n": "Entraînement aux armes drows", "d": "Rapière, épée courte, arbalète de poing."}], "sum": "+1 CHA · vision 36 m · magie drow"}]},
- {"id": "halfelin", "n": "Halfelin", "size": "P", "speed": 7.5, "asi": {"dex": 2}, "langs": ["Commun", "Halfelin"],
-  "defs": [{"t": "adv", "v": "JdS contre effrayé"}],
-  "traits": [{"n": "Chanceux", "d": "Un 1 naturel à une attaque, un test ou un JdS se relance (on garde le nouveau)."}, {"n": "Brave", "d": "Avantage aux JdS contre l'effroi."}, {"n": "Agilité halfeline", "d": "Tu traverses l'espace des créatures plus grandes que toi."}],
-  "sum": "Petite taille · Chanceux · Brave",
-  "subs": [{"id": "pied-leger", "n": "Halfelin pied-léger", "asi": {"cha": 1}, "traits": [{"n": "Discrétion naturelle", "d": "Tu peux te cacher derrière une créature plus grande que toi."}], "sum": "+1 CHA · Discrétion naturelle"},
-           {"id": "robuste", "n": "Halfelin robuste", "asi": {"con": 1}, "defs": [{"t": "res", "v": "poison"}, {"t": "adv", "v": "JdS contre le poison"}], "traits": [{"n": "Résistance des robustes", "d": "Avantage aux JdS contre le poison, résistance aux dégâts de poison."}], "sum": "+1 CON · résistance au poison"}]},
- {"id": "humain", "n": "Humain", "size": "M", "speed": 9, "asi": {"str": 1, "dex": 1, "con": 1, "int": 1, "wis": 1, "cha": 1}, "langs": ["Commun"], "langChoice": 1,
-  "traits": [], "sum": "+1 à tout · une langue",
-  "subs": [{"id": "standard", "n": "Humain", "sum": "+1 à toutes les caractéristiques"},
-           {"id": "variante", "n": "Humain (variante)", "asiReplace": true, "asiChoice": {"n": 2, "v": 1}, "skillChoice": 1, "feat": true, "traits": [], "sum": "+1 à deux caractéristiques · une compétence · un don"}]},
- {"id": "demi-elfe", "n": "Demi-elfe", "size": "M", "speed": 9, "asi": {"cha": 2}, "asiChoice": {"n": 2, "v": 1, "not": ["cha"]}, "langs": ["Commun", "Elfique"], "langChoice": 1, "skillChoice": 2, "dv": 18,
-  "defs": [{"t": "adv", "v": "JdS contre charmé"}, {"t": "imm", "v": "sommeil magique"}],
-  "traits": [{"n": "Vision dans le noir", "d": "18 m, en nuances de gris dans l'obscurité."}, {"n": "Ascendance féerique", "d": "Avantage aux JdS contre le charme ; la magie ne peut pas t'endormir."}, {"n": "Polyvalence", "d": "Deux compétences au choix."}],
-  "sum": "+2 CHA, +1 à deux au choix · 2 compétences"},
- {"id": "demi-orc", "n": "Demi-orc", "size": "M", "speed": 9, "asi": {"str": 2, "con": 1}, "langs": ["Commun", "Orc"], "dv": 18, "skills": ["intimidation"],
-  "traits": [{"n": "Vision dans le noir", "d": "18 m, en nuances de gris dans l'obscurité."}, {"n": "Menaçant", "d": "Maîtrise d'Intimidation."}, {"n": "Endurance implacable", "d": "À 0 PV sans être tué sur le coup : tu restes à 1 PV, une fois par repos long."}, {"n": "Attaques sauvages", "d": "Sur un critique au corps à corps, un dé de dégâts de l'arme en plus."}],
-  "sum": "+2 FOR, +1 CON · Intimidation · Endurance implacable"},
- {"id": "drakeide", "n": "Drakéide", "size": "M", "speed": 9, "asi": {"str": 2, "cha": 1}, "langs": ["Commun", "Draconique"],
-  "traits": [], "sum": "+2 FOR, +1 CHA · souffle et résistance",
-  "ancestry": [["Blanc", "froid", "cône de 4,5 m", "con"], ["Bleu", "foudre", "ligne de 1,5 × 9 m", "dex"], ["Noir", "acide", "ligne de 1,5 × 9 m", "dex"], ["Rouge", "feu", "cône de 4,5 m", "dex"], ["Vert", "poison", "cône de 4,5 m", "con"], ["Airain", "feu", "ligne de 1,5 × 9 m", "dex"], ["Argent", "froid", "cône de 4,5 m", "con"], ["Bronze", "foudre", "ligne de 1,5 × 9 m", "dex"], ["Cuivre", "acide", "ligne de 1,5 × 9 m", "dex"], ["Or", "feu", "cône de 4,5 m", "dex"]]},
- {"id": "gnome", "n": "Gnome", "size": "P", "speed": 7.5, "asi": {"int": 2}, "langs": ["Commun", "Gnome"], "dv": 18,
-  "defs": [{"t": "adv", "v": "JdS d'INT, SAG et CHA contre la magie"}],
-  "traits": [{"n": "Vision dans le noir", "d": "18 m, en nuances de gris dans l'obscurité."}, {"n": "Ruse gnome", "d": "Avantage aux JdS d'INT, de SAG et de CHA contre la magie."}],
-  "sum": "Petite taille · vision 18 m · Ruse gnome",
-  "subs": [{"id": "forets", "n": "Gnome des forêts", "asi": {"dex": 1}, "traits": [{"n": "Illusionniste-né", "d": "Sort mineur Illusion mineure (INT)."}, {"n": "Communication avec les petits animaux", "d": "Idées simples avec les bêtes de taille Petite ou moins."}], "sum": "+1 DEX · Illusion mineure"},
-           {"id": "roches", "n": "Gnome des roches", "asi": {"con": 1}, "tools": ["Outils de bricoleur"], "traits": [{"n": "Connaissance en ingénierie", "d": "Histoire sur les objets magiques, alchimiques ou techniques : maîtrise doublée."}, {"n": "Bricoleur", "d": "Outils de bricoleur : petits mécanismes (CA 5, 1 PV, 3 au plus)."}], "sum": "+1 CON · Bricoleur"}]},
- {"id": "tieffelin", "n": "Tieffelin", "size": "M", "speed": 9, "asi": {"int": 1, "cha": 2}, "langs": ["Commun", "Infernal"], "dv": 18,
-  "defs": [{"t": "res", "v": "feu"}],
-  "traits": [{"n": "Vision dans le noir", "d": "18 m, en nuances de gris dans l'obscurité."}, {"n": "Résistance infernale", "d": "Résistance aux dégâts de feu."}, {"n": "Ascendance infernale", "d": "Thaumaturgie ; niveau 3 : Représailles infernales (niveau 2), niveau 5 : Ténèbres, une fois par repos long chacun (CHA)."}],
-  "sum": "+2 CHA, +1 INT · résistance au feu · Thaumaturgie"}
-],
-"backgrounds": [
- {"id": "acolyte", "n": "Acolyte", "skills": ["insight", "religion"], "langChoice": 2, "gold": 15, "equip": ["Symbole sacré", "Livre de prières", "Bâtons d'encens (5)", "Habits de cérémonie", "Vêtements communs"], "feat": ["Abri du fidèle", "Soins et aide gratuits dans les lieux de ta foi ; un temple de ta divinité peut t'accueillir et t'assister."]},
- {"id": "artisan", "n": "Artisan de guilde", "skills": ["insight", "persuasion"], "toolChoice": {"n": 1, "list": ["artisan"]}, "langChoice": 1, "gold": 15, "equip": ["Outils d'artisan (au choix)", "Lettre de recommandation de la guilde", "Vêtements de voyage"], "feat": ["Membre de guilde", "Ta guilde te loge, te soutient en justice et t'ouvre des contacts influents (cotisation de 5 po par mois)."]},
- {"id": "artiste", "n": "Artiste", "skills": ["acrobatics", "performance"], "tools": ["Kit de déguisement"], "toolChoice": {"n": 1, "list": ["instrument"]}, "gold": 15, "equip": ["Instrument de musique (au choix)", "Cadeau d'un admirateur", "Costume"], "feat": ["À la demande du public", "Tu trouves toujours où te produire, logé et nourri ; on te reconnaît et on t'accueille dans les villes où tu as joué."]},
- {"id": "charlatan", "n": "Charlatan", "skills": ["sleight", "deception"], "tools": ["Kit de contrefaçon", "Kit de déguisement"], "gold": 15, "equip": ["Vêtements fins", "Kit de déguisement", "Outils d'escroquerie (dés truqués, cartes marquées…)"], "feat": ["Fausse identité", "Une seconde identité avec papiers et contacts ; tu imites des documents que tu as déjà vus."]},
- {"id": "criminel", "n": "Criminel", "skills": ["stealth", "deception"], "tools": ["Outils de voleur"], "toolChoice": {"n": 1, "list": ["jeu"]}, "gold": 15, "equip": ["Pied-de-biche", "Vêtements sombres avec capuche"], "feat": ["Accointances avec la pègre", "Un contact fiable te relie à un réseau de criminels et fait passer tes messages au loin."]},
- {"id": "enfant-rues", "n": "Enfant des rues", "skills": ["sleight", "stealth"], "tools": ["Kit de déguisement", "Outils de voleur"], "gold": 10, "equip": ["Petit couteau", "Carte de la ville natale", "Souris domestiquée", "Souvenir de tes parents", "Vêtements communs"], "feat": ["Secrets de la ville", "Hors combat, toi et tes compagnons vous déplacez deux fois plus vite en ville."]},
- {"id": "ermite", "n": "Ermite", "skills": ["medicine", "religion"], "tools": ["Kit d'herboriste"], "langChoice": 1, "gold": 5, "equip": ["Étui à parchemins (notes d'études)", "Couverture d'hiver", "Vêtements communs", "Kit d'herboriste"], "feat": ["Découverte", "Ta réclusion t'a fait découvrir un secret unique, à définir avec ton MJ."]},
- {"id": "heros", "n": "Héros du peuple", "skills": ["animal", "survival"], "tools": ["Véhicules (terrestres)"], "toolChoice": {"n": 1, "list": ["artisan"]}, "gold": 10, "equip": ["Outils d'artisan (au choix)", "Pelle", "Pot en fer", "Vêtements communs"], "feat": ["Hospitalité rustique", "Les gens du peuple te cachent et t'hébergent, sans risquer leur vie pour toi."]},
- {"id": "marin", "n": "Marin", "skills": ["athletics", "perception"], "tools": ["Outils de navigateur", "Véhicules (aquatiques)"], "gold": 10, "equip": ["Cabillot d'amarrage (gourdin)", "Corde en soie (15 m)", "Porte-bonheur", "Vêtements communs"], "feat": ["Place à bord", "Traversée gratuite pour toi et tes compagnons en échange d'aide à l'équipage."]},
- {"id": "noble", "n": "Noble", "skills": ["history", "persuasion"], "toolChoice": {"n": 1, "list": ["jeu"]}, "langChoice": 1, "gold": 25, "equip": ["Vêtements fins", "Chevalière", "Lettre de noblesse"], "feat": ["Apanage de la noblesse", "La haute société t'est ouverte, et tu obtiens audience auprès des nobles locaux."]},
- {"id": "sage", "n": "Sage", "skills": ["arcana", "history"], "langChoice": 2, "gold": 10, "equip": ["Bouteille d'encre noire", "Plume", "Petit couteau", "Lettre d'un collègue mort", "Vêtements communs"], "feat": ["Chercheur", "Tu sais où et auprès de qui trouver une information que tu ignores."]},
- {"id": "sauvageon", "n": "Sauvageon", "skills": ["athletics", "survival"], "toolChoice": {"n": 1, "list": ["instrument"]}, "langChoice": 1, "gold": 10, "equip": ["Bâton", "Piège à mâchoires", "Trophée d'animal", "Vêtements de voyage"], "feat": ["Éternel vagabond", "Tu retiens cartes et géographie ; tu trouves chaque jour de quoi nourrir jusqu'à 5 autres personnes."]},
- {"id": "soldat", "n": "Soldat", "skills": ["athletics", "intimidation"], "tools": ["Véhicules (terrestres)"], "toolChoice": {"n": 1, "list": ["jeu"]}, "gold": 10, "equip": ["Insigne de grade", "Trophée pris à un ennemi", "Jeu de dés en os", "Vêtements communs"], "feat": ["Grade militaire", "Les soldats de ton ancienne armée reconnaissent ton grade ; tu peux réquisitionner du matériel simple."]}
-],
-"toolLists": {
- "artisan": ["Matériel d'alchimiste", "Matériel de brasseur", "Matériel de calligraphe", "Outils de bricoleur", "Outils de cartographe", "Outils de charpentier", "Outils de cordonnier", "Outils de forgeron", "Outils de joaillier", "Outils de maçon", "Outils de menuisier", "Outils de peintre", "Outils de potier", "Outils de souffleur de verre", "Outils de tanneur", "Outils de tisserand", "Ustensiles de cuisinier"],
- "jeu": ["Jeu de dés", "Jeu de cartes", "Jeu d'échecs draconiques", "Jeu des Trois Dragons"],
- "instrument": ["Chalemie", "Cor", "Cornemuse", "Flûte", "Flûte de pan", "Luth", "Lyre", "Tambour", "Tympanon", "Viole"]
-},
-"langs": ["Commun", "Elfique", "Géant", "Gnome", "Gobelin", "Halfelin", "Nain", "Orc", "Abyssal", "Céleste", "Commun des profondeurs", "Draconique", "Infernal", "Primordial", "Profond", "Sylvestre"],
-"packs": {
- "Sac d'explorateur": "sac à dos, sac de couchage, gamelle, boîte d'allume-feu, 10 torches, 10 jours de rations, outre d'eau, 15 m de corde de chanvre",
- "Sac de cambrioleur": "sac à dos, 1 000 billes, 3 m de ficelle, clochette, 5 bougies, pied-de-biche, marteau, 10 pitons, lanterne à capuchon, 2 flasques d'huile, 5 jours de rations, boîte d'allume-feu, outre d'eau, 15 m de corde de chanvre",
- "Sac d'exploration souterraine": "sac à dos, pied-de-biche, marteau, 10 pitons, 10 torches, boîte d'allume-feu, 10 jours de rations, outre d'eau, 15 m de corde de chanvre",
- "Sac d'ecclésiastique": "sac à dos, couverture, 10 bougies, boîte d'allume-feu, boîte pour l'aumône, 2 bâtonnets d'encens, encensoir, habits de cérémonie, 2 jours de rations, outre d'eau",
- "Sac d'érudit": "sac à dos, livre de connaissances, bouteille d'encre, plume, 10 feuilles de parchemin, petit sac de sable, petit couteau"
-}
+ "source": "Manuel des joueurs 2014 (races et historiques, résumés d'après AideDD)",
+ "races": [
+  {
+   "id": "nain",
+   "n": "Nain",
+   "size": "M",
+   "speed": 7.5,
+   "asi": {
+    "con": 2
+   },
+   "langs": [
+    "Commun",
+    "Nain"
+   ],
+   "dv": 18,
+   "defs": [
+    {
+     "t": "res",
+     "v": "poison"
+    },
+    {
+     "t": "adv",
+     "v": "JdS contre le poison"
+    }
+   ],
+   "weapons": [
+    "handaxe",
+    "battleaxe",
+    "light-hammer",
+    "warhammer"
+   ],
+   "toolChoice": {
+    "n": 1,
+    "list": [
+     "Outils de forgeron",
+     "Matériel de brasseur",
+     "Outils de maçon"
+    ]
+   },
+   "traits": [
+    {
+     "n": "Vision dans le noir",
+     "d": "18 m, en nuances de gris dans l'obscurité."
+    },
+    {
+     "n": "Résistance naine",
+     "d": "Avantage aux JdS contre le poison, résistance aux dégâts de poison."
+    },
+    {
+     "n": "Entraînement aux armes naines",
+     "d": "Hachette, hache d'armes, marteau léger, marteau de guerre."
+    },
+    {
+     "n": "Connaissance de la pierre",
+     "d": "Histoire liée à un travail de la pierre : bonus de maîtrise doublé."
+    },
+    {
+     "n": "Vitesse",
+     "d": "7,5 m, non réduite par une armure lourde."
+    }
+   ],
+   "sum": "vision 18 m · résistance au poison · armes naines",
+   "subs": [
+    {
+     "id": "collines",
+     "n": "Nain des collines",
+     "asi": {
+      "wis": 1
+     },
+     "hpLv": 1,
+     "traits": [
+      {
+       "n": "Ténacité naine",
+       "d": "+1 PV maximum par niveau."
+      }
+     ],
+     "sum": "+1 SAG · +1 PV par niveau"
+    },
+    {
+     "id": "montagnes",
+     "n": "Nain des montagnes",
+     "asi": {
+      "str": 2
+     },
+     "armor": [
+      "light",
+      "medium"
+     ],
+     "traits": [
+      {
+       "n": "Formation au port des armures naines",
+       "d": "Armures légères et intermédiaires."
+      }
+     ],
+     "sum": "+2 FOR · armures légères et intermédiaires"
+    }
+   ]
+  },
+  {
+   "id": "elfe",
+   "n": "Elfe",
+   "size": "M",
+   "speed": 9,
+   "asi": {
+    "dex": 2
+   },
+   "langs": [
+    "Commun",
+    "Elfique"
+   ],
+   "dv": 18,
+   "skills": [
+    "perception"
+   ],
+   "defs": [
+    {
+     "t": "adv",
+     "v": "JdS contre charmé"
+    },
+    {
+     "t": "imm",
+     "v": "sommeil magique"
+    }
+   ],
+   "traits": [
+    {
+     "n": "Vision dans le noir",
+     "d": "18 m, en nuances de gris dans l'obscurité."
+    },
+    {
+     "n": "Sens aiguisés",
+     "d": "Maîtrise de Perception."
+    },
+    {
+     "n": "Ascendance féerique",
+     "d": "Avantage aux JdS contre le charme ; la magie ne peut pas t'endormir."
+    },
+    {
+     "n": "Transe",
+     "d": "4 heures de méditation valent 8 heures de sommeil."
+    }
+   ],
+   "sum": "vision 18 m · Perception · Transe",
+   "subs": [
+    {
+     "id": "haut",
+     "n": "Haut-elfe",
+     "asi": {
+      "int": 1
+     },
+     "weapons": [
+      "longsword",
+      "shortsword",
+      "shortbow",
+      "longbow"
+     ],
+     "langChoice": 1,
+     "cantripFrom": "magicien",
+     "traits": [
+      {
+       "n": "Entraînement aux armes elfiques",
+       "d": "Épée longue, épée courte, arc court, arc long."
+      },
+      {
+       "n": "Sort mineur",
+       "d": "Un sort mineur de magicien (INT)."
+      },
+      {
+       "n": "Langue supplémentaire",
+       "d": "Une langue au choix."
+      }
+     ],
+     "sum": "+1 INT · un sort mineur de magicien · une langue",
+     "spells": [
+      {
+       "choice": "cantrip",
+       "ab": "int"
+      }
+     ]
+    },
+    {
+     "id": "bois",
+     "n": "Elfe des bois",
+     "asi": {
+      "wis": 1
+     },
+     "speed": 10.5,
+     "weapons": [
+      "longsword",
+      "shortsword",
+      "shortbow",
+      "longbow"
+     ],
+     "traits": [
+      {
+       "n": "Entraînement aux armes elfiques",
+       "d": "Épée longue, épée courte, arc court, arc long."
+      },
+      {
+       "n": "Foulée légère",
+       "d": "Vitesse 10,5 m."
+      },
+      {
+       "n": "Cachette naturelle",
+       "d": "Tu peux te cacher dans une zone à visibilité réduite (feuillage, pluie, neige, brume)."
+      }
+     ],
+     "sum": "+1 SAG · 10,5 m · Cachette naturelle"
+    },
+    {
+     "id": "drow",
+     "n": "Elfe noir (drow)",
+     "asi": {
+      "cha": 1
+     },
+     "dv": 36,
+     "weapons": [
+      "rapier",
+      "shortsword",
+      "crossbow-hand"
+     ],
+     "traits": [
+      {
+       "n": "Vision dans le noir supérieure",
+       "d": "36 m."
+      },
+      {
+       "n": "Sensibilité au soleil",
+       "d": "Désavantage aux attaques et à la Perception basée sur la vue en plein soleil."
+      },
+      {
+       "n": "Magie drow",
+       "d": "Lumières dansantes ; niveau 3 : Lueurs féeriques, niveau 5 : Ténèbres, une fois par repos long chacun (CHA)."
+      },
+      {
+       "n": "Entraînement aux armes drows",
+       "d": "Rapière, épée courte, arbalète de poing."
+      }
+     ],
+     "sum": "+1 CHA · vision 36 m · magie drow",
+     "spells": [
+      {
+       "id": "dancing-lights",
+       "ab": "cha"
+      },
+      {
+       "id": "faerie-fire",
+       "ab": "cha",
+       "lv": 3,
+       "rest": "long"
+      },
+      {
+       "id": "darkness",
+       "ab": "cha",
+       "lv": 5,
+       "rest": "long"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "halfelin",
+   "n": "Halfelin",
+   "size": "P",
+   "speed": 7.5,
+   "asi": {
+    "dex": 2
+   },
+   "langs": [
+    "Commun",
+    "Halfelin"
+   ],
+   "defs": [
+    {
+     "t": "adv",
+     "v": "JdS contre effrayé"
+    }
+   ],
+   "traits": [
+    {
+     "n": "Chanceux",
+     "d": "Un 1 naturel à une attaque, un test ou un JdS se relance (on garde le nouveau)."
+    },
+    {
+     "n": "Brave",
+     "d": "Avantage aux JdS contre l'effroi."
+    },
+    {
+     "n": "Agilité halfeline",
+     "d": "Tu traverses l'espace des créatures plus grandes que toi."
+    }
+   ],
+   "sum": "Petite taille · Chanceux · Brave",
+   "subs": [
+    {
+     "id": "pied-leger",
+     "n": "Halfelin pied-léger",
+     "asi": {
+      "cha": 1
+     },
+     "traits": [
+      {
+       "n": "Discrétion naturelle",
+       "d": "Tu peux te cacher derrière une créature plus grande que toi."
+      }
+     ],
+     "sum": "+1 CHA · Discrétion naturelle"
+    },
+    {
+     "id": "robuste",
+     "n": "Halfelin robuste",
+     "asi": {
+      "con": 1
+     },
+     "defs": [
+      {
+       "t": "res",
+       "v": "poison"
+      },
+      {
+       "t": "adv",
+       "v": "JdS contre le poison"
+      }
+     ],
+     "traits": [
+      {
+       "n": "Résistance des robustes",
+       "d": "Avantage aux JdS contre le poison, résistance aux dégâts de poison."
+      }
+     ],
+     "sum": "+1 CON · résistance au poison"
+    }
+   ]
+  },
+  {
+   "id": "humain",
+   "n": "Humain",
+   "size": "M",
+   "speed": 9,
+   "asi": {
+    "str": 1,
+    "dex": 1,
+    "con": 1,
+    "int": 1,
+    "wis": 1,
+    "cha": 1
+   },
+   "langs": [
+    "Commun"
+   ],
+   "langChoice": 1,
+   "traits": [],
+   "sum": "+1 à tout · une langue",
+   "subs": [
+    {
+     "id": "standard",
+     "n": "Humain",
+     "sum": "+1 à toutes les caractéristiques"
+    },
+    {
+     "id": "variante",
+     "n": "Humain (variante)",
+     "asiReplace": true,
+     "asiChoice": {
+      "n": 2,
+      "v": 1
+     },
+     "skillChoice": 1,
+     "feat": true,
+     "traits": [],
+     "sum": "+1 à deux caractéristiques · une compétence · un don"
+    }
+   ]
+  },
+  {
+   "id": "demi-elfe",
+   "n": "Demi-elfe",
+   "size": "M",
+   "speed": 9,
+   "asi": {
+    "cha": 2
+   },
+   "asiChoice": {
+    "n": 2,
+    "v": 1,
+    "not": [
+     "cha"
+    ]
+   },
+   "langs": [
+    "Commun",
+    "Elfique"
+   ],
+   "langChoice": 1,
+   "skillChoice": 2,
+   "dv": 18,
+   "defs": [
+    {
+     "t": "adv",
+     "v": "JdS contre charmé"
+    },
+    {
+     "t": "imm",
+     "v": "sommeil magique"
+    }
+   ],
+   "traits": [
+    {
+     "n": "Vision dans le noir",
+     "d": "18 m, en nuances de gris dans l'obscurité."
+    },
+    {
+     "n": "Ascendance féerique",
+     "d": "Avantage aux JdS contre le charme ; la magie ne peut pas t'endormir."
+    },
+    {
+     "n": "Polyvalence",
+     "d": "Deux compétences au choix."
+    }
+   ],
+   "sum": "+2 CHA, +1 à deux au choix · 2 compétences"
+  },
+  {
+   "id": "demi-orc",
+   "n": "Demi-orc",
+   "size": "M",
+   "speed": 9,
+   "asi": {
+    "str": 2,
+    "con": 1
+   },
+   "langs": [
+    "Commun",
+    "Orc"
+   ],
+   "dv": 18,
+   "skills": [
+    "intimidation"
+   ],
+   "traits": [
+    {
+     "n": "Vision dans le noir",
+     "d": "18 m, en nuances de gris dans l'obscurité."
+    },
+    {
+     "n": "Menaçant",
+     "d": "Maîtrise d'Intimidation."
+    },
+    {
+     "n": "Endurance implacable",
+     "d": "À 0 PV sans être tué sur le coup : tu restes à 1 PV, une fois par repos long."
+    },
+    {
+     "n": "Attaques sauvages",
+     "d": "Sur un critique au corps à corps, un dé de dégâts de l'arme en plus."
+    }
+   ],
+   "sum": "+2 FOR, +1 CON · Intimidation · Endurance implacable"
+  },
+  {
+   "id": "drakeide",
+   "n": "Drakéide",
+   "size": "M",
+   "speed": 9,
+   "asi": {
+    "str": 2,
+    "cha": 1
+   },
+   "langs": [
+    "Commun",
+    "Draconique"
+   ],
+   "traits": [],
+   "sum": "+2 FOR, +1 CHA · souffle et résistance",
+   "ancestry": [
+    [
+     "Blanc",
+     "froid",
+     "cône de 4,5 m",
+     "con"
+    ],
+    [
+     "Bleu",
+     "foudre",
+     "ligne de 1,5 × 9 m",
+     "dex"
+    ],
+    [
+     "Noir",
+     "acide",
+     "ligne de 1,5 × 9 m",
+     "dex"
+    ],
+    [
+     "Rouge",
+     "feu",
+     "cône de 4,5 m",
+     "dex"
+    ],
+    [
+     "Vert",
+     "poison",
+     "cône de 4,5 m",
+     "con"
+    ],
+    [
+     "Airain",
+     "feu",
+     "ligne de 1,5 × 9 m",
+     "dex"
+    ],
+    [
+     "Argent",
+     "froid",
+     "cône de 4,5 m",
+     "con"
+    ],
+    [
+     "Bronze",
+     "foudre",
+     "ligne de 1,5 × 9 m",
+     "dex"
+    ],
+    [
+     "Cuivre",
+     "acide",
+     "ligne de 1,5 × 9 m",
+     "dex"
+    ],
+    [
+     "Or",
+     "feu",
+     "cône de 4,5 m",
+     "dex"
+    ]
+   ]
+  },
+  {
+   "id": "gnome",
+   "n": "Gnome",
+   "size": "P",
+   "speed": 7.5,
+   "asi": {
+    "int": 2
+   },
+   "langs": [
+    "Commun",
+    "Gnome"
+   ],
+   "dv": 18,
+   "defs": [
+    {
+     "t": "adv",
+     "v": "JdS d'INT, SAG et CHA contre la magie"
+    }
+   ],
+   "traits": [
+    {
+     "n": "Vision dans le noir",
+     "d": "18 m, en nuances de gris dans l'obscurité."
+    },
+    {
+     "n": "Ruse gnome",
+     "d": "Avantage aux JdS d'INT, de SAG et de CHA contre la magie."
+    }
+   ],
+   "sum": "Petite taille · vision 18 m · Ruse gnome",
+   "subs": [
+    {
+     "id": "forets",
+     "n": "Gnome des forêts",
+     "asi": {
+      "dex": 1
+     },
+     "traits": [
+      {
+       "n": "Illusionniste-né",
+       "d": "Sort mineur Illusion mineure (INT)."
+      },
+      {
+       "n": "Communication avec les petits animaux",
+       "d": "Idées simples avec les bêtes de taille Petite ou moins."
+      }
+     ],
+     "sum": "+1 DEX · Illusion mineure",
+     "spells": [
+      {
+       "id": "minor-illusion",
+       "ab": "int"
+      }
+     ]
+    },
+    {
+     "id": "roches",
+     "n": "Gnome des roches",
+     "asi": {
+      "con": 1
+     },
+     "tools": [
+      "Outils de bricoleur"
+     ],
+     "traits": [
+      {
+       "n": "Connaissance en ingénierie",
+       "d": "Histoire sur les objets magiques, alchimiques ou techniques : maîtrise doublée."
+      },
+      {
+       "n": "Bricoleur",
+       "d": "Outils de bricoleur : petits mécanismes (CA 5, 1 PV, 3 au plus)."
+      }
+     ],
+     "sum": "+1 CON · Bricoleur"
+    }
+   ]
+  },
+  {
+   "id": "tieffelin",
+   "n": "Tieffelin",
+   "size": "M",
+   "speed": 9,
+   "asi": {
+    "int": 1,
+    "cha": 2
+   },
+   "langs": [
+    "Commun",
+    "Infernal"
+   ],
+   "dv": 18,
+   "defs": [
+    {
+     "t": "res",
+     "v": "feu"
+    }
+   ],
+   "traits": [
+    {
+     "n": "Vision dans le noir",
+     "d": "18 m, en nuances de gris dans l'obscurité."
+    },
+    {
+     "n": "Résistance infernale",
+     "d": "Résistance aux dégâts de feu."
+    },
+    {
+     "n": "Ascendance infernale",
+     "d": "Thaumaturgie ; niveau 3 : Représailles infernales (niveau 2), niveau 5 : Ténèbres, une fois par repos long chacun (CHA)."
+    }
+   ],
+   "sum": "+2 CHA, +1 INT · résistance au feu · Thaumaturgie",
+   "spells": [
+    {
+     "id": "thaumaturgy",
+     "ab": "cha"
+    },
+    {
+     "id": "hellish-rebuke",
+     "ab": "cha",
+     "lv": 3,
+     "rest": "long",
+     "at": 2
+    },
+    {
+     "id": "darkness",
+     "ab": "cha",
+     "lv": 5,
+     "rest": "long"
+    }
+   ]
+  }
+ ],
+ "backgrounds": [
+  {
+   "id": "acolyte",
+   "n": "Acolyte",
+   "skills": [
+    "insight",
+    "religion"
+   ],
+   "langChoice": 2,
+   "gold": 15,
+   "equip": [
+    "Symbole sacré",
+    "Livre de prières",
+    "Bâtons d'encens (5)",
+    "Habits de cérémonie",
+    "Vêtements communs"
+   ],
+   "feat": [
+    "Abri du fidèle",
+    "Soins et aide gratuits dans les lieux de ta foi ; un temple de ta divinité peut t'accueillir et t'assister."
+   ]
+  },
+  {
+   "id": "artisan",
+   "n": "Artisan de guilde",
+   "skills": [
+    "insight",
+    "persuasion"
+   ],
+   "toolChoice": {
+    "n": 1,
+    "list": [
+     "artisan"
+    ]
+   },
+   "langChoice": 1,
+   "gold": 15,
+   "equip": [
+    "Outils d'artisan (au choix)",
+    "Lettre de recommandation de la guilde",
+    "Vêtements de voyage"
+   ],
+   "feat": [
+    "Membre de guilde",
+    "Ta guilde te loge, te soutient en justice et t'ouvre des contacts influents (cotisation de 5 po par mois)."
+   ]
+  },
+  {
+   "id": "artiste",
+   "n": "Artiste",
+   "skills": [
+    "acrobatics",
+    "performance"
+   ],
+   "tools": [
+    "Kit de déguisement"
+   ],
+   "toolChoice": {
+    "n": 1,
+    "list": [
+     "instrument"
+    ]
+   },
+   "gold": 15,
+   "equip": [
+    "Instrument de musique (au choix)",
+    "Cadeau d'un admirateur",
+    "Costume"
+   ],
+   "feat": [
+    "À la demande du public",
+    "Tu trouves toujours où te produire, logé et nourri ; on te reconnaît et on t'accueille dans les villes où tu as joué."
+   ]
+  },
+  {
+   "id": "charlatan",
+   "n": "Charlatan",
+   "skills": [
+    "sleight",
+    "deception"
+   ],
+   "tools": [
+    "Kit de contrefaçon",
+    "Kit de déguisement"
+   ],
+   "gold": 15,
+   "equip": [
+    "Vêtements fins",
+    "Kit de déguisement",
+    "Outils d'escroquerie (dés truqués, cartes marquées…)"
+   ],
+   "feat": [
+    "Fausse identité",
+    "Une seconde identité avec papiers et contacts ; tu imites des documents que tu as déjà vus."
+   ]
+  },
+  {
+   "id": "criminel",
+   "n": "Criminel",
+   "skills": [
+    "stealth",
+    "deception"
+   ],
+   "tools": [
+    "Outils de voleur"
+   ],
+   "toolChoice": {
+    "n": 1,
+    "list": [
+     "jeu"
+    ]
+   },
+   "gold": 15,
+   "equip": [
+    "Pied-de-biche",
+    "Vêtements sombres avec capuche"
+   ],
+   "feat": [
+    "Accointances avec la pègre",
+    "Un contact fiable te relie à un réseau de criminels et fait passer tes messages au loin."
+   ]
+  },
+  {
+   "id": "enfant-rues",
+   "n": "Enfant des rues",
+   "skills": [
+    "sleight",
+    "stealth"
+   ],
+   "tools": [
+    "Kit de déguisement",
+    "Outils de voleur"
+   ],
+   "gold": 10,
+   "equip": [
+    "Petit couteau",
+    "Carte de la ville natale",
+    "Souris domestiquée",
+    "Souvenir de tes parents",
+    "Vêtements communs"
+   ],
+   "feat": [
+    "Secrets de la ville",
+    "Hors combat, toi et tes compagnons vous déplacez deux fois plus vite en ville."
+   ]
+  },
+  {
+   "id": "ermite",
+   "n": "Ermite",
+   "skills": [
+    "medicine",
+    "religion"
+   ],
+   "tools": [
+    "Kit d'herboriste"
+   ],
+   "langChoice": 1,
+   "gold": 5,
+   "equip": [
+    "Étui à parchemins (notes d'études)",
+    "Couverture d'hiver",
+    "Vêtements communs",
+    "Kit d'herboriste"
+   ],
+   "feat": [
+    "Découverte",
+    "Ta réclusion t'a fait découvrir un secret unique, à définir avec ton MJ."
+   ]
+  },
+  {
+   "id": "heros",
+   "n": "Héros du peuple",
+   "skills": [
+    "animal",
+    "survival"
+   ],
+   "tools": [
+    "Véhicules (terrestres)"
+   ],
+   "toolChoice": {
+    "n": 1,
+    "list": [
+     "artisan"
+    ]
+   },
+   "gold": 10,
+   "equip": [
+    "Outils d'artisan (au choix)",
+    "Pelle",
+    "Pot en fer",
+    "Vêtements communs"
+   ],
+   "feat": [
+    "Hospitalité rustique",
+    "Les gens du peuple te cachent et t'hébergent, sans risquer leur vie pour toi."
+   ]
+  },
+  {
+   "id": "marin",
+   "n": "Marin",
+   "skills": [
+    "athletics",
+    "perception"
+   ],
+   "tools": [
+    "Outils de navigateur",
+    "Véhicules (aquatiques)"
+   ],
+   "gold": 10,
+   "equip": [
+    "Cabillot d'amarrage (gourdin)",
+    "Corde en soie (15 m)",
+    "Porte-bonheur",
+    "Vêtements communs"
+   ],
+   "feat": [
+    "Place à bord",
+    "Traversée gratuite pour toi et tes compagnons en échange d'aide à l'équipage."
+   ]
+  },
+  {
+   "id": "noble",
+   "n": "Noble",
+   "skills": [
+    "history",
+    "persuasion"
+   ],
+   "toolChoice": {
+    "n": 1,
+    "list": [
+     "jeu"
+    ]
+   },
+   "langChoice": 1,
+   "gold": 25,
+   "equip": [
+    "Vêtements fins",
+    "Chevalière",
+    "Lettre de noblesse"
+   ],
+   "feat": [
+    "Apanage de la noblesse",
+    "La haute société t'est ouverte, et tu obtiens audience auprès des nobles locaux."
+   ]
+  },
+  {
+   "id": "sage",
+   "n": "Sage",
+   "skills": [
+    "arcana",
+    "history"
+   ],
+   "langChoice": 2,
+   "gold": 10,
+   "equip": [
+    "Bouteille d'encre noire",
+    "Plume",
+    "Petit couteau",
+    "Lettre d'un collègue mort",
+    "Vêtements communs"
+   ],
+   "feat": [
+    "Chercheur",
+    "Tu sais où et auprès de qui trouver une information que tu ignores."
+   ]
+  },
+  {
+   "id": "sauvageon",
+   "n": "Sauvageon",
+   "skills": [
+    "athletics",
+    "survival"
+   ],
+   "toolChoice": {
+    "n": 1,
+    "list": [
+     "instrument"
+    ]
+   },
+   "langChoice": 1,
+   "gold": 10,
+   "equip": [
+    "Bâton",
+    "Piège à mâchoires",
+    "Trophée d'animal",
+    "Vêtements de voyage"
+   ],
+   "feat": [
+    "Éternel vagabond",
+    "Tu retiens cartes et géographie ; tu trouves chaque jour de quoi nourrir jusqu'à 5 autres personnes."
+   ]
+  },
+  {
+   "id": "soldat",
+   "n": "Soldat",
+   "skills": [
+    "athletics",
+    "intimidation"
+   ],
+   "tools": [
+    "Véhicules (terrestres)"
+   ],
+   "toolChoice": {
+    "n": 1,
+    "list": [
+     "jeu"
+    ]
+   },
+   "gold": 10,
+   "equip": [
+    "Insigne de grade",
+    "Trophée pris à un ennemi",
+    "Jeu de dés en os",
+    "Vêtements communs"
+   ],
+   "feat": [
+    "Grade militaire",
+    "Les soldats de ton ancienne armée reconnaissent ton grade ; tu peux réquisitionner du matériel simple."
+   ]
+  }
+ ],
+ "toolLists": {
+  "artisan": [
+   "Matériel d'alchimiste",
+   "Matériel de brasseur",
+   "Matériel de calligraphe",
+   "Outils de bricoleur",
+   "Outils de cartographe",
+   "Outils de charpentier",
+   "Outils de cordonnier",
+   "Outils de forgeron",
+   "Outils de joaillier",
+   "Outils de maçon",
+   "Outils de menuisier",
+   "Outils de peintre",
+   "Outils de potier",
+   "Outils de souffleur de verre",
+   "Outils de tanneur",
+   "Outils de tisserand",
+   "Ustensiles de cuisinier"
+  ],
+  "jeu": [
+   "Jeu de dés",
+   "Jeu de cartes",
+   "Jeu d'échecs draconiques",
+   "Jeu des Trois Dragons"
+  ],
+  "instrument": [
+   "Chalemie",
+   "Cor",
+   "Cornemuse",
+   "Flûte",
+   "Flûte de pan",
+   "Luth",
+   "Lyre",
+   "Tambour",
+   "Tympanon",
+   "Viole"
+  ]
+ },
+ "langs": [
+  "Commun",
+  "Elfique",
+  "Géant",
+  "Gnome",
+  "Gobelin",
+  "Halfelin",
+  "Nain",
+  "Orc",
+  "Abyssal",
+  "Céleste",
+  "Commun des profondeurs",
+  "Draconique",
+  "Infernal",
+  "Primordial",
+  "Profond",
+  "Sylvestre"
+ ],
+ "packs": {
+  "Sac d'explorateur": "sac à dos, sac de couchage, gamelle, boîte d'allume-feu, 10 torches, 10 jours de rations, outre d'eau, 15 m de corde de chanvre",
+  "Sac de cambrioleur": "sac à dos, 1 000 billes, 3 m de ficelle, clochette, 5 bougies, pied-de-biche, marteau, 10 pitons, lanterne à capuchon, 2 flasques d'huile, 5 jours de rations, boîte d'allume-feu, outre d'eau, 15 m de corde de chanvre",
+  "Sac d'exploration souterraine": "sac à dos, pied-de-biche, marteau, 10 pitons, 10 torches, boîte d'allume-feu, 10 jours de rations, outre d'eau, 15 m de corde de chanvre",
+  "Sac d'ecclésiastique": "sac à dos, couverture, 10 bougies, boîte d'allume-feu, boîte pour l'aumône, 2 bâtonnets d'encens, encensoir, habits de cérémonie, 2 jours de rations, outre d'eau",
+  "Sac d'érudit": "sac à dos, livre de connaissances, bouteille d'encre, plume, 10 feuilles de parchemin, petit sac de sable, petit couteau"
+ }
 }

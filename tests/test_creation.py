@@ -114,3 +114,25 @@ def test_races_a_choix(browser, devices, url):
     check(a.js("G().traits.some(t => t.feat === 'tough')") and a.g("hpMax") == 10 + a.js("Math.floor((G().abil.con - 10) / 2)") + 2, "don Robuste appliqué (+2 PV)")
     check(a.js("acOf(G())") == 18 and a.g("skills.athletics") == 1, "cotte de mailles + bouclier : CA 18 ; compétence de la variante")
     a.close()
+
+
+def test_sorts_innes(browser, devices, url):
+    from helpers import NEMEIA
+    from test_roublard import OMBRE
+    a = App(browser, devices, url, char=dict(NEMEIA, level=5, v=3, race={"id": "tieffelin", "n": "Tieffelin"}, abil={"str": 8, "dex": 14, "con": 12, "int": 18, "wis": 10, "cha": 14}), view="jeu")
+    t = a.text('[data-k="act-inn"]') + a.text("#panel")
+    check("Thaumaturgie" in t and "Représailles infernales" in t and "Ténèbres" in t, "sorts du tieffelin au niveau 5")
+    check("3d10 feu" in t and "DEX 13" in t, "Représailles infernales lancées au niveau 2, DD avec le Charisme (8 + 3 + 2)")
+    a.click('[data-a="inn-cast"][data-id="hellish-rebuke"]')
+    check(a.g("innU['hellish-rebuke']") == 1 and a.count('[data-a="inn-cast"][data-id="hellish-rebuke"]') == 0, "une fois par repos long")
+    check(a.js("JSON.stringify(G().used)") == "{}", "aucun emplacement dépensé")
+    a.click('[data-a="inn-cast"][data-id="darkness"]')
+    check(a.js("concOf(G()) && concOf(G()).id") == "darkness", "Ténèbres : concentration suivie")
+    a.click('[data-a="longrest"]')
+    check(not a.g("innU['hellish-rebuke']"), "repos long : de nouveau disponible")
+    a.close()
+    b = App(browser, devices, url, char=dict(OMBRE, level=3), view="jeu")
+    check(b.count('[data-k="act-inn"]') == 0, "pas de race : pas de section")
+    b.click('[data-a="hero-edit"]'); b.pg.select_option("#f-race", "elfe:drow")
+    check("Lumières dansantes" in b.text("#panel") and "Lueurs féeriques" in b.text("#panel") and not any("Ténèbres" in x for x in b.texts(".jrow.inn")), "roublard drow : sorts innés dans Capacités (Ténèbres au niveau 5)")
+    b.close()

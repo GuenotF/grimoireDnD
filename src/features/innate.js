@@ -1,0 +1,82 @@
+// Sorts innés de la race (tieffelin, drow, haut-elfe, gnome des forêts) : section de l'onglet d'action (En jeu),
+// pour toutes les classes. Chaque sort garde sa caractéristique d'incantation (celle de la race), son niveau d'accès
+// et son usage : à volonté (sort mineur) ou une fois par repos long, sans emplacement. Race réglable dans ✎ Modifier.
+import { onChange, onClick } from "../core/actions.js";
+import { esc, signed } from "../core/format.js";
+import { fxKey } from "../core/schema.js";
+import { G, S } from "../core/state.js";
+import { mutate } from "../core/store.js";
+import { toast } from "../core/ui.js";
+import { BY_ID } from "../data.js";
+import { R } from "../rules/common.js";
+import { RACES } from "../rules/creation.js";
+import { foldHead, isFold } from "../ui/components.js";
+import { concOf } from "./cast.js";
+import { pText, tags } from "./spells.js";
+
+const ABN = { int: "INT", wis: "SAG", cha: "CHA" };
+const raceDef = g => { const r = g.race && RACES[g.race.id]; if (!r) return null; return { r, s: (r.subs || []).find(x => x.id === g.race.sub) || null }; };
+/** Sorts innés accessibles au niveau du personnage : [{ s (sort), ab, rest, at (niveau de lancement), lv }]. */
+function innateSpells(g) {
+  const d = raceDef(g); if (!d) return [];
+  return [...(d.r.spells || []), ...((d.s && d.s.spells) || [])].map(x => ({ ...x, id: x.choice === "cantrip" ? g.race.cantrip : x.id }))
+    .filter(x => BY_ID[x.id] && g.level >= (x.lv || 1)).map(x => ({ s: BY_ID[x.id], ab: x.ab, rest: x.rest || null, at: x.at || BY_ID[x.id].l, lv: x.lv || 1 }));
+}
+/** Pastilles calculées avec la caractéristique de la race. */
+function pills(g, x) {
+  const s = x.s, m = R.ab(g, x.ab), prof = R.prof(g.level);
+  let v = pText(s, g.level);
+  if (x.at > s.l && /d\d+/.test(v) && /\+1d\d+ par niveau/.test(s.up || "")) v = v.replace(/^(\d+)d/, (_, n) => `${+n + x.at - s.l}d`); // lancé à un niveau plus élevé (Représailles infernales : niveau 2)
+  let h = v ? `<span class="kp ${s.p.startsWith("d:") ? "d" : "f"}">${esc(v)}</span>` : "";
+  if (s.j === "atk") h += `<span class="kp a" title="Attaque de sort (${ABN[x.ab]})">${signed(prof + m)}</span>`;
+  else if (s.j && s.j !== "auto") h += `<span class="kp s" title="Jet de sauvegarde de la cible">${s.j} ${8 + prof + m}</span>`;
+  return h;
+}
+function innateHTML(g) {
+  const list = innateSpells(g); if (!list.length) return "";
+  const rn = g.race.n || RACES[g.race.id].n;
+  let h = foldHead("act-inn", "", "Sorts innés", `${esc(rn)} · sans emplacement`, list.map(x => esc(x.s.n)).join(", "));
+  if (isFold("act-inn")) return h;
+  return h + list.map(x => {
+    const used = x.rest && (g.innU || {})[x.s.id], open = S.open.has("inn:" + x.s.id), cur = concOf(g);
+    const btn = used ? `<button class="btn cast-none sm" disabled>Utilisé</button>` : `<button class="btn cast-go sm" data-a="inn-cast" data-id="${x.s.id}">Lancer</button>`;
+    return `<div class="jrow inn"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="inn:${x.s.id}" aria-expanded="${open}">${esc(x.s.n)}${tags(x.s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${cur && cur.id === x.s.id ? `<span class="live">◉ en cours</span>` : ""}</div><span class="kps">${pills(g, x)}</span>${btn}</div>
+      <div class="innsub">${ABN[x.ab]} · ${x.s.l === 0 ? "à volonté" : `${x.at > x.s.l ? `niveau ${x.at}, ` : ""}une fois par repos long${x.rest ? ` <button class="pip${used ? " used" : ""}" data-a="inn-pip" data-id="${x.s.id}" aria-label="${esc(x.s.n)} : ${used ? "utilisé" : "disponible"}"></button>` : ""}`}</div>
+      ${open ? `<div class="jbody"><div class="eff">${esc(x.s.e)}</div><div class="meta">${esc(x.s.t)} · ${esc(x.s.r)} · ${esc(x.s.d)}</div></div>` : ""}</div>`;
+  }).join("");
+}
+onClick("inn-cast", (b) => {
+  const g = G(), x = innateSpells(g).find(y => y.s.id === b.dataset.id); if (!x) return; const s = x.s;
+  if (x.rest && (g.innU || {})[s.id]) return;
+  const cur = concOf(g), prev = JSON.parse(JSON.stringify({ innU: g.innU || {}, effects: g.effects }));
+  mutate(g => {
+    if (x.rest) g.innU = { ...(g.innU || {}), [s.id]: 1 };
+    if (s.c) { g.effects = g.effects.filter(e => !e.c); g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: true, note: "" }); }
+    else if (!["Instantanée", "Jusqu'à dissipation", "Spéciale"].includes(s.d)) g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: false, note: "" });
+  });
+  toast(`<b>${esc(s.n)}</b> lancé · ${x.rest ? "une fois par repos long" : "sort mineur"}${s.c && cur && cur.id !== s.id ? ` · fin de ${esc(cur.name)}` : ""}`, () => { mutate(g => Object.assign(g, prev)); return "Annulé"; });
+});
+onClick("inn-pip", (b) => { mutate(g => { const u = { ...(g.innU || {}) }; if (u[b.dataset.id]) delete u[b.dataset.id]; else u[b.dataset.id] = 1; g.innU = u; }); });
+
+// ---------- Race dans ✎ Modifier (fiches créées sans l'assistant) : sorts innés et maîtrises, sans toucher aux valeurs
+function raceField(g) {
+  const cur = g.race ? `${g.race.id}${g.race.sub ? ":" + g.race.sub : ""}` : "";
+  const opts = Object.values(RACES).flatMap(r => r.subs ? r.subs.map(s => [`${r.id}:${s.id}`, s.id === "standard" ? r.n : s.n]) : [[r.id, r.n]]);
+  const d = raceDef(g), cantrip = d && d.s && (d.s.spells || []).some(x => x.choice === "cantrip");
+  return `<div class="field"><label for="f-race">Race</label><select id="f-race"><option value="">Non précisée</option>${opts.map(([v, n]) => `<option value="${v}"${v === cur ? " selected" : ""}>${esc(n)}</option>`).join("")}</select></div>
+  ${cantrip ? `<div class="field"><label for="f-rcantrip">Sort mineur de haut-elfe</label><select id="f-rcantrip"><option value="">Choisir…</option>${Object.values(BY_ID).filter(s => s.l === 0 && (s.cl || []).includes("magicien")).sort((a, b) => a.n.localeCompare(b.n, "fr")).map(s => `<option value="${s.id}"${g.race.cantrip === s.id ? " selected" : ""}>${esc(s.n)}</option>`).join("")}</select></div>` : ""}`;
+}
+onChange("#f-race", t => {
+  mutate(g => {
+    if (!t.value) { g.race = null; return; }
+    const [rid, sid] = t.value.split(":"), r = RACES[rid], s = (r.subs || []).find(x => x.id === sid) || {};
+    // Seulement ce qui ne figure pas déjà dans les valeurs de la fiche : nom, maîtrises d'armes et d'armures, PV par niveau, sorts innés
+    g.race = { id: rid, sub: sid || null, n: s.n && s.id !== "standard" ? s.n : r.n, hpLv: s.hpLv || 0, weapons: [...(r.weapons || []), ...(s.weapons || [])], armor: [...(r.armor || []), ...(s.armor || [])] };
+  });
+  toast("Race enregistrée : sorts innés et maîtrises d'armes pris en compte (caractéristiques et traits inchangés)");
+});
+onChange("#f-rcantrip", t => { mutate(g => { if (g.race) g.race = { ...g.race, cantrip: t.value || undefined }; }); });
+/** Repos long : sorts innés de nouveau disponibles. */
+const innateRest = g => { g.innU = {}; };
+
+export { innateSpells, innateHTML, raceField, innateRest };

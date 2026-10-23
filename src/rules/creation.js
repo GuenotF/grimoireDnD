@@ -124,7 +124,7 @@ function build(c, blank) {
   const g = blank(c.name, c.cls), rg = raceGives(c) || { speed: 9, langs: [], skills: [], tools: [], weapons: [], armor: [], defs: [], traits: [], hpLv: 0, name: "" };
   const base = baseScores(c) || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }, asi = raceAsi(c);
   g.abil = Object.fromEntries(Object.entries(base).map(([k, v]) => [k, Math.min(20, v + (asi[k] || 0))]));
-  g.speed = rg.speed; g.race = { id: c.race, sub: c.sub || null, n: rg.name, hpLv: rg.hpLv, weapons: rg.weapons, armor: rg.armor };
+  g.speed = rg.speed; g.race = { id: c.race, sub: c.sub || null, n: rg.name, hpLv: rg.hpLv, weapons: rg.weapons, armor: rg.armor, ...(c.rc.cantrip ? { cantrip: c.rc.cantrip } : {}) };
   g.hpMax = hitDie(c.cls) + mod(g.abil.con) + rg.hpLv; g.hp = null;
   const skills = new Set([...rg.skills, ...bgSkills(c).filter(Boolean), ...c.skills]);
   g.skills = Object.fromEntries([...skills].map(k => [k, (c.exp || []).includes(k) ? 2 : 1]));

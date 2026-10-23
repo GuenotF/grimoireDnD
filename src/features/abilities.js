@@ -5,6 +5,7 @@ import { S } from "../core/state.js";
 import { attacksHTML } from "./attacks.js";
 import { itemsActionHTML } from "./equipment.js";
 import { featsPlayHTML } from "./featplay.js";
+import { innateHTML } from "./innate.js";
 import { featsHTML } from "./grimoire.js";
 import { restBarHTML } from "./rest.js";
 
@@ -13,7 +14,7 @@ function abilitiesHTML(g) {
   let h = `<div class="viewsw" role="group" aria-label="Affichage des capacités"><button data-a="view" data-v="gerer" aria-pressed="${!jeu}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${jeu}">En jeu</button></div>`;
   if (!jeu) return h + featsHTML(g); // Gérer : réglages seulement (capacités, style…), aucune action
   if (C(g).capsTop) h += C(g).capsTop(g);         // carte propre à la classe (Rage, Attaque sournoise…)
-  h += attacksHTML(g) + itemsActionHTML(g) + featsPlayHTML(g); // attaques, objets, dons
+  h += attacksHTML(g) + itemsActionHTML(g) + featsPlayHTML(g) + innateHTML(g); // attaques, objets, dons
   if (C(g).resources) h += C(g).resources(g);      // autres ressources (Ruse, Coup de chance…)
   return h + featsHTML(g) + restBarHTML(g);
 }
