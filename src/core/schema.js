@@ -78,7 +78,7 @@ function norm(g) {
   // Dons : reliés au catalogue (feat), choix fait en le prenant (ch), ajouts de l'atelier à retirer avec lui (ap).
   // Un trait libre au nom exact d'un don est relié au catalogue (sans ap : ses effets sont déjà dans la fiche).
   const arr = v => Array.isArray(v) ? v.filter(x => typeof x === "string") : undefined, abk = k => ABILITIES.some(a => a[0] === k) ? k : undefined;
-  const chOf = c => { if (!c || typeof c !== "object") return null; const r = { abil: abk(c.abil), skills: arr(c.skills), langs: arr(c.langs) }; Object.keys(r).forEach(k => r[k] === undefined && delete r[k]); return Object.keys(r).length ? r : null; };
+  const chOf = c => { if (!c || typeof c !== "object") return null; const r = { abil: abk(c.abil), skills: arr(c.skills), langs: arr(c.langs), cls: typeof c.cls === "string" ? c.cls : undefined, spells: arr(c.spells) && arr(c.spells).filter(id => BY_ID[id]) }; Object.keys(r).forEach(k => r[k] === undefined && delete r[k]); return Object.keys(r).length ? r : null; };
   const apOf = a => { if (!a || typeof a !== "object") return null; const r = { abil: abk(a.abil), skills: arr(a.skills), langs: arr(a.langs), hp: +a.hp > 0 ? Math.round(+a.hp) : undefined }; Object.keys(r).forEach(k => r[k] === undefined && delete r[k]); return r; };
   o.traits = (Array.isArray(o.traits) ? o.traits : []).filter(t => t && str(t.n).trim()).map(t => {
     const feat = FEATS[t.feat] ? t.feat : t.o !== "race" && featByName(t.n) ? featByName(t.n).id : null, ch = feat && chOf(t.ch), ap = feat && apOf(t.ap);

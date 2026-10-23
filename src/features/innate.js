@@ -1,6 +1,7 @@
-// Sorts innés de la race (tieffelin, drow, haut-elfe, gnome des forêts) : section de l'onglet d'action (En jeu),
-// pour toutes les classes. Chaque sort garde sa caractéristique d'incantation (celle de la race), son niveau d'accès
-// et son usage : à volonté (sort mineur) ou une fois par repos long, sans emplacement. Race réglable dans ✎ Modifier.
+// Sorts innés : race (tieffelin, drow, haut-elfe, gnome des forêts) et dons (Initié à la magie, Mage offensif,
+// Magie rituelle). Section de l'onglet d'action (En jeu), pour toutes les classes. Chaque sort garde sa caractéristique
+// d'incantation (race, ou classe choisie pour le don), son niveau d'accès et son usage : à volonté (sort mineur),
+// une fois par repos long sans emplacement, ou en rituel seulement (livre de rituels). Race réglable dans ✎ Modifier.
 import { onChange, onClick } from "../core/actions.js";
 import { esc, signed } from "../core/format.js";
 import { fxKey } from "../core/schema.js";
@@ -10,17 +11,23 @@ import { toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
 import { R } from "../rules/common.js";
 import { RACES } from "../rules/creation.js";
+import { FEATS, SPELL_CLASSES, featSpellPool } from "../rules/feats.js";
 import { foldHead, isFold } from "../ui/components.js";
 import { concOf } from "./cast.js";
 import { pText, tags } from "./spells.js";
 
 const ABN = { int: "INT", wis: "SAG", cha: "CHA" };
 const raceDef = g => { const r = g.race && RACES[g.race.id]; if (!r) return null; return { r, s: (r.subs || []).find(x => x.id === g.race.sub) || null }; };
-/** Sorts innés accessibles au niveau du personnage : [{ s (sort), ab, rest, at (niveau de lancement), lv }]. */
+/** Sorts innés accessibles au niveau du personnage : [{ s (sort), ab, rest, ritual, at (niveau de lancement), src, ti (trait du don) }]. */
 function innateSpells(g) {
-  const d = raceDef(g); if (!d) return [];
-  return [...(d.r.spells || []), ...((d.s && d.s.spells) || [])].map(x => ({ ...x, id: x.choice === "cantrip" ? g.race.cantrip : x.id }))
-    .filter(x => BY_ID[x.id] && g.level >= (x.lv || 1)).map(x => ({ s: BY_ID[x.id], ab: x.ab, rest: x.rest || null, at: x.at || BY_ID[x.id].l, lv: x.lv || 1 }));
+  const d = raceDef(g), out = [];
+  if (d) [...(d.r.spells || []), ...((d.s && d.s.spells) || [])].map(x => ({ ...x, id: x.choice === "cantrip" ? g.race.cantrip : x.id }))
+    .filter(x => BY_ID[x.id] && g.level >= (x.lv || 1)).forEach(x => out.push({ s: BY_ID[x.id], ab: x.ab, rest: x.rest || null, at: x.at || BY_ID[x.id].l, src: g.race.n || d.r.n }));
+  (g.traits || []).forEach((t, ti) => { const f = FEATS[t.feat]; if (!f || !f.spells || !t.ch || !SPELL_CLASSES[t.ch.cls]) return;
+    const ab = SPELL_CLASSES[t.ch.cls][1];
+    (t.ch.spells || []).filter(id => BY_ID[id]).forEach(id => { const s = BY_ID[id];
+      out.push({ s, ab, rest: f.spells.l1 && s.l === 1 ? "long" : null, ritual: !!f.spells.ritual, at: s.l, src: f.n, ti }); }); });
+  return out;
 }
 /** Pastilles calculées avec la caractéristique de la race. */
 function pills(g, x) {
@@ -34,28 +41,37 @@ function pills(g, x) {
 }
 function innateHTML(g) {
   const list = innateSpells(g); if (!list.length) return "";
-  const rn = g.race.n || RACES[g.race.id].n;
-  let h = foldHead("act-inn", "", "Sorts innés", `${esc(rn)} · sans emplacement`, list.map(x => esc(x.s.n)).join(", "));
+  const srcs = [...new Set(list.map(x => x.src))].join(", ");
+  let h = foldHead("act-inn", "", "Sorts innés", `${esc(srcs)} · sans emplacement`, list.map(x => esc(x.s.n)).join(", "));
   if (isFold("act-inn")) return h;
+  const book = list.find(x => x.ritual), addable = book ? ritualAddable(g, book.ti) : [];
   return h + list.map(x => {
     const used = x.rest && (g.innU || {})[x.s.id], open = S.open.has("inn:" + x.s.id), cur = concOf(g);
-    const btn = used ? `<button class="btn cast-none sm" disabled>Utilisé</button>` : `<button class="btn cast-go sm" data-a="inn-cast" data-id="${x.s.id}">Lancer</button>`;
+    const btn = x.ritual ? `<button class="btn cast-rit sm" data-a="inn-cast" data-id="${x.s.id}">Rituel</button>` : used ? `<button class="btn cast-none sm" disabled>Utilisé</button>` : `<button class="btn cast-go sm" data-a="inn-cast" data-id="${x.s.id}">Lancer</button>`;
     return `<div class="jrow inn"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="inn:${x.s.id}" aria-expanded="${open}">${esc(x.s.n)}${tags(x.s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${cur && cur.id === x.s.id ? `<span class="live">◉ en cours</span>` : ""}</div><span class="kps">${pills(g, x)}</span>${btn}</div>
-      <div class="innsub">${ABN[x.ab]} · ${x.s.l === 0 ? "à volonté" : `${x.at > x.s.l ? `niveau ${x.at}, ` : ""}une fois par repos long${x.rest ? ` <button class="pip${used ? " used" : ""}" data-a="inn-pip" data-id="${x.s.id}" aria-label="${esc(x.s.n)} : ${used ? "utilisé" : "disponible"}"></button>` : ""}`}</div>
+      <div class="innsub">${esc(x.src)} · ${ABN[x.ab]} · ${x.ritual ? "en rituel seulement (+10 minutes)" : x.s.l === 0 ? "à volonté" : `${x.at > x.s.l ? `niveau ${x.at}, ` : ""}une fois par repos long${x.rest ? ` <button class="pip${used ? " used" : ""}" data-a="inn-pip" data-id="${x.s.id}" aria-label="${esc(x.s.n)} : ${used ? "utilisé" : "disponible"}"></button>` : ""}`}</div>
       ${open ? `<div class="jbody"><div class="eff">${esc(x.s.e)}</div><div class="meta">${esc(x.s.t)} · ${esc(x.s.r)} · ${esc(x.s.d)}</div></div>` : ""}</div>`;
-  }).join("");
+  }).join("") + (addable.length ? `<div class="innadd"><label for="inn-add">Copier un rituel dans le livre</label><select id="inn-add" data-ti="${book.ti}"><option value="">Choisir… (2 h et 50 po par niveau)</option>${addable.map(s => `<option value="${s.id}">${esc(s.n)} · niv. ${s.l}</option>`).join("")}</select></div>` : "");
 }
 onClick("inn-cast", (b) => {
   const g = G(), x = innateSpells(g).find(y => y.s.id === b.dataset.id); if (!x) return; const s = x.s;
-  if (x.rest && (g.innU || {})[s.id]) return;
+  if (x.rest && !x.ritual && (g.innU || {})[s.id]) return;
   const cur = concOf(g), prev = JSON.parse(JSON.stringify({ innU: g.innU || {}, effects: g.effects }));
   mutate(g => {
-    if (x.rest) g.innU = { ...(g.innU || {}), [s.id]: 1 };
+    if (x.rest && !x.ritual) g.innU = { ...(g.innU || {}), [s.id]: 1 };
     if (s.c) { g.effects = g.effects.filter(e => !e.c); g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: true, note: "" }); }
     else if (!["Instantanée", "Jusqu'à dissipation", "Spéciale"].includes(s.d)) g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: false, note: "" });
   });
-  toast(`<b>${esc(s.n)}</b> lancé · ${x.rest ? "une fois par repos long" : "sort mineur"}${s.c && cur && cur.id !== s.id ? ` · fin de ${esc(cur.name)}` : ""}`, () => { mutate(g => Object.assign(g, prev)); return "Annulé"; });
+  toast(`<b>${esc(s.n)}</b> lancé · ${x.ritual ? "en rituel, 10 minutes de plus" : x.rest ? "une fois par repos long" : "sort mineur"}${s.c && cur && cur.id !== s.id ? ` · fin de ${esc(cur.name)}` : ""}`, () => { mutate(g => Object.assign(g, prev)); return "Annulé"; });
 });
+// Magie rituelle : rituels copiés ensuite (niveau au plus la moitié du niveau du personnage, arrondi au supérieur)
+function ritualAddable(g, ti) {
+  const t = g.traits[ti]; if (!t) return []; const max = Math.ceil(g.level / 2), have = t.ch.spells || [];
+  return [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(l => l <= max).flatMap(l => featSpellPool("ritual-caster", t.ch.cls, l)).filter(s => !have.includes(s.id));
+}
+onChange("#inn-add", t => { const id = t.value, ti = +t.dataset.ti; if (!BY_ID[id]) return;
+  mutate(g => { const tr = g.traits[ti]; if (tr && tr.ch) tr.ch = { ...tr.ch, spells: [...(tr.ch.spells || []), id] }; });
+  toast(`<b>${esc(BY_ID[id].n)}</b> copié dans le livre de rituels`); });
 onClick("inn-pip", (b) => { mutate(g => { const u = { ...(g.innU || {}) }; if (u[b.dataset.id]) delete u[b.dataset.id]; else u[b.dataset.id] = 1; g.innU = u; }); });
 
 // ---------- Race dans ✎ Modifier (fiches créées sans l'assistant) : sorts innés et maîtrises, sans toucher aux valeurs

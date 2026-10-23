@@ -8,7 +8,8 @@ import { render } from "../core/ui.js";
 import { R } from "../rules/common.js";
 import { saveBonus, saveFromClass, skillLevel } from "../rules/character.js";
 import { armorProf } from "../rules/equipment.js";
-import { ABN, FEATS, featAbil, featBlock, featTaken } from "../rules/feats.js";
+import { ABN, FEATS, SPELL_CLASSES, featAbil, featBlock, featSpellPool, featTaken } from "../rules/feats.js";
+import { BY_ID } from "../data.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 
 const state = ctx => { const o = ctx === "lu" ? S.lu : ctx === "cr" ? S.cr : S; if (!o.fp) o.fp = { q: "", all: false, sel: null, ch: {} }; return o.fp; };
@@ -41,6 +42,17 @@ function choiceHTML(g, id, st) {
     const sel = ch.skills || [];
     h += `<span class="lusub">Compétences · ${sel.length}/${f.skills}</span><div class="chips">${SKILLS.filter(([k]) => !skillLevel(g, k)).map(([k, n]) => `<button class="chip" data-a="fp-skill" data-v="${k}" aria-pressed="${sel.includes(k)}"${!sel.includes(k) && sel.length >= f.skills ? " disabled" : ""}>${n}</button>`).join("")}</div>
       <small class="muted">Un outil à la place ? Ajoute-le ensuite dans Outils et langues.</small>`;
+  }
+  if (f.spells) { // Initié à la magie, Mage offensif, Magie rituelle
+    h += `<span class="lusub">Classe (caractéristique d'incantation)</span><div class="chips">${Object.entries(SPELL_CLASSES).map(([k, [n, ab]]) => `<button class="chip" data-a="fp-cls" data-v="${k}" aria-pressed="${ch.cls === k}">${n} · ${ABN[ab]}</button>`).join("")}</div>`;
+    if (ch.cls) {
+      if (!["magicien", "druide"].includes(ch.cls)) h += `<small class="muted">La liste complète de cette classe n'est pas dans l'appli : tous les sorts du niveau sont proposés, vérifie qu'il fait partie de la liste.</small>`;
+      const sel = ch.spells || [], blk = (lv, n, lbl) => { const pool = featSpellPool(id, ch.cls, lv), cnt = sel.filter(x => BY_ID[x] && BY_ID[x].l === lv).length;
+        return `<span class="lusub">${lbl} · ${cnt}/${n}</span><div class="chips">${pool.map(s => { const on = sel.includes(s.id); return `<button class="chip" data-a="fp-spell" data-v="${s.id}" data-n="${n}" aria-pressed="${on}"${!on && cnt >= n ? " disabled" : ""}>${esc(s.n)}</button>`; }).join("")}</div>`; };
+      if (f.spells.cantrips) h += blk(0, f.spells.cantrips, f.spells.atk ? "Sort mineur avec jet d'attaque" : "Sorts mineurs");
+      if (f.spells.l1) h += blk(1, f.spells.l1, "Sort de niveau 1 (une fois par repos long)");
+      if (f.spells.ritual) h += blk(1, f.spells.ritual, "Rituels de niveau 1 (livre de rituels)");
+    }
   }
   if (f.langs) h += `<span class="lusub">Langues</span><div class="fplangs">${Array.from({ length: f.langs }, (_, i) => `<input id="fp-l${i}" type="text" value="${esc((ch.langs || [])[i] || "")}" placeholder="Langue ${i + 1}" aria-label="Langue ${i + 1}">`).join("")}</div>`;
   return h;
@@ -78,6 +90,9 @@ onInput("#fp-q", t => { cur().q = t.value; render(); });
 onClick("fp-all", (b) => { cur().all = b.dataset.v === "1"; render(); });
 onClick("fp-sel", (b) => { const st = cur(), id = b.dataset.v; st.sel = st.sel === id ? null : id; st.ch = {}; if (S.lu || S.cr) S.luKeep = true; render(); });
 onClick("fp-abil", (b) => { const st = cur(); st.ch = { ...st.ch, abil: b.dataset.v }; if (S.lu || S.cr) S.luKeep = true; render(); });
+onClick("fp-cls", (b) => { const st = cur(); st.ch = { ...st.ch, cls: b.dataset.v, spells: [] }; if (S.lu || S.cr) S.luKeep = true; render(); });
+onClick("fp-spell", (b) => { const st = cur(), id = b.dataset.v, s = st.ch.spells || [], n = +b.dataset.n, lv = BY_ID[id].l;
+  st.ch = { ...st.ch, spells: s.includes(id) ? s.filter(x => x !== id) : s.filter(x => BY_ID[x] && BY_ID[x].l === lv).length < n ? [...s, id] : s }; if (S.lu || S.cr) S.luKeep = true; render(); });
 onClick("fp-skill", (b) => { const st = cur(), k = b.dataset.v, s = st.ch.skills || []; st.ch = { ...st.ch, skills: s.includes(k) ? s.filter(x => x !== k) : [...s, k] }; if (S.lu || S.cr) S.luKeep = true; render(); });
 onInput(t => /^fp-l\d$/.test(t.id), (t) => { const st = cur(), l = [...(st.ch.langs || [])]; l[+t.id.slice(4)] = t.value; st.ch = { ...st.ch, langs: l }; });
 

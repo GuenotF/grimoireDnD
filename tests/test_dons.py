@@ -114,3 +114,38 @@ def test_dons_en_jeu(browser, devices, url):
     c.pg.fill("#hp-n", "10"); c.click('[data-a="hp-dmg"][data-minus="3"]')
     check(c.g("hp") == 33, "Dégâts −3 en armure lourde")
     c.close()
+
+
+def test_dons_a_sorts(browser, devices, url):
+    a = App(browser, devices, url, char=GARAL, tab="perso", view="gerer")
+    a.click('[data-a="trait-feat"]'); pick(a, "initi", "magic-initiate")
+    a.click('[data-a="fp-cls"][data-v="magicien"]')
+    for i in ["fire-bolt", "light", "magic-missile"]: a.click(f'[data-a="fp-spell"][data-v="{i}"]')
+    check(a.count('[data-a="fp-spell"][data-v="ray-of-frost"]:disabled') == 1, "2 sorts mineurs au plus")
+    a.click('[data-a="fp-add"]')
+    check(a.g("traits.at(-1).ch.cls") == "magicien" and a.js("G().traits.at(-1).ch.spells.length") == 3, "don enregistré avec ses sorts")
+    a.tab("caps"); a.view("jeu")
+    t = a.text("#panel")
+    check("Trait de feu" in t and "Projectile magique" in t and "Initié à la magie · INT" in t, "sorts du don dans la section Sorts innés (Capacités)")
+    check("+1" in a.text('.jrow.inn:has([data-id="fire-bolt"]) .kps'), "attaque avec l'INT (−1 + maîtrise 2)")
+    a.click('[data-a="inn-cast"][data-id="magic-missile"]')
+    check(a.g("innU['magic-missile']") == 1, "sort de niveau 1 : une fois par repos long")
+    a.close()
+    b = App(browser, devices, url, char=OMBRE, tab="perso", view="gerer")
+    b.click('[data-a="trait-feat"]'); pick(b, "ritu", "ritual-caster"); b.click('[data-a="fp-cls"][data-v="magicien"]')
+    for i in ["detect-magic", "find-familiar"]: b.click(f'[data-a="fp-spell"][data-v="{i}"]')
+    b.click('[data-a="fp-add"]'); b.tab("caps"); b.view("jeu")
+    check(b.count('.jrow.inn [data-a="inn-cast"].cast-rit') == 2, "livre de rituels : bouton Rituel")
+    b.pg.select_option("#inn-add", "comprehend-languages")
+    check(b.count('.jrow.inn [data-a="inn-cast"].cast-rit') == 3, "rituel copié dans le livre")
+    b.click('[data-a="inn-cast"][data-id="detect-magic"]')
+    check(not b.g("innU['detect-magic']") and "rituel" in b.toast(), "rituel : pas de limite par repos")
+    b.close()
+
+
+def test_mage_offensif(browser, devices, url):
+    a = App(browser, devices, url, char=NEMEIA, tab="perso", view="gerer")
+    a.click('[data-a="trait-feat"]'); pick(a, "offens", "spell-sniper"); a.click('[data-a="fp-cls"][data-v="druide"]')
+    ids = a.js("[...document.querySelectorAll('[data-a=fp-spell]')].map(b => b.dataset.v)")
+    check("produce-flame" in ids and "guidance" not in ids, "seuls les sorts mineurs à jet d'attaque")
+    a.close()

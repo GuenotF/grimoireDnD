@@ -14,7 +14,7 @@
 //   pre        : condition { abil: {dex: 13} } (toutes), { any: {int: 13, wis: 13} } (l'une), { spell: true }, { armor: "medium" }
 import { C } from "../classes/index.js";
 import { S } from "../core/state.js";
-import { FEAT_LIST } from "../data.js";
+import { BY_ID, FEAT_LIST, SPELLS } from "../data.js";
 import { R } from "./common.js";
 
 const EFFECTS = {
@@ -41,7 +41,7 @@ const EFFECTS = {
   "linguist": { abil: ["int"], langs: 3, pill: "+1 INT · 3 langues", calc: true },
   "lucky": { play: "Après un d20 d'attaque, de caractéristique ou de sauvegarde, ou contre une attaque qui te vise : lance un d20 de plus et choisis.", res: { n: 3, rest: "long", label: "points de chance" }, pill: "3 points de chance" },
   "mage-slayer": { play: "Réaction : attaque contre une créature à 1,50 m qui lance un sort ; tes coups lui imposent le désavantage en concentration ; avantage à tes JdS contre les sorts lancés à 1,50 m.", pill: "contre les lanceurs de sorts au contact" },
-  "magic-initiate": { play: "2 sorts mineurs et 1 sort de niveau 1 de la classe choisie ; le sort de niveau 1 se lance une fois par repos long sans emplacement.", res: { n: 1, rest: "long", label: "sort de niveau 1" }, pill: "2 sorts mineurs et 1 sort de niveau 1" },
+  "magic-initiate": { spells: { cantrips: 2, l1: 1 }, pill: "2 sorts mineurs et 1 sort de niveau 1", calc: true },
   "martial-adept": { play: g => `2 manœuvres du maître de guerre ; DD ${8 + R.prof(g.level) + Math.max(R.ab(g, "str"), R.ab(g, "dex"))} pour les jets de sauvegarde.`, res: { n: 1, rest: "court", label: "dé de supériorité (d6)" }, pill: "2 manœuvres, 1 dé de supériorité" },
   "medium-armor-master": { pre: { armor: "medium" }, dexMax: 3, pill: "DEX +3 en armure intermédiaire", calc: true },
   "mobile": { play: "Après une attaque au corps à corps contre une créature, pas d'attaque d'opportunité de sa part ce tour ; Foncer ignore le terrain difficile.", speed: 3, pill: "+3 m de vitesse", calc: true },
@@ -50,7 +50,7 @@ const EFFECTS = {
   "observant": { abil: ["int", "wis"], passive: 5, pill: "+1 INT ou SAG · +5 passif", calc: true },
   "polearm-master": { play: "Attaque d'opportunité quand une créature entre dans ton allonge (coutille, hallebarde, pique, bâton, lance).", pill: "attaque bonus avec le talon (1d4)", calc: true },
   "resilient": { abil: "any", save: true, pill: "+1 carac. · JdS maîtrisé", calc: true },
-  "ritual-caster": { play: "Livre de rituels : tu lances ses sorts uniquement en rituel (10 minutes de plus).", pre: { any: { int: 13, wis: 13 } }, pill: "livre de rituels" },
+  "ritual-caster": { spells: { ritual: 2 }, pre: { any: { int: 13, wis: 13 } }, pill: "livre de rituels (2 sorts)", calc: true },
   "savage-attacker": { play: "Une fois par tour : relance les dégâts d'une attaque d'arme au corps à corps et garde le meilleur résultat.", pill: "relance les dégâts" },
   "sentinel": { play: "Attaque d'opportunité réussie : vitesse de la cible à 0, même si elle se désengage. Réaction : attaque contre une créature à 1,50 m qui attaque quelqu'un d'autre.", pill: "attaques d'opportunité renforcées" },
   "sharpshooter": { pill: "−5 / +10, pas de désavantage à longue portée", calc: true,
@@ -59,7 +59,7 @@ const EFFECTS = {
   "shield-master": { play: "Action Attaquer : bousculade au bouclier en action bonus ; bonus du bouclier aux JdS de DEX qui te ciblent ; réaction : aucun dégât si ton JdS de DEX réussit.", pill: "bousculade au bouclier, JdS DEX" },
   "skilled": { skills: 3, pill: "3 compétences", calc: true },
   "skulker": { play: "Te cacher en visibilité réduite ; un tir raté ne trahit pas ta position ; pas de désavantage en Perception à la lumière faible.", pre: { abil: { dex: 13 } }, pill: "se cacher dans la pénombre" },
-  "spell-sniper": { play: "Sorts avec jet d'attaque : portée doublée, abris partiels et importants ignorés.", pre: { spell: true }, pill: "portée doublée, 1 sort mineur" },
+  "spell-sniper": { play: "Sorts avec jet d'attaque : portée doublée, abris partiels et importants ignorés.", spells: { cantrips: 1, atk: true }, pre: { spell: true }, pill: "portée doublée, 1 sort mineur", calc: true },
   "tavern-brawler": { play: "Après un coup à mains nues ou avec une arme improvisée : lutte en action bonus.", abil: ["str", "con"], unarmed: "1d4", pill: "+1 FOR ou CON · mains nues 1d4", calc: true },
   "tough": { hpLv: 2, pill: "+2 PV par niveau", calc: true },
   "war-caster": { play: "Avantage aux JdS de concentration ; composantes somatiques les mains pleines ; un sort à la place d'une attaque d'opportunité.", concAdv: true, pre: { spell: true }, pill: "avantage en concentration" },
@@ -129,7 +129,21 @@ function featChoiceOk(id, ch = {}) {
   if (f.abil && (f.abil === "any" || f.abil.length > 1) && !ch.abil) return false;
   if (f.skills && (ch.skills || []).length !== f.skills) return false;
   if (f.langs && (ch.langs || []).filter(Boolean).length !== f.langs) return false;
+  if (f.spells) { // Initié à la magie, Mage offensif, Magie rituelle : classe et sorts choisis
+    const sp = (ch.spells || []).map(id => BY_ID[id]).filter(Boolean), n = l => sp.filter(s => s.l === l).length;
+    if (!SPELL_CLASSES[ch.cls]) return false;
+    if (f.spells.cantrips && n(0) !== f.spells.cantrips) return false;
+    if (f.spells.l1 && n(1) !== f.spells.l1) return false;
+    if (f.spells.ritual && sp.filter(s => s.l === 1 && s.ri).length !== f.spells.ritual) return false;
+  }
   return true;
+}
+/** Classes proposées par les dons à sorts : caractéristique d'incantation. Listes complètes dans l'appli : magicien, druide. */
+const SPELL_CLASSES = { barde: ["Barde", "cha"], clerc: ["Clerc", "wis"], druide: ["Druide", "wis"], ensorceleur: ["Ensorceleur", "cha"], magicien: ["Magicien", "int"], occultiste: ["Occultiste", "cha"] };
+/** Sorts proposés par le don pour une classe (liste de la classe si l'appli la connaît, sinon tous les sorts du niveau). */
+function featSpellPool(id, cls, lv) {
+  const f = FEATS[id].spells, known = ["magicien", "druide"].includes(cls);
+  return SPELLS.filter(s => s.l === lv && (!known || (s.cl || []).includes(cls)) && (!f.atk || s.j === "atk") && (!f.ritual || s.ri)).sort((a, b) => a.n.localeCompare(b.n, "fr"));
 }
 /** Caractéristique augmentée de 1 par le don (choisie, ou imposée), ou null. */
 const featAbil = (id, ch = {}) => { const a = FEATS[id].abil; return !a ? null : a !== "any" && a.length === 1 ? a[0] : ch.abil || null; };
@@ -158,4 +172,4 @@ function featUnapply(g, t) {
 }
 
 export { FEATS, ABN, featByName, featTraits, featsOf, hasFeat, featInit, featSpeed, featPassive, featSaves, featArmor, featUnarmed, featHpLv, featAttack,
-  featBlock, featTaken, featChoiceOk, featAbil, featApply, featUnapply, featPlay, featPlayText, featLeft, featRecharge, concAdv };
+  featBlock, featTaken, featChoiceOk, featAbil, featApply, featUnapply, SPELL_CLASSES, featSpellPool, featPlay, featPlayText, featLeft, featRecharge, concAdv };
