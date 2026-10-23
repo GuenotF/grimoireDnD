@@ -10,6 +10,7 @@ import { render, toast } from "../core/ui.js";
 import { hitDieSize } from "../rules/character.js";
 import { R } from "../rules/common.js";
 import { hdLeft, hpCur, isDown, longRestHP, spendHitDie } from "../rules/hp.js";
+import { FEATS, featPlay, featRecharge } from "../rules/feats.js";
 import { rechargeItems } from "../rules/magic.js";
 
 /** Ressource récupérée au repos court : objet, ou fonction du personnage (ex. Coup de chance du roublard au niveau 20). */
@@ -34,7 +35,9 @@ function shortRestHTML(g) {
   let h = `<div class="short" id="short-panel"><div><h3>Repos court</h3>${diceHTML(g)}</div>`;
   if (C(g).shortPanel) return h + `<button class="btn ghost" data-a="short-close" style="justify-self:start">Fermer</button></div>` + C(g).shortPanel(g); // magicien : Restauration arcanique
   const items = g.items.filter(x => x.chMax && x.rec === "court" && x.chU); // objets magiques rechargés au repos court
-  const lines = (sr ? `<p><b>${sr.label.charAt(0).toUpperCase() + sr.label.slice(1)}</b> : ${sr.done} en terminant le repos.</p>` : "") + (items.length ? `<p><b>Objets</b> : ${items.map(x => esc(x.n)).join(", ")}, charges récupérées en terminant le repos.</p>` : "");
+  const feats = featPlay(g).filter(id => FEATS[id].res && FEATS[id].res.rest === "court" && (g.featU || {})[id]); // Adepte martial
+  const lines = (sr ? `<p><b>${sr.label.charAt(0).toUpperCase() + sr.label.slice(1)}</b> : ${sr.done} en terminant le repos.</p>` : "") + (items.length ? `<p><b>Objets</b> : ${items.map(x => esc(x.n)).join(", ")}, charges récupérées en terminant le repos.</p>` : "")
+    + (feats.length ? `<p><b>Dons</b> : ${feats.map(id => esc(FEATS[id].n)).join(", ")}, récupéré${feats.length > 1 ? "s" : ""} en terminant le repos.</p>` : "");
   if (!lines) return h + `<div class="cast"><button class="btn ghost" data-a="short-close">Fermer</button></div></div>`; // rien d'autre à récupérer (barbare, roublard)
   return h + `${lines}
   <div class="cast"><button class="btn cast-go" data-a="short-done">Terminer le repos court</button><button class="btn ghost" data-a="short-close">Fermer</button></div></div>`;
@@ -44,9 +47,9 @@ const snapHP = g => JSON.parse(JSON.stringify({ hp: g.hp, hdU: g.hdU }));
 onClick("short-open", () => { S.shortOpen = !S.shortOpen; S.sr = {}; render(); });
 onClick("short-close", () => { S.shortOpen = false; S.sr = {}; render(); });
 onClick("short-done", () => {
-  const g = G(); if (!g) return; const sr = SR(g), prev = JSON.parse(JSON.stringify({ items: g.items, ...(sr ? { [sr.field]: g[sr.field] } : {}) })); S.shortOpen = false;
-  let n = 0; mutate(g => { if (sr) g[sr.field] = 0; n = rechargeItems(g, "court"); });
-  toast(`Repos court : ${[sr ? `${sr.label} ${sr.done}` : "", n ? `charges de ${n} objet${n > 1 ? "s" : ""}` : ""].filter(Boolean).join(", ")}`, () => { mutate(g => Object.assign(g, prev)); return "Repos court annulé"; });
+  const g = G(); if (!g) return; const sr = SR(g), prev = JSON.parse(JSON.stringify({ items: g.items, featU: g.featU, ...(sr ? { [sr.field]: g[sr.field] } : {}) })); S.shortOpen = false;
+  let n = 0, fr = []; mutate(g => { if (sr) g[sr.field] = 0; n = rechargeItems(g, "court"); fr = featRecharge(g, "court"); });
+  toast(`Repos court : ${[sr ? `${sr.label} ${sr.done}` : "", n ? `charges de ${n} objet${n > 1 ? "s" : ""}` : "", ...fr].filter(Boolean).join(", ") || "terminé"}`, () => { mutate(g => Object.assign(g, prev)); return "Repos court annulé"; });
 });
 onClick("hp-hd", () => {
   const g = G(), el = document.getElementById("hd-n"), n = Math.floor(+(el && el.value) || 0); if (!g) return;
@@ -56,6 +59,6 @@ onClick("hp-hd", () => {
   if (got != null) toast(`Dé de vie : ${n} ${signed(R.ab(g, "con"))} CON → <b>+${got} PV</b> · ${hpCur(G())}/${g.hpMax} · reste ${hdLeft(G())}`, () => { mutate(g => Object.assign(g, prev)); return "Dé de vie annulé"; });
   const nx = document.getElementById("hd-n"); if (nx) nx.focus({ preventScroll: true });
 });
-onClick("longrest", () => { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.effects = []; if (C(g).longRest) C(g).longRest(g); g.extras.forEach(x => x.used = false); longRestHP(g); rechargeItems(g, "long"); toast(`Repos long : ${g.hpMax != null ? "PV au maximum, " : ""}emplacements et capacités récupérés, sorts en cours terminés`); }); });
+onClick("longrest", () => { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.effects = []; if (C(g).longRest) C(g).longRest(g); g.extras.forEach(x => x.used = false); longRestHP(g); rechargeItems(g, "long"); featRecharge(g, "long"); toast(`Repos long : ${g.hpMax != null ? "PV au maximum, " : ""}emplacements et capacités récupérés, sorts en cours terminés`); }); });
 
 export { restBarHTML };

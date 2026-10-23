@@ -8,6 +8,7 @@ import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
 import { R } from "../rules/common.js";
+import { concAdv } from "../rules/feats.js";
 
 const NO_TRACK = ["Instantanée", "Jusqu'à dissipation", "Spéciale"]; // durées non suivies dans « En cours »
 const slotsLeft = (g, lv) => Math.max(0, (R.slots(g)[lv - 1] || 0) - (+(g.used[lv] || 0)));
@@ -47,9 +48,9 @@ function slotbarHTML(g, pre = "") {
 }
 const concOf = g => (g.effects || []).find(e => e.c);
 const concDD = dmg => Math.max(10, Math.floor((+dmg || 0) / 2));
-function concPanelHTML(cur) {
+function concPanelHTML(cur, g) {
   return `<div class="head"><b>Concentration : ${esc(cur.name)}</b><span class="muted" style="font-size:13px">jusqu'à ${esc(cur.d)}</span></div>
-  <p>Tu subis des dégâts ? Jet de sauvegarde de <b>Constitution</b>, DD 10 ou la moitié des dégâts si c'est plus.</p>
+  <p>Tu subis des dégâts ? Jet de sauvegarde de <b>Constitution</b>, DD 10 ou la moitié des dégâts si c'est plus.${g && concAdv(g) ? ` <b class="adv">Avantage (Mage de guerre).</b>` : ""}</p>
   <div class="row"><label for="conc-dmg">Dégâts subis</label><input id="conc-dmg" type="number" inputmode="numeric" min="0" placeholder="0"><span class="kp s" id="conc-dd">JdS CON · DD 10</span></div>
   <div class="row"><button class="btn" data-a="conc-end" style="border-color:var(--rubric);color:var(--pa-fg)">Concentration perdue</button><button class="btn ghost" data-a="conc-close">Fermer</button></div>`;
 }

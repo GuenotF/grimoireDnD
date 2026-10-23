@@ -50,7 +50,7 @@ function renderApp() {
   const hpp = document.getElementById("hppanel"), showHp = showBar && !!S.hpOpen && !!barChips;
   hpp.hidden = !showHp; if (showHp) hpp.innerHTML = hpCardHTML(g, true); else S.hpOpen = false;
   const cp = document.getElementById("concpanel"), cur = g && concOf(g), showCp = showBar && S.concPanel && !!cur && !showHp;
-  cp.hidden = !showCp; if (showCp) cp.innerHTML = concPanelHTML(cur);
+  cp.hidden = !showCp; if (showCp) cp.innerHTML = concPanelHTML(cur, g);
   const showFx = showBar && S.fxOpen && g.effects.length > 0, fs = document.getElementById("fxsheet");
   fs.hidden = !showFx; document.getElementById("fxback").hidden = !showFx; if (showFx) fs.innerHTML = fxSheetHTML(g);
   if (!showFx) S.fxOpen = false;

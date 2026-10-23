@@ -220,3 +220,11 @@
 .itdet { display: grid; gap: 3px; margin: 0 0 6px 28px; padding: 8px 10px; background: var(--bg); border-radius: 8px; font-size: 13.5px; }
 .it.j + .itdet { margin-left: 0; }
 .itdet div { display: flex; gap: 8px; } .itdet span { color: var(--muted); min-width: 92px; flex: none; } .itdet b { font-weight: 500; }
+
+/* Dons en jeu (onglet d'action) */
+.fpplay { display: grid; gap: 8px; }
+.fpcard { background: var(--surface); border: 1.5px solid var(--rule); border-radius: 10px; padding: 9px 12px; display: grid; gap: 5px; }
+.fpcard .h { display: flex; align-items: center; gap: 8px; } .fpcard .h b { font-family: var(--f-display); font-size: 17px; flex: 1; }
+.fpcard p { margin: 0; font-size: 14px; line-height: 1.4; }
+.fpres { display: inline-flex; align-items: center; gap: 6px; } .fpres small { color: var(--muted); font-size: 12.5px; margin-right: 2px; }
+.adv { color: var(--ok); }

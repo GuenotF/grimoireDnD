@@ -8,6 +8,8 @@ import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { BEAST } from "../data.js";
 import { hitDieSize, saveBonus } from "../rules/character.js";
+import { acCalc } from "../rules/equipment.js";
+import { concAdv, hasFeat } from "../rules/feats.js";
 import { damage, deathSave, hdLeft, heal, hpCur, isDead, isDown, setTemp } from "../rules/hp.js";
 import { concDD, concOf } from "./cast.js";
 
@@ -17,7 +19,7 @@ const restore = prev => mutate(g => Object.assign(g, prev));
 // Rappel du jet de concentration après des dégâts (hors Forme sauvage, qui a le sien)
 function hpConcHTML(g) {
   const w = S.hpConc, cur = concOf(g); if (!w || !cur) { S.hpConc = null; return ""; }
-  return `<div class="concwarn" role="alert"><div><b>◉ ${esc(cur.name)}</b> : jet de sauvegarde de Constitution, <b>DD ${w.dd}</b> (${plural(w.n, "dégât")}), ton bonus <b>${signed(saveBonus(g, "con"))}</b>.</div>
+  return `<div class="concwarn" role="alert"><div><b>◉ ${esc(cur.name)}</b> : jet de sauvegarde de Constitution, <b>DD ${w.dd}</b> (${plural(w.n, "dégât")}), ton bonus <b>${signed(saveBonus(g, "con"))}</b>${concAdv(g) ? ` · <b class="adv">avantage (Mage de guerre)</b>` : ""}.</div>
   <div class="cast"><button class="btn" data-a="hpconc-ok">Réussi</button><button class="btn" data-a="conc-end" style="border-color:var(--rubric);color:var(--pa-fg)">Raté : concentration perdue</button></div></div>`;
 }
 const dots = (n, cls) => Array.from({ length: 3 }, (_, i) => `<span class="dsd ${cls}${i < n ? " on" : ""}"></span>`).join("");
@@ -25,13 +27,15 @@ const dots = (n, cls) => Array.from({ length: 3 }, (_, i) => `<span class="dsd $
 const EXH = ["désavantage aux tests", "vitesse ÷ 2", "désavantage attaques et JdS", "PV max ÷ 2", "vitesse 0", "mort"];
 /** Résistance applicable : capacité de la classe (Rage) ou résistances saisies dans les défenses. */
 const halfLabel = g => (C(g).halfDamage && C(g).halfDamage(g)) || (g.defs.some(d => d.t === "res") ? `résistance (${g.defs.filter(d => d.t === "res").map(d => d.v).join(", ")})` : "");
+/** Maître des armures lourdes, en armure lourde : −3 aux dégâts physiques non magiques. */
+const ham = g => hasFeat(g, "heavy-armor-master") && (acCalc(g).armor || {}).cat === "heavy";
 function hpCardHTML(g, panel = false) { // panel : volet ouvert depuis la barre du bas (sans dés de vie ni épuisement)
   if (g.hpMax == null) return `<section class="hpcard"><div class="hph"><span class="k">Points de vie</span></div><p class="muted" style="margin:0">Saisis tes PV maximum (mode <button class="linkbtn" data-a="view" data-v="gerer">Gérer</button>) pour suivre tes points de vie.</p></section>`;
   const cur = hpCur(g), t = g.hpTemp || 0, d = g.death, down = isDown(g), dead = isDead(g);
   const pct = Math.round(100 * cur / g.hpMax), tpct = Math.min(100 - pct, Math.round(100 * t / g.hpMax));
   const state = dead ? "Mort" : down ? (d.stable ? "À terre · stabilisé" : "À terre · inconscient") : "Points de vie";
   const half = halfLabel(g); // résistance active (Rage…) ou défenses de la fiche : dégâts divisés par 2
-  const input = `<div class="hpin"><input id="hp-n" type="number" inputmode="numeric" min="0" placeholder="0" aria-label="Nombre de points de vie"><button class="btn cast-go sm" data-a="hp-dmg">Dégâts</button>${half && !down ? `<button class="btn sm half" data-a="hp-dmg" data-half="1" title="${esc(half)}">Dégâts ½</button>` : ""}<button class="btn sm" data-a="hp-heal"${dead ? " disabled" : ""}>Soins</button>${down ? "" : `<button class="btn sm" data-a="hp-temp">PV temp.</button>`}</div>`;
+  const input = `<div class="hpin"><input id="hp-n" type="number" inputmode="numeric" min="0" placeholder="0" aria-label="Nombre de points de vie"><button class="btn cast-go sm" data-a="hp-dmg">Dégâts</button>${half && !down ? `<button class="btn sm half" data-a="hp-dmg" data-half="1" title="${esc(half)}">Dégâts ½</button>` : ""}${ham(g) && !down ? `<button class="btn sm half" data-a="hp-dmg" data-minus="3" title="Maître des armures lourdes : contondant, perforant, tranchant non magiques">Dégâts −3</button>` : ""}<button class="btn sm" data-a="hp-heal"${dead ? " disabled" : ""}>Soins</button>${down ? "" : `<button class="btn sm" data-a="hp-temp">PV temp.</button>`}</div>`;
   let h = `<section class="hpcard${down || dead ? " down" : ""}${panel ? " inpanel" : ""}"${panel ? "" : ' id="hp-card"'}><div class="hph"><span class="k">${state}</span>${t ? `<span class="tmp">+${t} temp.</span>` : ""}<span class="v">${cur}<small>/${g.hpMax}</small></span></div>`;
   if (!down) h += `<div class="hpbar" aria-hidden="true"><i style="width:${pct}%"></i><i class="t" style="width:${tpct}%"></i></div>`;
   const foot = panel ? `<div class="hpfoot">${down || dead ? "" : `<button class="linkbtn" data-a="hp-sheet">Repos et dés de vie : fiche du personnage ›</button>`}<button class="btn ghost sm" data-a="hp-close">Fermer</button></div>` : "";
@@ -75,7 +79,7 @@ function takeDamage(g, n, fromBeast) {
 }
 
 const val = () => { const el = document.getElementById("hp-n"), n = Math.floor(+(el && el.value) || 0); if (n < 1 && el) el.focus(); return n; };
-onClick("hp-dmg", (b) => { const g = G(), raw = val(), n = b.dataset.half ? Math.floor(raw / 2) : raw; if (!g || raw < 1) return; const prev = snap(g); let msg = ""; mutate(g => { msg = takeDamage(g, n); }); toast(msg, () => { S.hpConc = null; restore(prev); return "Dégâts annulés"; }); });
+onClick("hp-dmg", (b) => { const g = G(), raw = val(), n = b.dataset.half ? Math.floor(raw / 2) : b.dataset.minus ? Math.max(0, raw - +b.dataset.minus) : raw; if (!g || raw < 1) return; if (n === 0) { toast("Aucun dégât : Maître des armures lourdes (−3)"); return; } const prev = snap(g); let msg = ""; mutate(g => { msg = takeDamage(g, n); }); toast(msg, () => { S.hpConc = null; restore(prev); return "Dégâts annulés"; }); });
 onClick("hp-heal", () => { const g = G(), n = val(); if (!g || n < 1) return; const prev = snap(g), down = isDown(g); let got = 0; S.hpConc = null; mutate(g => { got = heal(g, n); }); toast(`<b>+${got} PV</b>${down ? " : tu te relèves" : ""} · ${hpCur(G())}/${g.hpMax}`, () => { restore(prev); return "Soin annulé"; }); });
 onClick("hp-temp", () => { const g = G(), n = val(); if (!g || n < 1) return; const prev = snap(g); let up = false; mutate(g => { up = setTemp(g, n); }); toast(up ? `<b>${g.hpTemp} PV temporaires</b>` : `Tu gardes tes ${g.hpTemp} PV temporaires : ils ne se cumulent pas, on garde le plus élevé`, up ? () => { restore(prev); return "PV temporaires annulés"; } : null); });
 onClick("ds", (b) => {

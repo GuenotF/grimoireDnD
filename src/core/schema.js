@@ -88,6 +88,8 @@ function norm(g) {
     }
     return { n: str(t.n).trim(), o: feat ? "don" : str(t.o) || "autre", d: str(t.d), ...(feat ? { feat } : {}), ...(ch ? { ch } : {}), ...(ap ? { ap } : {}) };
   });
+  const fu = o.featU && typeof o.featU === "object" ? o.featU : {}; // ressources des dons dépensées : {id: n}
+  o.featU = Object.fromEntries(Object.entries(fu).filter(([k, n]) => FEATS[k] && FEATS[k].res && +n > 0).map(([k, n]) => [k, Math.min(FEATS[k].res.n, Math.round(+n))]));
   o.bg = { n: str((o.bg || {}).n), d: str((o.bg || {}).d) }; o.pnotes = str(o.pnotes);
   o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(x.oh ? { oh: true } : {}), ...magicOf(x), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : {}) }));
   o.acMode = ["calc", "manual"].includes(o.acMode) ? o.acMode : null; // null : saisie si elle existe, sinon calcul

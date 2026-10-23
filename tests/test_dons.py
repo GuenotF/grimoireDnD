@@ -87,3 +87,30 @@ def test_assistant_de_niveau(browser, devices, url):
     b.click(".lvup")
     check("40 → 46" in b.text(".luhpv"), f"Robuste déjà pris : 4 + 0 CON + 2 au passage ({b.text('.luhpv')})")
     b.close()
+
+
+def test_dons_en_jeu(browser, devices, url):
+    traits = [{"n": "Chanceux", "o": "don", "d": ""}, {"n": "Mage de guerre", "o": "don", "d": ""}, {"n": "Robuste", "o": "don", "d": ""}]
+    a = App(browser, devices, url, char=dict(NEMEIA, traits=traits, hpMax=31), view="jeu")
+    check(a.texts(".fpcard .h b") == ["Chanceux", "Mage de guerre"], f"section Dons : ressources et rappels, pas Robuste ({a.texts('.fpcard .h b')})")
+    check(a.count('[data-a="feat-pip"]') == 3, "3 points de chance")
+    a.click('[data-a="feat-pip"][data-v="lucky"][data-k="0"]')
+    check(a.g("featU.lucky") == 1 and "2 points de chance" in a.text(".fpcard"), "un point dépensé")
+    a.click('.jline [data-a="cast"][data-id="levitate"]')
+    a.click(".slotbar .chip.hp"); a.pg.fill("#hp-n", "6"); a.click('#hppanel [data-a="hp-dmg"]')
+    check("avantage (Mage de guerre)" in a.text("#hppanel .concwarn"), "concentration : avantage rappelé")
+    a.click('#hppanel [data-a="hp-close"]'); a.click('[data-a="longrest"]')
+    check(not a.g("featU.lucky"), "repos long : points de chance récupérés")
+    a.close()
+    b = App(browser, devices, url, char=dict(GARAL, traits=[{"n": "Adepte martial", "o": "don", "d": ""}]), view="jeu")
+    check("DD 13" in b.text(".fpcard") and b.count('[data-a="feat-pip"]') == 1, "Adepte martial : DD des manœuvres, 1 dé de supériorité")
+    b.click('[data-a="feat-pip"][data-v="martial-adept"][data-k="0"]'); b.click('[data-a="short-open"]')
+    check("Adepte martial" in b.text("#short-panel"), "repos court : le dé est annoncé")
+    b.click('[data-a="short-done"]')
+    check(not b.g("featU['martial-adept']") and "Adepte martial" in b.toast(), "repos court : dé récupéré")
+    b.close()
+    from helpers import KAEL
+    c = App(browser, devices, url, char=dict(KAEL, hpMax=40, traits=[{"n": "Maître des armures lourdes", "o": "don", "d": ""}], items=[{"n": "Harnois", "q": 1, "eq": True, "ref": "plate"}]), tab="perso", view="jeu")
+    c.pg.fill("#hp-n", "10"); c.click('[data-a="hp-dmg"][data-minus="3"]')
+    check(c.g("hp") == 33, "Dégâts −3 en armure lourde")
+    c.close()
