@@ -48,3 +48,6 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .hppanel .hpcard { margin: 0; box-shadow: 0 8px 24px rgba(27,33,54,.22); max-height: calc(100vh - var(--barh, 58px) - 40px); overflow-y: auto; }
 .hpfoot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px; }
 .hpcard.down .hpfoot .btn { color: #C9CED8; }
+/* Clavier ouvert (téléphone) : le volet remonte au-dessus du clavier et tient dans la partie visible */
+body.kb-open .concpanel { bottom: calc(var(--kb, 0px) + 8px); }
+body.kb-open .hppanel .hpcard { max-height: calc(var(--vvh, 100vh) - 24px); }

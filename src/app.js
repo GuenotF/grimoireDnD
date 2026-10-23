@@ -145,4 +145,15 @@ setRenderer(renderApp);
 startActions();
 boot();
 // Accès réservé aux tests automatiques (tests/helpers.py) : le code assemblé n'expose pas ses variables.
+// Clavier du téléphone : hauteur cachée par le clavier (--kb) et hauteur visible (--vvh), pour que les volets fixés
+// en bas (PV, concentration) remontent au-dessus du clavier au lieu d'être recouverts.
+if (window.visualViewport) {
+  const vv = window.visualViewport, kb = () => {
+    const h = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+    document.documentElement.style.setProperty("--kb", h + "px");
+    document.documentElement.style.setProperty("--vvh", Math.round(vv.height) + "px");
+    document.body.classList.toggle("kb-open", h > 80);
+  };
+  vv.addEventListener("resize", kb); vv.addEventListener("scroll", kb); kb();
+}
 window.__t = { S, G, R, mutate, concOf, inClass, BY_ID, BEAST, BEASTS, SPELLS, saveProf, speedOf };

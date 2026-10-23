@@ -87,7 +87,7 @@ onClick("ds", (b) => {
 onClick("exh", (b) => { mutate(g => { g.exh = Math.min(6, Math.max(0, (g.exh || 0) + +b.dataset.v)); }); });
 onClick("hp-revive", () => { const g = G(); if (!g) return; const prev = snap(g); mutate(g => { g.death = { s: 0, f: 0, stable: false }; g.hp = 1; }); toast("De retour à 1 PV", () => { restore(prev); return "Annulé"; }); });
 onClick("hpconc-ok", () => { S.hpConc = null; render(); const c = concOf(G()); if (c) toast(`Concentration maintenue : <b>${esc(c.name)}</b>`); });
-onClick("hp-go", () => { S.hpOpen = !S.hpOpen; S.concPanel = false; S.fxOpen = false; render(); const el = document.getElementById("hp-n"); if (el && S.hpOpen) el.focus({ preventScroll: true }); });
+onClick("hp-go", () => { S.hpOpen = !S.hpOpen; S.concPanel = false; S.fxOpen = false; render(); }); // pas de focus d'office : le clavier ne s'ouvre qu'en touchant le champ
 onClick("hp-close", () => { S.hpOpen = false; S.hpConc = null; render(); });
 onClick("hp-sheet", () => {
   S.hpOpen = false; S.tab = "perso"; S.view = "jeu"; try { localStorage.setItem("grimoire.tab", S.tab); localStorage.setItem("grimoire.view", S.view); } catch (e) {}
