@@ -131,6 +131,10 @@ function printSheet(g) {
   return `${pHeader(g, `Magicien, niveau ${g.level} · École ${/^[AÉEIO]/.test(g.school) ? "d'" : "de "}${esc(g.school)}`, [[signed(mod), "MOD. INTELLIGENCE"], [8 + prof + mod, "DD DES SORTS"], [signed(prof + mod), "ATTAQUE DE SORT"], [pMax, "SORTS PRÉPARÉS"], [R.cantrips(g), "SORTS MINEURS"]])}
 ${pSlots(g)}
 <div class="callout"><span class="box"></span> <b>Restauration arcanique</b> : une fois par jour, après un repos court, récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</div>
+${g.level >= 2 && g.school === "Abjuration" ? `<div class="res"><span class="l">Protection arcanique</span>PV <span class="write"></span> / ${2 * g.level + R.ab(g, "int")}<span class="r">créée par un sort d'abjuration · encaisse avant tes PV</span></div>` : ""}
+${g.level >= 2 && g.school === "Divination" ? `<div class="res"><span class="l">Présage</span>${Array.from({ length: g.level >= 14 ? 3 : 2 }, () => `d20 <span class="write" style="min-width:12mm"></span>`).join(" ")}<span class="r">à lancer après le repos long, barrer une fois utilisé</span></div>` : ""}
+<h2>Capacités de classe <small>magicien et école${/^[AÉEIO]/.test(g.school) ? " d'" : " de "}${esc(g.school)} · niveau ${g.level}</small></h2>
+<table>${wizFeats(g).filter(f => f.lv <= g.level).map(f => `<tr><td class="n">${f.n}</td><td>${esc(f.d(g))}</td></tr>`).join("")}</table>
 ${pCantrips(g)}
 ${pExtras(g)}
 ${pConc()}

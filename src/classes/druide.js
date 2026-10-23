@@ -5,7 +5,7 @@ import { S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render } from "../core/ui.js";
 import { BEAST, BEASTS, BY_ID } from "../data.js";
-import { pCantrips, pClassList, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, printHTML } from "../features/print.js";
+import { pCantrips, pClassList, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, pSpellRow, printHTML } from "../features/print.js";
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { SLOTS } from "../rules/tables.js";
@@ -113,6 +113,9 @@ ${pSlots(g)}
 ${n ? `<div class="res"><span class="l">Utilisations</span>${n > 10 ? "illimitées" : pDots(n)}<span class="r">action bonus · ${DRU.hours(g)} h au plus · FP ${fp} · ${g.level < 4 ? "ni nage ni vol" : g.level < 8 ? "nage, pas de vol" : "nage et vol"}</span></div>
 <div class="res"><span class="l">Forme active</span><span class="write" style="min-width:55mm"></span><span>PV <span class="write"></span> / <span class="write" style="min-width:12mm"></span></span></div>
 <div class="callout">La bête remplace FOR, DEX, CON et les PV ; tu gardes INT, SAG, CHA et tes maîtrises (le meilleur bonus). <b>À 0 PV</b>, retour à ta forme : l'excédent de dégâts passe sur tes PV. ${g.level >= 18 ? "Sorts à composantes verbales et somatiques possibles" : "Pas de sort"}, la concentration continue.${g.level >= 6 ? " Attaques magiques (Frappe primitive)." : ""}<br><b>Changeforme de combat</b> : action bonus, un emplacement = <b>1d8 PV par niveau</b> d'emplacement.</div>` : ""}
+${isLand(g) && g.level >= 2 ? `<div class="res"><span class="l">Récupération naturelle</span>${pDots(1)}<span class="r">1 fois par jour, au repos court : ${DRU.natRec(g)} niveau${DRU.natRec(g) > 1 ? "x" : ""} d'emplacements (aucun de niveau 6+)</span></div>` : ""}
+<h2>Capacités de classe <small>${g.level >= 2 ? esc(CIRCLES[g.circle].full) + " · " : ""}niveau ${g.level}</small></h2>
+<table>${DRU_FEATS.filter(f => (!f.circle || f.circle === g.circle) && f.lv <= g.level).map(f => `<tr><td class="n">${f.n}</td><td>${esc(f.d(g))}</td></tr>`).join("")}</table>
 ${pCantrips(g)}
 ${pExtras(g)}
 ${pConc(" En forme de bête : avec la Constitution de la bête.")}
@@ -120,8 +123,10 @@ ${pConc(" En forme de bête : avec la Constitution de la bête.")}
 <h2 style="margin-top:0">Mes formes <small>${favs.length ? "formes ★ de l'application" : "à compléter (ajoute des formes ★ dans l'application)"}</small></h2>
 <div class="beasts">${favs.map(beastPrint).join("")}${favs.length % 2 ? empty : ""}${favs.length ? "" : empty + empty}</div>
 <div class="brk"></div>
-<h2 style="margin-top:0">Sorts de druide <small>sorts préparés aujourd'hui : ____ / ${pMax}</small></h2>
-${pClassList(g)}
+${circleSpells(g).length ? `<h2 style="margin-top:0">Sorts de cercle <small>${esc((TERRAINS[g.terrain] || TERRAINS.foret).n)} · toujours préparés, hors limite</small></h2>
+<table><tr><th>Sort</th><th>Incantation · composantes</th><th>Effet</th></tr>${circleSpells(g).map(id => BY_ID[id]).sort((a, b) => a.l - b.l || a.n.localeCompare(b.n, "fr")).map(s => pSpellRow(g, s, false)).join("")}</table>` : ""}
+<h2${circleSpells(g).length ? "" : ' style="margin-top:0"'}>Sorts de druide <small>sorts préparés aujourd'hui : ____ / ${pMax}</small></h2>
+${pClassList(g, circleSpells(g))}
 <div class="callout"><span class="tag">C</span> concentration · <span class="tag r">R</span> rituel : un sort préparé se lance en 10 minutes de plus, sans emplacement.</div>
 <h2>Règles du druide</h2><div class="cols"><div>
 <h3>Préparer</h3><p>Après un repos long, ${pMax} sorts de la liste du druide (mod. de Sagesse + niveau). Un sort se lance avec un emplacement de son niveau ou supérieur.</p>

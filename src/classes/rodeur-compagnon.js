@@ -36,6 +36,20 @@ function petCard(g, b, lv = g.level) {
   ${b.ac.length ? `<span class="lusub">Actions</span>${acts}` : `<span class="muted">Aucune attaque.</span>`}
   <span class="petcalc">Calculé : maîtrise ${signed(p)} ajoutée à la CA, aux attaques et aux dégâts (et aux compétences maîtrisées) ; PV max = ${b.pv} ou 4 × ${lv}, le plus élevé.${lv >= 7 ? " Attaques magiques (Entraînement exceptionnel)." : ""}</span></div>`;
 }
+/** Fiche imprimable du compagnon (bloc de bête, PV à remplir) ; vide sans compagnon : cadre à remplir au crayon. */
+function petPrint(g) {
+  const b = g.pet && BEAST[g.pet.id], p = R.prof(g.level);
+  if (!b) return `<h2>Compagnon <small>Maître des bêtes · taille M au plus, FP 1/4 au plus</small></h2><div class="beast"><h3><span class="write" style="min-width:45mm"></span><small>FP ____</small></h3><p>CA ____ (+${p}) · PV max ____ (au moins ${4 * g.level}) · vitesses ________________</p><p>Attaques (+${p} au toucher et aux dégâts) :</p><div class="line"></div><div class="line"></div><p>PV : <span class="write"></span></p></div>`;
+  const max = petMax(g), skills = b.cp ? b.cp.split(", ").map(x => x.replace(/([+−-])\s?(\d+)$/, (_, s, n) => signed((s === "+" ? 1 : -1) * +n + p))).join(", ") : "";
+  const acts = b.ac.map(a => a.b != null && a.d ? `<p><b>${esc(a.n)}</b> <span class="pl a">${signed(a.b + p)}</span> <span class="pl d">${esc(dmgPlus(a.d, p))}</span> ${esc(actRest(a))}</p>` : `<p><b>${esc(a.n)}</b> ${esc(a.t)}</p>`).join("");
+  return `<h2>Compagnon <small>${esc(petName(g))} · ${esc(b.n)} · maîtrise ${signed(p)} comprise</small></h2>
+  <div class="beast"><h3>${esc(petName(g))}<small>${esc(b.n)} · FP ${esc(b.fp)} · ${esc(SIZES[b.sz] || b.sz)}</small></h3>
+  <div class="bs"><span class="pl">CA ${b.ca + p}</span><span class="pl">PV max ${max}</span><span class="pl">${esc(spdTxt(b))}</span></div>
+  <div class="bs"><span class="pl">FOR ${b.st[0]} (${modOf(b.st[0])})</span><span class="pl">DEX ${b.st[1]} (${modOf(b.st[1])})</span><span class="pl">CON ${b.st[2]} (${modOf(b.st[2])})</span>${skills ? `<span class="pl">${esc(skills)}</span>` : ""}</div>
+  ${b.sens ? `<p><i>${esc(b.sens)}</i></p>` : ""}${b.tr.map(([n, d]) => `<p><b>${esc(n)}.</b> ${esc(d)}</p>`).join("")}${acts}
+  <p>PV : <span class="write"></span> / ${max}</p></div>
+  <div class="callout">${orders(g)}</div>`;
+}
 /** Ordres : rappel selon le niveau. */
 const orders = g => `Agit à ton initiative ; tu le déplaces librement. <b>Ton action</b> : Attaquer${g.level >= 11 ? " (deux attaques, Fureur bestiale)" : ""}, Foncer, Se désengager, Esquiver ou Aider. Sans ordre, il Esquive.${g.level >= 7 ? " <b>Action bonus</b> (s'il n'a pas attaqué) : Foncer, Se désengager, Esquiver ou Aider." : ""}${g.level >= 15 ? " Tes sorts personnels peuvent aussi le cibler à 9 m (Partage des sorts)." : ""}`;
 
@@ -97,4 +111,4 @@ onClick(["pet-dmg", "pet-heal"], (b, a) => {
 });
 onClick("pet-top", () => { const el = document.getElementById("pet-card"); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); else { S.tab = "grimoire"; S.view = "jeu"; render(); } });
 
-export { PET_OK, petBeasts, petMax, petHp, petCard, petPlayHTML, petGererHTML, petChips, dmgPlus };
+export { PET_OK, petBeasts, petMax, petHp, petCard, petPrint, petPlayHTML, petGererHTML, petChips, dmgPlus };

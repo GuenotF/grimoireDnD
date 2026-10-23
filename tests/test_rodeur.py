@@ -104,3 +104,19 @@ def test_maitre_des_betes(browser, devices, url):
     lu_next(a); a.click('[data-a="lu-go"]')
     check(a.g("foes.join()") == "dragons,geants" and a.g("terrs.join()") == "foret,montagne", "niveau 6 : 2 ennemis jurés, 2 terrains")
     a.close()
+
+
+def test_fiches_imprimables(browser, devices, url):
+    """Ajouts récents présents sur papier : compagnon, sorts innés et des dons, ressources des dons, capacités d'école, sorts de cercle."""
+    def fiche(char):
+        a = App(browser, devices, url, char=char, tab="perso", view="jeu"); a.tab("imprimer")
+        with a.pg.expect_popup() as pp: a.click('[data-a="open-print"]')
+        w = pp.value; w.wait_for_load_state(); t = w.inner_text("body"); a.close(); return t
+    feats = [{"n": "Initié à la magie", "o": "don", "d": "", "feat": "magic-initiate", "ch": {"cls": "magicien", "spells": ["fire-bolt", "light", "shield"]}}, {"n": "Chanceux", "o": "don", "d": "", "feat": "lucky"}]
+    t = fiche(dict(BRAM, pet={"id": "loup", "name": "Croc", "hp": 12}, traits=feats, race={"id": "tieffelin", "sub": None, "n": "Tieffelin", "hpLv": 0, "weapons": [], "armor": []}))
+    check("Compagnon" in t and "Croc" in t and "2d4 + 5 perforant" in t and "/ 20" in t, "rôdeur : fiche du compagnon avec PV à remplir")
+    check("Sorts innés" in t and "Thaumaturgie" in t and "Trait de feu" in t and "points de chance" in t, "sorts innés (race, don) et ressource de Chanceux")
+    t = fiche({"name": "N", "cls": "magicien", "level": 6, "int": 18, "school": "Abjuration", "updatedAt": 1})
+    check("Capacités de classe" in t and "Protection arcanique" in t and "/ 16" in t, "magicien : capacités d'école, Protection arcanique")
+    t = fiche({"name": "M", "cls": "druide", "level": 5, "wis": 16, "circle": "terre", "terrain": "foret", "updatedAt": 1})
+    check("Sorts de cercle" in t and "Peau d'écorce" in t and "Récupération naturelle" in t, "druide de la Terre : sorts de cercle, Récupération naturelle")

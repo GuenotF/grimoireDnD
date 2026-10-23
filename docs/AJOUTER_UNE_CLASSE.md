@@ -16,7 +16,7 @@ Recette suivie pour le rôdeur (octobre 2026), à reprendre pour les classes sui
 - `src/classes/<classe>.js` exporte la définition (contrat), enregistrée dans `src/classes/index.js`.
 - Champs propres au personnage : `defaults()` et `normalize(o)`. **Noms de champs uniques entre classes** : les valeurs par défaut de toutes les classes sont fusionnées (ex. le rôdeur utilise `rarch`, le roublard `arch`).
 - Capacités : `features(g)` (niveau, pastille, texte, `control` pour un réglage), sous-classe : `subclass` (choisie dans l'assistant de niveau), choix au passage de niveau : `levelUp.choices` / `recapBefore` / `apply`.
-- Onglets *Règles* et *Imprimer* : `panels`, `print`.
+- Onglets *Règles* et *Imprimer* : `panels`, `print`. **La fiche imprimable suit chaque ajout** : ressources à cocher, capacités (tableau du niveau), sous-classe (sorts toujours préparés, compagnon…). La page Personnage (attaques, sorts innés et des dons, ressources des dons) est commune (`features/print.js`).
 - Un mécanisme nouveau qui servira à d'autres classes va dans `src/features/` et s'active par un champ du contrat (ex. `known` pour les sorts connus, `afterAttacks`, `settings`, `creation`).
 
 ## 4. Tests
@@ -24,6 +24,7 @@ Recette suivie pour le rôdeur (octobre 2026), à reprendre pour les classes sui
 - création pas à pas au niveau 1, puis enchaînement des niveaux jusqu'à 5 (sous-classe, amélioration, sorts) ;
 - chaque sous-classe et ses éléments d'interface ;
 - repos court et long ;
+- la fiche imprimable (sections attendues présentes, voir `test_rodeur.test_fiches_imprimables`) ;
 - `npm test` complet (le test commun vérifie que chaque `data-a` a son gestionnaire).
 
 ## 5. Publication

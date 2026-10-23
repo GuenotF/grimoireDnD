@@ -11,7 +11,7 @@ import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { HALF } from "../rules/tables.js";
 import { statLabel } from "../ui/components.js";
-import { PET_OK, petBeasts, petChips, petGererHTML, petHp, petMax, petPlayHTML } from "./rodeur-compagnon.js";
+import { PET_OK, petBeasts, petChips, petGererHTML, petHp, petMax, petPlayHTML, petPrint } from "./rodeur-compagnon.js";
 
 // Sorts connus par niveau de rôdeur (le rôdeur n'a pas de sort mineur)
 const KNOWN = [0, 0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11];
@@ -174,6 +174,7 @@ function printSheet(g) {
 ${pSlots(g)}
 <h2>Capacités de classe <small>niveau ${g.level}</small></h2>
 <table>${fl.map(f => `<tr><td class="n">${f.n}</td><td>${esc(f.d(g))}</td></tr>`).join("")}</table>
+${g.level >= 3 && g.rarch === "betes" ? petPrint(g) : ""}
 ${pExtras(g)}
 ${pConc()}
 <div class="brk"></div>
@@ -226,7 +227,7 @@ export default {
   panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },
   print: g => printSheet(g),
   printTitle: g => `Fiche de rôdeur de ${g.name}`,
-  printDesc: "Elle contient le tableau de bord (emplacements), les capacités de classe avec tes choix (ennemis jurés, terrains, archétype), et tes sorts connus.",
+  printDesc: "Elle contient le tableau de bord (emplacements), les capacités de classe avec tes choix (ennemis jurés, terrains, archétype), la fiche du compagnon (Maître des bêtes) avec ses PV à remplir, et tes sorts connus.",
   features: g => feats(g),
   settings: g => settingsHTML(g),
   afterAttacks: g => g.level >= 3 && g.rarch === "betes" ? petPlayHTML(g) : "",
