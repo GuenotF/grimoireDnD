@@ -9,6 +9,7 @@ import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { GEAR } from "../data.js";
 import { armorProf, gearOf, weaponProf } from "../rules/equipment.js";
+import { hasFeat } from "../rules/feats.js";
 import { MAX_ATT, REC, attunedCount, isMagic, recLabel } from "../rules/magic.js";
 import { COINS, purseText, spend } from "../rules/money.js";
 import { foldHead, isFold } from "../ui/components.js";
@@ -25,9 +26,9 @@ function purseHTML(g) {
     <p>Pas assez de cette pièce ? L'atelier fait la monnaie (1 po = 10 pa = 100 pc) ; tout est annulable.</p></form>`;
   return h;
 }
-// Arme pouvant aller en main secondaire : corps à corps, à une main (légère, ou non légère avec Combattant à deux armes)
-const offhandOk = x => { const w = gearOf(x); return !!w && w.kind === "weapon" && w.rng === "melee" && !w.two; };
-function itemForm(x, i) {
+// Arme pouvant aller en main secondaire : corps à corps légère, ou à une main avec le don Combattant à deux armes
+const offhandOk = (g, x) => { const w = gearOf(x); return !!w && w.kind === "weapon" && w.rng === "melee" && !w.two && (w.light || hasFeat(g, "dual-wielder")); };
+function itemForm(g, x, i) {
   return `<form class="itform" data-a="it-save" data-i="${i}"><div class="frow2"><input id="it-name" type="text" value="${esc(x.n)}" aria-label="Nom" required><input id="it-q" type="number" inputmode="numeric" min="0" value="${x.q}" aria-label="Quantité"></div>
     <input id="it-note" type="text" value="${esc(x.note)}" placeholder="Note (effet, contenu, valeur…)" aria-label="Note">
     <label class="itref"><span>Arme ou armure du Manuel</span><select id="it-ref" aria-label="Arme ou armure du Manuel"><option value="">Aucune (objet libre)</option>${REF_GROUPS.map(([l, list]) => `<optgroup label="${l}">${list.map(r => `<option value="${r.id}"${r.id === x.ref ? " selected" : ""}>${esc(r.n)}</option>`).join("")}</optgroup>`).join("")}</select></label>
@@ -39,7 +40,7 @@ function itemForm(x, i) {
       <div class="row wide"><label class="check"><input type="checkbox" id="it-att"${x.att ? " checked" : ""}> Harmonisation requise</label><label class="check"><input type="checkbox" id="it-attuned"${x.attuned ? " checked" : ""}> Harmonisé</label></div>
       <p class="wide">Le bonus s'applique au toucher et aux dégâts d'une arme du Manuel, ou à la CA d'une armure ou d'un bouclier. Un objet à harmonisation n'a d'effet qu'harmonisé (${MAX_ATT} au plus).</p>
     </fieldset>
-    <div class="row"><label class="check"><input type="checkbox" id="it-eq"${x.eq ? " checked" : ""}> Équipé</label><label class="check"><input type="checkbox" id="it-c"${x.c ? " checked" : ""}> À décompter en jeu</label>${offhandOk(x) ? `<label class="check" title="Combat à deux armes : cette arme pour l'attaque en action bonus"><input type="checkbox" id="it-oh"${x.oh ? " checked" : ""}> Main secondaire</label>` : ""}
+    <div class="row"><label class="check"><input type="checkbox" id="it-eq"${x.eq ? " checked" : ""}> Équipé</label><label class="check"><input type="checkbox" id="it-c"${x.c ? " checked" : ""}> À décompter en jeu</label>${offhandOk(g, x) ? `<label class="check" title="Combat à deux armes : cette arme pour l'attaque en action bonus"><input type="checkbox" id="it-oh"${x.oh ? " checked" : ""}> Main secondaire</label>` : ""}
     <span style="flex:1"></span><button type="button" class="btn ghost" data-a="it-del" data-i="${i}">Retirer</button><button type="button" class="btn ghost" data-a="it-cancel">Annuler</button><button class="btn primary" type="submit">Enregistrer</button></div></form>`;
 }
 // ---------- Catalogue (armes et armures du Manuel) : suggestions à l'ajout, résumé, étiquette
@@ -59,7 +60,7 @@ function gearDetail(g, x, item) {
   else if (x.cat === "shield") h += row("CA", "+2");
   else h += row("CA", `${x.ac}${x.dex ? (x.dexMax != null ? " + DEX (max +2)" : " + DEX") : ""}`) + row("Force requise", x.str ? `${x.str} (sinon −3 m de vitesse)` : "") + row("Discrétion", x.stealth ? "désavantage" : "") + row("Métal", C(g).noMetal && x.metal ? "oui (refusé par les druides)" : "");
   h += row("Poids · prix", [x.w, x.p].filter(Boolean).join(" · "));
-  if (item && item.oh) h += row("Combat à deux armes", "main secondaire");
+  if (x.kind === "weapon" && x.rng === "melee" && !x.two) h += row("Main secondaire", item && item.oh && (x.light || hasFeat(g, "dual-wielder")) ? "oui (attaque en action bonus)" : x.light ? "possible (arme légère)" : hasFeat(g, "dual-wielder") ? "possible (Combattant à deux armes)" : "arme légère requise (ou don Combattant à deux armes)");
   return `<div class="itdet">${h}</div>`;
 }
 const openBtn = (x, i, inner) => gearOf(x) ? `<button class="itn itopen" data-a="it-open" data-i="${i}" aria-expanded="${S.itOpen === i}">${inner}</button>` : `<div class="itn">${inner}</div>`;
@@ -85,7 +86,7 @@ function equipmentGerer(g) {
   let h = foldHead("ch-eq", "", "Équipement", `${g.items.length} objet${g.items.length > 1 ? "s" : ""}${attAside(g)}`, purseText(g.money));
   if (isFold("ch-eq")) return h;
   h += purseHTML(g) + (S.purseOpen ? "" : `<p class="chhelp" style="margin:4px 0 8px">Touche la bourse pour gagner ou dépenser.</p>`);
-  h += `<div class="chbox itbox">${order(g).map(i => { const x = g.items[i]; return S.itEdit === i ? itemForm(x, i)
+  h += `<div class="chbox itbox">${order(g).map(i => { const x = g.items[i]; return S.itEdit === i ? itemForm(g, x, i)
     : `<div class="it${x.c && !x.q ? " out" : ""}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button>${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${x.oh ? ` <i class="ct">main secondaire</i>` : ""}${magicMarks(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}`)}${gearOf(x) ? gearTag(gearOf(x)) : ""}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>${S.itOpen === i && gearOf(x) ? gearDetail(g, gearOf(x), x) : ""}`; }).join("")}
     <form class="itadd" data-a="it-add"><input id="it-new" type="text" placeholder="Nom de l'objet (ex. épée, cuir, rations)" aria-label="Nouvel objet" autocomplete="off" value="${esc(S.itQ || "")}"><button class="btn" type="submit">Ajouter</button></form>${suggestHTML(g)}</div>`;
   return h;
@@ -145,7 +146,7 @@ onSubmit("it-save", f => {
   if (bonus) x.bonus = bonus; if (v("it-xdmg").value.trim()) x.xdmg = v("it-xdmg").value.trim();
   if (v("it-att").checked) { x.att = true; x.attuned = v("it-attuned").checked; }
   if (ch) { x.chMax = ch; x.chU = Math.min(ch, prev.chU || 0); x.rec = v("it-rec").value; }
-  const oh = !!(v("it-oh") && v("it-oh").checked && GEAR[ref] && offhandOk(x)); if (oh) x.oh = true; // une seule arme en main secondaire
+  const oh = !!(v("it-oh") && v("it-oh").checked && GEAR[ref] && offhandOk(G(), x)); if (oh) x.oh = true; // une seule arme en main secondaire
   if (x.attuned && !prev.attuned && attunedCount(G()) >= MAX_ATT) { x.attuned = false; toast(`Déjà ${MAX_ATT} objets harmonisés : défais d'abord une harmonisation`); }
   else toast("Modification enregistrée");
   S.itEdit = null; mutate(g => { if (oh) g.items.forEach(y => { delete y.oh; }); g.items[i] = x; });

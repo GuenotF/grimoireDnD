@@ -156,3 +156,17 @@ def test_limite_harmonisation(browser, devices, url):
     a.click('[data-a="it-edit"][data-i="3"]'); a.pg.check("#it-attuned"); a.click('.itform [type="submit"]')
     check(not a.g("items[3].attuned") and "Déjà 3" in a.toast(), "pas plus de 3 objets harmonisés")
     a.close()
+
+
+def test_main_secondaire_regle(browser, devices, url):
+    from helpers import KAEL
+    items = [{"n": "Rapière", "q": 1, "eq": True, "ref": "rapier"}, {"n": "Rapière", "q": 1, "eq": True, "ref": "rapier", "oh": True}]
+    a = App(browser, devices, url, char=dict(KAEL, **dict(KAEL_F, items=items)), tab="perso", view="gerer")
+    a.click('[data-a="it-edit"][data-i="0"]')
+    check(a.count("#it-oh") == 0, "rapière (non légère) : pas de case Main secondaire")
+    a.click('[data-a="it-cancel"]'); a.click('[data-a="it-open"][data-i="0"]')
+    check("arme légère requise" in a.text(".itdet"), "la fiche dépliée explique pourquoi")
+    a.js("mutate(g => { g.traits.push({ n: 'Combattant à deux armes', o: 'don', d: '', feat: 'dual-wielder' }); })")
+    a.click('[data-a="it-edit"][data-i="0"]')
+    check(a.count("#it-oh") == 1, "avec Combattant à deux armes : case proposée")
+    a.close()
