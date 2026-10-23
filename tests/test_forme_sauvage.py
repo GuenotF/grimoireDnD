@@ -10,7 +10,7 @@ def transform(a, beast):
 
 
 def test_formes_possibles(browser, devices, url):
-    a = App(browser, devices, url, char=MALFAEL)
+    a = App(browser, devices, url, char=MALFAEL, view="jeu")
     a.click('[data-a="row"][data-id="res:ws"]'); a.click('[data-a="ws-open"]')
     check("55 bêtes" in a.text("#wssheet .luhead"), "55 formes au niveau 4")
     a.click('[data-a="ws-mv"][data-v="nage"]')
@@ -24,7 +24,7 @@ def test_formes_possibles(browser, devices, url):
 
 
 def test_forme_active_pv_et_retour(browser, devices, url):
-    a = App(browser, devices, url, char=MALFAEL)
+    a = App(browser, devices, url, char=MALFAEL, view="jeu")
     transform(a, "ours-brun")
     check(a.g("wsForm.hp") == 34 and a.g("wsU") == 1, "ours brun, 34 PV")
     check("Ours brun · 34/34" in a.text(".slotbar .chip.ws"), "puce dans la barre du bas")
@@ -37,7 +37,7 @@ def test_forme_active_pv_et_retour(browser, devices, url):
 
 
 def test_fiche_complete_et_repli(browser, devices, url):
-    a = App(browser, devices, url, char=MALFAEL)
+    a = App(browser, devices, url, char=MALFAEL, view="jeu")
     transform(a, "pieuvre-geante")
     body = a.text("#ws-active")
     for t in ["Nuage d'encre", "1 fois par repos", "Discrétion +5", "Allonge 4,50 m", "DD 16"]:
@@ -48,7 +48,7 @@ def test_fiche_complete_et_repli(browser, devices, url):
 
 
 def test_changeforme_de_combat(browser, devices, url):
-    a = App(browser, devices, url, char=dict(MALFAEL, level=13, used={"1": 4}))
+    a = App(browser, devices, url, char=dict(MALFAEL, level=13, used={"1": 4}), view="jeu")
     transform(a, "ours-brun")
     check("niv. 2 = 2d8" in a.text(".wscf .cast"), "premier emplacement libre par défaut")
     a.click('#ws-active [data-a="cast-open"]')
@@ -74,7 +74,7 @@ def test_rappel_de_concentration(browser, devices, url):
 
 
 def test_niveau_6_et_18(browser, devices, url):
-    a = App(browser, devices, url, char=dict(MALFAEL, level=6, wsForm={"id": "ours-brun", "hp": 34, "max": 34}))
+    a = App(browser, devices, url, char=dict(MALFAEL, level=6, wsForm={"id": "ours-brun", "hp": 34, "max": 34}), view="jeu")
     check(a.count(".wsprimal") == 1, "Frappe primitive au niveau 6")
     a.level(18)
     check("Sorts bestiaux" in a.text("#ws-active"), "Sorts bestiaux au niveau 18")

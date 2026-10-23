@@ -45,7 +45,7 @@ def test_concentration(browser, devices, url):
 
 
 def test_restauration_arcanique(browser, devices, url):
-    a = App(browser, devices, url, char=dict(NEMEIA, used={"1": 3, "2": 2}))
+    a = App(browser, devices, url, char=dict(NEMEIA, used={"1": 3, "2": 2}), view="jeu")
     a.click('[data-a="short-open"]')
     a.click('[data-a="sr-pick"] >> nth=0'); a.click('[data-a="sr-go"]')
     check(a.g("arcane") is True, "Restauration arcanique utilisée")

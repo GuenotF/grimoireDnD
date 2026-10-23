@@ -15,7 +15,7 @@ def test_preparation_et_serment(browser, devices, url):
 
 
 def test_imposition_des_mains(browser, devices, url):
-    a = App(browser, devices, url, char=KAEL)
+    a = App(browser, devices, url, char=KAEL, view="jeu")
     a.click('[data-a="loh-open"]')
     check(a.pg.is_visible("#lohsheet"), "volet d'Imposition des mains")
     a.click('[data-a="loh-set"][data-v="7"]') if a.count('[data-a="loh-set"][data-v="7"]') else None
@@ -78,6 +78,8 @@ def test_serment_de_devotion(browser, devices, url):
     for n in ["Sanctuaire", "Protection contre le mal et le bien", "Zone de vérité", "Restauration partielle", "Lueur d'espoir", "Dissipation de la magie"]:
         check(any(n in s for s in stars), f"sort de serment : {n} ({stars})")
     check(a.count(".gstar") == 6, "6 sorts de serment au niveau 9")
+    check(a.count('[data-a="pip"]') == 0 and a.count('[data-a="loh-open"]') == 0 and a.count('[data-a="short-open"]') == 0, "Gérer : ni emplacements, ni ressources, ni repos")
+    a.view("jeu")
     a.click('[data-a="row"][data-id="res:cd"]')
     check(a.texts(".capopt b") == ["Arme sacrée", "Renvoi des impies"], "options de Conduit divin")
     a.click('[data-a="cd-use"][data-v="sacred"]')

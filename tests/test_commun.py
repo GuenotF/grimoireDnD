@@ -95,7 +95,7 @@ def test_sorts_en_cours_et_repos_long(browser, devices, url):
     a.click('[data-a="fx-all"]')
     check(a.g("effects.length") == 0, "tout terminer")
     a.click('.jline [data-a="cast"][data-id="levitate"]')
-    a.view("gerer"); a.click('[data-a="longrest"]')
+    a.click('[data-a="longrest"]')
     check(a.g("effects.length") == 0 and a.js("JSON.stringify(G().used)") == "{}", "repos long : tout récupéré")
     a.close()
 
