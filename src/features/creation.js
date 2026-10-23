@@ -125,8 +125,9 @@ function stepSorts(c) {
 }
 function stepEquip(c) {
   const cs = CLASS_START[c.cls], b = bgOf(c);
-  let h = `<div class="viewsw" role="group" aria-label="Équipement"><button data-a="cr-eqmode" data-v="pack" aria-pressed="${c.eqMode === "pack"}">Paquetage</button><button data-a="cr-eqmode" data-v="gold" aria-pressed="${c.eqMode === "gold"}">Or de départ</button></div>`;
-  if (c.eqMode === "gold") return h + `<p class="help">À la place de l'équipement de la classe et de l'historique : ${cs.gold} × 10 po, puis tu achètes ton équipement dans Personnage › Équipement.</p>
+  let h = `<p class="help"><b>L'un ou l'autre</b>, pas les deux : le paquetage de la classe et de l'historique, <b>ou</b> l'or de départ pour tout acheter toi-même.</p>
+  <div class="viewsw" role="group" aria-label="Équipement : paquetage ou or de départ"><button data-a="cr-eqmode" data-v="pack" aria-pressed="${c.eqMode === "pack"}">Paquetage</button><button data-a="cr-eqmode" data-v="gold" aria-pressed="${c.eqMode === "gold"}">Or de départ</button></div>`;
+  if (c.eqMode === "gold") return h + `<p class="help"><b>Aucun objet n'est ajouté</b> : ${cs.gold} × 10 po à la place de l'équipement de la classe et de l'historique, puis tu achètes ton équipement dans Personnage › Équipement.</p>
     <div class="crgold"><input id="cr-gold" type="number" inputmode="numeric" min="0" value="${esc(c.gold)}" placeholder="po" aria-label="Or de départ"><button class="btn" data-a="cr-goldroll">🎲 Lancer ${cs.gold} × 10</button></div>`;
   cs.equip.forEach((line, i) => {
     h += `<div class="crcard">${line.map(([lbl, items], j) => { const on = (c.eq[i] || 0) === j;
