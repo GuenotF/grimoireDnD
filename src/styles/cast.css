@@ -43,3 +43,8 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .wsprimal .kp { margin-right: 4px; }
 .wsactive .wsconc { margin-top: 0; max-width: none; }
 .live { font-size: 12.5px; font-weight: 700; color: var(--rubric); white-space: nowrap; margin-left: 6px; }
+/* Volet des PV (cœur de la barre du bas) : la carte des PV, sans cadre en double */
+.hppanel { padding: 0; background: none; border: 0; box-shadow: none; }
+.hppanel .hpcard { margin: 0; box-shadow: 0 8px 24px rgba(27,33,54,.22); max-height: calc(100vh - var(--barh, 58px) - 40px); overflow-y: auto; }
+.hpfoot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px; }
+.hpcard.down .hpfoot .btn { color: #C9CED8; }

@@ -110,7 +110,29 @@ def test_points_de_vie(browser, devices, url):
     a.click('[data-a="longrest"]')
     check(a.g("hp") is None and a.g("hdU") == 0 and "PV au maximum" in a.toast(), "repos long : PV et dés de vie")
     a.click(".slotbar .chip.hp")
-    check(a.js("S.tab") == "perso" and a.count("#hp-card") == 1, "la puce ouvre la fiche")
+    check(a.js("S.tab") == "grimoire" and a.count("#hppanel:not([hidden]) .hpcard") == 1, "la puce ouvre le volet des PV sur place")
+    a.click('#hppanel [data-a="hp-sheet"]')
+    check(a.js("S.tab") == "perso" and a.count("#hp-card") == 1 and a.pg.is_hidden("#hppanel"), "lien vers la fiche : repos et dés de vie")
+    a.close()
+
+
+def test_volet_pv_en_combat(browser, devices, url):
+    from helpers import NEMEIA
+    a = App(browser, devices, url, char=dict(NEMEIA, hpMax=31, hpTemp=5, abil=dict(FICHE["abil"], int=18)), view="jeu")
+    a.click('.jline [data-a="cast"][data-id="levitate"]')
+    a.click(".slotbar .chip.hp")
+    check(a.count("#hppanel .hpdice") == 0 and a.pg.is_hidden("#concpanel"), "volet compact (sans dés de vie)")
+    a.pg.fill("#hp-n", "8"); a.click('#hppanel [data-a="hp-dmg"]')
+    check(a.g("hp") == 28 and a.g("hpTemp") == 0 and "5 absorbés" in a.toast(), "dégâts : PV temporaires d'abord")
+    check("DD 10" in a.text("#hppanel .concwarn") and a.js("S.tab") == "grimoire", "rappel de concentration dans le volet, sans changer d'onglet")
+    a.click('#hppanel [data-a="hpconc-ok"]')
+    check(a.count("#hppanel .concwarn") == 0 and a.js("!!concOf(G())"), "concentration maintenue")
+    a.pg.fill("#hp-n", "40"); a.click('#hppanel [data-a="hp-dmg"]')
+    check(a.count("#hppanel .hpcard.down") == 1 and a.count('#hppanel [data-a="ds"]') == 4 and "À terre" in a.text(".slotbar .chip.hp"), "à 0 PV : jets contre la mort dans le volet")
+    a.click('#hppanel [data-a="ds"][data-v="s"]')
+    check(a.g("death.s") == 1, "réussite cochée")
+    a.click('#hppanel [data-a="hp-close"]')
+    check(a.pg.is_hidden("#hppanel"), "volet fermé")
     a.close()
 
 

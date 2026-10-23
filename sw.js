@@ -1,6 +1,6 @@
 // Service worker de l'Atelier du Grimoire : garde l'application en cache pour l'utiliser hors connexion.
 // La version est remplacée par build.py à chaque reconstruction, ce qui force la mise à jour du cache.
-const CACHE = "grimoire-9783e29728";
+const CACHE = "grimoire-4e47fcda6d";
 const ASSETS = [
   "./",
   "./index.html",

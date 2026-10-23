@@ -25,35 +25,36 @@ const dots = (n, cls) => Array.from({ length: 3 }, (_, i) => `<span class="dsd $
 const EXH = ["désavantage aux tests", "vitesse ÷ 2", "désavantage attaques et JdS", "PV max ÷ 2", "vitesse 0", "mort"];
 /** Résistance applicable : capacité de la classe (Rage) ou résistances saisies dans les défenses. */
 const halfLabel = g => (C(g).halfDamage && C(g).halfDamage(g)) || (g.defs.some(d => d.t === "res") ? `résistance (${g.defs.filter(d => d.t === "res").map(d => d.v).join(", ")})` : "");
-function hpCardHTML(g) {
+function hpCardHTML(g, panel = false) { // panel : volet ouvert depuis la barre du bas (sans dés de vie ni épuisement)
   if (g.hpMax == null) return `<section class="hpcard"><div class="hph"><span class="k">Points de vie</span></div><p class="muted" style="margin:0">Saisis tes PV maximum (mode <button class="linkbtn" data-a="view" data-v="gerer">Gérer</button>) pour suivre tes points de vie.</p></section>`;
   const cur = hpCur(g), t = g.hpTemp || 0, d = g.death, down = isDown(g), dead = isDead(g);
   const pct = Math.round(100 * cur / g.hpMax), tpct = Math.min(100 - pct, Math.round(100 * t / g.hpMax));
   const state = dead ? "Mort" : down ? (d.stable ? "À terre · stabilisé" : "À terre · inconscient") : "Points de vie";
   const half = halfLabel(g); // résistance active (Rage…) ou défenses de la fiche : dégâts divisés par 2
   const input = `<div class="hpin"><input id="hp-n" type="number" inputmode="numeric" min="0" placeholder="0" aria-label="Nombre de points de vie"><button class="btn cast-go sm" data-a="hp-dmg">Dégâts</button>${half && !down ? `<button class="btn sm half" data-a="hp-dmg" data-half="1" title="${esc(half)}">Dégâts ½</button>` : ""}<button class="btn sm" data-a="hp-heal"${dead ? " disabled" : ""}>Soins</button>${down ? "" : `<button class="btn sm" data-a="hp-temp">PV temp.</button>`}</div>`;
-  let h = `<section class="hpcard${down || dead ? " down" : ""}" id="hp-card"><div class="hph"><span class="k">${state}</span>${t ? `<span class="tmp">+${t} temp.</span>` : ""}<span class="v">${cur}<small>/${g.hpMax}</small></span></div>`;
+  let h = `<section class="hpcard${down || dead ? " down" : ""}${panel ? " inpanel" : ""}"${panel ? "" : ' id="hp-card"'}><div class="hph"><span class="k">${state}</span>${t ? `<span class="tmp">+${t} temp.</span>` : ""}<span class="v">${cur}<small>/${g.hpMax}</small></span></div>`;
   if (!down) h += `<div class="hpbar" aria-hidden="true"><i style="width:${pct}%"></i><i class="t" style="width:${tpct}%"></i></div>`;
-  if (dead) return h + `<p class="hpnote">Trois échecs : ton personnage meurt. Seule la magie (Revivifier, Rappel à la vie…) peut le ramener.</p><div class="hpin"><button class="btn sm" data-a="hp-revive">Ramené à la vie (1 PV)</button></div></section>`;
+  const foot = panel ? `<div class="hpfoot">${down || dead ? "" : `<button class="linkbtn" data-a="hp-sheet">Repos et dés de vie : fiche du personnage ›</button>`}<button class="btn ghost sm" data-a="hp-close">Fermer</button></div>` : "";
+  if (dead) return h + `<p class="hpnote">Trois échecs : ton personnage meurt. Seule la magie (Revivifier, Rappel à la vie…) peut le ramener.</p><div class="hpin"><button class="btn sm" data-a="hp-revive">Ramené à la vie (1 PV)</button></div>${foot}</section>`;
   if (down) {
     h += `<div class="dsgrid"><span>Réussites</span><span class="dsr">${dots(d.s, "ok")}</span><span>Échecs</span><span class="dsr">${dots(d.f, "ko")}</span></div>`;
     if (!d.stable) h += `<div class="hpin"><button class="btn sm" data-a="ds" data-v="s">Réussite</button><button class="btn sm" data-a="ds" data-v="f">Échec</button><button class="btn sm" data-a="ds" data-v="20">20 naturel</button><button class="btn sm" data-a="ds" data-v="stab">Stabilisé</button></div>`;
-    h += input + `<p class="hpnote">${d.stable ? "Stabilisé : plus de jets contre la mort. Tu reprends 1 PV au bout de 1d4 heures, ou dès qu'on te soigne." : "Au début de ton tour, jet de sauvegarde contre la mort (d20) : 10 ou plus = réussite, 3 réussites = stabilisé. 1 naturel = 2 échecs, 20 naturel = tu reprends 1 PV. Des dégâts à 0 PV = 1 échec (2 sur un coup critique). Un soin te relève."}</p></section>`;
+    h += input + `<p class="hpnote">${d.stable ? "Stabilisé : plus de jets contre la mort. Tu reprends 1 PV au bout de 1d4 heures, ou dès qu'on te soigne." : "Au début de ton tour, jet de sauvegarde contre la mort (d20) : 10 ou plus = réussite, 3 réussites = stabilisé. 1 naturel = 2 échecs, 20 naturel = tu reprends 1 PV. Des dégâts à 0 PV = 1 échec (2 sur un coup critique). Un soin te relève."}</p>${foot}</section>`;
     return h;
   }
   const hd = hdLeft(g);
   if (half) h += `<p class="hpnote">Dégâts ½ : ${esc(half)} (arrondi à l'inférieur).</p>`;
-  h += input + `<div class="hpdice"><span>Dés de vie <b>${hd}/${g.level} d${hitDieSize(g)}</b></span><span class="muted">à dépenser au repos court</span></div>`;
-  if (g.exh) h += `<div class="hpexh"><b>Épuisement ${g.exh}</b><span>${EXH.slice(0, g.exh).join(" · ")}</span><button class="btn ghost sm" data-a="exh" data-v="-1" aria-label="Un niveau d'épuisement en moins">−</button><button class="btn ghost sm" data-a="exh" data-v="1" aria-label="Un niveau d'épuisement en plus"${g.exh >= 6 ? " disabled" : ""}>+</button></div>`;
+  h += input + (panel ? "" : `<div class="hpdice"><span>Dés de vie <b>${hd}/${g.level} d${hitDieSize(g)}</b></span><span class="muted">à dépenser au repos court</span></div>`);
+  if (g.exh && !panel) h += `<div class="hpexh"><b>Épuisement ${g.exh}</b><span>${EXH.slice(0, g.exh).join(" · ")}</span><button class="btn ghost sm" data-a="exh" data-v="-1" aria-label="Un niveau d'épuisement en moins">−</button><button class="btn ghost sm" data-a="exh" data-v="1" aria-label="Un niveau d'épuisement en plus"${g.exh >= 6 ? " disabled" : ""}>+</button></div>`;
   if (g.wsForm && BEAST[g.wsForm.id]) h += `<p class="hpnote">Tu es en <b>${esc(BEAST[g.wsForm.id].n)}</b> : les dégâts vont d'abord à la bête (carte Forme active, onglet Sorts). L'excédent revient ici tout seul.</p>`;
-  return h + hpConcHTML(g) + `</section>`;
+  return h + hpConcHTML(g) + foot + `</section>`;
 }
 
-/** Puce de la barre du bas (onglet Sorts) : PV actuels, toucher pour ouvrir la fiche. */
+/** Puce de la barre du bas (onglet d'action) : PV actuels, toucher pour ouvrir le volet des PV sur place. */
 function hpChipHTML(g) {
   if (g.hpMax == null) return "";
   const lbl = isDead(g) ? "Mort" : isDown(g) ? "À terre" : `${hpCur(g)}/${g.hpMax}${g.hpTemp ? ` +${g.hpTemp}` : ""}`;
-  return `<button class="chip hp${isDown(g) ? " down" : ""}" data-a="hp-go" aria-label="Points de vie : ${lbl}">♥ ${lbl}</button>`;
+  return `<button class="chip hp${isDown(g) ? " down" : ""}" data-a="hp-go" aria-expanded="${!!S.hpOpen}" aria-label="Points de vie : ${lbl}">♥ ${lbl}</button>`;
 }
 
 /** Dégâts sur le personnage (aussi appelé par la Forme sauvage pour l'excédent). Renvoie le texte du message. */
@@ -86,8 +87,10 @@ onClick("ds", (b) => {
 onClick("exh", (b) => { mutate(g => { g.exh = Math.min(6, Math.max(0, (g.exh || 0) + +b.dataset.v)); }); });
 onClick("hp-revive", () => { const g = G(); if (!g) return; const prev = snap(g); mutate(g => { g.death = { s: 0, f: 0, stable: false }; g.hp = 1; }); toast("De retour à 1 PV", () => { restore(prev); return "Annulé"; }); });
 onClick("hpconc-ok", () => { S.hpConc = null; render(); const c = concOf(G()); if (c) toast(`Concentration maintenue : <b>${esc(c.name)}</b>`); });
-onClick("hp-go", () => {
-  S.tab = "perso"; S.view = "jeu"; try { localStorage.setItem("grimoire.tab", S.tab); localStorage.setItem("grimoire.view", S.view); } catch (e) {}
+onClick("hp-go", () => { S.hpOpen = !S.hpOpen; S.concPanel = false; S.fxOpen = false; render(); const el = document.getElementById("hp-n"); if (el && S.hpOpen) el.focus({ preventScroll: true }); });
+onClick("hp-close", () => { S.hpOpen = false; S.hpConc = null; render(); });
+onClick("hp-sheet", () => {
+  S.hpOpen = false; S.tab = "perso"; S.view = "jeu"; try { localStorage.setItem("grimoire.tab", S.tab); localStorage.setItem("grimoire.view", S.view); } catch (e) {}
   render(); const el = document.getElementById("hp-card"); if (el) el.scrollIntoView({ block: "center" });
 });
 

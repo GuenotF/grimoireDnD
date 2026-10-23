@@ -88,7 +88,7 @@ onClick(["cast", "cast-rit", "cast-force"], (b, a, e) => {
 onClick("cast-open", (b) => { S.castOpen = S.castOpen === b.dataset.id ? null : b.dataset.id; render(); });
 onClick("cast-close", () => { S.castOpen = null; render(); });
 onClick("conc-cancel", () => { S.concWarn = null; render(); });
-onClick("conc-panel", () => { S.concPanel = !S.concPanel; render(); if (S.concPanel) { const i = document.getElementById("conc-dmg"); if (i) i.focus(); } });
+onClick("conc-panel", () => { S.concPanel = !S.concPanel; S.hpOpen = false; render(); if (S.concPanel) { const i = document.getElementById("conc-dmg"); if (i) i.focus(); } });
 onClick("conc-close", () => { S.concPanel = false; render(); });
 onClick("conc-end", (b, a, e) => {
   const g = G(), cur = g && concOf(g); if (!cur) return; S.concPanel = false; S.wsConc = null;
@@ -96,7 +96,7 @@ onClick("conc-end", (b, a, e) => {
   mutate(g => { g.effects = g.effects.filter(e => !e.c); });
   toast(`Concentration perdue : <b>${esc(cur.name)}</b> prend fin`, () => mutate(g => { g.effects = prev; }));
 });
-onClick("fx-open", () => { S.fxOpen = true; S.concPanel = false; render(); });
+onClick("fx-open", () => { S.fxOpen = true; S.concPanel = false; S.hpOpen = false; render(); });
 onClick("fx-close", () => { S.fxOpen = false; render(); });
 onClick(["fx-end", "fx-all"], (b, a, e) => {
   const g = G(); if (!g) return; const prev = JSON.parse(JSON.stringify(g.effects));

@@ -11,7 +11,7 @@ import { BEAST, BEASTS, BY_ID, SPELLS } from "./data.js";
 import { concOf, concPanelHTML, fxSheetHTML, slotbarHTML } from "./features/cast.js";
 import { characterHTML, heroAbilities } from "./features/character.js";
 import { grimoireHTML } from "./features/grimoire.js";
-import { hpChipHTML } from "./features/hp.js";
+import { hpCardHTML, hpChipHTML } from "./features/hp.js";
 import { luHTML } from "./features/levelup.js";
 import { biblioHTML } from "./features/library.js";
 import { newHTML } from "./features/newchar.js";
@@ -46,7 +46,10 @@ function renderApp() {
   document.body.classList.toggle("has-slotbar", showBar);
   document.documentElement.style.setProperty("--barh", (showBar ? bar.offsetHeight : 0) + "px");
   document.getElementById("toast").classList.toggle("above-bar", showBar);
-  const cp = document.getElementById("concpanel"), cur = g && concOf(g), showCp = showBar && S.concPanel && !!cur;
+  // Volet des PV ouvert depuis le cœur de la barre du bas (même carte que l'onglet Personnage, sans les repos)
+  const hpp = document.getElementById("hppanel"), showHp = showBar && !!S.hpOpen && !!barChips;
+  hpp.hidden = !showHp; if (showHp) hpp.innerHTML = hpCardHTML(g, true); else S.hpOpen = false;
+  const cp = document.getElementById("concpanel"), cur = g && concOf(g), showCp = showBar && S.concPanel && !!cur && !showHp;
   cp.hidden = !showCp; if (showCp) cp.innerHTML = concPanelHTML(cur);
   const showFx = showBar && S.fxOpen && g.effects.length > 0, fs = document.getElementById("fxsheet");
   fs.hidden = !showFx; document.getElementById("fxback").hidden = !showFx; if (showFx) fs.innerHTML = fxSheetHTML(g);
@@ -59,7 +62,7 @@ function renderApp() {
   if (showLu) { const sc = lu.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; lu.innerHTML = luHTML(g); const nb = lu.querySelector(".lubody"); if (nb && S.luKeep) nb.scrollTop = top; S.luKeep = false; }
   // Volets propres aux classes (Imposition des mains, formes possibles) : chaque classe gère les siens, refermés si le personnage affiché est d'une autre classe
   const showSheet = Object.values(CLASSES).map(c => c.renderSheets ? c.renderSheets(g && C(g) === c ? g : null, showLu) : false).some(Boolean);
-  document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showNw || showSheet);
+  document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showNw || showSheet || showHp); // le message ne couvre pas le volet ouvert
   // Focus retrouvé en dernier : les volets (assistant de niveau…) sont redessinés juste avant
   if (keep) { const el = document.querySelector(keep.sel); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
 }
