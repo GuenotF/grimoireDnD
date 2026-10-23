@@ -88,7 +88,7 @@ function grimoireHTML(g) {
   let h = `<div class="viewsw" role="group" aria-label="Affichage du grimoire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
   const jeu = S.view === "jeu";
   // Gérer : préparation et capacités seulement ; emplacements, repos et ressources (actions) sont dans En jeu
-  if (!jeu) return h + (C(g).book ? bookGererHTML(g) : featsHTML(g) + preparedGererHTML(g));
+  if (!jeu) return h + featsHTML(g) + (C(g).book ? bookGererHTML(g) : preparedGererHTML(g));
   if (C(g).beforeSlots) h += C(g).beforeSlots(g); // ex. druide : forme active
   h += `<div class="rubric" id="slots-top" style="margin-top:4px"><h2>Emplacements de sorts</h2><span class="aside">touche un cercle quand tu lances un sort</span></div><div class="slots">`;
   if (!slots.length) h += `<p class="muted" style="margin:0 0 6px">Pas encore d'emplacement : les sorts arrivent au niveau ${R.unlockAt(g, 1)}.</p>`;
@@ -98,8 +98,8 @@ function grimoireHTML(g) {
   });
   // Repos court (dés de vie + récupération de la classe) et repos long : features/rest.js
   h += `</div>` + restBarHTML(g);
-  if (!C(g).book) h += C(g).resources ? C(g).resources(g) : "";
-  return h + jeuHTML(g) + (C(g).book ? "" : featsHTML(g)); // capacités de classe après la liste des sorts
+  h += C(g).resources ? C(g).resources(g) : "";
+  return h + jeuHTML(g) + featsHTML(g); // capacités de classe après la liste des sorts
 }
 
 // Grimoire du magicien, mode Gérer : sorts mineurs et sorts du grimoire à préparer

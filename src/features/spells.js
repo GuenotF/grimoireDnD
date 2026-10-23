@@ -4,6 +4,7 @@ import { cap, esc, fr, signed } from "../core/format.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
+import { C } from "../classes/index.js";
 import { R } from "../rules/common.js";
 import { SCHOOL_VAR } from "../rules/tables.js";
 
@@ -13,7 +14,7 @@ function metaLine(s) {
 // Pastilles : dégâts ou effet → jet → portée / zone → durée
 function pillData(s, g) {
   const out = [];
-  if (s.p) out.push(s.p.startsWith("d:") ? { k: "d", l: "Dégâts", v: pText(s, g.level) } : { k: "f", l: "Effet", v: pText(s, g.level) });
+  if (s.p) out.push(s.p.startsWith("d:") ? { k: "d", l: "Dégâts", v: pText(s, g.level, g) } : { k: "f", l: "Effet", v: pText(s, g.level) });
   if (s.j === "atk") out.push({ k: "a", l: "Ton jet", v: `Attaque ${signed(R.prof(g.level) + R.am(g))}`, sub: s.ok, short: "contre la CA" });
   else if (s.j === "auto") out.push({ k: "n", l: "Jet", v: "Aucun", sub: s.ok });
   else if (s.j) {
@@ -28,7 +29,13 @@ function pillData(s, g) {
 }
 // Sorts mineurs à dégâts : un dé de plus aux niveaux 5, 11 et 17
 const tier = lv => 1 + (lv >= 5) + (lv >= 11) + (lv >= 17);
-function pText(s, lv) { if (!s.p) return ""; const v = s.p.slice(2); return s.l === 0 && s.p.startsWith("d:") && s.up ? v.replace(/^(\d+)d/, (m, n) => (n * tier(lv)) + "d") : v; }
+function pText(s, lv, g) {
+  if (!s.p) return ""; let v = s.p.slice(2);
+  if (s.l === 0 && s.p.startsWith("d:") && s.up) v = v.replace(/^(\d+)d/, (m, n) => (n * tier(lv)) + "d");
+  const b = g && C(g).dmgBonus ? C(g).dmgBonus(g, s) : 0; // ex. Évocation améliorée : + INT à un jet de dégâts
+  if (b && !v.includes("×")) v = v.replace(/(\d+d\d+)/, `$1 ${b > 0 ? "+" : "−"} ${Math.abs(b)}`);
+  return v;
+}
 function pillsHTML(s, g) {
   return `<div class="pills">${pillData(s, g).map(p => `<div class="pill ${p.k}"><span class="pl">${p.l}</span><span class="pv">${esc(p.v)}</span>${p.sub ? `<span class="ps${p.conc ? " conc" : ""}">${esc(p.sub)}</span>` : ""}</div>`).join("")}</div>`;
 }
@@ -55,7 +62,7 @@ const noteMark = (g, s) => noteOf(g, s) ? `<span class="nmark" title="Ce sort a 
 const noteBox = (g, s) => `<div class="nbox">${esc(noteOf(g, s))}</div>`;
 function keyPills(s, g) {
   let h = "";
-  if (s.p) h += `<span class="kp ${s.p.startsWith("d:") ? "d" : "f"}">${esc(pText(s, g.level))}</span>`;
+  if (s.p) h += `<span class="kp ${s.p.startsWith("d:") ? "d" : "f"}">${esc(pText(s, g.level, g))}</span>`;
   if (s.j === "atk") h += `<span class="kp a" title="Attaque de sort">${signed(R.prof(g.level) + R.am(g))}</span>`;
   else if (s.j && s.j !== "auto") { const fixed = /^DD (\d+) fixe/.exec(s.ok || ""); h += `<span class="kp s" title="Jet de sauvegarde de la cible">${s.j} ${fixed ? fixed[1] : 8 + R.prof(g.level) + R.am(g)}</span>`; }
   return h;

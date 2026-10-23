@@ -4,7 +4,7 @@ import { cap, esc, plural, signed } from "../core/format.js";
 import { S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render } from "../core/ui.js";
-import { BEAST, BEASTS } from "../data.js";
+import { BEAST, BEASTS, BY_ID } from "../data.js";
 import { pCantrips, pClassList, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, printHTML } from "../features/print.js";
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
@@ -20,13 +20,19 @@ const DRU_FEATS = [
   { id: "primal", lv: 6, circle: "lune", n: "Frappe primitive", pill: () => "attaques magiques", k: "f", d: () => "En forme de bête, tes attaques comptent comme magiques pour surmonter les résistances et immunités." },
   { id: "elem", lv: 10, circle: "lune", n: "Forme sauvage élémentaire", pill: () => "2 utilisations · élémentaire", k: "f", d: () => "Dépense deux utilisations de Forme sauvage pour devenir un élémentaire de l'air, de la terre, du feu ou de l'eau." },
   { id: "thousand", lv: 14, circle: "lune", n: "Mille formes", pill: () => "Modification d'apparence à volonté", k: "f", d: () => "Tu peux lancer Modification d'apparence à volonté." },
+  { id: "landcantrip", lv: 2, circle: "terre", n: "Sort mineur supplémentaire", pill: () => "+1 sort mineur", k: "f", d: () => "Tu apprends un sort mineur de druide de plus, qui ne compte pas dans ton nombre de sorts mineurs connus (compté dans l'appli)." },
+  { id: "natrec", lv: 2, circle: "terre", n: "Récupération naturelle", pill: g => `${DRU.natRec(g)} niveau${DRU.natRec(g) > 1 ? "x" : ""} d'emplacements`, k: "f", d: g => `Une fois par jour, pendant un repos court : récupère des emplacements de sort pour un total de ${DRU.natRec(g)} niveau${DRU.natRec(g) > 1 ? "x" : ""} (moitié de ton niveau, arrondi au supérieur), aucun de niveau 6 ou plus. Dans le panneau du repos court.` },
+  { id: "terrain", lv: 3, circle: "terre", n: "Sorts de cercle", control: g => `<select id="f-terrain" aria-label="Terrain">${Object.entries(TERRAINS).map(([k, t]) => `<option value="${k}"${(g.terrain || "foret") === k ? " selected" : ""}>${t.n}</option>`).join("")}</select>`, pill: g => `${(TERRAINS[g.terrain] || TERRAINS.foret).n} · toujours préparés`, k: "f", d: g => `Terrain : ${(TERRAINS[g.terrain] || TERRAINS.foret).n} (à choisir en mode Gérer). Ses sorts de cercle, aux niveaux 3, 5, 7 et 9, sont toujours préparés et ne comptent pas dans ta limite : ${Object.entries((TERRAINS[g.terrain] || TERRAINS.foret).sp).map(([lv, ids]) => `niv. ${lv} ${ids.map(id => BY_ID[id] ? BY_ID[id].n : id).join(", ")}`).join(" · ")}.` },
+  { id: "landstride", lv: 6, circle: "terre", n: "Foulée tellurique", pill: () => "terrain difficile ignoré", k: "f", d: () => "Le terrain difficile non magique ne te coûte pas de mouvement supplémentaire ; tu traverses les plantes non magiques sans être ralenti ni blessé. Avantage aux jets de sauvegarde contre les plantes créées ou manipulées par magie pour gêner les mouvements." },
+  { id: "ward", lv: 10, circle: "terre", n: "Protégé de dame Nature", pill: () => "immunisé poison, maladie", k: "s", d: () => "Les élémentaires et les fées ne peuvent pas te charmer ni t'effrayer ; tu es immunisé contre le poison et les maladies." },
+  { id: "sanctuary", lv: 14, circle: "terre", n: "Sanctuaire de dame Nature", pill: g => `bêtes et plantes : JdS SAG DD ${8 + R.prof(g.level) + R.am(g)}`, k: "s", d: g => `Une bête ou une plante qui t'attaque fait un jet de sauvegarde de Sagesse (DD ${8 + R.prof(g.level) + R.am(g)}) : en cas d'échec, elle choisit une autre cible ou rate automatiquement ; en cas de réussite, elle est immunisée pendant 24 heures.` },
   { id: "timeless", lv: 18, n: "Jeunesse éternelle, Sorts bestiaux", pill: () => "sorts en forme de bête", k: "f", d: () => "Tu vieillis dix fois moins vite. En forme de bête, tu peux lancer des sorts (composantes verbales et somatiques), sans composante matérielle." },
   { id: "arch", lv: 20, n: "Archidruide", pill: () => "Forme sauvage illimitée", k: "f", d: () => "Forme sauvage illimitée ; tu ignores les composantes verbales, somatiques et matérielles sans coût de tes sorts de druide." },
 ];
 // Détail de Forme sauvage (capacité dépliable)
 function wsBody(g) {
     const fp = DRU.fp(g), lim = g.level < 4 ? "ni nage ni vol" : g.level < 8 ? "nage autorisée, pas de vol" : "nage et vol autorisés";
-    return `${pillsRaw([["n", "Incantation", "1 action bonus"], ["n", "Durée", `${DRU.hours(g)} h maximum`], ["f", "Bêtes", `FP ${fp} maximum`, lim]])}
+    return `${pillsRaw([["n", "Incantation", g.circle === "lune" ? "1 action bonus" : "1 action"], ["n", "Durée", `${DRU.hours(g)} h maximum`], ["f", "Bêtes", `FP ${fp} maximum`, lim]])}
     <div class="eff">Tu prends la forme d'une bête déjà vue : ses statistiques physiques et ses PV remplacent les tiens (tu gardes INT, SAG, CHA, tes compétences et ta concentration). À 0 PV, tu reprends ta forme et l'excédent de dégâts passe sur tes PV. Pas de sort dans cette forme.</div>
     <div class="cast"><button class="btn cast-go sm wsbtn" data-a="ws-open">${g.wsForm ? "Changer de forme" : "Choisir une forme"}</button></div>`;
 }
@@ -37,15 +43,32 @@ function druResHTML(g) {
   return `<div class="rubric"><h2>Ressources du druide</h2></div><div class="slots res">${capRow(g, "ws", "Forme sauvage", "repos court", pips, false, wsBody)}</div>`;
 }
 onChange("#f-circle", t => { mutate(g => { g.circle = t.value; }); });
-// Cercles du druide (Cercle de la Lune pour l'instant)
-const CIRCLES = { lune: { n: "Lune", full: "Cercle de la Lune" } };
+onChange("#f-terrain", t => { mutate(g => { g.terrain = t.value; }); });
+// Cercles du druide (Manuel des joueurs)
+const CIRCLES = { lune: { n: "Lune", full: "Cercle de la Lune", sum: "Changeforme de combat : Forme sauvage en action bonus, bêtes de FP 1 dès le niveau 2, soins en dépensant des emplacements." },
+  terre: { n: "Terre", full: "Cercle de la Terre", sum: "Sorts de cercle selon un terrain (toujours préparés), un sort mineur de plus, Récupération naturelle d'emplacements au repos court." } };
+// Cercle de la Terre : sorts de cercle par terrain et niveau de druide (3, 5, 7, 9)
+const TERRAINS = {
+  arctique: { n: "Arctique", sp: {3: ["spike-growth", "hold-person"], 5: ["slow", "sleet-storm"], 7: ["freedom-of-movement", "ice-storm"], 9: ["commune-with-nature", "cone-of-cold"]} },
+  desert: { n: "Désert", sp: {3: ["blur", "silence"], 5: ["create-food-and-water", "protection-from-energy"], 7: ["blight", "hallucinatory-terrain"], 9: ["insect-plague", "wall-of-stone"]} },
+  foret: { n: "Forêt", sp: {3: ["spider-climb", "barkskin"], 5: ["call-lightning", "plant-growth"], 7: ["divination", "freedom-of-movement"], 9: ["commune-with-nature", "tree-stride"]} },
+  littoral: { n: "Littoral", sp: {3: ["misty-step", "mirror-image"], 5: ["water-walk", "water-breathing"], 7: ["control-water", "freedom-of-movement"], 9: ["conjure-elemental", "scrying"]} },
+  marais: { n: "Marais", sp: {3: ["melf-s-acid-arrow", "darkness"], 5: ["water-walk", "stinking-cloud"], 7: ["freedom-of-movement", "locate-creature"], 9: ["insect-plague", "scrying"]} },
+  montagne: { n: "Montagne", sp: {3: ["spike-growth", "spider-climb"], 5: ["lightning-bolt", "meld-into-stone"], 7: ["stone-shape", "stoneskin"], 9: ["wall-of-stone", "passwall"]} },
+  outreterre: { n: "Outreterre", sp: {3: ["spider-climb", "web"], 5: ["gaseous-form", "stinking-cloud"], 7: ["stone-shape", "greater-invisibility"], 9: ["cloudkill", "insect-plague"]} },
+  plaine: { n: "Plaine", sp: {3: ["invisibility", "pass-without-trace"], 5: ["haste", "daylight"], 7: ["divination", "freedom-of-movement"], 9: ["insect-plague", "dream"]} },
+};
+const isLand = g => g.circle === "terre";
+const circleSpells = g => { if (!isLand(g) || g.level < 3) return []; const t = TERRAINS[g.terrain] || TERRAINS.foret; return [...new Set(Object.entries(t.sp).filter(([lv]) => g.level >= +lv).flatMap(([, ids]) => ids))].filter(id => BY_ID[id]); };
 const DRU = {
   ws: g => g.level >= 20 ? 99 : g.level >= 2 ? 2 : 0,          // Forme sauvage : 2 utilisations, repos court (illimitée au niveau 20)
-  fp: g => g.level >= 6 ? Math.floor(g.level / 3) : 1,          // Cercle de la Lune : FP 1, puis niveau ÷ 3 dès le niveau 6
+  // FP maximum : Cercle de la Lune 1, puis niveau ÷ 3 dès le niveau 6 ; autres cercles 1/4, 1/2 au niveau 4, 1 au niveau 8
+  fp: g => g.circle === "lune" ? (g.level >= 6 ? Math.floor(g.level / 3) : 1) : g.level >= 8 ? 1 : g.level >= 4 ? 0.5 : 0.25,
   hours: g => Math.floor(g.level / 2),
+  natRec: g => Math.ceil(g.level / 2),                        // Récupération naturelle : moitié du niveau (arrondi au supérieur)
 };
 
-export { DRU_FEATS, druResHTML, CIRCLES, DRU };
+export { DRU_FEATS, druResHTML, CIRCLES, TERRAINS, DRU };
 
 // ---------- Onglet Règles ----------
 function rulesHTML(g) {
@@ -122,13 +145,17 @@ export default {
   prep: (g, m) => Math.max(1, m + g.level),
   ritualNeedsPrep: true,       // un rituel se lance s'il est préparé
   canRitual: prepared => prepared,
-  defaults: () => ({ circle: "lune", favs: [], wsForm: null, wsU: 0 }),
+  defaults: () => ({ circle: "lune", terrain: "foret", natRec: false, favs: [], wsForm: null, wsU: 0 }),
   normalize(o) {
     if (!CIRCLES[o.circle]) o.circle = "lune";
+    if (!TERRAINS[o.terrain]) o.terrain = "foret"; o.natRec = !!o.natRec;          // Cercle de la Terre
     if (!Array.isArray(o.favs)) o.favs = []; o.favs = o.favs.filter(id => BEAST[id]);   // formes favorites
     if (!o.wsForm || !BEAST[o.wsForm.id]) o.wsForm = null;                                // forme active {id, hp, max}
     o.wsU = Math.max(0, +o.wsU || 0);                                                     // utilisations de Forme sauvage
   },
+  subclass: { lv: 2, label: "Cercle druidique", field: "circle", opts: () => Object.entries(CIRCLES).map(([k, c]) => [k, c.full, c.sum]),
+    extra: (g, k, x) => k !== "terre" ? null : { label: "Terrain (sorts de cercle au niveau 3)", opts: Object.entries(TERRAINS).map(([t, v]) => [t, v.n, ""]), cur: x || g.terrain || "foret" },
+    apply: (g, x) => { if (x) g.terrain = x; } },
   subline: g => `Druide niveau ${g.level}${g.level >= 2 ? ` · ${esc(CIRCLES[g.circle].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-circle">Cercle druidique</label><select id="f-circle">${Object.entries(CIRCLES).map(([k, o]) => `<option value="${k}"${k === g.circle ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
   heroStats: g => { const cMax = R.cantrips(g); return `<div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div>${statLabel("Sorts mineurs", "Mineurs")}</div>
@@ -142,11 +169,17 @@ export default {
   features: g => DRU_FEATS.filter(f => !f.circle || f.circle === g.circle),
   resources: g => druResHTML(g),
   resourceMax: { ws: g => DRU.ws(g) },
-  longRest: g => { g.wsU = 0; g.wsForm = null; S.wsDice = ""; S.wsConc = null; },
+  longRest: g => { g.natRec = false; g.wsU = 0; g.wsForm = null; S.wsDice = ""; S.wsConc = null; },
   // Forme active (ou rappel de concentration si la forme vient de prendre fin), au-dessus des emplacements
   beforeSlots: g => g.wsForm ? wsActiveHTML(g) : wsConcHTML(g),
   slotbarChips: g => g.wsForm && BEAST[g.wsForm.id] ? `<button class="chip ws" data-a="ws-top">🐾 ${esc(BEAST[g.wsForm.id].n)} · ${g.wsForm.hp}/${g.wsForm.max}</button>` : "",
   shortRest: { field: "wsU", label: "Forme sauvage", done: "récupérée" },
+  // Cercle de la Terre : sorts de cercle, sort mineur de plus, Récupération naturelle
+  cantripBonus: g => isLand(g) && g.level >= 2 ? 1 : 0,
+  alwaysPrepared: g => circleSpells(g),
+  alwaysPreparedInfo: g => ({ title: "Sorts de cercle", aside: `toujours préparés · ${esc((TERRAINS[g.terrain] || TERRAINS.foret).n)}`, origin: `Sort de cercle · ${esc((TERRAINS[g.terrain] || TERRAINS.foret).n)}`,
+    tip: "Sort de cercle : toujours préparé, hors limite", aria: "Sort de cercle, toujours préparé" }),
+  recovery: g => isLand(g) && g.level >= 2 ? { name: "Récupération naturelle", budget: DRU.natRec(g), field: "natRec" } : null,
   // Volet des formes possibles ; renvoie true s'il est ouvert (jamais par-dessus l'assistant de passage de niveau)
   renderSheets(g, levelUpOpen) {
     const ws = document.getElementById("wssheet"), show = !!g && !!S.ws && !levelUpOpen;
@@ -163,7 +196,7 @@ export default {
       return `<div class="lunew"><span class="k">Nouvelles formes</span><b class="h">${plural(nf.length, "bête")} de plus</b><span style="font-size:13.5px">${cap(why)}${to === 2 ? "" : " deviennent possibles"}.</span>
       <div class="lunames">${nf.map(x => esc(x.n)).join(" · ")}</div><span class="muted" style="font-size:12.5px">Tu pourras les ajouter à tes formes ★ à l'étape suivante.</span></div>`;
     },
-    notes: (g, to) => to === 2 ? [`<span><b>Cercle druidique</b> : vérifie le cercle choisi dans la fiche (${esc(CIRCLES[g.circle].n)}).</span>`] : [],
+    notes: () => [],
     choicesFirst(g, b, L) {
       const nf = newForms(g, b); if (!nf.length) return "";
       const fav = L.wsfav || [];

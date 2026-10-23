@@ -51,13 +51,19 @@ const PAL_FEATS = [
   { id: "aprot", lv: 6, n: "Aura de protection", pill: g => `${signed(Math.max(1, R.am(g)))} aux JdS · ${auraR(g)}`, k: "s", d: g => `Toi et les créatures amicales à ${auraR(g)} ou moins ajoutez ton mod. de Charisme (${signed(Math.max(1, R.am(g)))}) à vos jets de sauvegarde, tant que tu es conscient.${g.level < 18 ? " 9 m au niveau 18." : ""}` },
   { id: "aconq", lv: 7, oath: "conquete", n: "Aura de conquête", pill: g => `${Math.floor(g.level / 2)} psychiques · ${auraR(g)}`, k: "d", d: g => `Une créature effrayée par toi qui commence son tour à ${auraR(g)} ou moins a une vitesse de 0 et subit ${Math.floor(g.level / 2)} dégâts psychiques (moitié de ton niveau de paladin). Se combine avec Présence conquérante.` },
   { id: "adevot", lv: 7, oath: "devotion", n: "Aura de dévotion", pill: g => `pas de charme · ${auraR(g)}`, k: "s", d: g => `Toi et les créatures amicales à ${auraR(g)} ou moins ne pouvez pas être charmés tant que tu es conscient.` },
+  { id: "aguard", lv: 7, oath: "anciens", n: "Aura de garde", pill: g => `résistance aux sorts · ${auraR(g)}`, k: "s", d: g => `Toi et les créatures amicales à ${auraR(g)} ou moins avez la résistance aux dégâts des sorts, tant que tu es conscient.` },
+  { id: "relent", lv: 7, oath: "vengeance", n: "Vengeur implacable", pill: () => "½ vitesse après une attaque d'opportunité", k: "f", d: () => "Quand tu touches avec une attaque d'opportunité, tu peux te déplacer de la moitié de ta vitesse dans la même réaction, sans provoquer d'attaque d'opportunité." },
   { id: "acour", lv: 10, n: "Aura de courage", pill: g => `pas d'effroi · ${auraR(g)}`, k: "s", d: g => `Toi et les créatures amicales à ${auraR(g)} ou moins ne pouvez pas être effrayés tant que tu es conscient.` },
   { id: "ismite", lv: 11, n: "Châtiment divin amélioré", pill: () => "+1d8 radiant à chaque coup", k: "d", d: () => "Chaque coup au corps à corps avec une arme inflige 1d8 dégâts radiants de plus (cumulable avec le Châtiment divin)." },
   { id: "cleanse", lv: 14, n: "Contact purifiant", pill: g => `${Math.max(1, R.am(g))} fois · repos long`, k: "f", d: g => `Action : mets fin à un sort qui affecte toi ou une créature consentante que tu touches. ${Math.max(1, R.am(g))} fois par repos long (mod. de Charisme).` },
   { id: "rebuke", lv: 15, oath: "conquete", n: "Réprimande méprisante", pill: g => `${Math.max(1, R.am(g))} psychiques à qui te frappe`, k: "d", d: g => `Quand une créature te touche avec une attaque, elle subit ${Math.max(1, R.am(g))} dégâts psychiques (mod. de Charisme), si tu n'es pas neutralisé.` },
   { id: "purity", lv: 15, oath: "devotion", n: "Pureté de l'esprit", pill: () => "Protection contre le mal et le bien", k: "f", d: () => "Tu es en permanence sous l'effet de Protection contre le mal et le bien : aberrations, célestes, élémentaires, fées, fiélons et morts-vivants ont un désavantage pour t'attaquer et ne peuvent ni te charmer, ni t'effrayer, ni te posséder." },
+  { id: "undying", lv: 15, oath: "anciens", n: "Sentinelle immortelle", pill: () => "1 PV au lieu de 0 · repos long", k: "f", d: () => "Quand tu tombes à 0 PV sans être tué sur le coup, tu peux tomber à 1 PV à la place, une fois par repos long. Tu ne subis plus les effets de l'âge et ne peux pas être vieilli par magie." },
+  { id: "soul", lv: 15, oath: "vengeance", n: "Âme vengeresse", pill: () => "réaction : attaque la cible du vœu", k: "d", d: () => "Quand la créature visée par ton Vœu d'hostilité fait une attaque, tu peux utiliser ta réaction pour l'attaquer au corps à corps si elle est à portée." },
   { id: "aura18", lv: 18, n: "Améliorations des auras", pill: () => "auras à 9 m", k: "f", d: () => "La portée de tes auras passe à 9 m." },
   { id: "invinc", lv: 20, oath: "conquete", n: "Conquérant invincible", pill: () => "1 fois · repos long", k: "f", d: () => "Action, 1 minute : résistance à tous les dégâts, une attaque de plus par action Attaquer, critique sur 19 ou 20. Une fois par repos long." },
+  { id: "champion", lv: 20, oath: "anciens", n: "Champion antique", pill: () => "1 fois · repos long", k: "f", d: () => "Action, 1 minute : tu récupères 10 PV au début de chacun de tes tours ; tes sorts de paladin d'une action se lancent en action bonus ; les ennemis à 3 m ou moins ont un désavantage aux jets de sauvegarde contre tes sorts de paladin et ton Conduit divin. Une fois par repos long." },
+  { id: "avenger", lv: 20, oath: "vengeance", n: "Ange de la vengeance", pill: () => "1 fois · repos long", k: "f", d: g => `Action, 1 heure : des ailes te donnent une vitesse de vol de 18 m, et une aura de 9 m effraie (JdS SAG, DD ${8 + R.prof(g.level) + R.am(g)}) pendant 1 minute ou jusqu'à des dégâts la créature qui y entre ou y commence son tour en combat ; les attaques contre une créature effrayée ont l'avantage. Une fois par repos long.` },
   { id: "nimbus", lv: 20, oath: "devotion", n: "Nimbe sacré", pill: () => "1 fois · repos long", k: "f", d: () => "Action, 1 minute : lumière vive sur 9 m (faible sur 9 m de plus). Un ennemi qui commence son tour dans la lumière vive subit 10 dégâts radiants. Avantage aux jets de sauvegarde contre les sorts des fiélons et des morts-vivants. Une fois par repos long." },
 ];
 // Volet Imposition des mains
@@ -129,6 +135,26 @@ const OATHS = {
         e: "Action. Chaque mort-vivant ou fiélon à 9 m ou moins qui te voit ou t'entend et rate son jet est renvoyé : il s'éloigne le plus possible de toi, ne peut pas s'approcher à 9 m ni prendre de réaction, et n'agit que pour Foncer ou se libérer (Esquiver s'il est coincé). Prend fin s'il subit des dégâts." },
     ],
     sp: {3: ["protection-from-evil-and-good", "sanctuary"], 5: ["lesser-restoration", "zone-of-truth"], 9: ["beacon-of-hope", "dispel-magic"], 13: ["freedom-of-movement", "guardian-of-faith"], 17: ["commune", "flame-strike"]} },
+  anciens: { n: "Anciens", full: "Serment des anciens", src: "Manuel des joueurs 2014",
+    cd: [
+      { k: "wrath", n: "Courroux de la nature", fx: "1 minute",
+        pills: g => [["f", "Effet", "Entravée"], ["s", "Jet de la cible", `JdS FOR ou DEX · DD ${8 + R.prof(g.level) + R.am(g)}`, "au choix de la cible ; nouveau jet à chaque fin de tour"], ["n", "Portée", "3 m"]],
+        e: "Action. Des lianes spectrales jaillissent autour d'une créature que tu vois à 3 m ou moins : si elle rate son jet, elle est entravée jusqu'à ce qu'elle le réussisse." },
+      { k: "faithless", n: "Renvoi des infidèles", fx: "1 minute",
+        pills: g => [["f", "Effet", "Renvoyé"], ["s", "Jet de la cible", `JdS SAG · DD ${8 + R.prof(g.level) + R.am(g)}`, "fées et fiélons"], ["n", "Zone", "9 m"], ["n", "Durée", "1 minute ou dégâts"]],
+        e: "Action. Chaque fée ou fiélon à 9 m ou moins qui t'entend et rate son jet est renvoyé : il s'éloigne le plus possible de toi et n'agit que pour Foncer ou se libérer. Sa vraie forme est révélée s'il est déguisé par une illusion ou métamorphosé." },
+    ],
+    sp: {3: ["ensnaring-strike", "speak-with-animals"], 5: ["misty-step", "moonbeam"], 9: ["plant-growth", "protection-from-energy"], 13: ["ice-storm", "stoneskin"], 17: ["commune-with-nature", "tree-stride"]} },
+  vengeance: { n: "Vengeance", full: "Serment de vengeance", src: "Manuel des joueurs 2014",
+    cd: [
+      { k: "abjure", n: "Conspuer l'ennemi", fx: "1 minute",
+        pills: g => [["f", "Effet", "Effrayée, vitesse 0"], ["s", "Jet de la cible", `JdS SAG · DD ${8 + R.prof(g.level) + R.am(g)}`, "désavantage pour les fiélons et morts-vivants"], ["n", "Portée", "18 m"], ["n", "Durée", "1 minute ou dégâts"]],
+        e: "Action. Une créature que tu vois : si elle rate son jet, elle est effrayée et sa vitesse tombe à 0 ; si elle le réussit, sa vitesse est réduite de moitié. Les créatures immunisées contre l'effroi ne sont pas affectées." },
+      { k: "vow", n: "Vœu d'hostilité", fx: "1 minute", note: () => " · avantage aux attaques contre la cible",
+        pills: () => [["a", "Attaque", "avantage", "contre la cible du vœu"], ["n", "Portée", "3 m"], ["n", "Durée", "1 minute ou cible à 0 PV"]],
+        e: "Action bonus. Une créature à 3 m ou moins : avantage à tes jets d'attaque contre elle pendant 1 minute, ou jusqu'à ce qu'elle tombe à 0 PV ou perde connaissance." },
+    ],
+    sp: {3: ["bane", "hunters-mark"], 5: ["hold-person", "misty-step"], 9: ["haste", "protection-from-energy"], 13: ["banishment", "dimension-door"], 17: ["hold-monster", "scrying"]} },
 };
 const oathSpells = g => { const o = OATHS[g.oath]; if (!o) return []; return Object.entries(o.sp).filter(([lv]) => g.level >= +lv).flatMap(([, ids]) => ids).filter(id => BY_ID[id]); };
 const PAL = {
@@ -224,6 +250,7 @@ export default {
     if (typeof o.style !== "string") o.style = ""; // style de combat
     ["loh", "dsU", "cdU"].forEach(k => { o[k] = Math.max(0, +o[k] || 0); }); // PV d'Imposition dépensés, Perception divine et Conduit divin utilisés
   },
+  subclass: { lv: 3, label: "Serment sacré", field: "oath", opts: () => Object.entries(OATHS).map(([k, o]) => [k, o.full, `Conduit divin : ${o.cd.map(x => x.n).join(" ou ")}. Sorts : ${o.sp[3].map(id => BY_ID[id] ? BY_ID[id].n : id).join(", ")}…${o.src !== "Manuel des joueurs 2014" ? ` (${o.src})` : ""}`]) },
   subline: g => `Paladin niveau ${g.level}${g.level >= 3 ? ` · ${esc(OATHS[g.oath].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-oath">Serment sacré</label><select id="f-oath">${Object.entries(OATHS).map(([k, o]) => `<option value="${k}"${k === g.oath ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
   heroStats: g => `<div class="stat" role="listitem"><div class="v">${oathSpells(g).length}</div>${statLabel("Sorts de serment", "Serment")}</div>
@@ -242,6 +269,7 @@ export default {
   resourceMax: { ds: g => PAL.ds(g), cd: g => PAL.cd(g) },
   longRest: g => { g.loh = 0; g.dsU = 0; g.cdU = 0; },
   playTop: g => smiteHTML(g),
+  onDown: g => g.oath === "anciens" && g.level >= 15 ? "Sentinelle immortelle : tu peux rester à 1 PV (une fois par repos long)" : "",
   shortRest: { field: "cdU", label: "Conduit divin", done: "récupéré" },
   // Volet d'Imposition des mains ; renvoie true s'il est ouvert
   renderSheets(g) {
@@ -257,7 +285,7 @@ export default {
       const newOath = oathSpells(b).filter(id => !oathSpells(g).includes(id));
       return newOath.length ? `<div style="display:grid;gap:6px"><span class="lusub" style="color:var(--gold)">Nouveaux sorts de serment · toujours préparés</span>${newOath.map(id => BY_ID[id]).map(s => `<div class="lucan"><span style="color:var(--gold)">★</span><span class="n">${esc(s.n)}</span><span class="kps">${keyPills(s, b)}</span></div>`).join("")}</div>` : "";
     },
-    notes: (g, to) => to === 3 ? [`<span><b>Serment sacré</b> : vérifie le serment choisi dans la fiche (${esc(OATHS[g.oath].n)}).</span>`] : [],
+    notes: () => [],
     choices: (g, b, L) => !g.style && b.level >= 2 ? `<div class="luprep"><h3>Style de combat</h3><span class="muted">Pas encore choisi : c'est le moment.</span>
     <div class="chips">${Object.entries(STYLES).map(([k, s]) => `<button class="chip" data-a="lu-style" data-v="${k}" aria-pressed="${L.style === k}">${s.n}</button>`).join("")}</div>
     ${L.style ? `<span class="muted" style="font-size:13px">${esc(STYLES[L.style].n)} : ${esc(STYLES[L.style].d)}</span>` : ""}</div>` : "",

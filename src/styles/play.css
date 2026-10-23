@@ -64,3 +64,5 @@
 .libmark.ok { color: var(--ok); font-weight: 500; }
 .rubric.rit { border-bottom-color: var(--ok); } .rubric.rit h3 { color: var(--ok); }
 @media (prefers-reduced-motion: no-preference) { .pip { transition: transform .1s, background .12s; } }
+/* Capacités de classe : la pastille de résumé peut passer à la ligne (jamais de débordement horizontal) */
+.jrow.feat .jline > .kp { white-space: normal; text-align: right; max-width: 55%; }

@@ -76,15 +76,17 @@ onClick(["cast", "cast-rit", "cast-force"], (b, a, e) => {
   const cur = concOf(g);
   if (a !== "cast-force" && s.c && cur && cur.id !== s.id) { S.concWarn = { id: s.id, lv, rit }; S.castOpen = null; render(); return; }
   S.concWarn = null; S.castOpen = null;
-  const prev = JSON.parse(JSON.stringify({ used: g.used, effects: g.effects }));
+  const SNAP = ["used", "effects", "wardMade", "wardHp", "schoolU"], prev = JSON.parse(JSON.stringify(Object.fromEntries(SNAP.filter(k => k in g).map(k => [k, g[k]]))));
+  let extra = "";
   mutate(g => {
     if (!free) g.used[lv] = (+(g.used[lv] || 0)) + 1;
+    if (C(g).onCast) extra = C(g).onCast(g, s, rit ? 0 : lv) || ""; // ex. Protection arcanique (abjuration)
     if (s.c) { g.effects = g.effects.filter(e => !e.c); g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: true, note: "" }); }
     else if (!NO_TRACK.includes(s.d)) g.effects.push({ k: fxKey(), id: s.id, name: s.n, d: s.d, c: false, note: "" });
   });
   const ended = s.c && cur && cur.id !== s.id ? ` · fin de ${esc(cur.name)}` : "";
-  toast((rit ? `<b>${esc(s.n)}</b> lancé en rituel : +10 min, aucun emplacement` : s.l === 0 ? `<b>${esc(s.n)}</b> lancé · sort mineur, concentration suivie` : `<b>${esc(s.n)}</b> lancé · emplacement de niveau ${lv}`) + ended,
-    () => mutate(g => { g.used = prev.used; g.effects = prev.effects; }));
+  toast((rit ? `<b>${esc(s.n)}</b> lancé en rituel : +10 min, aucun emplacement` : s.l === 0 ? `<b>${esc(s.n)}</b> lancé · sort mineur, concentration suivie` : `<b>${esc(s.n)}</b> lancé · emplacement de niveau ${lv}`) + ended + extra,
+    () => mutate(g => { Object.assign(g, JSON.parse(JSON.stringify(prev))); }));
 });
 onClick("cast-open", (b) => { S.castOpen = S.castOpen === b.dataset.id ? null : b.dataset.id; render(); });
 onClick("cast-close", () => { S.castOpen = null; render(); });

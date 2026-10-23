@@ -18,7 +18,7 @@ const R = {
   slots: (g, lv = g.level) => C(g).slots[lv] || [],
   maxLevel: (g, lv = g.level) => (C(g).slots[lv] || []).length,
   unlockAt: (g, sl) => { for (let lv = 1; lv <= 20; lv++) if ((C(g).slots[lv] || []).length >= sl) return lv; return 21; },
-  cantrips: (g, lv = g.level) => C(g).cantrips(lv),
+  cantrips: (g, lv = g.level) => C(g).cantrips(lv) + (C(g).cantripBonus ? C(g).cantripBonus({ ...g, level: lv }) : 0), // + sort mineur de sous-classe
   prepMax: g => C(g).prep(g, R.am(g)),
   expected: lv => 6 + 2 * (lv - 1),
   arcane: lv => Math.ceil(lv / 2),

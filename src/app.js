@@ -1,6 +1,6 @@
 // Atelier du Grimoire : point d'entrée. Écran principal (en-tête, onglets), démarrage.
 // Les modules importés déclarent leurs actions (boutons, champs) en se chargeant.
-import { C, CLASSES } from "./classes/index.js";
+import { C, CLASSES, alwaysPrepared } from "./classes/index.js";
 import { beforeEachClick, onChange, onClick, onInput, onKey, startActions } from "./core/actions.js";
 import { esc, signed } from "./core/format.js";
 import { showIosTip } from "./core/pwa.js";
@@ -156,4 +156,4 @@ if (window.visualViewport) {
   };
   vv.addEventListener("resize", kb); vv.addEventListener("scroll", kb); kb();
 }
-window.__t = { S, G, R, mutate, concOf, inClass, BY_ID, BEAST, BEASTS, SPELLS, saveProf, speedOf };
+window.__t = { S, G, R, mutate, concOf, inClass, BY_ID, BEAST, BEASTS, SPELLS, saveProf, speedOf, alwaysPrepared };

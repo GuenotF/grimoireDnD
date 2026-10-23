@@ -12,8 +12,9 @@ import { R } from "../rules/common.js";
 import { acOf } from "../rules/equipment.js";
 import { capRow, pillsRaw, statLabel } from "../ui/components.js";
 
-// Archétypes (Assassin pour l'instant)
-const ARCH = { assassin: { n: "Assassin", full: "Assassin" } };
+// Archétypes du Manuel des joueurs (l'Escroc arcanique viendra avec les classes à sorts connus)
+const ARCH = { assassin: { n: "Assassin", full: "Assassin", sum: "Assassinat : avantage contre qui n'a pas encore joué, critique contre une créature surprise. Puis fausse identité, Imposteur, Frappe mortelle." },
+  voleur: { n: "Voleur", full: "Voleur", sum: "Mains lestes : la Ruse sert aussi à Escamoter, crocheter, désamorcer ou Utiliser un objet. Monte-en-l'air, puis Discrétion suprême, objets magiques sans restriction, deux tours au premier round." } };
 const ROU = {
   sneak: g => Math.ceil(g.level / 2),                       // Attaque sournoise : 1d6 au niveau 1, +1d6 tous les deux niveaux
   dd: g => 8 + R.prof(g.level) + R.ab(g, "dex"),            // Frappe mortelle (Assassin, niveau 17)
@@ -26,13 +27,18 @@ const ROU_FEATS = [
   { id: "arch", lv: 3, n: "Archétype de roublard", pill: g => ARCH[g.arch].full, k: "f", d: g => `Tu suis l'archétype ${ARCH[g.arch].full} ; ses capacités arrivent aux niveaux 3, 9, 13 et 17.` },
   { id: "bonusprof", lv: 3, arch: "assassin", n: "Maîtrises supplémentaires", pill: () => "kit de déguisement, matériel d'empoisonneur", k: "f", d: () => "Tu maîtrises le kit de déguisement et le matériel d'empoisonneur (ajoutés d'office dans Personnage › Outils et langues)." },
   { id: "assassinate", lv: 3, arch: "assassin", n: "Assassinat", pill: () => "avantage · critique si surprise", k: "d", d: () => "Avantage aux attaques contre toute créature qui n'a pas encore joué son tour dans le combat. Tout coup réussi contre une créature surprise est un coup critique (dés de dégâts doublés, Attaque sournoise comprise)." },
+  { id: "fasthands", lv: 3, arch: "voleur", n: "Mains lestes", pill: () => "Ruse : Escamotage, outils, objet", k: "f", d: () => "L'action bonus de la Ruse sert aussi à faire un test de Dextérité (Escamotage), à crocheter une serrure ou désamorcer un piège avec les outils de voleur, ou à Utiliser un objet." },
+  { id: "climber", lv: 3, arch: "voleur", n: "Monte-en-l'air", pill: g => `escalade sans surcoût · saut +${String(Math.max(0, R.ab(g, "dex")) * 0.3).replace(".", ",")} m`, k: "f", d: g => `Escalader ne te coûte plus de mouvement supplémentaire, et la distance de ton saut en longueur avec élan augmente de ton mod. de DEX × 30 cm (+${String(Math.max(0, R.ab(g, "dex")) * 0.3).replace(".", ",")} m).` },
   { id: "uncanny", lv: 5, n: "Esquive instinctive", pill: () => "réaction : dégâts ½", k: "s", d: () => "Quand un attaquant que tu vois te touche, ta réaction divise par deux les dégâts de cette attaque (bouton « Dégâts ½ » de la carte des PV)." },
   { id: "evasion", lv: 7, n: "Dérobade", pill: () => "JdS DEX : 0 ou ½", k: "s", d: () => "Contre un effet qui permet un jet de sauvegarde de Dextérité pour moitié des dégâts (souffle, boule de feu…) : aucun dégât si tu réussis, la moitié si tu échoues." },
+  { id: "supreme", lv: 9, arch: "voleur", n: "Discrétion suprême", pill: () => "avantage en Discrétion à ½ vitesse", k: "f", d: () => "Avantage aux tests de Dextérité (Discrétion) si tu ne te déplaces pas de plus de la moitié de ta vitesse pendant ce tour." },
   { id: "infiltration", lv: 9, arch: "assassin", n: "Expert en infiltration", pill: () => "fausse identité", k: "f", d: () => "En sept jours et pour 25 po, tu te forges une fausse identité solide (histoire, profession, relations) ; on la croit tant que rien ne prouve le contraire." },
   { id: "reliable", lv: 11, n: "Talent", pill: () => "d20 au moins 10", k: "f", d: () => "Pour un test de caractéristique avec une compétence maîtrisée, un résultat de 9 ou moins au d20 compte comme un 10." },
+  { id: "magicitem", lv: 13, arch: "voleur", n: "Utilisation d'objets magiques", pill: () => "objets sans restriction", k: "f", d: () => "Tu ignores les restrictions de classe, de race et de niveau pour utiliser et te lier aux objets magiques." },
   { id: "impostor", lv: 13, arch: "assassin", n: "Imposteur", pill: () => "imiter une personne", k: "f", d: () => "Après trois heures d'observation, tu imites sans faille la voix, l'écriture et les manières d'une personne ; avantage aux tests de Charisme (Tromperie) pour éviter d'être démasqué." },
   { id: "blindsense", lv: 14, n: "Perception aveugle", pill: () => "créatures à 3 m", k: "f", d: () => "Si tu entends, tu sais où se trouvent les créatures cachées ou invisibles à 3 m de toi." },
   { id: "slippery", lv: 15, n: "Esprit fuyant", pill: () => "maîtrise des JdS de SAG", k: "f", d: () => "Tu maîtrises les jets de sauvegarde de Sagesse (ajouté automatiquement)." },
+  { id: "reflexes", lv: 17, arch: "voleur", n: "Réflexes de voleur", pill: g => `2 tours au 1er round (2e à initiative ${initiative(g) - 10})`, k: "f", d: g => `Au premier round d'un combat, tu joues deux tours : le premier à ton initiative, le second à ton initiative − 10. Impossible si tu es surpris.` },
   { id: "death", lv: 17, arch: "assassin", n: "Frappe mortelle", pill: g => `JdS CON DD ${ROU.dd(g)} · dégâts ×2`, k: "s", d: g => `Quand tu attaques et touches une créature surprise, elle fait un jet de sauvegarde de Constitution (DD ${ROU.dd(g)}, 8 + DEX + maîtrise) : sur un échec, les dégâts de l'attaque sont doublés.` },
   { id: "elusive", lv: 18, n: "Insaisissable", pill: () => "aucun avantage contre toi", k: "f", d: () => "Tant que tu n'es pas neutralisé, aucune attaque contre toi n'a l'avantage." },
   { id: "luck", lv: 20, n: "Coup de chance", pill: () => "1 fois · repos court ou long", k: "f", d: () => "Une attaque ratée devient un coup réussi, ou un test de caractéristique raté devient un 20 naturel. Une fois par repos court ou long." },
@@ -50,7 +56,7 @@ function sneakCard(g) {
 }
 function rouResHTML(g) {
   let h = "";
-  if (g.level >= 2) h += `<div class="rubric"><h2>Ruse</h2><span class="aside">action bonus, à chaque tour</span></div><div class="pills" style="margin-bottom:6px">${[["n", "Foncer", "vitesse doublée"], ["n", "Se désengager", "pas d'attaque d'opportunité"], ["n", "Se cacher", "test de Discrétion " + signed(skillBonus(g, "stealth"))]].map(([k, l, v]) => `<div class="pill ${k}"><span class="pl">${l}</span><span class="pv">${esc(v)}</span></div>`).join("")}</div>`;
+  if (g.level >= 2) h += `<div class="rubric"><h2>Ruse</h2><span class="aside">action bonus, à chaque tour</span></div><div class="pills" style="margin-bottom:6px">${[["n", "Foncer", "vitesse doublée"], ["n", "Se désengager", "pas d'attaque d'opportunité"], ["n", "Se cacher", "test de Discrétion " + signed(skillBonus(g, "stealth"))], ...(g.level >= 3 && g.arch === "voleur" ? [["n", "Mains lestes", "Escamotage " + signed(skillBonus(g, "sleight")) + ", outils, objet"]] : [])].map(([k, l, v]) => `<div class="pill ${k}"><span class="pl">${l}</span><span class="pv">${esc(v)}</span></div>`).join("")}</div>`;
   if (g.level >= 20) {
     const u = Math.min(1, g.luckU);
     h += `<div class="slots res">${capRow(g, "luck", "Coup de chance", "repos court ou long", `<button class="pip${u ? " used" : ""}" data-a="res-pip" data-r="luck" data-k="0" aria-label="Coup de chance, ${u ? "utilisé" : "disponible"}"></button>`, false, () => pillsRaw([["f", "Effet", "raté → réussi, ou test → 20"]]))}</div>`;
@@ -99,6 +105,7 @@ export default {
   langs: () => ["Jargon des voleurs"],
   defaults: () => ({ arch: "assassin", luckU: 0 }),
   normalize(o) { if (!ARCH[o.arch]) o.arch = "assassin"; o.luckU = Math.max(0, +o.luckU || 0); },
+  subclass: { lv: 3, label: "Archétype", field: "arch", opts: () => Object.entries(ARCH).map(([k, a]) => [k, a.full, a.sum]) },
   subline: g => `Roublard niveau ${g.level}${g.level >= 3 ? ` · ${esc(ARCH[g.arch].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-arch">Archétype</label><select id="f-arch">${Object.entries(ARCH).map(([k, o]) => `<option value="${k}"${k === g.arch ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
   heroStats: g => {
@@ -127,7 +134,7 @@ export default {
   levelUp: {
     step2: "Choix",
     rowsAfter: (g, b) => { const o = `${ROU.sneak(g)}d6`, n = `${ROU.sneak(b)}d6`; return `<div class="${o === n ? "same" : ""}"><span>Attaque sournoise</span><span class="old">${o}</span><span class="ar">→</span><b${o !== n ? ' style="color:var(--pd-fg)"' : ""}>${n}</b></div>`; },
-    notes: (g, to) => [to === 3 ? `<span><b>Archétype</b> : vérifie l'archétype choisi dans ✎ Modifier (${esc(ARCH[g.arch].full)}). Assassin : kit de déguisement et matériel d'empoisonneur ajoutés dans Outils et langues.</span>` : "",
+    notes: (g, to) => [to === 3 && g.arch === "assassin" ? `<span><b>Assassin</b> : kit de déguisement et matériel d'empoisonneur ajoutés dans Outils et langues.</span>` : "",
       to === 6 ? `<span><b>Expertise</b> : deux compétences de plus (onglet Personnage, toucher deux fois la compétence).</span>` : ""].filter(Boolean),
   },
 };

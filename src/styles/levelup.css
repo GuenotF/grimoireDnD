@@ -77,3 +77,12 @@ body.lu-on, body.ws-on { overflow: hidden; }
 .asi small { font-size: 12px; font-weight: 700; color: var(--ok); }
 .asi.on { border-color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); }
 .asi:disabled { opacity: .45; }
+
+/* Choix de la sous-classe (assistant de niveau) */
+.lusubc { display: grid; gap: 8px; margin: 4px 0 10px; }
+.subopt { display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%; padding: 9px 12px; border: 1.5px solid var(--rule); border-radius: 10px; background: var(--surface); font: inherit; color: inherit; cursor: pointer; }
+.subopt.on { border: 2px solid var(--rubric); background: linear-gradient(90deg, var(--rubric-soft), var(--surface) 70%); }
+.subopt .rd { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--rule); flex: none; margin-top: 2px; box-sizing: border-box; }
+.subopt.on .rd { background: var(--rubric); border-color: var(--rubric); box-shadow: inset 0 0 0 3px var(--surface); }
+.subopt .bd { display: grid; gap: 3px; } .subopt b { font-family: var(--f-display); font-size: 16px; } .subopt small { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.subx { display: grid; gap: 6px; margin: -2px 0 2px 28px; }

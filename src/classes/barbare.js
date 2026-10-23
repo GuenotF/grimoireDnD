@@ -12,8 +12,25 @@ import { R } from "../rules/common.js";
 import { acCalc } from "../rules/equipment.js";
 import { statLabel } from "../ui/components.js";
 
-// Voies primitives (Berserker pour l'instant)
-const VOIES = { berserker: { n: "Berserker", full: "Voie du Berserker" } };
+// Voies primitives du Manuel des joueurs
+const VOIES = { berserker: { n: "Berserker", full: "Voie du Berserker", sum: "Frénésie : attaque en action bonus pendant la rage (un niveau d'épuisement à la fin). Puis Rage aveugle, Présence intimidante, Représailles." },
+  totem: { n: "Guerrier totem", full: "Voie du guerrier totem", sum: "Un esprit animal (Ours, Aigle ou Loup) aux niveaux 3, 6 et 14 ; rituels pour parler aux animaux et communier avec la nature." } };
+// Guerrier totem : animal choisi à chaque palier (g.totem = { 3, 6, 14 }) ; effets en rage aux niveaux 3 et 14
+const TOTEMS = { ours: "Ours", aigle: "Aigle", loup: "Loup" };
+const TOTEM_FX = {
+  3: { ours: ["Ours", "résistance sauf psychiques", "En rage : résistance à tous les dégâts, sauf psychiques."],
+       aigle: ["Aigle", "Foncer en action bonus", "En rage, sans armure lourde : les attaques d'opportunité contre toi ont un désavantage, et tu peux Foncer en action bonus."],
+       loup: ["Loup", "alliés : avantage au contact", "En rage : tes alliés ont l'avantage aux attaques au corps à corps contre les créatures hostiles à 1,5 m de toi."] },
+  6: { ours: ["Ours", "charge ×2, avantage FOR", "Ta capacité de charge double, et tu as l'avantage aux tests de Force pour pousser, tirer, soulever ou briser."],
+       aigle: ["Aigle", "vue perçante", "Tu vois clairement jusqu'à 1,5 km (les détails comme à 30 m) ; la lumière faible n'impose pas de désavantage en Sagesse (Perception)."],
+       loup: ["Loup", "pistage et discrétion", "Tu peux pister en voyageant à allure rapide et te déplacer discrètement à allure normale."] },
+  14: { ours: ["Ours", "ennemis : désavantage sur les autres", "En rage : les créatures hostiles à 1,5 m ont un désavantage aux attaques contre une autre cible que toi (sauf si elles ne peuvent ni te voir, ni t'entendre, ni être effrayées)."],
+        aigle: ["Aigle", "vol en rage", "En rage : vitesse de vol égale à ta vitesse, par courtes envolées ; tu tombes si tu finis ton tour en l'air sans appui."],
+        loup: ["Loup", "jeter à terre (action bonus)", "En rage : quand tu touches au corps à corps avec une arme, action bonus pour jeter la créature à terre (Grande taille ou moins)."] },
+};
+const totemOf = (g, t) => (g.totem || {})[t] || "ours";
+const totemCtl = t => g => `<select data-totem="${t}" aria-label="Esprit totem, niveau ${t}">${Object.entries(TOTEMS).map(([k, n]) => `<option value="${k}"${totemOf(g, t) === k ? " selected" : ""}>${n}</option>`).join("")}</select>`;
+const isTotem = g => g.voie === "totem" && g.level >= 3;
 const BAR = {
   rage: g => g.level >= 20 ? 99 : g.level >= 17 ? 6 : g.level >= 12 ? 5 : g.level >= 6 ? 4 : g.level >= 3 ? 3 : 2, // utilisations par repos long
   dmg: g => g.level >= 16 ? 4 : g.level >= 9 ? 3 : 2,                                                                  // bonus de dégâts de rage
@@ -28,11 +45,16 @@ const BAR_FEATS = [
   { id: "frenzy", lv: 3, voie: "berserker", n: "Frénésie", pill: () => "attaque en action bonus", k: "d", d: () => "Quand tu entres en rage, tu peux choisir la frénésie : pendant toute la rage, à chacun de tes tours après celui-ci, une attaque au corps à corps en action bonus. À la fin de la rage, tu subis un niveau d'épuisement." },
   { id: "extra", lv: 5, n: "Attaque supplémentaire", pill: () => "2 attaques par action", k: "f", d: () => "Quand tu prends l'action Attaquer, tu attaques deux fois au lieu d'une." },
   { id: "fast", lv: 5, n: "Déplacement rapide", pill: () => "+3 m", k: "f", d: () => "+3 m à ta vitesse tant que tu ne portes pas d'armure lourde (compté dans ta vitesse affichée)." },
+  { id: "seeker", lv: 3, voie: "totem", n: "Quêteur spirituel", pill: () => "rituels : animaux", k: "f", d: () => "Tu peux lancer Communication avec les animaux et Sens animal, uniquement en rituel." },
+  { id: "spirit", lv: 3, voie: "totem", n: "Esprit totem", control: totemCtl(3), pill: g => `${TOTEM_FX[3][totemOf(g, 3)][0]} : ${TOTEM_FX[3][totemOf(g, 3)][1]}`, k: "d", d: g => TOTEM_FX[3][totemOf(g, 3)][2] + " (Ours, Aigle ou Loup : à choisir en mode Gérer.)" },
+  { id: "aspect", lv: 6, voie: "totem", n: "Aspect de la bête", control: totemCtl(6), pill: g => `${TOTEM_FX[6][totemOf(g, 6)][0]} : ${TOTEM_FX[6][totemOf(g, 6)][1]}`, k: "f", d: g => TOTEM_FX[6][totemOf(g, 6)][2] + " Animal identique ou différent de celui du niveau 3." },
   { id: "mindless", lv: 6, voie: "berserker", n: "Rage aveugle", pill: () => "ni charmée ni effrayée en rage", k: "f", d: () => "En rage, tu ne peux pas être charmée ni effrayée ; un tel effet déjà présent est suspendu pendant la rage." },
   { id: "feral", lv: 7, n: "Instinct sauvage", pill: () => "avantage à l'initiative", k: "f", d: () => "Avantage aux jets d'initiative. Si tu es surprise au début d'un combat, tu peux agir normalement à ton premier tour en entrant en rage avant toute autre chose." },
   { id: "brutal", lv: 9, n: "Critique brutal", pill: g => `+${plural(BAR.brutal(g), "dé")} au critique`, k: "d", d: g => `Sur un coup critique au corps à corps, lance ${plural(BAR.brutal(g), "dé de dégâts de l'arme", "dés de dégâts de l'arme")} en plus (1 au niveau 9, 2 au niveau 13, 3 au niveau 17).` },
   { id: "presence", lv: 10, voie: "berserker", n: "Présence intimidante", pill: () => "action : effrayer", k: "s", d: g => `Action : une créature à 9 m qui te voit ou t'entend fait un jet de sauvegarde de Sagesse (DD ${8 + R.prof(g.level) + R.ab(g, "cha")}, 8 + maîtrise + CHA) ou est effrayée jusqu'à la fin de ton prochain tour ; tu peux prolonger l'effet par une action à chaque tour.` },
   { id: "relentless", lv: 11, n: "Rage implacable", pill: () => "JdS CON pour rester à 1 PV", k: "f", d: () => "En rage, si tu tombes à 0 PV sans mourir, jet de sauvegarde de Constitution DD 10 : réussi, tu restes à 1 PV. Le DD augmente de 5 à chaque utilisation et revient à 10 après un repos court ou long." },
+  { id: "walker", lv: 10, voie: "totem", n: "Marcheur spirituel", pill: () => "rituel : Communion avec la nature", k: "f", d: () => "Tu peux lancer Communion avec la nature, uniquement en rituel ; un esprit de ton animal totem te transmet les informations." },
+  { id: "attune", lv: 14, voie: "totem", n: "Lien totémique", control: totemCtl(14), pill: g => `${TOTEM_FX[14][totemOf(g, 14)][0]} : ${TOTEM_FX[14][totemOf(g, 14)][1]}`, k: "d", d: g => TOTEM_FX[14][totemOf(g, 14)][2] },
   { id: "retaliation", lv: 14, voie: "berserker", n: "Représailles", pill: () => "réaction : attaque", k: "f", d: () => "Quand une créature à 1,5 m te blesse, tu peux utiliser ta réaction pour lui porter une attaque au corps à corps." },
   { id: "persistent", lv: 15, n: "Rage persistante", pill: () => "ne s'arrête plus d'elle-même", k: "f", d: () => "Ta rage ne prend fin plus tôt que si tu tombes inconsciente ou si tu y mets fin." },
   { id: "might", lv: 18, n: "Puissance indomptable", pill: () => "Force au moins la valeur", k: "f", d: () => "Si le total d'un test de Force est inférieur à ta valeur de Force, tu peux utiliser cette valeur à la place." },
@@ -47,7 +69,7 @@ function rageCard(g) {
   const n = BAR.rage(g), u = Math.min(n, g.rageU);
   const pips = n > 10 ? `<span class="muted">illimitée</span>` : Array.from({ length: n }, (_, k) => `<button class="pip fire${k < u ? " used" : ""}" data-a="res-pip" data-r="rage" data-k="${k}" aria-label="Rage ${k + 1}, ${k < u ? "utilisée" : "disponible"}"></button>`).join("");
   if (g.raging) return `<section class="ragecard on" id="rage-card"><div class="rh"><b>🔥 En rage${frenzyOn(g) ? " · Frénésie" : ""}</b><span class="muted">1 minute</span></div>
-    <div class="pills">${[["d", "Dégâts", `+${BAR.dmg(g)} FOR au corps à corps`], ["s", "Résistance", "contondant, perforant, tranchant"], ["n", "Force", "avantage tests et JdS"], ...(frenzyOn(g) ? [["f", "Frénésie", "attaque en action bonus"]] : []), ...(g.level >= 6 && g.voie === "berserker" ? [["f", "Rage aveugle", "ni charmée ni effrayée"]] : [])].map(([k, l, v]) => `<div class="pill ${k}"><span class="pl">${l}</span><span class="pv">${v}</span></div>`).join("")}</div>
+    <div class="pills">${[["d", "Dégâts", `+${BAR.dmg(g)} FOR au corps à corps`], ["s", "Résistance", "contondant, perforant, tranchant"], ["n", "Force", "avantage tests et JdS"], ...(frenzyOn(g) ? [["f", "Frénésie", "attaque en action bonus"]] : []), ...(g.level >= 6 && g.voie === "berserker" ? [["f", "Rage aveugle", "ni charmée ni effrayée"]] : []), ...(isTotem(g) ? [["s", `Esprit totem · ${TOTEMS[totemOf(g, 3)]}`, TOTEM_FX[3][totemOf(g, 3)][1]]] : []), ...(isTotem(g) && g.level >= 14 ? [["f", `Lien totémique · ${TOTEMS[totemOf(g, 14)]}`, TOTEM_FX[14][totemOf(g, 14)][1]]] : [])].map(([k, l, v]) => `<div class="pill ${k}"><span class="pl">${l}</span><span class="pv">${v}</span></div>`).join("")}</div>
     <p class="muted">Prend fin si tu tombes inconsciente, ou si tu n'as ni attaqué ni subi de dégâts depuis ton dernier tour. Pas de sorts ni de concentration.${g.level >= 11 ? " Rage implacable : à 0 PV, JdS CON DD 10 (+5 par utilisation) pour rester à 1 PV." : ""}</p>
     <div class="cast"><button class="btn" data-a="rage-end">Fin de la rage</button></div></section>`;
   return `<section class="ragecard" id="rage-card"><div class="rh"><b>Rage</b><span class="muted">repos long</span><span class="pips">${pips}</span></div>
@@ -69,6 +91,7 @@ onClick("rage-end", () => {
 });
 onClick("rage-top", () => { const el = document.getElementById("rage-card"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); else { S.tab = "caps"; render(); } });
 onChange("#f-voie", t => { mutate(g => { g.voie = t.value; }); });
+onChange(t => !!t.dataset.totem, t => { mutate(g => { g.totem = { ...(g.totem || {}), [t.dataset.totem]: t.value }; }); });
 onChange("opt-reckless", t => { S.reckless = t.checked; render(); });
 
 // ---------- Onglet Règles
@@ -111,8 +134,13 @@ export default {
   defaults: () => ({ voie: "berserker", rageU: 0, raging: false, frenzy: false }),
   normalize(o) {
     if (!VOIES[o.voie]) o.voie = "berserker";
+    const t = o.totem && typeof o.totem === "object" ? o.totem : {}; o.totem = Object.fromEntries([3, 6, 14].map(k => [k, TOTEMS[t[k]] ? t[k] : "ours"]));
     o.rageU = Math.max(0, +o.rageU || 0); o.raging = !!o.raging; o.frenzy = !!o.frenzy;
   },
+  // Choix de la voie dans l'assistant de passage de niveau (niveau 3), avec l'esprit totem
+  subclass: { lv: 3, label: "Voie primitive", field: "voie", opts: () => Object.entries(VOIES).map(([k, v]) => [k, v.full, v.sum]),
+    extra: (g, k, x) => k !== "totem" ? null : { label: "Esprit totem (niveau 3)", opts: Object.entries(TOTEMS).map(([t, n]) => [t, n, TOTEM_FX[3][t][2]]), cur: x || totemOf(g, 3) },
+    apply: (g, x) => { if (x) g.totem = { ...(g.totem || {}), 3: x }; } },
   subline: g => `Barbare niveau ${g.level}${g.level >= 3 ? ` · ${esc(VOIES[g.voie].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-voie">Voie primitive</label><select id="f-voie">${Object.entries(VOIES).map(([k, o]) => `<option value="${k}"${k === g.voie ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
   heroStats: g => {
@@ -146,10 +174,10 @@ export default {
   attackNotes: g => [g.level >= 5 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "", g.level >= 9 ? `<b>Critique brutal</b> : +${plural(BAR.brutal(g), "dé")} de l'arme sur un critique au corps à corps.` : ""].filter(Boolean),
   // Carte des PV : en rage, bouton « dégâts réduits » (résistance contondant, perforant, tranchant)
   onDown: g => { if (!g.raging) return ""; const fr = frenzyOn(g); g.raging = false; g.frenzy = false; if (fr) g.exh = Math.min(6, (g.exh || 0) + 1); return `fin de la rage${fr ? ` (épuisement ${g.exh})` : ""}`; },
-  halfDamage: g => g.raging ? "Rage : contondant, perforant, tranchant" : "",
+  halfDamage: g => !g.raging ? "" : isTotem(g) && totemOf(g, 3) === "ours" ? "Rage, Ours : tous les dégâts sauf psychiques" : "Rage : contondant, perforant, tranchant",
   levelUp: {
     step2: "Choix",
     rowsAfter: (g, b) => ["Rages", "Dégâts de rage"].map((l, i) => { const o = i ? `+${BAR.dmg(g)}` : BAR.rage(g), nv = i ? `+${BAR.dmg(b)}` : BAR.rage(b); return `<div class="${o === nv ? "same" : ""}"><span>${l}</span><span class="old">${o > 10 ? "∞" : o}</span><span class="ar">→</span><b${o !== nv ? ' style="color:var(--pd-fg)"' : ""}>${nv > 10 ? "∞" : nv}</b></div>`; }).join(""),
-    notes: (g, to) => to === 3 ? [`<span><b>Voie primitive</b> : vérifie la voie choisie dans ✎ Modifier (${esc(VOIES[g.voie].full)}).</span>`] : [],
+    notes: () => [],
   },
 };

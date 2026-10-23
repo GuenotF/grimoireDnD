@@ -15,11 +15,13 @@ import { DRU } from "./druide.js";
 const SIZES = { TP: "Très petite", P: "Petite", M: "Moyenne", G: "Grande", TG: "Très grande", Gig: "Gigantesque" };
 const MV = { nage: "nage", escalade: "escalade", vol: "vol", creusement: "creusement" };
 // Niveau de druide (Cercle de la Lune) qui ouvre une bête : Forme sauvage au niveau 2, FP 1 jusqu'au niveau 5 puis niveau ÷ 3, nage au niveau 4, vol au niveau 8
-function wsNeed(b) {
-  const c = [[2, "Forme sauvage"], [b.fpn > 1 ? 3 * b.fpn : 2, "FP " + b.fp], [b.v.nage ? 4 : 2, "Nage"], [b.v.vol ? 8 : 2, "Vol"]];
+// Autres cercles : FP 1/4 au niveau 2, 1/2 au niveau 4, 1 au niveau 8, jamais plus
+function wsNeed(b, g) {
+  const fpLv = g && g.circle !== "lune" ? (b.fpn <= 0.25 ? 2 : b.fpn <= 0.5 ? 4 : b.fpn <= 1 ? 8 : 99) : b.fpn > 1 ? 3 * b.fpn : 2;
+  const c = [[2, "Forme sauvage"], [fpLv, "FP " + b.fp], [b.v.nage ? 4 : 2, "Nage"], [b.v.vol ? 8 : 2, "Vol"]];
   return c.reduce((m, x) => x[0] > m[0] ? x : m);
 }
-const wsAllowed = (g, b) => g.level >= wsNeed(b)[0];
+const wsAllowed = (g, b) => g.level >= wsNeed(b, g)[0];
 const spdTxt = b => [b.v.marche && b.v.marche !== "0" ? `${b.v.marche} m` : "", ...Object.keys(MV).filter(k => b.v[k]).map(k => `${k} ${b.v[k]} m`)].filter(Boolean).join(" · ");
 const modOf = n => signed(Math.floor((n - 10) / 2));
 const rchg = r => r ? `<span class="kp f rchg">${/repos/.test(r) ? "1 fois par repos" : esc(r.replace(/^Recharge/, "recharge"))}</span>` : "";
@@ -99,7 +101,7 @@ function bestiaryHTML(g) {
   return h;
 }
 function bstRow(g, b, full) {
-  const key = "bst:" + b.id, open = full || S.open.has(key), fav = g.favs.includes(b.id), ok = wsAllowed(g, b), need = wsNeed(b);
+  const key = "bst:" + b.id, open = full || S.open.has(key), fav = g.favs.includes(b.id), ok = wsAllowed(g, b), need = wsNeed(b, g);
   const star = (!ok && !fav) ? `<span class="wsfav off" aria-hidden="true">☆</span>` : `<button class="wsfav${fav ? " on" : ""}" data-a="ws-fav" data-id="${b.id}" aria-pressed="${fav}" aria-label="${fav ? "Retirer des" : "Ajouter aux"} formes favorites">${fav ? "★" : "☆"}</button>`;
   const mark = ok ? "" : `<span class="libmark">${need[0] > 20 ? "Hors de portée" : `${need[1]} : niveau ${need[0]}`}</span>`;
   return `<div class="jrow wsrow${ok ? "" : " locked"}"><div class="jline">${star}<div class="jmain">${full ? `<span class="jname">${esc(b.n)}</span>` : `<button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${esc(b.n)}<span class="chev">${open ? "▴" : "▾"}</span></button>`}<span class="flv">FP ${esc(b.fp)}</span><span class="wsmini">PV ${b.pv}</span><span class="wsmini">CA ${b.ca}</span>${Object.keys(MV).filter(k => b.v[k]).map(k => `<span class="wsmini">${k} ${b.v[k]} m</span>`).join("")}</div>${mark}</div>
@@ -122,12 +124,12 @@ function wsActiveHTML(g) {
   <div class="bar"><span style="width:${pct}%"></span></div>
   <div class="wsdmg"><label for="ws-n">PV</label><input id="ws-n" type="number" inputmode="numeric" min="0" placeholder="${S.wsDice ? S.wsDice : "0"}"><button class="btn cast-go sm" data-a="ws-dmg">Dégâts</button><button class="btn sm" data-a="ws-heal">Soins</button></div>
   ${S.wsDice ? `<div class="muted" style="font-size:13px">Lance <b>${S.wsDice}</b>, tape le résultat puis « Soins ».</div>` : ""}${wsConcHTML(g)}
-  ${shut ? "" : `${g.level >= 6 ? `<div class="wsprimal"><span class="kp f">Frappe primitive</span> Tes attaques de bête comptent comme magiques (résistances et immunités aux attaques non magiques).</div>` : ""}${beastCard(g, b)}
-  <div class="wscf"><span class="lusub">Changeforme de combat · action bonus</span>
+  ${shut ? "" : `${g.level >= 6 && g.circle === "lune" ? `<div class="wsprimal"><span class="kp f">Frappe primitive</span> Tes attaques de bête comptent comme magiques (résistances et immunités aux attaques non magiques).</div>` : ""}${beastCard(g, b)}
+  ${g.circle === "lune" ? `<div class="wscf"><span class="lusub">Changeforme de combat · action bonus</span>
     ${slots.length ? `<div class="cast"><button class="btn cast-go" data-a="ws-cf" data-l="${slots[0][0]}">Soin · niv. ${slots[0][0]} = ${slots[0][0]}d8 PV</button>${R.slots(g).length > 1 ? `<button class="btn cast-up" data-a="cast-open" data-id="ws-cf" aria-label="Se soigner avec un emplacement plus élevé" aria-expanded="${S.castOpen === "ws-cf"}">▲</button>` : ""}</div>
     ${S.castOpen === "ws-cf" ? `<div class="chooser"><span class="lbl">Dépenser un emplacement de</span><div class="lvls">${R.slots(g).map((n, i) => { const lv = i + 1, left = slotsLeft(g, lv);
       return `<button class="btn" data-a="ws-cf" data-l="${lv}"${left ? "" : " disabled"}><b>Niveau ${lv} · ${lv}d8</b><small>${left ? `${left} restant${left > 1 ? "s" : ""}` : "épuisé"}</small></button>`; }).join("")}</div><div class="hint">1d8 PV par niveau d'emplacement.</div><button class="btn ghost" data-a="cast-close" style="justify-self:start">Fermer</button></div>` : ""}`
-    : `<span class="muted" style="font-size:13px">Plus d'emplacement pour te soigner.</span>`}</div>
+    : `<span class="muted" style="font-size:13px">Plus d'emplacement pour te soigner.</span>`}</div>` : ""}
   <div class="cast"><button class="btn sm" data-a="ws-end">Reprendre ma forme</button><button class="btn ghost sm" data-a="ws-open">Changer de forme</button></div>
   <p class="muted" style="font-size:12.5px;margin:0">À 0 PV, tu reprends ta forme et l'excédent de dégâts passe sur tes PV. ${g.level >= 18 ? "Sorts bestiaux : tu peux lancer tes sorts à composantes verbales et somatiques (pas de composante matérielle)" : "Pas de sort dans cette forme"} ; la concentration continue.</p>`}</section>`;
 }

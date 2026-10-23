@@ -13,7 +13,7 @@ import { concAdv, hasFeat } from "../rules/feats.js";
 import { damage, deathSave, hdLeft, heal, hpCur, isDead, isDown, setTemp } from "../rules/hp.js";
 import { concDD, concOf } from "./cast.js";
 
-const snap = g => JSON.parse(JSON.stringify({ hp: g.hp, hpTemp: g.hpTemp, death: g.death, hdU: g.hdU, effects: g.effects }));
+const snap = g => JSON.parse(JSON.stringify({ hp: g.hp, hpTemp: g.hpTemp, death: g.death, hdU: g.hdU, effects: g.effects, ...("wardHp" in g ? { wardHp: g.wardHp } : {}) }));
 const restore = prev => mutate(g => Object.assign(g, prev));
 
 // Rappel du jet de concentration après des dégâts (hors Forme sauvage, qui a le sien)
@@ -63,8 +63,10 @@ function hpChipHTML(g) {
 
 /** Dégâts sur le personnage (aussi appelé par la Forme sauvage pour l'excédent). Renvoie le texte du message. */
 function takeDamage(g, n, fromBeast) {
-  const cc = concOf(g), r = damage(g, n);
+  const cc = concOf(g), ward = C(g).absorb ? C(g).absorb(g, n) : 0; // Protection arcanique (abjuration) : avant les PV
+  const r = n - ward > 0 ? damage(g, n - ward) : { temp: 0, lost: 0 };
   const parts = [];
+  if (ward) parts.push(`${ward} absorbé${ward > 1 ? "s" : ""} par la Protection arcanique (${g.wardHp} restant${g.wardHp > 1 ? "s" : ""})`);
   if (r.temp) parts.push(`${r.temp} absorbé${r.temp > 1 ? "s" : ""} par les PV temporaires`);
   if (r.lost) parts.push(`${r.lost} retiré${r.lost > 1 ? "s" : ""}`);
   let msg = `<b>−${n} PV</b>${fromBeast ? " (excédent de la forme de bête)" : ""}${parts.length ? ` : ${parts.join(", ")}` : ""} · ${hpCur(g)}/${g.hpMax}`;

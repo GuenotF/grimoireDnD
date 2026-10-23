@@ -19,7 +19,21 @@ import { keyPills, tags } from "./spells.js";
 // complétées par les crochets de la classe (C(g).levelUp : lignes du tableau, choix, récapitulatif…).
 const LU = g => C(g).levelUp || {};
 /** Le personnage tel qu'il sera au niveau visé (améliorations de caractéristiques comprises). */
-function luB(g) { const abil = { ...g.abil }; Object.entries(luAsi(S.lu)).forEach(([k, n]) => { abil[k] = Math.min(20, abil[k] + n); }); return { ...g, level: S.lu.to, abil }; }
+function luB(g) { const abil = { ...g.abil }; Object.entries(luAsi(S.lu)).forEach(([k, n]) => { abil[k] = Math.min(20, abil[k] + n); }); return { ...g, level: S.lu.to, abil, ...luSubFields(g, S.lu) }; }
+// ---------- Sous-classe : choisie dans l'assistant au niveau où elle arrive (C(g).subclass : lv, label, field, opts, extra, apply)
+const SUB = g => C(g).subclass && C(g).subclass.lv === S.lu.to ? C(g).subclass : null;
+/** Champs de la sous-classe choisie, pour voir le personnage au nouveau niveau (sorts de cercle, sort mineur…). */
+function luSubFields(g, L) {
+  const sc = C(g).subclass; if (!sc || sc.lv !== L.to || !L.sub) return {};
+  const o = { [sc.field]: L.sub }; if (sc.apply && L.subx) { const t = { ...g, ...o }; sc.apply(t, L.subx); Object.assign(o, { terrain: t.terrain, totem: t.totem }); Object.keys(o).forEach(k => o[k] === undefined && delete o[k]); }
+  return o;
+}
+function subHTML(g, L) {
+  const sc = SUB(g); if (!sc) return "";
+  const cur = L.sub || g[sc.field], ex = sc.extra ? sc.extra(g, cur, L.subx) : null;
+  return `<div class="lusubc"><span class="lusub">${esc(sc.label)}</span><p class="muted" style="margin:0;font-size:13.5px">Elle se change ensuite dans ✎ Modifier.</p>
+    ${sc.opts(g).map(([k, n, sum]) => { const on = k === cur; return `<button class="subopt${on ? " on" : ""}" data-a="lu-sub" data-v="${esc(k)}" aria-pressed="${on}"><span class="rd" aria-hidden="true"></span><span class="bd"><b>${esc(n)}</b>${sum ? `<small>${esc(sum)}</small>` : ""}</span></button>${on && ex ? `<div class="subx"><span class="lusub">${esc(ex.label)}</span><div class="chips">${ex.opts.map(([t, tn]) => `<button class="chip" data-a="lu-subx" data-v="${esc(t)}" aria-pressed="${t === ex.cur}">${esc(tn)}</button>`).join("")}</div>${(ex.opts.find(o => o[0] === ex.cur) || [])[2] ? `<span class="fpprev">${esc(ex.opts.find(o => o[0] === ex.cur)[2])}</span>` : ""}</div>` : ""}`; }).join("")}</div>`;
+}
 /** Classe sans sorts et rien à choisir à ce niveau : l'étape 2 est sautée. */
 const skip2 = g => !!C(g).noSpells && !LU(g).steps && preparedLu2(g, luB(g)).startsWith('<div class="empty">');
 function luOpen(g) {
@@ -43,6 +57,7 @@ function luCommonHTML(g, L) {
     ${L.hp.mode === "roll" ? `<input id="lu-roll" type="number" inputmode="numeric" min="1" max="${r.d}" value="${esc(L.hp.roll)}" placeholder="1d${r.d}" aria-label="Résultat du d${r.d}">` : ""}</div>
     <div class="luhpv">PV maximum : ${g.hpMax} → <b>${r.total == null ? "?" : g.hpMax + r.total}</b> <span class="muted">${r.total == null ? `tape le résultat du d${r.d}` : `(${r.roll} ${signed(r.con)} CON${r.die === 1 && r.roll + r.con < 1 ? ", au moins 1" : ""}${r.retro ? `, +${r.retro} car ta CON augmente` : ""})`}</span></div></div>`;
   }
+  h += subHTML(g, L);
   if (asiLevels(g).includes(L.to)) {
     const used = asiUsed(L), feat = L.asiMode === "feat";
     h += `<div class="luasi"><span class="lusub">Amélioration de caractéristiques${feat ? "" : ` · ${used}/2`}</span>
@@ -56,6 +71,8 @@ function luCommonHTML(g, L) {
 function luCommonRecap(g, L) {
   const parts = [], r = g.hpMax != null ? hpGain(g, L.hp, luAsi(L)) : null, f = luFeat(L);
   if (r) parts.push(`<div><span class="n">Points de vie</span><small>${r.total == null ? "jet du dé à saisir à l'étape 1" : `${g.hpMax} → ${g.hpMax + r.total} (+${r.total})`}</small></div>`);
+  const sc = SUB(g); if (sc) { const k = L.sub || g[sc.field], o = sc.opts(g).find(x => x[0] === k), ex = sc.extra && sc.extra(g, k, L.subx);
+    parts.push(`<div><span class="n">${esc(sc.label)}</span><small>${esc(o ? o[1] : k)}${ex ? ` · ${esc((ex.opts.find(x => x[0] === ex.cur) || [])[1] || "")}` : ""}</small></div>`); }
   if (f) parts.push(`<div><span class="n">Don</span><small>${esc(FEATS[f.id].n)}${featPreview({ ...g, level: L.to }, f.id, f.ch, L.to).length ? ` · ${featPreview({ ...g, level: L.to }, f.id, f.ch, L.to).map(esc).join(" · ")}` : ""}</small></div>`);
   const asi = f ? [] : Object.entries(L.asi).filter(([, n]) => n);
   if (asi.length) parts.push(`<div><span class="n">Caractéristiques</span><small>${asi.map(([k, n]) => `${ABILITIES.find(a => a[0] === k)[1]} ${g.abil[k]} → ${g.abil[k] + n}`).join(", ")}</small></div>`);
@@ -63,6 +80,7 @@ function luCommonRecap(g, L) {
 }
 /** Applique PV et amélioration au personnage (dans un mutate). */
 function luCommonApply(g, L) {
+  const sc = C(g).subclass; if (sc && sc.lv === L.to) { if (L.sub) g[sc.field] = L.sub; if (sc.apply) { const ex = sc.extra && sc.extra(g, g[sc.field], L.subx); if (ex) sc.apply(g, ex.cur); } } // sous-classe choisie
   if (g.hpMax != null) { const r = hpGain(g, L.hp, luAsi(L)); if (r.total != null) { g.hpMax += r.total; if (g.hp != null) g.hp = Math.max(0, g.hp + r.total); } }
   const f = luFeat(L);
   if (f) featApply(g, f.id, f.ch, L.to); // don : +1, compétences, langues, PV (Robuste : 2 × nouveau niveau)
@@ -99,7 +117,7 @@ function preparedLu1(g, b) {
   ${lu.rowsBefore ? lu.rowsBefore(g, b) : ""}
   ${C(g).noSpells ? "" : row("Sorts préparés", R.maxLevel(g) ? R.prepMax(g) : 0, R.maxLevel(b) ? R.prepMax(b) : 0)}
   ${lu.rowsAfter ? lu.rowsAfter(g, b) : ""}</div>`;
-  const feats = classFeats(g).filter(f => f.lv === to);
+  const feats = classFeats(b).filter(f => f.lv === to);
   if (feats.length) h += `<div style="display:grid;gap:6px"><span class="lusub">Nouvelle capacité</span>${feats.map(f => `<div class="lucan"><span class="n">${f.n}</span><span class="kp ${f.k}">${esc(f.pill(b))}</span></div>`).join("")}</div>`;
   if (lu.summaryExtra) h += lu.summaryExtra(g, b); // ex. nouveaux sorts de serment, nouvelles formes
   const notes = R.prof(to) > R.prof(from) ? [`<span><b>Bonus de maîtrise ${signed(R.prof(to))}</b> : sauvegardes, compétences et toucher de tes armes montent aussi.</span>`] : [];
@@ -163,7 +181,7 @@ onClick("lu-go", () => {
     if (!f || !featChoiceOk(f.id, f.ch)) { S.lu = L; L.step = 1; render(); toast(f ? `Termine le choix de <b>${esc(FEATS[f.id].n)}</b>` : "Choisis un don, ou passe à « +2 ou +1 / +1 »"); return; }
   }
   if (LU(g).steps) { // assistant propre à la classe (magicien) : PV et caractéristiques d'abord, annulés avec le reste
-    const prevC = JSON.parse(JSON.stringify({ abil: g.abil, hpMax: g.hpMax, hp: g.hp, traits: g.traits, skills: g.skills, langs: g.langs }));
+    const prevC = JSON.parse(JSON.stringify({ abil: g.abil, hpMax: g.hpMax, hp: g.hp, traits: g.traits, skills: g.skills, langs: g.langs, school: g.school }));
     mutate(g => luCommonApply(g, L), false); LU(g).apply(L, g);
     const u = S.undo; if (u) S.undo = () => { mutate(g => Object.assign(g, prevC), false); return u(); };
     return;
@@ -181,6 +199,8 @@ onClick("lu-go", () => {
 });
 onClick("lu-hp", (b) => { if (!S.lu) return; S.lu.hp.mode = b.dataset.v; S.luKeep = true; render(); if (b.dataset.v === "roll") { const el = document.getElementById("lu-roll"); if (el) el.focus({ preventScroll: true }); } });
 onInput("#lu-roll", t => { if (!S.lu) return; S.lu.hp.roll = t.value; S.luKeep = true; render(); }); // le focus reste dans le champ (rendu : focus retrouvé par id)
+onClick("lu-sub", (b) => { if (!S.lu) return; S.lu.sub = b.dataset.v; S.lu.subx = null; S.luKeep = true; render(); });
+onClick("lu-subx", (b) => { if (!S.lu) return; S.lu.subx = b.dataset.v; S.luKeep = true; render(); });
 onClick("lu-mode", (b) => { if (!S.lu) return; S.lu.asiMode = b.dataset.v; S.luKeep = true; render(); });
 onClick("lu-asi", (b) => {
   const L = S.lu, g = G(); if (!L || !g) return; const k = b.dataset.v, n = L.asi[k] || 0, used = asiUsed(L);

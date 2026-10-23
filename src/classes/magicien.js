@@ -7,42 +7,14 @@ import { render, toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
 import { firstName, luNeed } from "../features/levelup.js";
 import { pCantrips, pConc, pExtras, pFoot, pHeader, pNotes, pSlots, pSpellRow, printHTML } from "../features/print.js";
+import "../features/recovery.js";
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills, metaLine, pText, pillsHTML, tags, tier } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { SCHOOLS, SLOTS } from "../rules/tables.js";
+import { SCHOOL_FEATS, wardAbsorb, wizDmgBonus, wizFeats, wizLongRest, wizNormalize, wizOnCast, wizResHTML, wizShortRest } from "./magicien-ecoles.js";
 import { statLabel } from "../ui/components.js";
 
-// Emplacements récupérables : niveaux 1 à 5, dans la limite de ceux dépensés ; budget = moitié du niveau de magicien (arrondi au supérieur).
-function arcaneLevels(g) { const out = []; for (let lv = 1; lv <= Math.min(5, R.maxLevel(g)); lv++) { const sp = +(g.used[lv] || 0); if (sp > 0) out.push([lv, sp]); } return out; }
-const srTotal = sr => Object.entries(sr).reduce((a, [lv, n]) => a + lv * n, 0);
-function arcaneCombos(g) {
-  const B = R.arcane(g.level), lv = arcaneLevels(g).reverse(), res = [];
-  (function walk(i, left, cur) {
-    if (i === lv.length) { if (Object.keys(cur).length) res.push({ ...cur }); return; }
-    const [l, sp] = lv[i];
-    for (let n = Math.min(sp, Math.floor(left / l)); n >= 0; n--) { if (n) cur[l] = n; else delete cur[l]; walk(i + 1, left - n * l, cur); }
-    delete cur[l];
-  })(0, B, {});
-  const best = Math.max(0, ...res.map(srTotal));
-  return res.filter(c => srTotal(c) === best).slice(0, 4);
-}
-function srLabel(sr) {
-  const parts = Object.entries(sr).filter(([, n]) => n > 0).sort((a, b) => b[0] - a[0]).map(([lv, n]) => `${n} emplacement${n > 1 ? "s" : ""} de niv. ${lv}`);
-  return parts.join(" + ");
-}
-function shortHTML(g) {
-  const B = R.arcane(g.level), lvls = arcaneLevels(g);
-  let h = `<div class="short"><div><h3>Restauration arcanique</h3><p>Une fois par jour, après un repos court : jusqu'à <b>${B} niveau${B > 1 ? "x" : ""}</b> d'emplacements au total, aucun de niveau 6 ou plus.</p></div>`;
-  if (g.arcane) return h + `<p>Déjà utilisée aujourd'hui : elle revient au prochain repos long.</p><button class="btn ghost" data-a="short-close" style="justify-self:start">Fermer</button></div>`;
-  if (!lvls.length) return h + `<p>Aucun emplacement dépensé : rien à récupérer pour l'instant.</p><button class="btn ghost" data-a="short-close" style="justify-self:start">Fermer</button></div>`;
-  const sr = S.sr, tot = srTotal(sr), combos = arcaneCombos(g), key = c => JSON.stringify(Object.entries(c).filter(([, n]) => n).sort());
-  if (combos.length) h += `<div><span class="lbl">Choix rapides</span><div class="quick">${combos.map(c => `<button class="btn" data-a="sr-pick" data-c='${esc(JSON.stringify(c))}' aria-pressed="${key(c) === key(sr)}">${srLabel(c)}</button>`).join("")}</div></div>`;
-  h += `<div>${lvls.map(([lv, sp]) => { const n = sr[lv] || 0; return `<div class="step"><span><b>Niveau ${lv}</b> <span class="muted" style="font-size:13px">· ${sp} dépensé${sp > 1 ? "s" : ""}</span></span><button class="btn" data-a="sr-dec" data-l="${lv}" aria-label="Un emplacement de niveau ${lv} en moins"${n ? "" : " disabled"}>−</button><b class="n">${n}</b><button class="btn" data-a="sr-inc" data-l="${lv}" aria-label="Un emplacement de niveau ${lv} en plus"${n < sp && tot + lv <= B ? "" : " disabled"}>+</button></div>`; }).join("")}</div>`;
-  h += `<div class="meter"><div class="track"><div class="fill" style="width:${Math.round(100 * tot / B)}%"></div></div><b>${tot} / ${B} niveau${B > 1 ? "x" : ""}</b></div>
-  <div class="cast"><button class="btn cast-go" data-a="sr-go"${tot ? "" : " disabled"}>${tot ? "Récupérer " + srLabel(sr) : "Choisis les emplacements à récupérer"}</button><button class="btn ghost" data-a="short-close">Annuler</button></div></div>`;
-  return h;
-}
 function rulesHTML(g) {
   return `<div class="cols rules">
   <div><div class="rubric" style="margin-top:4px"><h3>Apprendre</h3></div>
@@ -87,9 +59,8 @@ function luStep1(g, b) {
   }
   const notes = [];
   if (need.c) notes.push(`<span><b>Un sort mineur de plus</b> : tu le choisis à l'étape suivante.</span>`);
-  if ([2, 6, 10, 14].includes(to)) notes.push(`<span><b>Capacité de tradition arcanique</b> (${esc(g.school)}) : voir le Manuel des joueurs.</span>`);
-  if (to === 18) notes.push(`<span><b>Maîtrise des sorts</b> : un sort de niveau 1 et un de niveau 2 lancés à volonté.</span>`);
-  if (to === 20) notes.push(`<span><b>Sorts de prédilection</b> : deux sorts de niveau 3, une fois chacun par repos court sans emplacement.</span>`);
+  const nf = wizFeats(b).filter(f => f.lv === to); // capacités de classe et d'école gagnées (école choisie au niveau 2)
+  if (nf.length) h += `<div style="display:grid;gap:6px"><span class="lusub">Nouvelle capacité</span>${nf.map(f => `<div class="lucan"><span class="n">${f.n}</span><span class="kp ${f.k}">${esc(f.pill(b))}</span></div>`).join("")}</div>`;
   if (g.extras.length) notes.push(`<span>À vérifier : tes autres sorts (race, dons), certains se débloquent avec le niveau.</span>`);
   return h + (notes.length ? `<div class="lunote">${notes.join("")}</div>` : "");
 }
@@ -131,15 +102,6 @@ function luStep3(g, b) {
   <span>• Tu peux revenir au niveau ${g.level} avec le sélecteur de niveau : les sorts ajoutés restent au grimoire.</span></div>`;
   return h;
 }
-onClick("sr-pick", (b) => { S.sr = JSON.parse(b.dataset.c); render(); });
-onClick(["sr-inc", "sr-dec"], (b, a) => { const lv = +b.dataset.l; S.sr[lv] = Math.max(0, (S.sr[lv] || 0) + (a === "sr-inc" ? 1 : -1)); if (!S.sr[lv]) delete S.sr[lv]; render(); });
-onClick("sr-go", () => {
-  const g = G(), sr = S.sr; if (!g || !srTotal(sr) || srTotal(sr) > R.arcane(g.level)) return;
-  const prev = JSON.parse(JSON.stringify({ used: g.used, arcane: g.arcane })), label = srLabel(sr);
-  S.shortOpen = false; S.sr = {};
-  mutate(g => { Object.entries(sr).forEach(([lv, n]) => { g.used[lv] = Math.max(0, (+(g.used[lv] || 0)) - n); }); g.arcane = true; });
-  toast(`Restauration arcanique : ${label} récupéré${/s de/.test(label) || label.includes("+") ? "s" : ""}`, () => mutate(g => { g.used = prev.used; g.arcane = prev.arcane; }));
-});
 onClick("lu-flt", (b) => { if (!S.lu) return; S.lu.flt = +b.dataset.v; S.lu.open = null; render(); });
 onClick("lu-row", (b) => { if (!S.lu) return; S.lu.open = S.lu.open === b.dataset.id ? null : b.dataset.id; S.luKeep = true; render(); });
 onClick("lu-pick", (b) => {
@@ -153,7 +115,7 @@ onClick("lu-pick", (b) => {
 onChange("arcane", t => { mutate(g => { g.arcane = t.checked; }); });
 onChange("#f-school", t => { mutate(g => { g.school = t.value; }); });
 
-export { arcaneLevels, srTotal, arcaneCombos, srLabel, shortHTML, rulesHTML, luStep1, luStep2, luStep3 };
+export { rulesHTML, luStep1, luStep2, luStep3 };
 
 // ---------- Fiche imprimable ----------
 function printSheet(g) {
@@ -201,6 +163,7 @@ export default {
   cantrips: lv => lv >= 10 ? 5 : lv >= 4 ? 4 : 3,
   prep: (g, m) => Math.max(1, m + g.level),
   defaults: () => ({ school: "Évocation", arcane: false }),
+  subclass: { lv: 2, label: "Tradition arcanique", field: "school", opts: g => SCHOOLS.map(s => { const f = (SCHOOL_FEATS[s] || []).filter(x => x.lv === 2)[1]; return [s, `École ${/^[AÉEIO]/.test(s) ? "d'" : "de "}${s}`, f ? `${f.n} : ${f.pill({ ...g, level: 2, school: s })}.` : ""]; }) },
   subline: g => `Niveau ${g.level} · École ${/^[AÉEIO]/.test(g.school) ? "d'" : "de "}${esc(g.school)}`,
   subclassField: g => `<div class="field"><label for="f-school">Tradition arcanique</label><select id="f-school">${SCHOOLS.map(s=>`<option${s===g.school?" selected":""}>${s}</option>`).join("")}</select></div>`,
   heroStats: g => {
@@ -217,8 +180,17 @@ export default {
   canRitual: () => true,      // rituel depuis le grimoire, sans le préparer
   restBar: g => `<label class="check"><input type="checkbox" data-a="arcane"${g.arcane ? " checked" : ""}> Restauration arcanique utilisée</label>
     <span class="muted">Au repos court, 1 fois par jour : récupère des emplacements pour un total de <b>${R.arcane(g.level)}</b> niveau${R.arcane(g.level) > 1 ? "x" : ""} (aucun de niveau 6 ou plus).</span>`,
-  shortPanel: g => shortHTML(g),
-  longRest: g => { g.arcane = false; },
+  recovery: g => ({ name: "Restauration arcanique", budget: R.arcane(g.level), field: "arcane" }),
+  // Capacités de la classe et de l'école (magicien-ecoles.js)
+  features: g => wizFeats(g),
+  resources: g => wizResHTML(g),
+  normalize: o => wizNormalize(o),
+  longRest: g => wizLongRest(g),
+  shortRest: g => wizShortRest(g),
+  onCast: (g, s, lv) => wizOnCast(g, s, lv),
+  absorb: (g, n) => wardAbsorb(g, n),
+  dmgBonus: (g, s) => wizDmgBonus(g, s),
+  cantripBonus: g => g.school === "Illusion" && g.level >= 2 ? 1 : 0, // Illusion mineure améliorée
   levelUp: {
     step2: "Sorts gratuits",
     init: g => ({ step: 1, to: g.level + 1, picks: [], cpicks: [], prep: [], flt: R.maxLevel(g, g.level + 1), open: null }),

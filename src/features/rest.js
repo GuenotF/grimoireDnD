@@ -1,6 +1,6 @@
 // Repos court et repos long, communs aux onglets Personnage et Sorts.
 // Repos court : un panneau qui regroupe les dés de vie et la récupération propre à la classe
-// (Restauration arcanique du magicien via C(g).shortPanel, sinon la ressource C(g).shortRest : Conduit divin, Forme sauvage).
+// (ressource C(g).shortRest : Conduit divin, Forme sauvage… ; récupération d'emplacements C(g).recovery : Restauration arcanique, Récupération naturelle).
 import { C } from "../classes/index.js";
 import { onClick } from "../core/actions.js";
 import { esc, signed } from "../core/format.js";
@@ -11,6 +11,7 @@ import { hitDieSize } from "../rules/character.js";
 import { R } from "../rules/common.js";
 import { hdLeft, hpCur, isDown, longRestHP, spendHitDie } from "../rules/hp.js";
 import { FEATS, featPlay, featRecharge } from "../rules/feats.js";
+import { recoveryHTML } from "./recovery.js";
 import { rechargeItems } from "../rules/magic.js";
 
 /** Ressource récupérée au repos court : objet, ou fonction du personnage (ex. Coup de chance du roublard au niveau 20). */
@@ -33,13 +34,13 @@ function diceHTML(g) {
 function shortRestHTML(g) {
   const sr = SR(g);
   let h = `<div class="short" id="short-panel"><div><h3>Repos court</h3>${diceHTML(g)}</div>`;
-  if (C(g).shortPanel) return h + `<button class="btn ghost" data-a="short-close" style="justify-self:start">Fermer</button></div>` + C(g).shortPanel(g); // magicien : Restauration arcanique
   const items = g.items.filter(x => x.chMax && x.rec === "court" && x.chU); // objets magiques rechargés au repos court
   const feats = featPlay(g).filter(id => FEATS[id].res && FEATS[id].res.rest === "court" && (g.featU || {})[id]); // Adepte martial
   const lines = (sr ? `<p><b>${sr.label.charAt(0).toUpperCase() + sr.label.slice(1)}</b> : ${sr.done} en terminant le repos.</p>` : "") + (items.length ? `<p><b>Objets</b> : ${items.map(x => esc(x.n)).join(", ")}, charges récupérées en terminant le repos.</p>` : "")
     + (feats.length ? `<p><b>Dons</b> : ${feats.map(id => esc(FEATS[id].n)).join(", ")}, récupéré${feats.length > 1 ? "s" : ""} en terminant le repos.</p>` : "");
-  if (!lines) return h + `<div class="cast"><button class="btn ghost" data-a="short-close">Fermer</button></div></div>`; // rien d'autre à récupérer (barbare, roublard)
-  return h + `${lines}
+  const rec = C(g).recovery && C(g).recovery(g) ? recoveryHTML(g, true) : ""; // Restauration arcanique, Récupération naturelle
+  if (!lines) return h + rec + `<div class="cast"><button class="btn ghost" data-a="short-close">Fermer</button></div></div>`; // rien d'autre à récupérer (barbare, roublard)
+  return h + `${lines}${rec}
   <div class="cast"><button class="btn cast-go" data-a="short-done">Terminer le repos court</button><button class="btn ghost" data-a="short-close">Fermer</button></div></div>`;
 }
 
