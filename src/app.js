@@ -16,7 +16,7 @@ import { luHTML } from "./features/levelup.js";
 import { biblioHTML } from "./features/library.js";
 import { newHTML } from "./features/newchar.js";
 import { saveHTML } from "./features/save.js";
-import { sheetIncomplete } from "./rules/character.js";
+import { saveProf, sheetIncomplete, speedOf } from "./rules/character.js";
 import { R, inClass } from "./rules/common.js";
 import { ABILITIES } from "./rules/tables.js";
 import { statLabel } from "./ui/components.js";
@@ -142,4 +142,4 @@ setRenderer(renderApp);
 startActions();
 boot();
 // Accès réservé aux tests automatiques (tests/helpers.py) : le code assemblé n'expose pas ses variables.
-window.__t = { S, G, R, mutate, concOf, inClass, BY_ID, BEAST, BEASTS, SPELLS };
+window.__t = { S, G, R, mutate, concOf, inClass, BY_ID, BEAST, BEASTS, SPELLS, saveProf, speedOf };

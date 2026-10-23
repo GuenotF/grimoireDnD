@@ -7,7 +7,7 @@ import { cap, fmt, signed } from "../core/format.js";
 import { S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render } from "../core/ui.js";
-import { speedOf, hitDieSize, hpAverage, initiative, passivePerception, saveBonus, saveFromClass, saveProf, sheetIncomplete, skillBonus, skillLevel } from "../rules/character.js";
+import { speedOf, hitDieSize, hpAverage, initiative, passivePerception, saveBonus, saveFromClass, saveFromFeat, saveProf, sheetIncomplete, skillBonus, skillLevel } from "../rules/character.js";
 import { R } from "../rules/common.js";
 import { acCalc, acMode, acOf } from "../rules/equipment.js";
 import { featInit } from "../rules/feats.js";
@@ -60,8 +60,8 @@ function acBlock(g, num) {
 function savesGerer(g) {
   let h = foldHead("ch-sv", "", "Jets de sauvegarde", "★ donnés par la classe", ABILITIES.filter(([k]) => saveProf(g, k)).map(a => a[1]).join(", "));
   if (isFold("ch-sv")) return h;
-  return h + `<div class="svgrid">${ABILITIES.map(([k, , n]) => saveFromClass(g, k)
-    ? `<div class="sv lock" title="Maîtrise donnée par la classe"><span class="mk">★</span><span class="n">${n}</span><b>${signed(saveBonus(g, k))}</b></div>`
+  return h + `<div class="svgrid">${ABILITIES.map(([k, , n]) => saveFromClass(g, k) || saveFromFeat(g, k)
+    ? `<div class="sv lock" title="Maîtrise donnée par ${saveFromClass(g, k) ? "la classe" : "un don (Résilient)"}"><span class="mk">★</span><span class="n">${n}</span><b>${signed(saveBonus(g, k))}</b></div>`
     : `<button class="sv" data-a="save-tog" data-v="${k}" aria-pressed="${saveProf(g, k)}"><span class="mk" aria-hidden="true"></span><span class="n">${n}</span><b>${signed(saveBonus(g, k))}</b></button>`).join("")}</div>
   <p class="chhelp">Touche une sauvegarde pour ajouter une maîtrise (don Résilience, par exemple).</p>`;
 }

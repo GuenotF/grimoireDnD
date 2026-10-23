@@ -186,3 +186,30 @@
 .itn .mg { font-style: normal; font-size: 12px; color: var(--gold); margin-left: 4px; }
 .itch { display: flex; gap: 5px; align-items: center; margin-top: 4px; flex-wrap: wrap; } .itch .pip { width: 18px; height: 18px; } .itch small { font-size: 12px; color: var(--muted); margin-left: 4px; }
 .itmagic .row { display: flex; gap: 6px 16px; flex-wrap: wrap; } .itmagic .row label.check { display: flex; align-items: center; gap: 6px; }
+
+/* Dons du Manuel : sélecteur (Dons et traits, assistant de niveau) */
+.tradd { display: flex; gap: 8px; } .tradd .btn { flex: 1; } .tradd .btn.feat { border-color: var(--rubric); color: var(--rubric); font-weight: 700; }
+.fptag { font-family: var(--f-sc); font-size: 10.5px; letter-spacing: .05em; color: var(--muted); border: 1px solid var(--rule); border-radius: 3px; padding: 0 4px; white-space: nowrap; }
+.fptag.calc { color: var(--ok); border-color: var(--ok); }
+.trh .kp { font-size: 12px; } .trh .fptag { align-self: center; }
+.fpick { display: grid; gap: 8px; background: var(--bg); border-radius: 10px; padding: 9px 10px; }
+.fpick #fp-q { width: 100%; box-sizing: border-box; }
+.fplist { display: grid; }
+.fprow { display: flex; gap: 8px; align-items: flex-start; text-align: left; width: 100%; padding: 7px 2px; border: 0; border-bottom: 1px solid var(--rule); background: none; font: inherit; color: inherit; cursor: pointer; }
+.fprow.on { background: linear-gradient(90deg, var(--rubric-soft), transparent 75%); }
+.fprow .rd { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--rule); background: var(--surface); box-sizing: border-box; flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-top: 1px; }
+.fprow.on .rd { background: var(--rubric); border-color: var(--rubric); color: var(--surface); }
+.fprow.off .rd { border-style: dashed; border-color: var(--pn-bd); background: var(--sunk); }
+.fprow .bd { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.fprow .hd { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.fprow .hd b { font-family: var(--f-display); font-size: 15.5px; }
+.fprow.off .hd b { color: var(--muted); }
+.fprow small { font-size: 12.5px; color: var(--muted); }
+.fprow .kp { font-size: 12px; }
+.fpdet { display: grid; gap: 7px; margin: 4px 0 8px 28px; padding: 8px 10px; background: var(--surface); border-radius: 8px; border: 1px solid var(--rule); }
+.fpdet .pre { margin: 0; font-size: 13px; font-style: italic; color: var(--muted); }
+.fptxt p { margin: 0 0 4px; font-size: 13.5px; line-height: 1.4; }
+.fptxt p.bul { padding-left: 14px; position: relative; } .fptxt p.bul::before { content: "•"; position: absolute; left: 3px; }
+.fpprev { font-size: 13.5px; font-weight: 700; color: var(--ok); }
+.fplangs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; } .fplangs input { min-width: 0; }
+.fpdet .chip:disabled { opacity: .45; }

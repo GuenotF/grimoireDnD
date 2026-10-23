@@ -41,7 +41,7 @@ def test_outils_langues_et_vigilant(browser, devices, url):
     a.pg.fill("#lang-new", "Halfelin"); a.pg.press("#lang-new", "Enter"); a.pg.wait_for_timeout(60)
     check(a.g("tools['Jeu de dés']") == 1 and a.g("langs.join()") == "Halfelin" and "Jargon des voleurs" in a.text(".tlbox"), "outil et langue ajoutés, Jargon des voleurs d'office")
     check(a.pg.input_value("#f-init") == "+8", "initiative saisie : +8 (DEX +3, bonus +5)")
-    a.click('[data-a="trait-edit"][data-i="new"]'); a.pg.select_option("#t-feat", "alert"); a.click('.trform [type="submit"]')
+    a.click('[data-a="trait-feat"]'); a.pg.fill("#fp-q", "vigil"); a.pg.wait_for_timeout(60); a.click('[data-a="fp-sel"][data-v="alert"]'); a.click('[data-a="fp-add"]')
     check(a.g("traits[0].feat") == "alert" and a.g("traits[0].n") == "Vigilant" and a.g("initX") == 0 and a.pg.input_value("#f-init") == "+8", "Vigilant relié : le +5 passe du bonus divers au don, initiative inchangée")
     a.view("jeu")
     check("Outils de voleur" in a.text(".tljeu") and "expertise" in a.text(".tljeu"), "outils en jeu")

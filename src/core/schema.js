@@ -1,7 +1,7 @@
 // Format d'un personnage : valeurs par défaut, contrôle à l'ouverture, version et migrations.
 import { CLASSES } from "../classes/index.js";
 import { BY_ID, GEAR } from "../data.js";
-import { FEATS } from "../rules/feats.js";
+import { FEATS, featByName } from "../rules/feats.js";
 import { COINS, blankPurse } from "../rules/money.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 
@@ -75,7 +75,19 @@ function norm(g) {
   o.skills = Object.fromEntries(SKILLS.filter(([k]) => sk[k] === 1 || sk[k] === 2).map(([k]) => [k, sk[k]]));
   const str = v => typeof v === "string" ? v : "";
   o.defs = (Array.isArray(o.defs) ? o.defs : []).filter(d => d && ["res", "imm", "vul", "adv"].includes(d.t) && str(d.v).trim()).map(d => ({ t: d.t, v: str(d.v).trim() }));
-  o.traits = (Array.isArray(o.traits) ? o.traits : []).filter(t => t && str(t.n).trim()).map(t => ({ n: str(t.n).trim(), o: str(t.o) || "autre", d: str(t.d), ...(FEATS[t.feat] ? { feat: t.feat } : {}) }));
+  // Dons : reliés au catalogue (feat), choix fait en le prenant (ch), ajouts de l'atelier à retirer avec lui (ap).
+  // Un trait libre au nom exact d'un don est relié au catalogue (sans ap : ses effets sont déjà dans la fiche).
+  const arr = v => Array.isArray(v) ? v.filter(x => typeof x === "string") : undefined, abk = k => ABILITIES.some(a => a[0] === k) ? k : undefined;
+  const chOf = c => { if (!c || typeof c !== "object") return null; const r = { abil: abk(c.abil), skills: arr(c.skills), langs: arr(c.langs) }; Object.keys(r).forEach(k => r[k] === undefined && delete r[k]); return Object.keys(r).length ? r : null; };
+  const apOf = a => { if (!a || typeof a !== "object") return null; const r = { abil: abk(a.abil), skills: arr(a.skills), langs: arr(a.langs), hp: +a.hp > 0 ? Math.round(+a.hp) : undefined }; Object.keys(r).forEach(k => r[k] === undefined && delete r[k]); return r; };
+  o.traits = (Array.isArray(o.traits) ? o.traits : []).filter(t => t && str(t.n).trim()).map(t => {
+    const feat = FEATS[t.feat] ? t.feat : t.o !== "race" && featByName(t.n) ? featByName(t.n).id : null, ch = feat && chOf(t.ch), ap = feat && apOf(t.ap);
+    if (feat && !t.feat) { // relié à l'ouverture : le bonus déjà saisi à la main ne doit pas compter deux fois
+      if (feat === "alert" && o.initX >= 5) o.initX -= 5;
+      if (feat === "mobile" && o.speed >= 10.5) o.speed -= 3;
+    }
+    return { n: str(t.n).trim(), o: feat ? "don" : str(t.o) || "autre", d: str(t.d), ...(feat ? { feat } : {}), ...(ch ? { ch } : {}), ...(ap ? { ap } : {}) };
+  });
   o.bg = { n: str((o.bg || {}).n), d: str((o.bg || {}).d) }; o.pnotes = str(o.pnotes);
   o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...magicOf(x), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : {}) }));
   o.acMode = ["calc", "manual"].includes(o.acMode) ? o.acMode : null; // null : saisie si elle existe, sinon calcul

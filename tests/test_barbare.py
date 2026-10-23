@@ -72,5 +72,5 @@ def test_maitre_d_armes_lourdes(browser, devices, url):
     a.pg.check('[data-a="opt-feat"][data-v="gwm"]'); a.pg.wait_for_timeout(50)
     atk = a.texts(".atk .ah")
     check(atk[0] == "Hache à deux mains +0 1d12 + 15 tranchant" and atk[1].startswith("Hachette ×2 +5 1d6 + 5"), f"MAL sur l'arme lourde seulement : {atk}")
-    check("Maître d'armes lourdes" in a.text(".atknotes"), "rappel de l'attaque bonus")
+    check("Maître des armes à deux mains" in a.text(".atknotes"), "rappel de l'attaque bonus")
     a.close()

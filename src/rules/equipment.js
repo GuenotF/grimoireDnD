@@ -5,13 +5,13 @@
 import { C } from "../classes/index.js";
 import { GEAR } from "../data.js";
 import { R } from "./common.js";
-import { featAttack } from "./feats.js";
+import { FEATS, featArmor, featAttack, featUnarmed, hasFeat } from "./feats.js";
 import { usable } from "./magic.js";
 
 const gearOf = x => x && x.ref ? GEAR[x.ref] : null;
 const equipped = (g, kind) => g.items.filter(x => x.eq && gearOf(x) && gearOf(x).kind === kind).map(x => ({ item: x, gear: gearOf(x) }));
 const weaponProf = (g, w) => (C(g).weaponProf || []).some(p => p === w.cat || p === w.id);
-const armorProf = (g, a) => (C(g).armorProf || []).includes(a.cat);
+const armorProf = (g, a) => (C(g).armorProf || []).includes(a.cat) || featArmor(g).includes(a.cat); // classe ou don (Protection légère…)
 
 /**
  * Classe d'armure calculée : armure portée (base + DEX, plafonnée en intermédiaire, aucune en lourde), sinon 10 + DEX ;
@@ -23,15 +23,17 @@ function acCalc(g) {
   const armor = aw.gear, shield = sw.gear, mb = it => it && usable(it) ? it.bonus || 0 : 0; // bonus magique (+1…) de l'objet
   const parts = [], warn = [];
   if (armor) {
-    const d = !armor.dex ? 0 : armor.dexMax != null ? Math.min(dex, armor.dexMax) : dex;
+    const dexMax = armor.dexMax != null && armor.cat === "medium" && hasFeat(g, "medium-armor-master") ? FEATS["medium-armor-master"].dexMax : armor.dexMax; // Maître des armures intermédiaires
+    const d = !armor.dex ? 0 : dexMax != null ? Math.min(dex, dexMax) : dex;
     parts.push([`${armor.n}${mb(aw.item) ? ` +${mb(aw.item)}` : ""} (${{ light: "légère", medium: "intermédiaire", heavy: "lourde" }[armor.cat]})`, armor.ac + mb(aw.item)]);
-    parts.push([armor.dex ? `DEX${armor.dexMax != null && dex > armor.dexMax ? ` (plafonnée à +${armor.dexMax})` : ""}` : "DEX (aucune en armure lourde)", armor.dex ? d : null]);
-    if (armor.stealth) warn.push(`${armor.n} : <b>désavantage en Discrétion</b>.`);
+    parts.push([armor.dex ? `DEX${dexMax != null && dex > dexMax ? ` (plafonnée à +${dexMax})` : ""}` : "DEX (aucune en armure lourde)", armor.dex ? d : null]);
+    if (armor.stealth && !(armor.cat === "medium" && hasFeat(g, "medium-armor-master"))) warn.push(`${armor.n} : <b>désavantage en Discrétion</b>.`);
     if (armor.str && g.abil.str < armor.str) warn.push(`${armor.n} : Force ${armor.str} requise (tu as ${g.abil.str}) : <b>−3 m de vitesse</b>.`);
   } else if (C(g).acBase) C(g).acBase(g, !!shield).forEach(p => parts.push(p)); // ex. barbare : Défense sans armure
   else parts.push(["Sans armure : 10 + DEX", 10 + dex]);
   if (shield) parts.push([`Bouclier${mb(sw.item) ? ` +${mb(sw.item)}` : ""}`, shield.ac + mb(sw.item)]);
   for (const [l, n] of (C(g).acBonus ? C(g).acBonus(g, armor) : [])) parts.push([l, n]);
+  if (hasFeat(g, "dual-wielder") && !shield && twoWeapons(g)) parts.push(["Combattant à deux armes", 1]);
   [armor, shield].filter(Boolean).forEach(a => {
     if (!armorProf(g, a)) warn.push(`${a.n} : <b>non maîtrisé${a.cat === "shield" ? "" : "e"}</b> par ta classe : désavantage aux jets de FOR et DEX (caractéristique, sauvegarde, attaque), et pas de sorts.`);
     if (C(g).noMetal && a.metal) warn.push(`${a.n} : armure métallique. Les druides refusent de porter du métal (armure et bouclier) ; peaux, cuir, cuir clouté ou matelassée conviennent.`);
@@ -64,20 +66,31 @@ function attackOf(g, w, off = false, item = null) { // off : main secondaire (pa
   (x.pills || []).forEach(p => pills.push(p)); f.pills.forEach(p => pills.push(p));
   return { hit, ab, melee: w.rng === "melee", prof: !!prof, dmg: w.dmg ? `${w.dmg}${plus(dmod)} ${w.dt}${xd}` : "aucun dégât", pills, notes: [w.special, ...(x.notes || [])].filter(Boolean) };
 }
+const POLE = ["glaive", "halberd", "quarterstaff", "spear"]; // Maître d'hast (la pique n'a pas de talon)
+/** Deux armes de corps à corps tenues (deux objets, ou un objet en 2 exemplaires), aucune à deux mains. */
+const twoWeapons = g => { const m = equipped(g, "weapon").filter(({ gear }) => gear.rng === "melee" && !gear.two); return (m.length >= 2 || (m.length === 1 && m[0].item.q >= 2)) && !equipped(g, "weapon").some(({ gear }) => gear.two); };
 /** Attaques du personnage : armes équipées du catalogue, puis mains nues (1 + FOR, maîtrisée par tous). */
 function attacks(g) {
   const list = equipped(g, "weapon").map(({ item, gear }) => { const a = attackOf(g, gear, false, item); return { n: item.n, q: item.q, ...a, notes: [item.note, ...a.notes].filter(Boolean) }; }); // la note de l'objet (ex. +1d4 nécrotique) suit l'attaque
   const str = R.ab(g, "str");
   // Combat à deux armes : deux armes légères de corps à corps équipées (deux objets, ou un objet en 2 exemplaires),
   // aucune arme à deux mains : attaque de la main secondaire en action bonus, sans modificateur positif aux dégâts.
-  const light = equipped(g, "weapon").filter(({ gear }) => gear.light && gear.rng === "melee");
+  // Combattant à deux armes (don) : armes de corps à corps à une main, même non légères.
+  const light = equipped(g, "weapon").filter(({ gear }) => gear.rng === "melee" && (gear.light || (hasFeat(g, "dual-wielder") && !gear.two)));
   if (light.reduce((n, { item }) => n + Math.max(1, item.q), 0) >= 2 && !equipped(g, "weapon").some(({ gear }) => gear.two)) {
     const { item, gear } = light.length > 1 ? light[1] : light[0], a = attackOf(g, gear, true, item);
     list.splice(list.findIndex(x => x.n === item.n) + 1, 0, { ...a, n: `${item.n} (main secondaire)`, q: 1, pills: ["action bonus", ...a.pills.filter(p => !p.startsWith("lancer") && p !== "légère")], offhand: true });
   }
+  // Maître d'hast : attaque en action bonus avec le talon de l'arme (1d4 contondant, même caractéristique)
+  const pole = hasFeat(g, "polearm-master") && equipped(g, "weapon").find(({ gear }) => POLE.includes(gear.id));
+  if (pole) {
+    const a = attackOf(g, { ...pole.gear, dmg: "1d4", dt: "contondant", vers: null, reach: pole.gear.reach }, false, pole.item);
+    list.splice(list.findIndex(x => x.n === pole.item.n) + 1, 0, { ...a, n: `${pole.item.n} (talon)`, q: 1, pills: ["action bonus", "Maître d'hast"], notes: [] });
+  }
   if (C(g).extraAttacks) C(g).extraAttacks(g, list); // ex. Frénésie du berserker
   const x = C(g).attackMods ? C(g).attackMods(g, { id: "unarmed", rng: "melee", cat: "simple" }, "str") : {}; // attaque d'arme au corps à corps (Rage…)
-  list.push({ n: "Mains nues", q: 1, hit: str + R.prof(g.level) + (x.hit || 0), ab: "str", melee: true, prof: true, dmg: `${Math.max(1, 1 + str + (x.dmg || 0))} contondant`, pills: x.pills || [], notes: [] });
+  const ud = featUnarmed(g), um = str + (x.dmg || 0); // Bagarreur de tavernes : 1d4 + FOR
+  list.push({ n: "Mains nues", q: 1, hit: str + R.prof(g.level) + (x.hit || 0), ab: "str", melee: true, prof: true, dmg: ud ? `${ud}${um ? ` ${um > 0 ? "+" : "−"} ${Math.abs(um)}` : ""} contondant` : `${Math.max(1, 1 + um)} contondant`, pills: x.pills || [], notes: [] });
   return list;
 }
 

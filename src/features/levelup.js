@@ -8,7 +8,9 @@ import { render, toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
 import { asiLevels, hpGain } from "../rules/character.js";
 import { R, classSpells } from "../rules/common.js";
+import { FEATS, featAbil, featApply, featChoiceOk } from "../rules/feats.js";
 import { ABILITIES } from "../rules/tables.js";
+import { featPickerHTML, featPreview } from "./featpicker.js";
 import { keyPills, tags } from "./spells.js";
 
 // Assistant ouvert par le bouton « ↑ Niveau N » : ce qui change, sorts gratuits, validation.
@@ -17,7 +19,7 @@ import { keyPills, tags } from "./spells.js";
 // complétées par les crochets de la classe (C(g).levelUp : lignes du tableau, choix, récapitulatif…).
 const LU = g => C(g).levelUp || {};
 /** Le personnage tel qu'il sera au niveau visé (améliorations de caractéristiques comprises). */
-function luB(g) { const abil = { ...g.abil }; Object.entries(S.lu.asi || {}).forEach(([k, n]) => { abil[k] = Math.min(20, abil[k] + n); }); return { ...g, level: S.lu.to, abil }; }
+function luB(g) { const abil = { ...g.abil }; Object.entries(luAsi(S.lu)).forEach(([k, n]) => { abil[k] = Math.min(20, abil[k] + n); }); return { ...g, level: S.lu.to, abil }; }
 /** Classe sans sorts et rien à choisir à ce niveau : l'étape 2 est sautée. */
 const skip2 = g => !!C(g).noSpells && !LU(g).steps && preparedLu2(g, luB(g)).startsWith('<div class="empty">');
 function luOpen(g) {
@@ -27,35 +29,44 @@ function luOpen(g) {
 }
 // ---------- Commun à toutes les classes : points de vie et amélioration de caractéristiques (étape 1, récapitulatif, validation)
 const asiUsed = L => Object.values(L.asi).reduce((a, n) => a + n, 0);
+/** Don choisi dans l'assistant (au lieu de +2 / +1 +1), ou null. */
+const luFeat = L => L.asiMode === "feat" && L.fp && L.fp.sel ? { id: L.fp.sel, ch: L.fp.ch || {} } : null;
+/** Caractéristiques augmentées : amélioration choisie, ou +1 du don (Résilient, Athlète…). */
+const luAsi = L => { if (L.asiMode !== "feat") return L.asi || {}; const f = luFeat(L), k = f && featAbil(f.id, f.ch); return k ? { [k]: 1 } : {}; };
 function luCommonHTML(g, L) {
   let h = "";
   if (g.hpMax == null) h += `<div class="lunote"><span><b>Points de vie</b> : saisis tes PV maximum dans l'onglet Personnage (✎ Gérer), l'assistant les augmentera à chaque niveau.</span></div>`;
   else {
-    const r = hpGain(g, L.hp, L.asi), avg = r.d / 2 + 1;
+    const r = hpGain(g, L.hp, luAsi(L)), avg = r.d / 2 + 1;
     h += `<div class="luhp"><span class="lusub">Points de vie</span>
     <div class="chips"><button class="chip" data-a="lu-hp" data-v="avg" aria-pressed="${L.hp.mode === "avg"}">Moyenne : ${avg} ${signed(r.con)} CON</button><button class="chip" data-a="lu-hp" data-v="roll" aria-pressed="${L.hp.mode === "roll"}">Lancer le d${r.d}</button>
     ${L.hp.mode === "roll" ? `<input id="lu-roll" type="number" inputmode="numeric" min="1" max="${r.d}" value="${esc(L.hp.roll)}" placeholder="1d${r.d}" aria-label="Résultat du d${r.d}">` : ""}</div>
     <div class="luhpv">PV maximum : ${g.hpMax} → <b>${r.total == null ? "?" : g.hpMax + r.total}</b> <span class="muted">${r.total == null ? `tape le résultat du d${r.d}` : `(${r.roll} ${signed(r.con)} CON${r.die === 1 && r.roll + r.con < 1 ? ", au moins 1" : ""}${r.retro ? `, +${r.retro} car ta CON augmente` : ""})`}</span></div></div>`;
   }
   if (asiLevels(g).includes(L.to)) {
-    const used = asiUsed(L);
-    h += `<div class="luasi"><span class="lusub">Amélioration de caractéristiques · ${used}/2</span>
-    <p>+2 à une caractéristique ou +1 à deux (20 au plus). Un toucher : +1, +2, puis rien. Tu préfères un don ? Ne touche à rien et ajoute-le ensuite dans Personnage › Dons et traits.</p>
+    const used = asiUsed(L), feat = L.asiMode === "feat";
+    h += `<div class="luasi"><span class="lusub">Amélioration de caractéristiques${feat ? "" : ` · ${used}/2`}</span>
+    <div class="viewsw" role="group" aria-label="Amélioration ou don"><button data-a="lu-mode" data-v="asi" aria-pressed="${!feat}">+2 ou +1 / +1</button><button data-a="lu-mode" data-v="feat" aria-pressed="${feat}">Un don</button></div>`;
+    if (feat) { h += featPickerHTML(g, "lu", { ...g, level: L.to }) + `</div>`; return h; }
+    h += `<p>+2 à une caractéristique ou +1 à deux (20 au plus). Un toucher : +1, +2, puis rien.</p>
     <div class="asigrid">${ABILITIES.map(([k, a]) => { const n = L.asi[k] || 0, v = g.abil[k]; return `<button class="asi${n ? " on" : ""}" data-a="lu-asi" data-v="${k}" aria-pressed="${!!n}"${!n && (used >= 2 || v >= 20) ? " disabled" : ""}><span class="k">${a}</span><b>${v}${n ? ` → ${v + n}` : ""}</b>${n ? `<small>+${n}</small>` : ""}</button>`; }).join("")}</div></div>`;
   }
   return h;
 }
 function luCommonRecap(g, L) {
-  const parts = [], r = g.hpMax != null ? hpGain(g, L.hp, L.asi) : null;
+  const parts = [], r = g.hpMax != null ? hpGain(g, L.hp, luAsi(L)) : null, f = luFeat(L);
   if (r) parts.push(`<div><span class="n">Points de vie</span><small>${r.total == null ? "jet du dé à saisir à l'étape 1" : `${g.hpMax} → ${g.hpMax + r.total} (+${r.total})`}</small></div>`);
-  const asi = Object.entries(L.asi).filter(([, n]) => n);
+  if (f) parts.push(`<div><span class="n">Don</span><small>${esc(FEATS[f.id].n)}${featPreview({ ...g, level: L.to }, f.id, f.ch, L.to).length ? ` · ${featPreview({ ...g, level: L.to }, f.id, f.ch, L.to).map(esc).join(" · ")}` : ""}</small></div>`);
+  const asi = f ? [] : Object.entries(L.asi).filter(([, n]) => n);
   if (asi.length) parts.push(`<div><span class="n">Caractéristiques</span><small>${asi.map(([k, n]) => `${ABILITIES.find(a => a[0] === k)[1]} ${g.abil[k]} → ${g.abil[k] + n}`).join(", ")}</small></div>`);
   return parts.length ? `<div style="display:grid;gap:6px"><span class="lusub">Personnage</span><div class="luadd">${parts.join("")}</div></div>` : "";
 }
 /** Applique PV et amélioration au personnage (dans un mutate). */
 function luCommonApply(g, L) {
-  if (g.hpMax != null) { const r = hpGain(g, L.hp, L.asi); if (r.total != null) { g.hpMax += r.total; if (g.hp != null) g.hp = Math.max(0, g.hp + r.total); } }
-  Object.entries(L.asi).forEach(([k, n]) => { g.abil[k] = Math.min(20, g.abil[k] + n); });
+  if (g.hpMax != null) { const r = hpGain(g, L.hp, luAsi(L)); if (r.total != null) { g.hpMax += r.total; if (g.hp != null) g.hp = Math.max(0, g.hp + r.total); } }
+  const f = luFeat(L);
+  if (f) featApply(g, f.id, f.ch, L.to); // don : +1, compétences, langues, PV (Robuste : 2 × nouveau niveau)
+  else Object.entries(L.asi).forEach(([k, n]) => { g.abil[k] = Math.min(20, g.abil[k] + n); });
 }
 const luNeed = (g, to) => ({ s: 2, c: Math.max(0, R.cantrips(g, to) - R.cantrips(g)) });
 const firstName = g => g.name.trim() || g.name; // nom complet (« Ser Kael », pas « Ser »)
@@ -147,8 +158,12 @@ onClick("lu-go", () => {
   const L = S.lu, g = G(); if (!L || !g) return;
   S.lu = null;
   if (L.hp.mode === "roll" && g.hpMax != null && !(+L.hp.roll >= 1)) { S.lu = L; L.step = 1; render(); toast(`Tape le résultat du d${hpGain(g, L.hp).d} pour les points de vie`); return; }
+  if (L.asiMode === "feat" && asiLevels(g).includes(L.to)) { // don : choisi et complet
+    const f = luFeat(L);
+    if (!f || !featChoiceOk(f.id, f.ch)) { S.lu = L; L.step = 1; render(); toast(f ? `Termine le choix de <b>${esc(FEATS[f.id].n)}</b>` : "Choisis un don, ou passe à « +2 ou +1 / +1 »"); return; }
+  }
   if (LU(g).steps) { // assistant propre à la classe (magicien) : PV et caractéristiques d'abord, annulés avec le reste
-    const prevC = JSON.parse(JSON.stringify({ abil: g.abil, hpMax: g.hpMax, hp: g.hp }));
+    const prevC = JSON.parse(JSON.stringify({ abil: g.abil, hpMax: g.hpMax, hp: g.hp, traits: g.traits, skills: g.skills, langs: g.langs }));
     mutate(g => luCommonApply(g, L), false); LU(g).apply(L, g);
     const u = S.undo; if (u) S.undo = () => { mutate(g => Object.assign(g, prevC), false); return u(); };
     return;
@@ -166,6 +181,7 @@ onClick("lu-go", () => {
 });
 onClick("lu-hp", (b) => { if (!S.lu) return; S.lu.hp.mode = b.dataset.v; S.luKeep = true; render(); if (b.dataset.v === "roll") { const el = document.getElementById("lu-roll"); if (el) el.focus({ preventScroll: true }); } });
 onInput("#lu-roll", t => { if (!S.lu) return; S.lu.hp.roll = t.value; S.luKeep = true; render(); }); // le focus reste dans le champ (rendu : focus retrouvé par id)
+onClick("lu-mode", (b) => { if (!S.lu) return; S.lu.asiMode = b.dataset.v; S.luKeep = true; render(); });
 onClick("lu-asi", (b) => {
   const L = S.lu, g = G(); if (!L || !g) return; const k = b.dataset.v, n = L.asi[k] || 0, used = asiUsed(L);
   const next = n === 0 ? 1 : n === 1 && used < 2 && g.abil[k] + 2 <= 20 ? 2 : 0;
