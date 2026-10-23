@@ -40,8 +40,8 @@ function acCalc(g) {
   });
   return { total: parts.reduce((t, [, n]) => t + (n || 0), 0), parts, warn, armor, shield };
 }
-/** CA affichée : calculée ou saisie (acMode). Sans choix : la saisie si elle existe, sinon le calcul dès qu'une armure ou un bouclier du Manuel est équipé (sinon : à saisir). */
-const acMode = g => g.acMode || (g.ac == null && (equipped(g, "armor").length || C(g).acBase) ? "calc" : "manual"); // classe à Défense sans armure : calcul par défaut
+/** CA affichée : calculée ou saisie (acMode). Sans choix : la saisie si elle existe (anciennes fiches), sinon le calcul (10 + DEX sans armure). */
+const acMode = g => g.acMode || (g.ac == null ? "calc" : "manual");
 const acOf = g => acMode(g) === "calc" ? acCalc(g).total : g.ac;
 
 /**
