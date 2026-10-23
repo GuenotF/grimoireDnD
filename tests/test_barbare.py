@@ -58,7 +58,11 @@ def test_rage_prend_fin_a_0_pv_et_niveau_5(browser, devices, url):
     b = App(browser, devices, url, char=GARAL, view="jeu")
     b.click(".lvup")
     check("Rages" in b.text(".lutab") and "Bonus de maîtrise" in b.text(".lutab") and "DD des sorts" not in b.text(".lutab"), "assistant sans sorts")
-    b.click(".lufoot .primary"); b.click(".lufoot .primary"); b.click('[data-a="lu-go"]')
+    check(b.text(".lufoot .primary").strip() == "Suivant →", "bouton Suivant (pas de préparation)")
+    b.click(".lufoot .primary")
+    check(b.count('[data-a="lu-go"]') == 1 and "Rien à choisir" not in b.text("#lvlup"), "rien à choisir : étape 2 sautée")
+    b.click('[data-a="lu-back"]'); check(b.js("S.lu.step") == 1, "retour : étape 1")
+    b.click(".lufoot .primary"); b.click('[data-a="lu-go"]')
     check(b.g("level") == 5 and "12 m" in b.texts(".stats .v")[3] and "Attaque supplémentaire" in b.text(".atknotes"), "niveau 5 : Déplacement rapide, Attaque supplémentaire")
     b.close()
 

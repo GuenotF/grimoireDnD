@@ -16,6 +16,10 @@ import { keyPills, tags } from "./spells.js";
 // Étapes : celles de la classe (magicien : sorts gratuits du grimoire) ou les étapes communes des classes à sorts préparés,
 // complétées par les crochets de la classe (C(g).levelUp : lignes du tableau, choix, récapitulatif…).
 const LU = g => C(g).levelUp || {};
+/** Le personnage tel qu'il sera au niveau visé (améliorations de caractéristiques comprises). */
+function luB(g) { const abil = { ...g.abil }; Object.entries(S.lu.asi || {}).forEach(([k, n]) => { abil[k] = Math.min(20, abil[k] + n); }); return { ...g, level: S.lu.to, abil }; }
+/** Classe sans sorts et rien à choisir à ce niveau : l'étape 2 est sautée. */
+const skip2 = g => !!C(g).noSpells && !LU(g).steps && preparedLu2(g, luB(g)).startsWith('<div class="empty">');
 function luOpen(g) {
   S.lu = LU(g).init ? LU(g).init(g) : { step: 1, to: g.level + 1, style: g.style || "", prep: [...g.prepared], cpicks: [], wsfav: [], open: null };
   Object.assign(S.lu, { hp: { mode: "avg", roll: "" }, asi: {} }); // communs à toutes les classes : PV gagnés, amélioration de caractéristiques
@@ -57,14 +61,12 @@ const luNeed = (g, to) => ({ s: 2, c: Math.max(0, R.cantrips(g, to) - R.cantrips
 const firstName = g => g.name.trim() || g.name; // nom complet (« Ser Kael », pas « Ser »)
 function luHTML(g) {
   // b : le personnage au nouveau niveau, amélioration de caractéristiques comprise (DD, sorts préparés… en tiennent compte)
-  const L = S.lu, to = L.to, step = L.step, fn = firstName(g), abil = { ...g.abil };
-  Object.entries(L.asi || {}).forEach(([k, n]) => { abil[k] = Math.min(20, abil[k] + n); });
-  const b = { ...g, level: to, abil };
+  const L = S.lu, to = L.to, step = L.step, fn = firstName(g), b = luB(g);
   const lu = LU(g), names = ["Ce qui change", lu.step2 || "Préparation", "Valider"], steps = lu.steps || [preparedLu1, preparedLu2, preparedLu3];
   const head = `<div class="luhead"><div class="t"><h2><span class="initial">${esc(fn.charAt(0))}</span>${esc(fn.slice(1))} passe au niveau ${to}</h2><button class="x" data-a="lu-close" aria-label="Fermer l'assistant">✕</button></div>
   <div class="lusteps">${names.map((n, i) => `<div class="${i + 1 < step ? "done" : i + 1 === step ? "cur" : ""}"${i + 1 === step ? ' aria-current="step"' : ""}>${i + 1} · ${n}</div>`).join("")}</div></div>`;
   const body = (step === 1 ? luCommonHTML(g, L) : "") + steps[step - 1](g, b) + (step === 3 ? luCommonRecap(g, L) : "");
-  const foot = step === 1 ? `<button class="btn" data-a="lu-close">Annuler</button><button class="btn primary" data-a="lu-next">${lu.nextLabel ? lu.nextLabel(g, to) : "Préparation"} →</button>`
+  const foot = step === 1 ? `<button class="btn" data-a="lu-close">Annuler</button><button class="btn primary" data-a="lu-next">${lu.nextLabel ? lu.nextLabel(g, to) : C(g).noSpells ? "Suivant" : "Préparation"} →</button>`
     : step === 2 ? `<button class="btn" data-a="lu-back">← Retour</button><button class="btn primary" data-a="lu-next">Suivant →</button>`
     : `<button class="btn" data-a="lu-back">← Retour</button><button class="btn primary" data-a="lu-go" style="font-weight:700">Passer au niveau ${to}</button>`;
   return `<div class="lubox">${head}<div class="lubody">${body}</div><div class="lufoot">${foot}</div></div>`;
@@ -137,9 +139,9 @@ function preparedLu3(g, b) {
 }
 onClick("lu-open", () => { const g = G(); if (!g || g.level >= 20) return; luOpen(g); render(); const x = document.querySelector("#lvlup .lufoot .primary"); if (x) x.focus({ preventScroll: true }); });
 onClick("lu-close", () => { S.lu = null; render(); });
-onClick("lu-next", () => { if (!S.lu) return; S.lu.step = Math.min(3, S.lu.step + 1); S.lu.open = null; render(); });
-onClick("lu-back", () => { if (!S.lu) return; S.lu.step = Math.max(1, S.lu.step - 1); S.lu.open = null; render(); });
-onClick("lu-edit", () => { if (!S.lu) return; S.lu.step = 2; render(); });
+onClick("lu-next", () => { if (!S.lu) return; S.lu.step = Math.min(3, S.lu.step + 1); if (S.lu.step === 2 && skip2(G())) S.lu.step = 3; S.lu.open = null; render(); });
+onClick("lu-back", () => { if (!S.lu) return; S.lu.step = Math.max(1, S.lu.step - 1); if (S.lu.step === 2 && skip2(G())) S.lu.step = 1; S.lu.open = null; render(); });
+onClick("lu-edit", () => { if (!S.lu) return; S.lu.step = skip2(G()) ? 1 : 2; render(); });
 onClick("lu-pflt", (b) => { if (!S.lu) return; S.lu.flt = +b.dataset.v; S.luKeep = true; render(); });
 onClick("lu-go", () => {
   const L = S.lu, g = G(); if (!L || !g) return;

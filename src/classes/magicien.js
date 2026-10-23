@@ -4,7 +4,7 @@ import { byName, esc, plural, signed } from "../core/format.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
-import { BY_ID, SPELLS } from "../data.js";
+import { BY_ID } from "../data.js";
 import { firstName, luNeed } from "../features/levelup.js";
 import { pCantrips, pConc, pExtras, pFoot, pHeader, pNotes, pSlots, pSpellRow, printHTML } from "../features/print.js";
 import { castingRules, concentrationRules } from "../features/rules.js";
@@ -102,7 +102,7 @@ function luStep2(g, b) {
   if (need.c) h += chips(L.cpicks, need.c, "sort mineur");
   const lvls = []; for (let lv = max; lv >= 1; lv--) lvls.push(lv); if (need.c) lvls.push(0);
   h += `<div class="chips">${lvls.map(lv => `<button class="chip" data-a="lu-flt" data-v="${lv}" aria-pressed="${L.flt === lv}">${lv === 0 ? "Sorts mineurs" : `Niv. ${lv}${lv > maxOld ? " · nouveau" : ""}`}</button>`).join("")}</div>`;
-  const list = SPELLS.filter(s => s.l === L.flt && !owned.has(s.id)).sort((x, y) => x.n.localeCompare(y.n, "fr"));
+  const list = classSpells(g).filter(s => s.l === L.flt && !owned.has(s.id)).sort((x, y) => x.n.localeCompare(y.n, "fr"));
   const arr = L.flt === 0 ? L.cpicks : L.picks, full = arr.length >= (L.flt === 0 ? need.c : need.s);
   h += `<div>${list.map(s => {
     const on = arr.includes(s.id), open = L.open === s.id;

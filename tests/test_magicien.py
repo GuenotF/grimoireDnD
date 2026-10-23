@@ -70,6 +70,8 @@ def test_passage_de_niveau(browser, devices, url):
     a = App(browser, devices, url, char=NEMEIA)
     check(a.text(".lvup").strip() == "↑ Niveau 5", "bouton de passage de niveau")
     a.click(".lvup"); a.click(".lufoot .primary")
+    a.click('[data-a="lu-flt"][data-v="3"]')
+    check(a.count('[data-a="lu-pick"][data-id="aura-of-vitality"]') == 0 and a.count('[data-a="lu-pick"][data-id="fireball"]') == 1, "sorts gratuits : liste du magicien seulement")
     a.click('[data-a="lu-pick"][data-id="fireball"]'); a.click('[data-a="lu-pick"][data-id="counterspell"]')
     check(a.count(".lurow .pick:disabled") > 0, "2 sorts gratuits maximum")
     a.click(".lufoot .primary")
