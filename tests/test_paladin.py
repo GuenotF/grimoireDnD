@@ -80,6 +80,7 @@ def test_serment_de_devotion(browser, devices, url):
     check(a.count(".gstar") == 6, "6 sorts de serment au niveau 9")
     check(a.count('[data-a="pip"]') == 0 and a.count('[data-a="loh-open"]') == 0 and a.count('[data-a="short-open"]') == 0, "Gérer : ni emplacements, ni ressources, ni repos")
     a.view("jeu")
+    check(a.js("(() => { const f = [...document.querySelectorAll('#panel .rubric')].find(e => /Capacités de classe/.test(e.textContent)), s = document.querySelector('#panel .jrow'); return !!f && !!s && !!(s.compareDocumentPosition(f) & 4); })()"), "En jeu : capacités de classe après les sorts")
     a.click('[data-a="row"][data-id="res:cd"]')
     check(a.texts(".capopt b") == ["Arme sacrée", "Renvoi des impies"], "options de Conduit divin")
     a.click('[data-a="cd-use"][data-v="sacred"]')

@@ -25,6 +25,8 @@ function purseHTML(g) {
     <p>Pas assez de cette pièce ? L'atelier fait la monnaie (1 po = 10 pa = 100 pc) ; tout est annulable.</p></form>`;
   return h;
 }
+// Arme pouvant aller en main secondaire : corps à corps, à une main (légère, ou non légère avec Combattant à deux armes)
+const offhandOk = x => { const w = gearOf(x); return !!w && w.kind === "weapon" && w.rng === "melee" && !w.two; };
 function itemForm(x, i) {
   return `<form class="itform" data-a="it-save" data-i="${i}"><div class="frow2"><input id="it-name" type="text" value="${esc(x.n)}" aria-label="Nom" required><input id="it-q" type="number" inputmode="numeric" min="0" value="${x.q}" aria-label="Quantité"></div>
     <input id="it-note" type="text" value="${esc(x.note)}" placeholder="Note (effet, contenu, valeur…)" aria-label="Note">
@@ -37,7 +39,7 @@ function itemForm(x, i) {
       <div class="row wide"><label class="check"><input type="checkbox" id="it-att"${x.att ? " checked" : ""}> Harmonisation requise</label><label class="check"><input type="checkbox" id="it-attuned"${x.attuned ? " checked" : ""}> Harmonisé</label></div>
       <p class="wide">Le bonus s'applique au toucher et aux dégâts d'une arme du Manuel, ou à la CA d'une armure ou d'un bouclier. Un objet à harmonisation n'a d'effet qu'harmonisé (${MAX_ATT} au plus).</p>
     </fieldset>
-    <div class="row"><label class="check"><input type="checkbox" id="it-eq"${x.eq ? " checked" : ""}> Équipé</label><label class="check"><input type="checkbox" id="it-c"${x.c ? " checked" : ""}> À décompter en jeu</label>
+    <div class="row"><label class="check"><input type="checkbox" id="it-eq"${x.eq ? " checked" : ""}> Équipé</label><label class="check"><input type="checkbox" id="it-c"${x.c ? " checked" : ""}> À décompter en jeu</label>${offhandOk(x) ? `<label class="check" title="Combat à deux armes : cette arme pour l'attaque en action bonus"><input type="checkbox" id="it-oh"${x.oh ? " checked" : ""}> Main secondaire</label>` : ""}
     <span style="flex:1"></span><button type="button" class="btn ghost" data-a="it-del" data-i="${i}">Retirer</button><button type="button" class="btn ghost" data-a="it-cancel">Annuler</button><button class="btn primary" type="submit">Enregistrer</button></div></form>`;
 }
 // ---------- Catalogue (armes et armures du Manuel) : suggestions à l'ajout, résumé, étiquette
@@ -48,6 +50,20 @@ function gearLine(x) {
   if (x.cat === "shield") return "bouclier · +2 CA";
   return `${CATN[x.cat]} · CA ${x.ac}${x.dex ? (x.dexMax != null ? " + DEX (max +2)" : " + DEX") : ""}${x.str ? ` · Force ${x.str}` : ""}${x.stealth ? " · Discrétion désav." : ""}`;
 }
+/** Fiche détaillée d'une arme ou d'une armure du Manuel (objet déplié dans l'équipement). */
+function gearDetail(g, x, item) {
+  const row = (l, v) => v ? `<div><span>${l}</span><b>${esc(v)}</b></div>` : "";
+  const prof = x.kind === "weapon" ? weaponProf(g, x) : armorProf(g, x), f = x.kind === "armor" && x.cat !== "shield" ? "e" : "";
+  let h = row("Catégorie", `${CATN[x.cat]} · ${prof ? `maîtrisé${f}` : `non maîtrisé${f}`}`);
+  if (x.kind === "weapon") h += row("Dégâts", x.dmg ? `${x.dmg} ${x.dt}${x.vers ? ` (${x.vers} à deux mains)` : ""}` : "aucun") + row("Propriétés", x.props) + row("Portée", x.range) + row("Spécial", x.special);
+  else if (x.cat === "shield") h += row("CA", "+2");
+  else h += row("CA", `${x.ac}${x.dex ? (x.dexMax != null ? " + DEX (max +2)" : " + DEX") : ""}`) + row("Force requise", x.str ? `${x.str} (sinon −3 m de vitesse)` : "") + row("Discrétion", x.stealth ? "désavantage" : "") + row("Métal", C(g).noMetal && x.metal ? "oui (refusé par les druides)" : "");
+  h += row("Poids · prix", [x.w, x.p].filter(Boolean).join(" · "));
+  if (item && item.oh) h += row("Combat à deux armes", "main secondaire");
+  return `<div class="itdet">${h}</div>`;
+}
+const openBtn = (x, i, inner) => gearOf(x) ? `<button class="itn itopen" data-a="it-open" data-i="${i}" aria-expanded="${S.itOpen === i}">${inner}</button>` : `<div class="itn">${inner}</div>`;
+const chev = (x, i) => gearOf(x) ? `<span class="chev" aria-hidden="true">${S.itOpen === i ? "▾" : "▸"}</span> ` : "";
 // Choix du lien dans le formulaire, par catégorie
 const REF_GROUPS = [["simple", "Armes courantes"], ["martial", "Armes de guerre"], ["light", "Armures légères"], ["medium", "Armures intermédiaires"], ["heavy", "Armures lourdes"], ["shield", "Bouclier"]]
   .map(([k, l]) => [l, Object.values(GEAR).filter(x => x.cat === k)]);
@@ -70,7 +86,7 @@ function equipmentGerer(g) {
   if (isFold("ch-eq")) return h;
   h += purseHTML(g) + (S.purseOpen ? "" : `<p class="chhelp" style="margin:4px 0 8px">Touche la bourse pour gagner ou dépenser.</p>`);
   h += `<div class="chbox itbox">${order(g).map(i => { const x = g.items[i]; return S.itEdit === i ? itemForm(x, i)
-    : `<div class="it${x.c && !x.q ? " out" : ""}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button><div class="itn"><span>${esc(x.n)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${magicMarks(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}</div>${gearOf(x) ? gearTag(gearOf(x)) : ""}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>`; }).join("")}
+    : `<div class="it${x.c && !x.q ? " out" : ""}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button>${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${x.oh ? ` <i class="ct">main secondaire</i>` : ""}${magicMarks(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}`)}${gearOf(x) ? gearTag(gearOf(x)) : ""}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>${S.itOpen === i && gearOf(x) ? gearDetail(g, gearOf(x), x) : ""}`; }).join("")}
     <form class="itadd" data-a="it-add"><input id="it-new" type="text" placeholder="Nom de l'objet (ex. épée, cuir, rations)" aria-label="Nouvel objet" autocomplete="off" value="${esc(S.itQ || "")}"><button class="btn" type="submit">Ajouter</button></form>${suggestHTML(g)}</div>`;
   return h;
 }
@@ -90,7 +106,7 @@ function equipmentJeu(g) {
   if (isFold("ch-eqj")) return h;
   h += purseHTML(g);
   if (g.items.length) h += `<div class="chbox itbox">${order(g).map(i => { const x = g.items[i];
-    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}"><div class="itn"><span>${esc(x.n)}${magicMarks(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}</div>${x.q !== 1 || x.c ? `<b class="q">×${x.q}</b>` : ""}</div>`; }).join("")}
+    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}">${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${magicMarks(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}`)}${x.q !== 1 || x.c ? `<b class="q">×${x.q}</b>` : ""}</div>${S.itOpen === i && gearOf(x) ? gearDetail(g, gearOf(x), x) : ""}`; }).join("")}
     ${g.items.some(actionable) ? `<p class="chhelp" style="margin:6px 0 0">Potions, munitions et charges s'utilisent depuis l'onglet ${C(g).tabs(g)[0][1]}.</p>` : ""}</div>`;
   return h;
 }
@@ -120,6 +136,7 @@ onSubmit("it-add", () => { const el = document.getElementById("it-new"), n = el.
 onClick("it-eq", (b) => { mutate(g => { const x = g.items[+b.dataset.i]; if (x) x.eq = !x.eq; }); });
 onClick("it-edit", (b) => { S.itEdit = +b.dataset.i; render(); const el = document.getElementById("it-name"); if (el) el.focus(); });
 onClick("it-cancel", () => { S.itEdit = null; render(); });
+onClick("it-open", (b) => { const i = +b.dataset.i; S.itOpen = S.itOpen === i ? null : i; render(); });
 onSubmit("it-save", f => {
   const i = +f.dataset.i, n = document.getElementById("it-name").value.trim(); if (!n) return;
   const ref = document.getElementById("it-ref").value; // le lien avec le catalogue est conservé (attaques, CA)
@@ -128,11 +145,12 @@ onSubmit("it-save", f => {
   if (bonus) x.bonus = bonus; if (v("it-xdmg").value.trim()) x.xdmg = v("it-xdmg").value.trim();
   if (v("it-att").checked) { x.att = true; x.attuned = v("it-attuned").checked; }
   if (ch) { x.chMax = ch; x.chU = Math.min(ch, prev.chU || 0); x.rec = v("it-rec").value; }
+  const oh = !!(v("it-oh") && v("it-oh").checked && GEAR[ref] && offhandOk(x)); if (oh) x.oh = true; // une seule arme en main secondaire
   if (x.attuned && !prev.attuned && attunedCount(G()) >= MAX_ATT) { x.attuned = false; toast(`Déjà ${MAX_ATT} objets harmonisés : défais d'abord une harmonisation`); }
   else toast("Modification enregistrée");
-  S.itEdit = null; mutate(g => { g.items[i] = x; });
+  S.itEdit = null; mutate(g => { if (oh) g.items.forEach(y => { delete y.oh; }); g.items[i] = x; });
 });
-onClick("it-del", (b) => { const i = +b.dataset.i, prev = G().items[i]; if (!prev) return; S.itEdit = null; mutate(g => { g.items.splice(i, 1); }); toast(`Retiré : <b>${esc(prev.n)}</b>`, () => { mutate(g => { g.items.splice(i, 0, prev); }); return "Rétabli"; }); });
+onClick("it-del", (b) => { const i = +b.dataset.i, prev = G().items[i]; if (!prev) return; S.itEdit = null; S.itOpen = null; mutate(g => { g.items.splice(i, 1); }); toast(`Retiré : <b>${esc(prev.n)}</b>`, () => { mutate(g => { g.items.splice(i, 0, prev); }); return "Rétabli"; }); });
 onClick("it-chg", (b) => { mutate(g => { const x = g.items[+b.dataset.i]; if (!x) return; const k = +b.dataset.k, u = x.chU || 0; x.chU = k < u ? k : k + 1; }); });
 onClick(["it-dec", "it-inc"], (b, a) => { mutate(g => { const x = g.items[+b.dataset.i]; if (x) x.q = Math.max(0, x.q + (a === "it-inc" ? 1 : -1)); }); });
 

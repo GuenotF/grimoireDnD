@@ -97,8 +97,8 @@ function grimoireHTML(g) {
   });
   // Repos court (dés de vie + récupération de la classe) et repos long : features/rest.js
   h += `</div>` + restBarHTML(g);
-  if (!C(g).book) h += (C(g).resources ? C(g).resources(g) : "") + featsHTML(g);
-  return h + jeuHTML(g);
+  if (!C(g).book) h += C(g).resources ? C(g).resources(g) : "";
+  return h + jeuHTML(g) + (C(g).book ? "" : featsHTML(g)); // capacités de classe après la liste des sorts
 }
 
 // Grimoire du magicien, mode Gérer : sorts mineurs et sorts du grimoire à préparer

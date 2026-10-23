@@ -78,7 +78,8 @@ function attacks(g) {
   // Combattant à deux armes (don) : armes de corps à corps à une main, même non légères.
   const light = equipped(g, "weapon").filter(({ gear }) => gear.rng === "melee" && (gear.light || (hasFeat(g, "dual-wielder") && !gear.two)));
   if (light.reduce((n, { item }) => n + Math.max(1, item.q), 0) >= 2 && !equipped(g, "weapon").some(({ gear }) => gear.two)) {
-    const { item, gear } = light.length > 1 ? light[1] : light[0], a = attackOf(g, gear, true, item);
+    // main secondaire : l'arme cochée « main secondaire » (formulaire ✎), sinon la deuxième arme légère de l'inventaire
+    const { item, gear } = light.find(x => x.item.oh) || (light.length > 1 ? light[1] : light[0]), a = attackOf(g, gear, true, item);
     list.splice(list.findIndex(x => x.n === item.n) + 1, 0, { ...a, n: `${item.n} (main secondaire)`, q: 1, pills: ["action bonus", ...a.pills.filter(p => !p.startsWith("lancer") && p !== "légère")], offhand: true });
   }
   // Maître d'hast : attaque en action bonus avec le talon de l'arme (1d4 contondant, même caractéristique)

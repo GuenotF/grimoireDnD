@@ -34,7 +34,7 @@ def test_objets(browser, devices, url):
     a.click('[data-a="it-edit"][data-i="1"]'); a.pg.fill("#it-q", "7"); a.pg.check("#it-c"); a.pg.fill("#it-note", "une par jour"); a.click('.itform [type="submit"]')
     check(a.g("items[1].q") == 7 and a.g("items[1].c") and a.g("items[1].note") == "une par jour", "rations : 7, à décompter")
     a.view("jeu")
-    check(a.texts(".it.j .itn > span")[0] == "Bâton" and a.count(".it.eq") == 1, "objet équipé en tête, en gras")
+    check(a.texts(".it.j .itn > span")[0] == "▸ Bâton" and a.count(".it.eq") == 1, "objet équipé en tête, en gras")
     check(a.count('[data-a="it-dec"]') == 0 and "×7" in a.text(".itbox") and "onglet Sorts" in a.text(".itbox"), "Personnage en jeu : inventaire en lecture, renvoi vers Sorts")
     a.tab("grimoire")
     check(a.texts('[data-k="act-it"] ~ .itbox .itn > span') == ["Rations"], "onglet Sorts : section Objets, objets à décompter seulement")

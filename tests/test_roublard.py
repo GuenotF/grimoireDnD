@@ -46,3 +46,22 @@ def test_outils_langues_et_vigilant(browser, devices, url):
     a.view("jeu")
     check("Outils de voleur" in a.text(".tljeu") and "expertise" in a.text(".tljeu"), "outils en jeu")
     a.close()
+
+
+def test_main_secondaire_au_choix(browser, devices, url):
+    a = App(browser, devices, url, char=OMBRE, tab="perso", view="gerer")
+    a.click('[data-a="it-edit"][data-i="0"]')
+    check(a.count("#it-oh") == 1, "case Main secondaire sur une dague")
+    a.pg.check("#it-oh"); a.click('.itform [type="submit"]')
+    check(a.g("items[0].oh") and "main secondaire" in a.text(".itbox"), "Dague de cultiste en main secondaire")
+    a.click('[data-a="it-edit"][data-i="1"]'); a.pg.check("#it-oh"); a.click('.itform [type="submit"]')
+    check(a.g("items[1].oh") and not a.g("items[0].oh"), "une seule arme en main secondaire")
+    a.click('[data-a="it-edit"][data-i="0"]'); a.pg.check("#it-oh"); a.click('.itform [type="submit"]')
+    a.view("jeu"); a.tab("caps")
+    check(any(t.startswith("Dague de cultiste (main secondaire)") for t in a.texts(".atk .ah")), f"attaque bonus avec l'arme choisie : {a.texts('.atk .ah')}")
+    a.tab("perso")
+    a.click('[data-a="it-open"][data-i="2"]')
+    check("Munitions (portée 9 m/36 m)" in a.text(".itdet") and "1 pa" in a.text(".itdet"), "En jeu : arme dépliée avec ses propriétés")
+    a.view("gerer"); a.click('[data-a="it-open"][data-i="3"]')
+    check("11 + DEX" in a.text(".itdet") and "maîtrisée" in a.text(".itdet"), "Gérer : armure dépliée")
+    a.close()
