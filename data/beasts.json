@@ -23,7 +23,7 @@
 "tr": [
 [
 "Vue aiguisée",
-"L'aigle a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."
+"L'aigle a un avantage aux jets de Sagesse (Perception) faisant appel à la vue."
 ]
 ],
 "ac": [
@@ -103,15 +103,15 @@
 "tr": [
 [
 "Tactique de groupe",
-"Le babouin a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+"Le babouin a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est à 1,5 m ou moins de la créature et n'est pas incapable d'agir."
 ]
 ],
 "ac": [
 {
 "n": "Morsure",
-"t": "Attaque au corps à corps avec une arme : +1 au toucher, allonge 1,5 m, une cible. Touché : 1 (1d4 — 1) dégâts perforants.",
+"t": "Attaque au corps à corps avec une arme : +1 au toucher, allonge 1,5 m, une cible. Touché : 1 (1d4 − 1) dégâts perforants.",
 "b": 1,
-"d": "1d4—1 perforant"
+"d": "1d4 − 1 perforant"
 }
 ]
 },
@@ -238,11 +238,11 @@
 "tr": [
 [
 "Odorat et ouïe aiguisés",
-"Le chacal a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou louïe."
+"Le chacal a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou l'ouïe."
 ],
 [
 "Tactique de groupe",
-"Le chacal a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+"Le chacal a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est à 1,5 m ou moins de la créature et n'est pas incapable d'agir."
 ]
 ],
 "ac": [
@@ -313,12 +313,12 @@
 "cp": "",
 "tr": [
 [
-"Echolocalisation",
+"Écholocalisation",
 "La chauve-souris ne peut utiliser sa vision aveugle quand elle est assourdie."
 ],
 [
-"Ouie aiguisée",
-"La chauve-souris a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe."
+"Ouïe aiguisée",
+"La chauve-souris a un avantage aux jets de Sagesse (Perception) faisant appel à l'ouïe."
 ]
 ],
 "ac": [
@@ -357,8 +357,8 @@
 "La chouette ne provoque pas d'attaques d'opportunité lorsqu'elle quitte l'allonge d'un ennemi en volant."
 ],
 [
-"Ouie et vue aiguisées",
-"La chouette a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe ou a la vue."
+"Ouïe et vue aiguisées",
+"La chouette a un avantage aux jets de Sagesse (Perception) faisant appel à l'ouïe ou à la vue."
 ]
 ],
 "ac": [
@@ -393,11 +393,11 @@
 "tr": [
 [
 "Charge",
-"Si la chévre se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 2 (1d4) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 10 ou tomber a terre."
+"Si la chèvre se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 2 (1d4) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 10 ou tomber à terre."
 ],
 [
 "Stable",
-"La chévre a un avantage aux jets de sauvegarde de Force et de Dextérité contre les effets susceptibles de la faire tomber a terre."
+"La chèvre a un avantage aux jets de sauvegarde de Force et de Dextérité contre les effets susceptibles de la faire tomber à terre."
 ]
 ],
 "ac": [
@@ -469,7 +469,7 @@
 "tr": [
 [
 "Amphibien",
-"Le crabe peut respirer aussi bien dans lair que sous l'eau."
+"Le crabe peut respirer aussi bien dans l'air que sous l'eau."
 ]
 ],
 "ac": [
@@ -505,7 +505,7 @@
 "tr": [
 [
 "Vue aiguisée",
-"Le faucon a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."
+"Le faucon a un avantage aux jets de Sagesse (Perception) faisant appel à la vue."
 ]
 ],
 "ac": [
@@ -541,11 +541,11 @@
 "tr": [
 [
 "Amphibien",
-"La grenouille peut respirer aussi bien dans lair que sous l'eau."
+"La grenouille peut respirer aussi bien dans l'air que sous l'eau."
 ],
 [
 "Saut sans élan",
-"La grenouille peut sauter en longueur jusqu'a 3 m ou en hauteur jusqu'a 1,5 m, avec ou sans élan. _ ep Une grenouille n'a pas d'attaque efficace. Elle se nourrit de petits insectes et reste en général prés de l'eau, des arbres, ou sous terre."
+"La grenouille peut sauter en longueur jusqu'à 3 m ou en hauteur jusqu'à 1,5 m, avec ou sans élan. Une grenouille n'a pas d'attaque efficace. Elle se nourrit de petits insectes et reste en général près de l'eau, des arbres, ou sous terre."
 ]
 ],
 "ac": []
@@ -602,7 +602,7 @@
 "tr": [
 [
 "Tactique de groupe",
-"La hyéne a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+"La hyène a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est à 1,5 m ou moins de la créature et n'est pas incapable d'agir."
 ]
 ],
 "ac": [
@@ -792,7 +792,7 @@
 "tr": [
 [
 "Illumination",
-"Le scarabée émet une lumiére vive dans un rayon de 3 m et une lumiére faible sur 3 m supplémentaires."
+"Le scarabée émet une lumière vive dans un rayon de 3 m et une lumière faible sur 3 m supplémentaires."
 ]
 ],
 "ac": [
@@ -862,7 +862,7 @@
 ],
 [
 "Tactique de groupe",
-"Le vautour a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+"Le vautour a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est à 1,5 m ou moins de la créature et n'est pas incapable d'agir."
 ]
 ],
 "ac": [
@@ -897,7 +897,7 @@
 "tr": [
 [
 "Odorat et ouïe aiguisés",
-"La belette a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou louïe."
+"La belette a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou l'ouïe."
 ]
 ],
 "ac": [
@@ -999,11 +999,11 @@
 "tr": [
 [
 "Tactique de groupe",
-"Le faucon a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est & 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+"Le faucon a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est à 1,5 m ou moins de la créature et n'est pas incapable d'agir."
 ],
 [
 "Vue aiguisée",
-"Le faucon a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."
+"Le faucon a un avantage aux jets de Sagesse (Perception) faisant appel à la vue."
 ]
 ],
 "ac": [
@@ -1044,7 +1044,7 @@
 "ac": [
 {
 "n": "Morsure",
-"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 pour ne pas tomber a terre.",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une cible. Touché : 4 (1d6 + 1) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 pour ne pas tomber à terre.",
 "b": 3,
 "d": "1d6 + 1 perforant"
 }
@@ -1076,8 +1076,8 @@
 "La mule est considérée comme un animal de taille G pour déterminer sa capacité de charge."
 ],
 [
-"Pied sar",
-"La mule a un avantage aux jets de sauvegarde de Force et Dextérité effectués pour ne pas tomber a terre."
+"Pied sûr",
+"La mule a un avantage aux jets de sauvegarde de Force et Dextérité effectués pour ne pas tomber à terre."
 ]
 ],
 "ac": [
@@ -1146,7 +1146,7 @@
 ],
 [
 "Tactique de groupe",
-"Le rat a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 m ou moins de la créature et n'est pas incapable d'agir."
+"Le rat a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est à 1,50 m ou moins de la créature et n'est pas incapable d'agir."
 ]
 ],
 "ac": [
@@ -1264,7 +1264,7 @@
 "ac": [
 {
 "n": "Morsure",
-"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une créature. Touché : 4 (1d6 + 1) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 7 (2d6) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére.",
+"t": "Attaque au corps à corps avec une arme : +3 au toucher, allonge 1,5 m, une créature. Touché : 4 (1d6 + 1) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 7 (2d6) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible à 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupère des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette manière.",
 "b": 3,
 "d": "1d6 + 1 perforant"
 }
@@ -1369,12 +1369,12 @@
 "cp": "",
 "tr": [
 [
-"Echolocalisation",
+"Écholocalisation",
 "La chauve-souris ne peut utiliser sa vision aveugle quand elle est assourdie."
 ],
 [
-"Ouie aiguisée",
-"La chauve-souris a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe."
+"Ouïe aiguisée",
+"La chauve-souris a un avantage aux jets de Sagesse (Perception) faisant appel à l'ouïe."
 ]
 ],
 "ac": [
@@ -1473,8 +1473,8 @@
 "La chouette ne provoque pas d'attaques d'opportunité lorsqu'elle quitte l'allonge d'un ennemi en volant."
 ],
 [
-"Ouie et vue aiguisées",
-"La chouette a un avantage aux jets de Sagesse (Perception) faisant appel a l'ouïe ou a la vue."
+"Ouïe et vue aiguisées",
+"La chouette a un avantage aux jets de Sagesse (Perception) faisant appel à l'ouïe ou à la vue."
 ]
 ],
 "ac": [
@@ -1510,11 +1510,11 @@
 "tr": [
 [
 "Amphibien",
-"La grenouille peut respirer aussi bien dans lair que sous l'eau."
+"La grenouille peut respirer aussi bien dans l'air que sous l'eau."
 ],
 [
 "Saut sans élan",
-"La grenouille peut sauter en longueur jusqu'a 6 m ou en hauteur jusqu'a 3 m, avec ou sans élan."
+"La grenouille peut sauter en longueur jusqu'à 6 m ou en hauteur jusqu'à 3 m, avec ou sans élan."
 ]
 ],
 "ac": [
@@ -1526,7 +1526,7 @@
 },
 {
 "n": "Engloutissement",
-"t": "La grenouille effectue une attaque de morsure contre une cible de taille P ou inférieure qu'elle agrippe. Si l'attaque réussit, la cible est avalée et elle n'est plus agrippée. La créature avalée est aveuglée est entravée, bénéficie d'un abri total contre les attaques ou autres effets provenant de l'extérieur de la grenouille, et subit 5 (2d4) dégâts d'acide au début de chaque tour de la grenouille. La grenouille ne peut avaler qu'une cible a la fois. Si la grenouille meurt, la créature avalée n'est plus entravée et peut sortir du cadavre en utilisant 1,5 m de mouvement, pour alors en émerger et se retrouver a terre."
+"t": "La grenouille effectue une attaque de morsure contre une cible de taille P ou inférieure qu'elle agrippe. Si l'attaque réussit, la cible est avalée et elle n'est plus agrippée. La créature avalée est aveuglée et entravée, bénéficie d'un abri total contre les attaques ou autres effets provenant de l'extérieur de la grenouille, et subit 5 (2d4) dégâts d'acide au début de chaque tour de la grenouille. La grenouille ne peut avaler qu'une cible à la fois. Si la grenouille meurt, la créature avalée n'est plus entravée et peut sortir du cadavre en utilisant 1,5 m de mouvement, pour alors en émerger et se retrouver à terre."
 }
 ]
 },
@@ -1557,13 +1557,13 @@
 ],
 [
 "Tactique de groupe",
-"Le loup a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 meétre ou moins de la créature et n'est pas incapable d'agir."
+"Le loup a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est à 1,50 mètre ou moins de la créature et n'est pas incapable d'agir."
 ]
 ],
 "ac": [
 {
 "n": "Morsure",
-"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (2d4 + 2) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 pour ne pas tomber a terre.",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une cible. Touché : 7 (2d4 + 2) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 pour ne pas tomber à terre.",
 "b": 4,
 "d": "2d4 + 2 perforant"
 }
@@ -1593,7 +1593,7 @@
 "tr": [
 [
 "Apnée (variante)",
-"Le lézard peut retenir son souffle durant 15 minutes (un lézard qui a ce trait posséde également une vitesse de nage de 9 m)."
+"Le lézard peut retenir son souffle durant 15 minutes (un lézard qui a ce trait possède également une vitesse de nage de 9 m)."
 ],
 [
 "Pattes d'araignée (variante)",
@@ -1634,7 +1634,7 @@
 "ac": [
 {
 "n": "Morsure",
-"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 4 (1d4 + 2) dégâts perforants, et la cible doit réussir un jet de sauvegarde de Constitution DD 11 ou subir 10 (3d6) dégâts de poison. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére.",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 4 (1d4 + 2) dégâts perforants, et la cible doit réussir un jet de sauvegarde de Constitution DD 11 ou subir 10 (3d6) dégâts de poison. Si le poison réduit les points de vie de la cible à 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupère des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette manière.",
 "b": 4,
 "d": "1d4 + 2 perforant"
 }
@@ -1664,11 +1664,11 @@
 "tr": [
 [
 "Odorat aiguisé",
-"La panthére a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
+"La panthère a un avantage aux jets de Sagesse (Perception) basés sur l'odorat."
 ],
 [
 "Bond agressif",
-"Si la panthére se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 12 pour ne pas tomber & terre. Si la cible est a terre, la panthére peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
+"Si la panthère se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 12 pour ne pas tomber à terre. Si la cible est à terre, la panthère peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
 ]
 ],
 "ac": [
@@ -1709,11 +1709,11 @@
 "tr": [
 [
 "Charge",
-"Si le sanglier se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible subit 3 (1d6) dégâts tranchants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 ou tomber a terre."
+"Si le sanglier se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible subit 3 (1d6) dégâts tranchants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 ou tomber à terre."
 ],
 [
 "Implacable",
-"Si le sanglier subit 7 points de dégâts ou moins qui réduiraient ses points de vie a 0, il se retrouve a la place avec 1 point de vie.",
+"Si le sanglier subit 7 points de dégâts ou moins qui réduiraient ses points de vie à 0, il se retrouve à la place avec 1 point de vie.",
 "Recharge après un repos court ou long"
 ]
 ],
@@ -1817,7 +1817,7 @@
 "tr": [
 [
 "Charge",
-"Si l'élan se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber a terre."
+"Si l'élan se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber à terre."
 ]
 ],
 "ac": [
@@ -1858,7 +1858,7 @@
 "tr": [
 [
 "Charge écrasante",
-"Si un cheval se déplace d'au moins 6 metres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses sabots dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 14 pour ne pas étre jetée a terre. Si la cible est a terre, le cheval peut réaliser une autre attaque contre elle avec ses sabots en tant qu'action bonus."
+"Si un cheval se déplace d'au moins 6 mètres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses sabots dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 14 pour ne pas être jetée à terre. Si la cible est à terre, le cheval peut réaliser une autre attaque contre elle avec ses sabots en tant qu'action bonus."
 ]
 ],
 "ac": [
@@ -1893,11 +1893,11 @@
 "tr": [
 [
 "Charge",
-"Si la chévre se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 5 (2d4) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber a terre."
+"Si la chèvre se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 5 (2d4) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber à terre."
 ],
 [
 "Stable",
-"La chévre a un avantage aux jets de sauvegarde de Force et de Dextérité contre les effets susceptibles de la faire tomber a terre."
+"La chèvre a un avantage aux jets de sauvegarde de Force et de Dextérité contre les effets susceptibles de la faire tomber à terre."
 ]
 ],
 "ac": [
@@ -2011,7 +2011,7 @@
 "ac": [
 {
 "n": "Dard",
-"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 5 (1d6 + 2) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 10 (3d6) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére.",
+"t": "Attaque au corps à corps avec une arme : +4 au toucher, allonge 1,5 m, une créature. Touché : 5 (1d6 + 2) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 10 (3d6) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible à 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupère des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette manière.",
 "b": 4,
 "d": "1d6 + 2 perforant"
 }
@@ -2041,7 +2041,7 @@
 "tr": [
 [
 "Charge",
-"Si 'hippocampe se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 ou tomber a terre."
+"Si l'hippocampe se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 ou tomber à terre."
 ],
 [
 "Respiration aquatique",
@@ -2127,7 +2127,7 @@
 "tr": [
 [
 "Tactique de groupe",
-"Le requin a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,5 m ou moins de la créature et n'est pas incapable d'agir."
+"Le requin a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est à 1,5 m ou moins de la créature et n'est pas incapable d'agir."
 ],
 [
 "Respiration aquatique",
@@ -2167,7 +2167,7 @@
 "tr": [
 [
 "Vue aiguisée",
-"L'aigle a un avantage aux jets de Sagesse (Perception) faisant appel a la vue."
+"L'aigle a un avantage aux jets de Sagesse (Perception) faisant appel à la vue."
 ]
 ],
 "ac": [
@@ -2227,13 +2227,13 @@
 "ac": [
 {
 "n": "Morsure",
-"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une créature. Touché : 7 (1d8 + 3) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 9 (2d8) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible a 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupére des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette maniére.",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une créature. Touché : 7 (1d8 + 3) dégâts perforants, et la cible doit réaliser un jet de sauvegarde de Constitution DD 11, subissant 9 (2d8) dégâts de poison en cas d'échec, ou la moitié de ces dégâts en cas de réussite. Si le poison réduit les points de vie de la cible à 0, celle-ci est stable mais empoisonnée durant 1 heure, même si elle récupère des points de vie par la suite, et paralysée tant qu'elle est empoisonnée de cette manière.",
 "b": 5,
 "d": "1d8 + 3 perforant"
 },
 {
 "n": "Toile d'araignée",
-"t": "Attaque à distance avec une arme : +5 au toucher, portée 9/18 m, une créature. Touché : la cible est entravée par la toile. Par une action, la cible entravée peut effectuer un jet de Force DD 12, déchirant la toile en cas de réussite. La toile peut aussi étre attaquée et détruite (CA 10 ; pv 5 ; vulnérabilité aux dégâts de feu ; immunités aux dégâts contondants, de poison et psychiques).",
+"t": "Attaque à distance avec une arme : +5 au toucher, portée 9/18 m, une créature. Touché : la cible est entravée par la toile. Par une action, la cible entravée peut effectuer un jet de Force DD 12, déchirant la toile en cas de réussite. La toile peut aussi être attaquée et détruite (CA 10 ; pv 5 ; vulnérabilité aux dégâts de feu ; immunités aux dégâts contondants, de poison et psychiques).",
 "r": "Recharge 5-6",
 "b": 5
 }
@@ -2267,7 +2267,7 @@
 ],
 [
 "Saut sans élan",
-"Le crapaud peut sauter en longueur jusqu'a 6 metres ou en hauteur jusqu'a 3 m, avec ou sans élan."
+"Le crapaud peut sauter en longueur jusqu'à 6 mètres ou en hauteur jusqu'à 3 m, avec ou sans élan."
 ]
 ],
 "ac": [
@@ -2279,7 +2279,7 @@
 },
 {
 "n": "Engloutissement",
-"t": "Le crapaud effectue une attaque de morsure contre une cible de taille M ou inférieure qu'il agrippe. Si l'attaque réussit, la cible est avalée et elle n'est plus agrippée. La créature avalée est aveuglée et entravée, bénéficie d'un abri total contre les attaques ou autres effets provenant de l'extérieur du crapaud, et subit 10 (3d6) dégâts d'acide au début de chaque tour du crapaud. Le crapaud ne peut avaler qu'une cible a la fois. Si le crapaud meurt, la créature avalée n'est plus entravée et peut sortir du cadavre en utilisant 1,5 m de mouvement, pour alors en émerger et se retrouver a terre."
+"t": "Le crapaud effectue une attaque de morsure contre une cible de taille M ou inférieure qu'il agrippe. Si l'attaque réussit, la cible est avalée et elle n'est plus agrippée. La créature avalée est aveuglée et entravée, bénéficie d'un abri total contre les attaques ou autres effets provenant de l'extérieur du crapaud, et subit 10 (3d6) dégâts d'acide au début de chaque tour du crapaud. Le crapaud ne peut avaler qu'une cible à la fois. Si le crapaud meurt, la créature avalée n'est plus entravée et peut sortir du cadavre en utilisant 1,5 m de mouvement, pour alors en émerger et se retrouver à terre."
 }
 ]
 },
@@ -2306,7 +2306,7 @@
 "tr": [
 [
 "Déchainé",
-"Lorsque durant son tour la hyéne fait tomber les points de vie d'une créature a 0 avec une attaque au corps a corps, elle peut utiliser une action bonus pour se déplacer de la moitié de sa vitesse et effectuer une attaque de morsure."
+"Lorsque durant son tour la hyène fait tomber les points de vie d'une créature à 0 avec une attaque au corps à corps, elle peut utiliser une action bonus pour se déplacer de la moitié de sa vitesse et effectuer une attaque de morsure."
 ]
 ],
 "ac": [
@@ -2345,15 +2345,15 @@
 ],
 [
 "Tactique de groupe",
-"Le lion a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est 4 1,50 m ou moins de la créature et n'est pas incapable d'agir."
+"Le lion a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est à 1,50 m ou moins de la créature et n'est pas incapable d'agir."
 ],
 [
 "Bond agressif",
-"Si le lion se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 13 pour ne pas tomber a terre. Si la cible est a terre, le lion peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
+"Si le lion se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 13 pour ne pas tomber à terre. Si la cible est à terre, le lion peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
 ],
 [
 "Saut avec élan",
-"S'il peut prendre une course d'élan de 3 metres, un lion peut sauter jusqu'a 7,50 metres."
+"S'il peut prendre une course d'élan de 3 mètres, un lion peut sauter jusqu'à 7,50 mètres."
 ]
 ],
 "ac": [
@@ -2394,17 +2394,17 @@
 "tr": [
 [
 "Odorat et ouïe aiguisés",
-"Le loup a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou louïe."
+"Le loup a un avantage aux jets de Sagesse (Perception) basés sur l'odorat ou l'ouïe."
 ],
 [
 "Tactique de groupe",
-"Le loup a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 m ou moins de la créature et n'est pas incapable d'agir."
+"Le loup a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est à 1,50 m ou moins de la créature et n'est pas incapable d'agir."
 ]
 ],
 "ac": [
 {
 "n": "Morsure",
-"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 10 (2d6 + 3) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 pour ne pas étre jetée a terre.",
+"t": "Attaque au corps à corps avec une arme : +5 au toucher, allonge 1,5 m, une cible. Touché : 10 (2d6 + 3) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 pour ne pas être jetée à terre.",
 "b": 5,
 "d": "2d6 + 3 perforant"
 }
@@ -2500,7 +2500,7 @@
 },
 {
 "n": "Nuage d'encre",
-"t": "Un nuage d'encre de 6 m de rayon s'étend autours de la pieuvre si elle se trouve sous l'eau. La visibilité dans la zone est nulle pendant 1 minute, bien qu'un fort courant puisse disperser l'encre. Après avoir projeté son nuage d'encre, la pieuvre peut réaliser l'action Foncer en tant qu'action bonus.",
+"t": "Un nuage d'encre de 6 m de rayon s'étend autour de la pieuvre si elle se trouve sous l'eau. La visibilité dans la zone est nulle pendant 1 minute, bien qu'un fort courant puisse disperser l'encre. Après avoir projeté son nuage d'encre, la pieuvre peut réaliser l'action Foncer en tant qu'action bonus.",
 "r": "Recharge après un repos court ou long"
 }
 ]
@@ -2532,7 +2532,7 @@
 ],
 [
 "Bond agressif",
-"Si le tigre se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 13 pour ne pas tomber a terre. Si la cible est a terre, le tigre peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
+"Si le tigre se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 13 pour ne pas tomber à terre. Si la cible est à terre, le tigre peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
 ]
 ],
 "ac": [
@@ -2578,7 +2578,7 @@
 ],
 [
 "Tactique de groupe",
-"Le vautour a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est a 1,50 metre ou moins de la créature et n'est pas incapable d'agir."
+"Le vautour a un avantage aux jets d'attaque contre une créature si au moins l'un de ses alliés est à 1,50 mètre ou moins de la créature et n'est pas incapable d'agir."
 ]
 ],
 "ac": [
@@ -2709,7 +2709,7 @@
 "tr": [
 [
 "Charge",
-"Si le rhinocéros se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec sa corne dans le même tour, la cible subit 9 (2d8) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 15 ou tomber a terre."
+"Si le rhinocéros se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec sa corne dans le même tour, la cible subit 9 (2d8) dégâts contondants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 15 ou tomber à terre."
 ]
 ],
 "ac": [
@@ -2744,11 +2744,11 @@
 "tr": [
 [
 "Charge",
-"Si le sanglier se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible subit 7 (2d6) dégâts tranchants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber a terre."
+"Si le sanglier se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible subit 7 (2d6) dégâts tranchants supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 13 ou tomber à terre."
 ],
 [
 "Implacable",
-"Si le sanglier subit 10 points de dégâts ou moins qui réduiraient ses points de vie a 0, il se retrouve a la place avec 1 point de vie.",
+"Si le sanglier subit 10 points de dégâts ou moins qui réduiraient ses points de vie à 0, il se retrouve à la place avec 1 point de vie.",
 "Recharge après un repos court ou long"
 ]
 ],
@@ -2825,7 +2825,7 @@
 ],
 [
 "Bond agressif",
-"Si le tigre se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 14 pour ne pas tomber a terre. Si la cible est a terre, le tigre peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
+"Si le tigre se déplace d'au moins 6 m en ligne droite vers une créature, puis la touche lors d'une attaque avec ses griffes dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 14 pour ne pas tomber à terre. Si la cible est à terre, le tigre peut effectuer une attaque de morsure contre elle en tant qu'action bonus."
 ]
 ],
 "ac": [
@@ -2866,7 +2866,7 @@
 "tr": [
 [
 "Charge",
-"Si l'élan se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 14 ou tomber a terre."
+"Si l'élan se déplace d'au moins 6 m en ligne droite vers une cible, puis la touche lors d'une attaque avec un coup de tête dans le même tour, la cible subit 7 (2d6) dégâts supplémentaires. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 14 ou tomber à terre."
 ]
 ],
 "ac": [
@@ -2947,7 +2947,7 @@
 "cp": "Perception +3",
 "tr": [
 [
-"Echolocalisation",
+"Écholocalisation",
 "L'épaulard ne peut pas utiliser sa vision aveugle s'il est assourdi."
 ],
 [
@@ -2955,7 +2955,7 @@
 "L'épaulard peut retenir son souffle durant 30 minutes."
 ],
 [
-"Ouie aiguisée",
+"Ouïe aiguisée",
 "L'épaulard a un avantage aux jets de Sagesse (Perception) basés sur l'ouïe."
 ]
 ],
@@ -2991,7 +2991,7 @@
 "tr": [
 [
 "Charge écrasante",
-"Si l'éléphant se déplace d'au moins 6 metres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 12 pour ne pas 6tre jetée a terre. Si la cible est a terre, l'éléphant peut réaliser une attaque de piétinement contre celle-ci par une action bonus."
+"Si l'éléphant se déplace d'au moins 6 mètres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 12 pour ne pas 6tre jetée à terre. Si la cible est à terre, l'éléphant peut réaliser une attaque de piétinement contre celle-ci par une action bonus."
 ]
 ],
 "ac": [
@@ -3003,7 +3003,7 @@
 },
 {
 "n": "Piétinement",
-"t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 1,5 m, une créature a terre. Touché : 22 (3d10 + 6) dégâts contondants.",
+"t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 1,5 m, une créature à terre. Touché : 22 (3d10 + 6) dégâts contondants.",
 "b": 8,
 "d": "3d10 + 6 contondant"
 }
@@ -3049,7 +3049,7 @@
 },
 {
 "n": "Queue",
-"t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 3 m, une cible qui n'est pas agrippée par le crocodile. Touché : 14 (2d8 + 5) dégâts contondants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 16 pour ne pas étre jetée au sol.",
+"t": "Attaque au corps à corps avec une arme : +8 au toucher, allonge 3 m, une cible qui n'est pas agrippée par le crocodile. Touché : 14 (2d8 + 5) dégâts contondants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 16 pour ne pas être jetée au sol.",
 "b": 8,
 "d": "2d8 + 5 contondant"
 }
@@ -3118,7 +3118,7 @@
 "tr": [
 [
 "Charge écrasante",
-"Si le mammouth se déplace d'au moins 6 metres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 18 pour ne pas 6tre jetée a terre. Si la cible est a terre, le mammouth peut réaliser une attaque de piétinement contre celle-ci par une action bonus."
+"Si le mammouth se déplace d'au moins 6 mètres en ligne droite vers une créature, puis la touche lors d'une attaque avec ses défenses dans le même tour, la cible doit réussir un jet de sauvegarde de Force DD 18 pour ne pas 6tre jetée à terre. Si la cible est à terre, le mammouth peut réaliser une attaque de piétinement contre celle-ci par une action bonus."
 ]
 ],
 "ac": [
@@ -3130,7 +3130,7 @@
 },
 {
 "n": "Piétinement",
-"t": "Attaque au corps à corps avec une arme : +10 au toucher, allonge 1,5 m, une créature a terre. Touché : 29 (4d10 + 7) dégâts contondants.",
+"t": "Attaque au corps à corps avec une arme : +10 au toucher, allonge 1,5 m, une créature à terre. Touché : 29 (4d10 + 7) dégâts contondants.",
 "b": 10,
 "d": "4d10 + 7 contondant"
 }
