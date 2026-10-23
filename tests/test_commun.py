@@ -141,3 +141,14 @@ def test_fiches_imprimables(browser, devices, url):
         for w in words + ["Points de vie", "Jets contre la mort", "Compétences", "PERCEPTION PASSIVE", "Notes du personnage"]:
             check(w in html, f"{name} : « {w} »")
         a.close()
+
+
+def test_nouveau_personnage_clavier(browser, devices, url):
+    a = App(browser, devices, url, char=None)
+    a.click('[data-a="new"]'); a.click('[data-a="nw-cls"][data-v="rodeur"]')
+    check(a.js("document.activeElement.id") != "nw-name", "choisir la classe n'ouvre pas le clavier")
+    a.js("(document.documentElement.style.setProperty('--kb', '300px'), document.documentElement.style.setProperty('--vvh', '500px'), document.body.classList.add('kb-open'))")
+    a.pg.wait_for_timeout(60)
+    r = a.js("(() => { const b = document.getElementById('nwsheet').getBoundingClientRect(); return [Math.round(b.bottom), innerHeight, Math.round(b.height)]; })()")
+    check(r[0] == r[1] - 300 and r[2] <= 484, f"volet au-dessus du clavier : {r}")
+    a.close()

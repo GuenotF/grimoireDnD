@@ -28,7 +28,7 @@ function newHTML() {
 }
 onClick("new", () => { S.newOpen = true; S.newCls = null; S.newName = ""; render(); });
 onClick("nw-close", () => { S.newOpen = false; render(); });
-onClick("nw-cls", (b) => { S.newCls = b.dataset.v; render(); const el = document.getElementById("nw-name"); if (el) el.focus({ preventScroll: true }); });
+onClick("nw-cls", (b) => { S.newCls = b.dataset.v; render(); }); // pas de focus d'office : le clavier ne s'ouvre qu'en touchant le champ Nom
 onClick("nw-go", () => { // on commence par recopier la fiche : onglet Personnage, mode Gérer
   if (!CLASSES[S.newCls]) return;
   const g = blank((S.newName || "").trim(), S.newCls), id = newId(g.name);

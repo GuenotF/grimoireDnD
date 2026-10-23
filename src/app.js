@@ -162,5 +162,7 @@ if (window.visualViewport) {
     document.body.classList.toggle("kb-open", h > 80);
   };
   vv.addEventListener("resize", kb); vv.addEventListener("scroll", kb); kb();
+  // Champ touché dans un volet du bas (nouveau personnage…) : une fois le clavier ouvert, le champ reste visible
+  document.addEventListener("focusin", e => { const t = e.target; if (t.matches && t.matches("input, textarea") && t.closest(".fxsheet")) setTimeout(() => t.scrollIntoView({ block: "nearest" }), 300); });
 }
 window.__t = { S, G, R, mutate, concOf, inClass, BY_ID, BEAST, BEASTS, SPELLS, saveProf, speedOf, alwaysPrepared, acOf };
