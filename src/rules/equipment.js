@@ -51,11 +51,11 @@ const acOf = g => acMode(g) === "calc" ? acCalc(g).total : g.ac;
 function attackOf(g, w, off = false, item = null) { // off : main secondaire (pas de modificateur positif aux dégâts) ; item : objet porté (bonus magique)
   const str = R.ab(g, "str"), dex = R.ab(g, "dex");
   const ab = w.finesse ? (dex > str ? "dex" : "str") : w.rng === "ranged" ? "dex" : "str", mod = ab === "dex" ? dex : str;
-  const prof = weaponProf(g, w) ? R.prof(g.level) : 0, x = C(g).attackMods ? C(g).attackMods(g, w, ab) : {};
+  const prof = weaponProf(g, w) ? R.prof(g.level) : 0, x = C(g).attackMods ? C(g).attackMods(g, w, ab, off) : {};
   const f = featAttack(g, w, ab, !!prof); // options des dons cochées (Maître d'armes lourdes…)
   const mg = item && usable(item) ? item.bonus || 0 : 0, xd = item && usable(item) && item.xdmg ? ` + ${item.xdmg}` : ""; // objet magique
   f.hit += mg; f.dmg += mg; if (mg) f.pills.unshift(`+${mg} magique`); if (item && item.att && !item.attuned) f.pills.push("non harmonisée : pas d'effet magique");
-  const hit = mod + prof + (x.hit || 0) + f.hit, dmod = (off ? Math.min(0, mod) : mod) + (x.dmg || 0) + f.dmg, plus = n => n ? ` ${n > 0 ? "+" : "−"} ${Math.abs(n)}` : "";
+  const hit = mod + prof + (x.hit || 0) + f.hit, dmod = (off && !x.offMod ? Math.min(0, mod) : mod) + (x.dmg || 0) + f.dmg, plus = n => n ? ` ${n > 0 ? "+" : "−"} ${Math.abs(n)}` : "";
   const pills = [];
   if (w.vers) pills.push(`à deux mains : ${w.vers}${plus(mod + (x.dmg2 != null ? x.dmg2 : x.dmg || 0))}`);
   if (w.reach) pills.push("allonge 3 m");
@@ -64,6 +64,7 @@ function attackOf(g, w, off = false, item = null) { // off : main secondaire (pa
   else if (w.thrown && w.rng === "ranged") pills.push(`lancer ${w.range}`);
   if (w.two) pills.push("à deux mains"); if (w.heavy) pills.push("lourde"); if (w.light) pills.push("légère");
   (x.pills || []).forEach(p => pills.push(p)); f.pills.forEach(p => pills.push(p));
+  if ((g.effects || []).some(e => e.id === "hunters-mark")) pills.push("+1d6 Marque du chasseur"); // contre la cible marquée (rôdeur, paladin de la vengeance)
   return { hit, ab, melee: w.rng === "melee", prof: !!prof, dmg: w.dmg ? `${w.dmg}${plus(dmod)} ${w.dt}${xd}` : "aucun dégât", pills, notes: [w.special, ...(x.notes || [])].filter(Boolean) };
 }
 const POLE = ["glaive", "halberd", "quarterstaff", "spear"]; // Maître d'hast (la pique n'a pas de talon)

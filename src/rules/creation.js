@@ -24,6 +24,9 @@ const CLASS_START = {
   paladin: { skills: { n: 2, list: ["athletics", "insight", "intimidation", "medicine", "persuasion", "religion"] }, gold: "5d4",
     equip: [[["une arme de guerre et un bouclier", [P("martial"), W("shield")]], ["deux armes de guerre", [P("martial"), P("martial")]]], [["cinq javelines", [W("javelin", 5)]], ["une arme courante de corps à corps", [P("simple-melee")]]], [["un sac d'ecclésiastique", [O("Sac d'ecclésiastique")]], ["un sac d'explorateur", [O("Sac d'explorateur")]]]],
     fixed: [W("chain-mail"), O("Symbole sacré")] },
+  rodeur: { skills: { n: 3, list: ["athletics", "stealth", "animal", "insight", "investigation", "nature", "perception", "survival"] }, gold: "5d4",
+    equip: [[["une armure d'écailles", [W("scale-mail")]], ["une armure de cuir", [W("leather")]]], [["deux épées courtes", [W("shortsword", 2)]], ["deux armes courantes de corps à corps", [P("simple-melee"), P("simple-melee")]]], [["un sac d'exploration souterraine", [O("Sac d'exploration souterraine")]], ["un sac d'explorateur", [O("Sac d'explorateur")]]]],
+    fixed: [W("longbow"), O("Flèches", 20, true)] },
   roublard: { skills: { n: 4, list: ["acrobatics", "athletics", "stealth", "sleight", "intimidation", "insight", "investigation", "perception", "persuasion", "performance", "deception"] }, gold: "4d4", expertise: 2,
     equip: [[["une rapière", [W("rapier")]], ["une épée courte", [W("shortsword")]]], [["un arc court et un carquois de 20 flèches", [W("shortbow"), O("Flèches", 20, true)]], ["une épée courte", [W("shortsword")]]], [["un sac de cambrioleur", [O("Sac de cambrioleur")]], ["un sac d'exploration souterraine", [O("Sac d'exploration souterraine")]], ["un sac d'explorateur", [O("Sac d'explorateur")]]]],
     fixed: [W("leather"), W("dagger", 2), O("Outils de voleur")] },
@@ -141,6 +144,7 @@ function build(c, blank) {
   g.cantrips = [...(c.cantrips || [])];
   if (CLASS_START[c.cls].book) g.spells = (c.spells || []).map(id => ({ id, how: "niv" }));
   g.prepared = [...(c.prep || [])];
+  if (CLASSES[c.cls].creation) CLASSES[c.cls].creation.apply(g, c); // choix propres à la classe (rôdeur : ennemi juré, terrain favori)
   return g;
 }
 /** Valeur affichée d'une compétence (nom). */

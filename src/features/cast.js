@@ -44,7 +44,7 @@ function slotbarHTML(g, pre = "") {
   return `${fx}<button class="line" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g).map((n, i) => {
     const used = Math.min(n, +(g.used[i + 1] || 0));
     return `<span class="lv" aria-label="Niveau ${i + 1} : ${n - used} sur ${n}"><b>${i + 1}</b>${Array.from({ length: n }, (_, k) => `<span class="d${k < used ? " u" : ""}"></span>`).join("")}</span>`;
-  }).join("")}</span>${S.view !== "jeu" && R.maxLevel(g) ? `<span class="prepc${g.prepared.length > R.prepMax(g) ? " over" : ""}">Préparés <b>${g.prepared.length}</b>/${R.prepMax(g)}</span>` : ""}<span class="go">Emplacements ⌃</span></button>`;
+  }).join("")}</span>${S.view !== "jeu" && R.maxLevel(g) ? `<span class="prepc${g.prepared.length > R.prepMax(g) ? " over" : ""}">${C(g).known ? "Connus" : "Préparés"} <b>${g.prepared.length}</b>/${R.prepMax(g)}</span>` : ""}<span class="go">Emplacements ⌃</span></button>`;
 }
 const concOf = g => (g.effects || []).find(e => e.c);
 const concDD = dmg => Math.max(10, Math.floor((+dmg || 0) / 2));

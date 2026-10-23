@@ -13,6 +13,7 @@ const CLASS_INFO = {
   druide: { i: "D", col: "#2F6B45", d: "Sorts préparés dans toute la liste, sorts mineurs, rituels, Forme sauvage. Caractéristique : Sagesse.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },
   magicien: { i: "M", col: "#2D4A9A", d: "Grimoire, sorts copiés, Restauration arcanique. Caractéristique : Intelligence.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },
   paladin: { i: "P", col: "#A2261C", d: "Sorts préparés dans toute la liste, sorts de serment, Imposition des mains, Châtiment divin. Caractéristique : Charisme.", tags: ["Demi-lanceur", "Sorts niv. 1 à 5"] },
+  rodeur: { i: "R", col: "#22573A", d: "Sorts connus (pas de préparation), Ennemi juré, Explorateur-né ; Chasseur ou Maître des bêtes au niveau 3. Caractéristique : Sagesse.", tags: ["Demi-lanceur", "Sorts niv. 1 à 5"] },
   roublard: { i: "R", col: "#4B5563", d: "Attaque sournoise, Expertise, Ruse ; archétype au niveau 3. Pas de sorts.", tags: ["Combattant", "Dé de vie d8"] },
 };
 function newHTML() {

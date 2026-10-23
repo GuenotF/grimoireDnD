@@ -19,7 +19,7 @@ import { luOpen } from "./levelup.js";
 
 const STEPS = [["classe", "Classe"], ["race", "Race"], ["carac", "Caractéristiques"], ["hist", "Historique"], ["comp", "Compétences"], ["sorts", "Sorts"], ["equip", "Équipement"], ["fin", "Récapitulatif"]];
 const AB = Object.fromEntries(ABILITIES.map(([k, a]) => [k, a]));
-const hasSpells1 = cls => !CLASSES[cls].noSpells && (CLASSES[cls].cantrips(1) > 0 || !!CLASS_START[cls].book);
+const hasSpells1 = cls => !CLASSES[cls].noSpells && (CLASSES[cls].cantrips(1) > 0 || !!CLASS_START[cls].book || (CLASSES[cls].known ? CLASSES[cls].known(1) > 0 : false)); // le rôdeur n'a pas de sort au niveau 1
 /** Étapes réellement parcourues (pas de « Sorts » pour une classe sans sorts au niveau 1). */
 const steps = c => STEPS.filter(([k]) => k !== "sorts" || hasSpells1(c.cls));
 const chip = (attr, v, on, label, dis = false, extra = "") => `<button class="chip" ${attr} data-v="${esc(v)}" aria-pressed="${!!on}"${dis ? " disabled" : ""}${extra}>${label}</button>`;
@@ -112,6 +112,7 @@ function stepComp(c) {
     h += `<div class="crbudget" style="margin-top:12px"><span>Expertise : ${cs.expertise} maîtrises doublées</span><b>${c.exp.length} / ${cs.expertise}</b></div><p class="help">Parmi tes compétences maîtrisées, ou les outils de voleur.</p>
       <div class="chips">${prof.map(k => { const on = c.exp.includes(k); return chip('data-a="cr-exp"', k, on, `${on ? "◉ " : ""}${skillName(k)}`, !on && c.exp.length >= cs.expertise); }).join("")}</div>`;
   }
+  if (CLASSES[c.cls].creation) h += CLASSES[c.cls].creation.html(c); // choix propres à la classe au niveau 1 (rôdeur : ennemi juré, terrain favori)
   return h;
 }
 function stepSorts(c) {
@@ -119,7 +120,7 @@ function stepSorts(c) {
   let h = `<div class="crbudget"><span>Sorts mineurs</span><b>${c.cantrips.length} / ${cMax}</b></div><div class="chips">${cans.map(s => { const on = c.cantrips.includes(s.id); return chip('data-a="cr-can"', s.id, on, esc(s.n), !on && c.cantrips.length >= cMax); }).join("")}</div>`;
   if (cs.book) h += `<div class="crbudget" style="margin-top:12px"><span>Grimoire : ${cs.book} sorts de niveau 1</span><b>${c.spells.length} / ${cs.book}</b></div><div class="chips">${l1.map(s => { const on = c.spells.includes(s.id); return chip('data-a="cr-book"', s.id, on, esc(s.n), !on && c.spells.length >= cs.book); }).join("")}</div>`;
   const pool = cs.book ? l1.filter(s => c.spells.includes(s.id)) : l1, pMax = R.prepMax(g);
-  if (R.slots(g).length && pMax) h += `<div class="crbudget" style="margin-top:12px"><span>Sorts préparés (${CLASSES[c.cls].abN} + niveau)</span><b>${c.prep.length} / ${pMax}</b></div><p class="help">Facultatif : modifiable ensuite chaque jour dans l'onglet Sorts.</p><div class="chips">${pool.map(s => { const on = c.prep.includes(s.id); return chip('data-a="cr-prep"', s.id, on, esc(s.n), !on && c.prep.length >= pMax); }).join("") || `<span class="muted">Choisis d'abord les sorts du grimoire.</span>`}</div>`;
+  if (R.slots(g).length && pMax) h += `<div class="crbudget" style="margin-top:12px"><span>${CLASSES[c.cls].known ? "Sorts connus" : `Sorts préparés (${CLASSES[c.cls].abN} + niveau)`}</span><b>${c.prep.length} / ${pMax}</b></div><p class="help">Facultatif : modifiable ensuite chaque jour dans l'onglet Sorts.</p><div class="chips">${pool.map(s => { const on = c.prep.includes(s.id); return chip('data-a="cr-prep"', s.id, on, esc(s.n), !on && c.prep.length >= pMax); }).join("") || `<span class="muted">Choisis d'abord les sorts du grimoire.</span>`}</div>`;
   return h;
 }
 function stepEquip(c) {
@@ -152,7 +153,7 @@ function missing(c, k) {
   if (k === "race") return raceMissing(c);
   if (k === "carac") { if (c.method === "pb" && pbSpent(c.pb) > PB_BUDGET) return "trop de points dépensés"; return baseScores(c) ? "" : "attribue toutes les caractéristiques"; }
   if (k === "hist") { const b = bgOf(c); if (!b) return "choisis un historique"; if (bgSkills(c).some(x => !x) || (c.bg === "perso" && (c.bc.skills || []).length < 2)) return "choisis tes compétences d'historique"; if (b.toolChoice && !(c.bc.tools || [])[0]) return "choisis l'outil"; if (bgTools(c, clsToolsOf(c)).some(x => !x)) return "remplace l'outil en double"; if ((c.bc.langs || []).filter(Boolean).length < (b.langChoice || 0)) return "choisis les langues"; return ""; }
-  if (k === "comp") { const cs = CLASS_START[c.cls], locked = new Set([...(raceGives(c) || { skills: [] }).skills, ...bgSkills(c)]), n = Math.min(cs.skills.n, cs.skills.list.filter(x => !locked.has(x)).length); if (c.skills.length < n) return `choisis ${n - c.skills.length} compétence(s)`; if (cs.expertise && c.exp.length < cs.expertise) return "choisis ton Expertise"; return ""; }
+  if (k === "comp") { const cs = CLASS_START[c.cls], locked = new Set([...(raceGives(c) || { skills: [] }).skills, ...bgSkills(c)]), n = Math.min(cs.skills.n, cs.skills.list.filter(x => !locked.has(x)).length); if (c.skills.length < n) return `choisis ${n - c.skills.length} compétence(s)`; if (cs.expertise && c.exp.length < cs.expertise) return "choisis ton Expertise"; return CLASSES[c.cls].creation ? CLASSES[c.cls].creation.missing(c) : ""; }
   if (k === "sorts") { const g = preview(c), cs = CLASS_START[c.cls]; if (c.cantrips.length < R.cantrips(g)) return "choisis tes sorts mineurs"; if (cs.book && c.spells.length < cs.book) return `choisis ${cs.book} sorts pour le grimoire`; return ""; }
   if (k === "equip") { if (c.eqMode === "gold") return +c.gold > 0 ? "" : "indique ton or de départ"; const cs = CLASS_START[c.cls]; const need = cs.equip.flatMap((line, i) => line[c.eq[i] || 0][1].map((it, j) => it.pick ? `${i}-${c.eq[i] || 0}-${j}` : null)).filter(Boolean); return need.every(x => c.picks[x]) ? "" : "choisis les armes"; }
   return "";

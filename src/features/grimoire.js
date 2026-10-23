@@ -62,6 +62,40 @@ function preparedGererHTML(g) {
   }
   return h + extrasNotesHTML(g);
 }
+// Classes à sorts connus (rôdeur, puis barde, ensorceleur, occultiste) : une liste de sorts connus, tous lançables, rangés dans g.prepared.
+// Filtres : « Connus », puis un niveau de la liste de la classe pour apprendre (ou oublier, au cas où).
+function knownGererHTML(g) {
+  const max = R.maxLevel(g), kMax = R.prepMax(g), known = new Set(g.prepared), n = g.prepared.length;
+  let h = "";
+  if (C(g).cantrips(20) > 0) {
+    const cMax = R.cantrips(g), cans = g.cantrips.map(id => BY_ID[id]).filter(Boolean).sort(byName);
+    h += foldHead("c", "", "Sorts mineurs", `${cans.length} sur ${cMax} connus · à volonté`, plural(cans.length, "sort"));
+    if (!isFold("c")) { if (!cans.length) h += `<div class="empty">Aucun sort mineur. Choisis-en ${cMax} dans la bibliothèque (filtre « Mineurs »).</div>`; cans.forEach(s => { h += gererRow(g, s, null, false, false, true); }); }
+  }
+  h += `<div class="rubric"><h2>Sorts connus</h2><span class="aside">${n > kMax ? `<span class="lim">Trop de sorts connus : ${n} / ${kMax}</span> · oublie-en ${n - kMax}` : `<b class="kncount">${n} / ${kMax}</b> · tous lançables, sans préparation ; on en change au passage de niveau`}</span></div>`;
+  if (!max) return h + `<div class="empty">Le ${C(g).n.toLowerCase()} apprend ses premiers sorts au niveau ${R.unlockAt(g, 1)}.</div>` + extrasNotesHTML(g);
+  const flt = S.knf && S.knf !== "known" && +S.knf <= max ? +S.knf : "known", all = classSpells(g);
+  const lvls = []; for (let lv = 1; lv <= max; lv++) lvls.push(lv);
+  h += `<div class="chips knflt"><button class="chip" data-a="kn-flt" data-v="known" aria-pressed="${flt === "known"}">Connus · ${n}</button>${lvls.map(lv => `<button class="chip" data-a="kn-flt" data-v="${lv}" aria-pressed="${flt === lv}">Niv. ${lv} · ${all.filter(s => s.l === lv).length}</button>`).join("")}</div>`;
+  const list = flt === "known" ? g.prepared.map(id => BY_ID[id]).filter(Boolean).sort((a, b) => a.l - b.l || byName(a, b)) : all.filter(s => s.l === flt).sort(byName);
+  if (!list.length) h += `<div class="empty">${flt === "known" ? `Aucun sort connu. Choisis un niveau ci-dessus pour en apprendre ${kMax}.` : "Aucun sort de ce niveau."}</div>`;
+  list.forEach(s => { h += knownRow(g, s, known.has(s.id), n >= kMax); });
+  if (flt === "known" && list.length && n < kMax) h += `<p class="found">Encore ${plural(kMax - n, "sort")} à apprendre : choisis un niveau ci-dessus.</p>`;
+  return h + extrasNotesHTML(g);
+}
+function knownRow(g, s, on, full) {
+  const open = S.open.has(s.id), locked = s.l > R.maxLevel(g);
+  const act = on ? `<button class="btn sm knbtn off" data-a="kn-toggle" data-id="${s.id}" aria-label="Oublier ${esc(s.n)}">Oublier</button>` : `<button class="btn sm knbtn" data-a="kn-toggle" data-id="${s.id}" aria-label="Apprendre ${esc(s.n)}"${full || locked ? " disabled" : ""}>Apprendre</button>`;
+  const body = open ? `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g)}${noteOf(g, s) && S.noteEdit !== s.id ? noteBox(g, s) : ""}${on && !locked ? castHTML(g, s, true) : ""}<div class="rowact"><span class="origin">${on ? "Sort connu" : `Liste du ${C(g).n.toLowerCase()}`}</span></div></div>` : "";
+  return `<div class="jrow${on ? " on" : ""}"><div class="jline"><span class="knmark${on ? " on" : ""}" aria-hidden="true">${on ? "✓" : ""}</span><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${notePen(g, s)}${act}</div>${noteGerer(g, s)}${body}${concWarnHTML(g, s)}</div>`;
+}
+onClick("kn-flt", (b) => { S.knf = b.dataset.v; render(); });
+onClick("kn-toggle", (b) => {
+  const g = G(), id = b.dataset.id, s = BY_ID[id]; if (!g || !s) return; const on = g.prepared.includes(id), prev = [...g.prepared];
+  if (!on && g.prepared.length >= R.prepMax(g)) { toast(`Limite atteinte (${g.prepared.length}/${R.prepMax(g)}) : oublie d'abord un sort`); return; }
+  mutate(g => { g.prepared = on ? g.prepared.filter(x => x !== id) : [...g.prepared, id]; });
+  toast(`<b>${esc(s.n)}</b> ${on ? "oublié" : "appris"} · ${G().prepared.length} / ${R.prepMax(g)}`, () => { mutate(g => { g.prepared = prev; }); return on ? "Sort de nouveau connu" : "Annulé"; });
+});
 function extrasNotesHTML(g) {
   let h = "";
   // Autres sorts
@@ -89,7 +123,7 @@ function grimoireHTML(g) {
   let h = `<div class="viewsw" role="group" aria-label="Affichage du grimoire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
   const jeu = S.view === "jeu";
   // Gérer : préparation et capacités seulement ; emplacements, repos et ressources (actions) sont dans En jeu
-  if (!jeu) return h + featsHTML(g) + (C(g).book ? bookGererHTML(g) : preparedGererHTML(g));
+  if (!jeu) return h + featsHTML(g) + (C(g).settings ? C(g).settings(g) : "") + (C(g).book ? bookGererHTML(g) : C(g).known ? knownGererHTML(g) : preparedGererHTML(g)); // réglages de la classe (rôdeur : ennemis jurés, compagnon…)
   if (C(g).beforeSlots) h += C(g).beforeSlots(g); // ex. druide : forme active
   h += `<div class="rubric" id="slots-top" style="margin-top:4px"><h2>Emplacements de sorts</h2><span class="aside">touche un cercle quand tu lances un sort</span></div><div class="slots">`;
   if (!slots.length) h += `<p class="muted" style="margin:0 0 6px">Pas encore d'emplacement : les sorts arrivent au niveau ${R.unlockAt(g, 1)}.</p>`;
@@ -177,7 +211,7 @@ function jeuRow(g, s, kind) {
 function jeuHTML(g) {
   const prepared = new Set(g.prepared), max = R.maxLevel(g), slots = R.slots(g), ready = castable(g);
   let h = C(g).playTop ? C(g).playTop(g) : ""; // ex. paladin : Châtiment divin
-  h += attacksHTML(g) + itemsActionHTML(g) + featsPlayHTML(g) + innateHTML(g); // un seul point d'entrée pour les actions : attaques, objets, dons
+  h += attacksHTML(g) + (C(g).afterAttacks ? C(g).afterAttacks(g) : "") + itemsActionHTML(g) + featsPlayHTML(g) + innateHTML(g); // un seul point d'entrée pour les actions : attaques, objets, dons
   // Sorts toujours préparés (serment du paladin) dans leur propre section, comme dans Gérer
   const oath = C(g).book ? [] : ready.filter(s => isAlwaysPrepared(g, s)).sort((a, b) => a.l - b.l || byName(a, b));
   if (oath.length) { const ap = C(g).alwaysPreparedInfo(g); h += foldHead("o", "oath", ap.title, ap.aside, plural(oath.length, "sort")); if (!isFold("o")) oath.forEach(s => { h += jeuRow(g, s, "prep"); }); }
@@ -194,7 +228,7 @@ function jeuHTML(g) {
     h += foldHead("l" + lv, "", `Niveau ${lv}`, `${slotsLeft(g, lv)} / ${slots[lv - 1]} restant${slotsLeft(g, lv) > 1 ? "s" : ""}`, plural(list.length, "sort"));
     if (!isFold("l" + lv)) list.forEach(s => { h += jeuRow(g, s, "prep"); });
   }
-  if (!ready.length && max) h += `<div class="empty">Aucun sort préparé. Passe en mode « Gérer » pour cocher les sorts du jour.</div>`;
+  if (!ready.length && max) h += `<div class="empty">${C(g).known ? "Aucun sort connu. Passe en mode « Gérer » pour apprendre tes sorts." : "Aucun sort préparé. Passe en mode « Gérer » pour cocher les sorts du jour."}</div>`;
   const rits = g.spells.map(x => BY_ID[x.id]).filter(s => s.ri && !prepared.has(s.id) && s.l <= max).sort(byName);
   if (rits.length) { h += foldHead("r", "rit", "Rituels", "depuis le grimoire, +10 min, sans emplacement", plural(rits.length, "sort")); if (!isFold("r")) rits.forEach(s => { h += jeuRow(g, s, "rit"); }); }
   if (g.extras.length) {
@@ -239,4 +273,4 @@ onSubmit("addx", () => {
   if (!n) return; mutate(g => g.extras.push({ name: n, note, used: false }));
 });
 
-export { featsHTML, preparedGererHTML, extrasNotesHTML, grimoireHTML, gererRow, extraRow, jeuRow, jeuHTML };
+export { featsHTML, knownGererHTML, preparedGererHTML, extrasNotesHTML, grimoireHTML, gererRow, extraRow, jeuRow, jeuHTML };

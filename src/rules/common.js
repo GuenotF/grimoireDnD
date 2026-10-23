@@ -19,7 +19,7 @@ const R = {
   maxLevel: (g, lv = g.level) => (C(g).slots[lv] || []).length,
   unlockAt: (g, sl) => { for (let lv = 1; lv <= 20; lv++) if ((C(g).slots[lv] || []).length >= sl) return lv; return 21; },
   cantrips: (g, lv = g.level) => C(g).cantrips(lv) + (C(g).cantripBonus ? C(g).cantripBonus({ ...g, level: lv }) : 0), // + sort mineur de sous-classe
-  prepMax: g => C(g).prep(g, R.am(g)),
+  prepMax: g => C(g).known ? C(g).known(g.level) : C(g).prep(g, R.am(g)), // sorts connus (rôdeur…) : nombre fixe par niveau, rangés dans g.prepared
   expected: lv => 6 + 2 * (lv - 1),
   arcane: lv => Math.ceil(lv / 2),
   savant: (g, s) => g.level >= 2 && s.s === g.school,

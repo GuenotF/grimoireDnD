@@ -115,7 +115,7 @@ function preparedLu1(g, b) {
   ${C(g).noSpells ? row("Bonus de maîtrise", signed(R.prof(from)), signed(R.prof(to)), "--ps-fg") : `${row("DD des sorts", 8 + R.prof(from) + mod, 8 + R.prof(to) + mod1, "--ps-fg")}
   ${row("Attaque de sort", signed(R.prof(from) + mod), signed(R.prof(to) + mod1), "--pa-fg")}`}
   ${lu.rowsBefore ? lu.rowsBefore(g, b) : ""}
-  ${C(g).noSpells ? "" : row("Sorts préparés", R.maxLevel(g) ? R.prepMax(g) : 0, R.maxLevel(b) ? R.prepMax(b) : 0)}
+  ${C(g).noSpells ? "" : row(C(g).known ? "Sorts connus" : "Sorts préparés", R.maxLevel(g) ? R.prepMax(g) : 0, R.maxLevel(b) ? R.prepMax(b) : 0)}
   ${lu.rowsAfter ? lu.rowsAfter(g, b) : ""}</div>`;
   const feats = classFeats(b).filter(f => f.lv === to);
   if (feats.length) h += `<div style="display:grid;gap:6px"><span class="lusub">Nouvelle capacité</span>${feats.map(f => `<div class="lucan"><span class="n">${f.n}</span><span class="kp ${f.k}">${esc(f.pill(b))}</span></div>`).join("")}</div>`;
@@ -134,7 +134,8 @@ function preparedLu2(g, b) {
   }
   if (lu.choices) h += lu.choices(g, b, L); // ex. paladin : style de combat
   if (C(g).noSpells) return h || `<div class="empty">Rien à choisir à ce niveau : passe à l'étape suivante.</div>`;
-  if (!max) return h + `<div class="empty">Le ${C(g).n.toLowerCase()} prépare ses sorts à partir du niveau ${R.unlockAt(g, 1)}.</div>`;
+  if (!max) return h + `<div class="empty">Le ${C(g).n.toLowerCase()} ${C(g).known ? "apprend" : "prépare"} ses sorts à partir du niveau ${R.unlockAt(g, 1)}.</div>`;
+  if (C(g).known) return h + knownLu2(g, b, L);
   const prep = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id)), full = prep.length >= pMax;
   const box = (s, on) => `<label class="lurowp${on ? " on" : ""}"><input type="checkbox" data-a="lu-pprep" data-id="${s.id}"${on ? " checked" : ""}${!on && full ? ' class="full" aria-disabled="true"' : ""}><span class="n">${esc(s.n)}${tags(s)}</span><span class="kps">${keyPills(s, b)}</span></label>`;
   h += `<div style="font-size:14px;line-height:1.4">Tes sorts préparés au niveau ${b.level} : <b>${pMax}</b>${C(g).prepNote || ""}.${!R.maxLevel(g) ? ` Choisis-les dans la liste du niveau 1.` : R.maxLevel(g) < max ? ` Tu peux en remplacer un par un sort de niveau ${max}.` : ""} <span class="muted">En principe au repos long : vois avec ton MJ.</span></div>`;
@@ -150,6 +151,31 @@ function preparedLu2(g, b) {
   <div class="luplist">${more.map(s => box(s, prep.includes(s.id))).join("") || `<div class="empty">Tous les sorts de ce niveau sont déjà dans la liste.</div>`}</div>`;
   return h;
 }
+// ---------- Classes à sorts connus : apprendre les sorts gagnés, et en remplacer un (règle du Manuel)
+const knownNew = (g, b) => Math.max(0, R.prepMax(b) - (R.maxLevel(g) ? R.prepMax(g) : 0));
+/** Sorts connus après validation. */
+const knownAfter = (g, L) => [...g.prepared.filter(id => id !== (L.kin ? L.kout : null)), ...(L.kout && L.kin ? [L.kin] : []), ...(L.kn || [])].filter((id, i, a) => BY_ID[id] && a.indexOf(id) === i);
+function knownLu2(g, b, L) {
+  const max = R.maxLevel(b), need = knownNew(g, b), kn = L.kn || [], have = new Set([...g.prepared, ...kn, ...(L.kin ? [L.kin] : [])]), full = kn.length >= need;
+  let h = `<div class="rubric"><h3>Sorts connus · ${R.maxLevel(g) ? R.prepMax(g) : 0} → ${R.prepMax(b)}</h3><span class="aside">${need ? `${kn.length} / ${need} appris` : "aucun nouveau sort"}</span></div>`;
+  if (need) {
+    const flt = L.flt && L.flt <= max ? L.flt : max, lvls = []; for (let lv = max; lv >= 1; lv--) lvls.push(lv);
+    const isNew = R.maxLevel(g) < max;
+    h += `<div style="font-size:14px;line-height:1.4">Apprends <b>${plural(need, "sort")}</b> de ${C(g).n.toLowerCase()} de niveau 1${max > 1 ? ` à ${max}` : ""}.${isNew && max > 1 ? ` Nouveau : sorts de niveau ${max}.` : ""}</div>
+    <div class="chips">${lvls.map(lv => `<button class="chip" data-a="lu-pflt" data-v="${lv}" aria-pressed="${flt === lv}">Niv. ${lv}${isNew && lv === max ? " · nouveau" : ""}</button>`).join("")}</div>
+    <div class="luplist">${classSpells(b).filter(s => s.l === flt && (!have.has(s.id) || kn.includes(s.id))).sort(byName).map(s => { const on = kn.includes(s.id);
+      return `<label class="lurowp${on ? " on" : ""}"><input type="checkbox" data-a="lu-kpick" data-id="${s.id}"${on ? " checked" : ""}${!on && full ? ' class="full" aria-disabled="true"' : ""}><span class="n">${esc(s.n)}${tags(s)}</span><span class="kps">${keyPills(s, b)}</span></label>`; }).join("") || `<div class="empty">Tous les sorts de ce niveau sont déjà connus.</div>`}</div>`;
+  }
+  const mine = g.prepared.map(id => BY_ID[id]).filter(Boolean).sort((x, y) => x.l - y.l || byName(x, y));
+  if (mine.length) {
+    const pool = classSpells(b).filter(s => s.l >= 1 && s.l <= max && (!have.has(s.id) || s.id === L.kin)).sort((x, y) => x.l - y.l || byName(x, y));
+    h += `<div class="rubric"><h3>Remplacer un sort connu</h3><span class="aside">facultatif</span></div>
+    <div class="knswap"><select id="lu-kout" aria-label="Sort à oublier"><option value="">Aucun</option>${mine.map(s => `<option value="${s.id}"${L.kout === s.id ? " selected" : ""}>${esc(s.n)} · niv. ${s.l}</option>`).join("")}</select><span aria-hidden="true">→</span>
+    <select id="lu-kin" aria-label="Nouveau sort"${L.kout ? "" : " disabled"}><option value="">Choisir…</option>${pool.map(s => `<option value="${s.id}"${L.kin === s.id ? " selected" : ""}>${esc(s.n)} · niv. ${s.l}</option>`).join("")}</select></div>
+    <span class="muted" style="font-size:12.5px">Un seul sort, remplacé par un sort de ${C(g).n.toLowerCase()} d'un niveau que tu peux lancer.</span>`;
+  }
+  return h;
+}
 function preparedLu3(g, b) {
   const L = S.lu, lu = LU(g), max = R.maxLevel(b), oath = alwaysPrepared(b), prep = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id));
   const same = prep.length === g.prepared.length && prep.every(id => g.prepared.includes(id));
@@ -157,7 +183,7 @@ function preparedLu3(g, b) {
   return `<div style="display:grid;gap:6px"><span class="lusub">Récapitulatif</span><div class="luadd">
     ${L.cpicks && L.cpicks.length ? `<div><span class="n">Sort${L.cpicks.length > 1 ? "s" : ""} mineur${L.cpicks.length > 1 ? "s" : ""}</span><small>${L.cpicks.map(id => esc(BY_ID[id].n)).join(", ")}</small></div>` : ""}
     ${lu.recapBefore ? lu.recapBefore(g, b, L) : ""}
-    ${max ? `<div><span class="n">Sorts préparés</span><small>${prep.length} / ${R.prepMax(b)}${same ? " · inchangés" : ""}</small></div>` : ""}
+    ${max && C(g).known ? `<div><span class="n">Sorts connus</span><small>${knownAfter(g, L).length} / ${R.prepMax(b)}${(L.kn || []).length ? ` · + ${L.kn.map(id => esc(BY_ID[id].n)).join(", ")}` : ""}${L.kout && L.kin ? ` · ${esc(BY_ID[L.kout].n)} → ${esc(BY_ID[L.kin].n)}` : ""}</small></div>` : max ? `<div><span class="n">Sorts préparés</span><small>${prep.length} / ${R.prepMax(b)}${same ? " · inchangés" : ""}</small></div>` : ""}
     ${lu.recapAfter ? lu.recapAfter(g, b, L) : ""}</div>
     <button class="linkbtn" data-a="lu-edit">Modifier</button></div>
   <div style="display:grid;gap:4px;font-size:13.5px;color:var(--muted);line-height:1.45">
@@ -195,7 +221,7 @@ onClick("lu-go", () => {
     g.level = to;
     if (LU(g).apply) LU(g).apply(g, L); // ex. style de combat, formes favorites
     (L.cpicks || []).forEach(id => { if (!g.cantrips.includes(id)) g.cantrips.push(id); });
-    g.prepared = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id));
+    g.prepared = C(g).known ? knownAfter(prev, L) : L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id));
   });
   toast(`<b>${esc(fn)}</b> passe au niveau ${to}`, () => { mutate(g => Object.assign(g, prev)); return "Passage de niveau annulé"; });
   chainLevel();
@@ -223,6 +249,13 @@ onChange("lu-pprep", t => {
   if (t.checked && cur.length >= R.prepMax(b)) { t.checked = false; toast(`Limite atteinte (${cur.length}/${R.prepMax(b)}) : décoche d'abord un sort`); return; }
   S.lu.prep = t.checked ? [...cur, id] : cur.filter(x => x !== id); S.luKeep = true; render();
 });
+onChange("lu-kpick", t => {
+  if (!S.lu) return; const g = G(), id = t.dataset.id, need = knownNew(g, { ...g, level: S.lu.to }), kn = S.lu.kn || [];
+  if (t.checked && kn.length >= need) { t.checked = false; toast(`${plural(need, "sort")} à apprendre à ce niveau : décoche d'abord un sort`); return; }
+  S.lu.kn = t.checked ? [...kn, id] : kn.filter(x => x !== id); S.luKeep = true; render();
+});
+onChange("#lu-kout", t => { if (!S.lu) return; S.lu.kout = t.value || null; if (!t.value) S.lu.kin = null; S.luKeep = true; render(); });
+onChange("#lu-kin", t => { if (!S.lu) return; S.lu.kin = t.value || null; S.luKeep = true; render(); });
 onChange("lu-prep", t => { if (!S.lu) return; const id = t.dataset.id; S.lu.prep = t.checked ? [...S.lu.prep, id] : S.lu.prep.filter(x => x !== id); S.luKeep = true; render(); });
 
 export { luOpen, luNeed, firstName, luHTML, preparedLu1, preparedLu2, preparedLu3 };

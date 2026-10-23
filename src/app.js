@@ -93,7 +93,7 @@ function heroHTML(g) {
     <div class="stat" role="listitem"><div class="v">${signed(mod)}</div>${statLabel(`Mod. ${C(g).abN}`, `Mod. ${abShort}`)}</div>
     <div class="stat" role="listitem"><div class="v">${8 + prof + mod}</div>${statLabel("DD des sorts", "DD")}</div>
     <div class="stat" role="listitem"><div class="v">${signed(prof + mod)}</div>${statLabel("Attaque de sort", "Attaque")}</div>
-    <div class="stat ${nPrep > pMax ? "alert" : nPrep === pMax ? "good" : ""}" role="listitem"><div class="v">${nPrep}<small>/${pMax}</small></div>${statLabel("Sorts préparés", "Préparés")}</div>
+    <div class="stat ${nPrep > pMax ? "alert" : nPrep === pMax ? "good" : ""}" role="listitem"><div class="v">${nPrep}<small>/${pMax}</small></div>${C(g).known ? statLabel("Sorts connus", "Connus") : statLabel("Sorts préparés", "Préparés")}</div>
     ${C(g).heroStats(g)}
   </div>`;
   return `<section class="hero">
