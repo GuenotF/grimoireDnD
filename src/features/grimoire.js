@@ -9,6 +9,8 @@ import { BY_ID } from "../data.js";
 import { R, castable, classSpells } from "../rules/common.js";
 import { foldHead, isFold, removeBtn } from "../ui/components.js";
 import { castHTML, concWarnHTML, firstFree, liveMark, slotsLeft } from "./cast.js";
+import { attacksHTML } from "./attacks.js";
+import { itemsActionHTML } from "./equipment.js";
 import { restBarHTML } from "./rest.js";
 import { keyPills, noteBox, noteGerer, noteMark, noteOf, notePen, pillsHTML, spellBody, tags } from "./spells.js";
 
@@ -164,6 +166,7 @@ function jeuRow(g, s, kind) {
 function jeuHTML(g) {
   const prepared = new Set(g.prepared), max = R.maxLevel(g), slots = R.slots(g), ready = castable(g);
   let h = C(g).playTop ? C(g).playTop(g) : ""; // ex. paladin : Châtiment divin
+  h += attacksHTML(g) + itemsActionHTML(g);      // un seul point d'entrée pour les actions : attaques et objets ici
   // Sorts toujours préparés (serment du paladin) dans leur propre section, comme dans Gérer
   const oath = C(g).book ? [] : ready.filter(s => isAlwaysPrepared(g, s)).sort((a, b) => a.l - b.l || byName(a, b));
   if (oath.length) { const ap = C(g).alwaysPreparedInfo(g); h += foldHead("o", "oath", ap.title, ap.aside, plural(oath.length, "sort")); if (!isFold("o")) oath.forEach(s => { h += jeuRow(g, s, "prep"); }); }

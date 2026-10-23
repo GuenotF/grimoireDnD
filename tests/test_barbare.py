@@ -18,6 +18,9 @@ def test_classe_sans_sorts(browser, devices, url):
     check("sorts" not in a.text(".subline"), "pas de « sorts jusqu'au niveau »")
     check(a.count("#slotbar:not([hidden]) .chip.hp") == 1, "barre du bas avec les PV, sans emplacements")
     check(a.count(".atk") == 3, "attaques dans l'onglet Capacités (hache, hachette, mains nues)")
+    a.view("gerer")
+    check(a.count('[data-a="rage-start"]') == 0 and a.count(".atk") == 0 and a.count('[data-a="short-open"]') == 0, "Gérer : ni Rage, ni attaques, ni repos (réglages seulement)")
+    a.view("jeu")
     a.tab("perso")
     check(a.count(".atk") == 0 and a.texts(".chstat .v")[0] == "14", "pas d'attaques dans Personnage ; CA : Défense sans armure 10 + 1 + 3")
     for t in ["regles", "imprimer"]:

@@ -35,9 +35,12 @@ def test_objets(browser, devices, url):
     check(a.g("items[1].q") == 7 and a.g("items[1].c") and a.g("items[1].note") == "une par jour", "rations : 7, à décompter")
     a.view("jeu")
     check(a.texts(".it.j .itn > span")[0] == "Bâton" and a.count(".it.eq") == 1, "objet équipé en tête, en gras")
+    check(a.count('[data-a="it-dec"]') == 0 and "×7" in a.text(".itbox") and "onglet Sorts" in a.text(".itbox"), "Personnage en jeu : inventaire en lecture, renvoi vers Sorts")
+    a.tab("grimoire")
+    check(a.texts('[data-k="act-it"] ~ .itbox .itn > span') == ["Rations"], "onglet Sorts : section Objets, objets à décompter seulement")
     a.click('[data-a="it-dec"][data-i="1"]')
     check(a.g("items[1].q") == 6, "une ration de moins")
-    a.view("gerer"); a.click('[data-a="it-edit"][data-i="2"]'); a.click('[data-a="it-del"][data-i="2"]')
+    a.tab("perso"); a.view("gerer"); a.click('[data-a="it-edit"][data-i="2"]'); a.click('[data-a="it-del"][data-i="2"]')
     check(a.g("items.length") == 2, "objet retiré"); a.undo()
     check(a.g("items.length") == 3 and a.g("items[2].n") == "Potion de soins", "retrait annulé")
     a.close()
@@ -60,6 +63,11 @@ KAEL_F = {"abil": {"str": 16, "dex": 10, "con": 14, "int": 8, "wis": 10, "cha": 
                     {"n": "Épée longue", "q": 1, "eq": True, "ref": "longsword"}, {"n": "Javeline", "q": 5, "eq": True, "ref": "javelin"}]}
 
 
+def s_order(a):
+    """Onglet Sorts en jeu : la carte du Châtiment divin, puis les attaques."""
+    return a.js("(() => { const s = document.querySelector('.smite'), p = document.querySelector('.atkbox'); return !!s && !!p && !!(s.compareDocumentPosition(p) & 4); })()")
+
+
 def test_catalogue_ca_et_attaques(browser, devices, url):
     from helpers import KAEL
     a = App(browser, devices, url, char=dict(KAEL, **KAEL_F), tab="perso", view="gerer")
@@ -75,7 +83,9 @@ def test_catalogue_ca_et_attaques(browser, devices, url):
     a.click('[data-a="it-pick"][data-id="greatsword"]')
     check(a.g("items[4].ref") == "greatsword" and a.g("items[4].eq") is False, "épée à deux mains ajoutée, reliée au catalogue")
     a.view("jeu")
-    check(a.texts(".chstat .v")[0] == "19", "CA en jeu")
+    check(a.texts(".chstat .v")[0] == "19" and a.count(".atk") == 0, "CA en jeu, plus d'attaques dans Personnage")
+    a.tab("grimoire")
+    check(s_order(a), "Châtiment divin puis attaques en tête de l'onglet Sorts")
     atk = a.texts(".atk .ah")
     check(atk[0] == "Épée longue +5 1d8 + 3 tranchant" and "×5" in atk[1] and atk[2].startswith("Mains nues +5 4 contondant"), f"attaques : {atk}")
     check("à deux mains : 1d10 + 3" in a.text(".atk") and "Châtiment divin" in a.text(".atknotes"), "polyvalente et rappel du Châtiment")
@@ -91,7 +101,7 @@ def test_alertes_druide_et_magicien(browser, devices, url):
     a.close()
     b = App(browser, devices, url, char=dict(NEMEIA, **dict(FICHE, ac=None), items=[{"n": "Cuir", "q": 1, "eq": True, "ref": "leather"}, {"n": "Épée longue", "q": 1, "eq": True, "ref": "longsword"}, {"n": "Dague", "q": 1, "eq": True, "ref": "dagger"}]), tab="perso", view="gerer")
     check("non maîtrisée" in b.text(".acwarn") and "pas de sorts" in b.text(".acwarn"), "magicien en armure : alerte")
-    b.view("jeu")
+    b.view("jeu"); b.tab("grimoire")
     atk = b.texts(".atk .ah")
     check(atk[0].startswith("Épée longue +0") and atk[1].startswith("Dague +4 1d4 + 2"), f"maîtrise selon la classe, finesse : {atk}")
     b.close()
@@ -108,7 +118,7 @@ def test_lien_catalogue_conserve(browser, devices, url):
     check(a.g("items[1].ref") == "studded-leather", "lien choisi dans le formulaire")
     a.click('[data-a="ac-mode"][data-v="calc"]')
     check(a.text(".acv") == "13", f"CA : cuir clouté 12 + DEX 1 = 13 : {a.text('.acblock')}")
-    a.view("jeu")
+    a.view("jeu"); a.tab("grimoire")
     check(a.texts(".atk .ah b")[0] == "Bâton", "attaque au bâton")
     a.close()
 
@@ -119,18 +129,20 @@ def test_objets_magiques(browser, devices, url):
     a.click('[data-a="it-edit"][data-i="2"]')  # épée longue
     a.pg.select_option("#it-bonus", "1"); a.pg.fill("#it-xdmg", "1d6 radiant"); a.pg.check("#it-att"); a.click('.itform [type="submit"]')
     check(a.g("items[2].bonus") == 1 and a.g("items[2].att") and not a.g("items[2].attuned"), "épée +1 à harmoniser")
-    a.view("jeu")
+    a.view("jeu"); a.tab("grimoire")
     check("non harmonisée" in a.text(".atkbox") and a.texts(".atk .ah")[0] == "Épée longue +5 1d8 + 3 tranchant", "non harmonisée : pas de bonus")
-    a.view("gerer"); a.click('[data-a="it-edit"][data-i="2"]'); a.pg.check("#it-attuned"); a.click('.itform [type="submit"]')
-    a.view("jeu")
+    a.tab("perso"); a.view("gerer"); a.click('[data-a="it-edit"][data-i="2"]'); a.pg.check("#it-attuned"); a.click('.itform [type="submit"]')
+    a.view("jeu"); a.tab("grimoire")
     check(a.texts(".atk .ah")[0] == "Épée longue +6 1d8 + 4 tranchant + 1d6 radiant" and "+1 magique" in a.text(".atkbox"), f"harmonisée : +1 et dégâts en plus : {a.texts('.atk .ah')[0]}")
-    a.view("gerer"); a.click('[data-a="it-edit"][data-i="1"]'); a.pg.select_option("#it-bonus", "1"); a.click('.itform [type="submit"]')
+    a.tab("perso"); a.view("gerer"); a.click('[data-a="it-edit"][data-i="1"]'); a.pg.select_option("#it-bonus", "1"); a.click('.itform [type="submit"]')
     check(a.text(".acv") == "20" and "Bouclier +1" in a.text(".acparts"), "bouclier +1 : CA 20")
     a.click('[data-a="it-edit"][data-i="3"]'); a.pg.fill("#it-ch", "3"); a.pg.select_option("#it-rec", "court"); a.click('.itform [type="submit"]')
     a.view("jeu")
+    check(a.count('[data-a="it-chg"]') == 0 and "3/3 charges" in a.text(".itbox"), "Personnage : charges en lecture")
+    a.tab("grimoire")
     a.click('[data-a="it-chg"][data-i="3"][data-k="0"]'); a.click('[data-a="it-chg"][data-i="3"][data-k="1"]')
     check(a.g("items[3].chU") == 2 and "1/3 charges" in a.text(".itbox"), "2 charges dépensées")
-    a.tab("grimoire"); a.click('[data-a="short-open"]')
+    a.click('[data-a="short-open"]')
     check("charges récupérées" in a.text("#short-panel"), "repos court : objet rechargé annoncé")
     a.click('[data-a="short-done"]')
     check(a.g("items[3].chU") == 0, "charges récupérées au repos court")

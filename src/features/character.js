@@ -13,7 +13,6 @@ import { acCalc, acMode, acOf } from "../rules/equipment.js";
 import { featInit } from "../rules/feats.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { foldHead, isFold } from "../ui/components.js";
-import { attacksHTML } from "./attacks.js";
 import { equipmentGerer, equipmentJeu } from "./equipment.js";
 import { hpCardHTML } from "./hp.js";
 import { restBarHTML } from "./rest.js";
@@ -83,7 +82,7 @@ function jeuHTML(g) {
   const stats = `<div class="chstats">${st(acOf(g) ?? "?", "CA")}${st(signed(initiative(g)), "Initiative")}${st(speedTxt(g), "Vitesse")}${st(signed(R.prof(g.level)), "Maîtrise")}</div>`;
   let sk = foldHead("ch-skj", "", "Compétences", `Perception passive ${passivePerception(g)}`);
   if (!isFold("ch-skj")) sk += `<div class="skplay">${SKILLS.map(([k, n]) => { const l = skillLevel(g, k); return `<div class="${l ? "on" : ""}"><span class="mk" aria-hidden="true">${l === 2 ? "◉" : l ? "●" : ""}</span><span class="n">${n}${l ? `<span class="sr"> (${LV_NAME[l]})</span>` : ""}</span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("")}</div>`;
-  return hpCardHTML(g) + restBarHTML(g) + stats + (C(g).noSpells ? "" : attacksHTML(g)) + sk + toolsJeu(g) + equipmentJeu(g) + traitsSheetJeu(g); // les caractéristiques sont dans l'en-tête (heroAbilities)
+  return hpCardHTML(g) + restBarHTML(g) + stats + sk + toolsJeu(g) + equipmentJeu(g) + traitsSheetJeu(g); // les caractéristiques sont dans l'en-tête (heroAbilities)
 }
 
 // En-tête de l'onglet Personnage : les six caractéristiques à la place des statistiques de sorts.

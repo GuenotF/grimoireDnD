@@ -74,13 +74,24 @@ function equipmentGerer(g) {
     <form class="itadd" data-a="it-add"><input id="it-new" type="text" placeholder="Nom de l'objet (ex. épée, cuir, rations)" aria-label="Nouvel objet" autocomplete="off" value="${esc(S.itQ || "")}"><button class="btn" type="submit">Ajouter</button></form>${suggestHTML(g)}</div>`;
   return h;
 }
+// Objets qui servent en action : charges (objets magiques) ou à décompter (potions, munitions)
+const actionable = x => x.chMax || x.c;
+/** Section « Objets » de l'onglet d'action (Sorts, Capacités), en jeu : cercles de charges et − / +. */
+function itemsActionHTML(g) {
+  const list = order(g).filter(i => actionable(g.items[i])); if (!list.length) return "";
+  let h = foldHead("act-it", "", "Objets", "potions, munitions, charges", list.map(i => esc(g.items[i].n)).join(", "));
+  if (isFold("act-it")) return h;
+  return h + `<div class="chbox itbox">${list.map(i => { const x = g.items[i];
+    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}"><div class="itn"><span>${esc(x.n)}${magicMarks(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}${x.chMax ? chargePips(x, i) : ""}</div>${x.c ? `<div class="qty"><button class="btn sm" data-a="it-dec" data-i="${i}" aria-label="${esc(x.n)} : un de moins"${x.q ? "" : " disabled"}>−</button><b>${x.q}</b><button class="btn sm" data-a="it-inc" data-i="${i}" aria-label="${esc(x.n)} : un de plus">+</button></div>` : ""}</div>`; }).join("")}</div>`;
+}
 function equipmentJeu(g) {
   if (!g.items.length && !Object.values(g.money).some(Boolean)) return "";
   let h = foldHead("ch-eqj", "", "Équipement", `${g.items.length} objet${g.items.length > 1 ? "s" : ""}${attAside(g)}`, purseText(g.money)); // comme en Gérer
   if (isFold("ch-eqj")) return h;
   h += purseHTML(g);
   if (g.items.length) h += `<div class="chbox itbox">${order(g).map(i => { const x = g.items[i];
-    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}"><div class="itn"><span>${esc(x.n)}${magicMarks(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}${x.chMax ? chargePips(x, i) : ""}</div>${x.c ? `<div class="qty"><button class="btn sm" data-a="it-dec" data-i="${i}" aria-label="${esc(x.n)} : un de moins"${x.q ? "" : " disabled"}>−</button><b>${x.q}</b><button class="btn sm" data-a="it-inc" data-i="${i}" aria-label="${esc(x.n)} : un de plus">+</button></div>` : x.q !== 1 ? `<b class="q">×${x.q}</b>` : ""}</div>`; }).join("")}</div>`;
+    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}"><div class="itn"><span>${esc(x.n)}${magicMarks(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}</div>${x.q !== 1 || x.c ? `<b class="q">×${x.q}</b>` : ""}</div>`; }).join("")}
+    ${g.items.some(actionable) ? `<p class="chhelp" style="margin:6px 0 0">Potions, munitions et charges s'utilisent depuis l'onglet ${C(g).tabs(g)[0][1]}.</p>` : ""}</div>`;
   return h;
 }
 
@@ -125,4 +136,4 @@ onClick("it-del", (b) => { const i = +b.dataset.i, prev = G().items[i]; if (!pre
 onClick("it-chg", (b) => { mutate(g => { const x = g.items[+b.dataset.i]; if (!x) return; const k = +b.dataset.k, u = x.chU || 0; x.chU = k < u ? k : k + 1; }); });
 onClick(["it-dec", "it-inc"], (b, a) => { mutate(g => { const x = g.items[+b.dataset.i]; if (x) x.q = Math.max(0, x.q + (a === "it-inc" ? 1 : -1)); }); });
 
-export { equipmentGerer, equipmentJeu };
+export { equipmentGerer, equipmentJeu, itemsActionHTML };
