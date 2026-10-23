@@ -103,11 +103,11 @@ function heroHTML(g) {
     <div class="hbtns">${g.level < 20 ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}<button class="btn edit" data-a="hero-edit" aria-expanded="${S.heroEdit}">✎ ${S.heroEdit ? "Fermer" : "Modifier"}</button></div>
   </div>
   ${S.heroEdit ? `<div class="setup">
+    <p class="help setuphelp"><b>Corrections</b> : pour une fiche vierge ou importée. Au fil de la partie, utilise plutôt ${g.level < 20 ? `<b>↑ Niveau ${g.level + 1}</b>` : "l'assistant de niveau"} (sous-classe, sorts, PV).</p>
     <div class="field"><label for="f-full">Nom complet</label><input id="f-full" type="text" value="${esc(g.name)}"></div>
     <div class="field"><label for="f-level">Niveau de ${C(g).n.toLowerCase()}</label><select id="f-level">${Array.from({length:20},(_, i)=>`<option${i+1===g.level?" selected":""}>${i+1}</option>`).join("")}</select></div>
-    ${C(g).subclassField(g)}
+    ${!C(g).subclass || g.level >= C(g).subclass.lv ? C(g).subclassField(g) : ""}
     ${raceField(g)}
-    <p class="help">Le niveau se change ici sans assistant (création, correction).${g.level < 20 ? ` Pour monter de niveau, utilise ↑ Niveau ${g.level + 1}.` : ""}</p>
   </div>` : ""}
   ${S.tab === "perso" ? `<div class="statcap">Caractéristiques</div><div class="stats" role="list" aria-label="Caractéristiques">${heroAbilities(g)}</div>`
     : C(g).noSpells ? `<div class="statcap">${C(g).n}</div><div class="stats" role="list" aria-label="${C(g).n}">${C(g).heroStats(g)}</div>` : spells}
