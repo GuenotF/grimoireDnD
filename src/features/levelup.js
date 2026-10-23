@@ -10,7 +10,7 @@ import { asiLevels, hpGain } from "../rules/character.js";
 import { R, classSpells } from "../rules/common.js";
 import { FEATS, featAbil, featApply, featChoiceOk } from "../rules/feats.js";
 import { ABILITIES } from "../rules/tables.js";
-import { featPickerHTML, featPreview } from "./featpicker.js";
+import { featAllowed, featPickerHTML, featPreview } from "./featpicker.js";
 import { keyPills, tags } from "./spells.js";
 
 // Assistant ouvert par le bouton « ↑ Niveau N » : ce qui change, sorts gratuits, validation.
@@ -30,7 +30,7 @@ function luOpen(g) {
 // ---------- Commun à toutes les classes : points de vie et amélioration de caractéristiques (étape 1, récapitulatif, validation)
 const asiUsed = L => Object.values(L.asi).reduce((a, n) => a + n, 0);
 /** Don choisi dans l'assistant (au lieu de +2 / +1 +1), ou null. */
-const luFeat = L => L.asiMode === "feat" && L.fp && L.fp.sel ? { id: L.fp.sel, ch: L.fp.ch || {} } : null;
+const luFeat = L => L.asiMode === "feat" && L.fp && L.fp.sel && featAllowed(G(), L.fp.sel) ? { id: L.fp.sel, ch: L.fp.ch || {} } : null; // condition non remplie : pas de don
 /** Caractéristiques augmentées : amélioration choisie, ou +1 du don (Résilient, Athlète…). */
 const luAsi = L => { if (L.asiMode !== "feat") return L.asi || {}; const f = luFeat(L), k = f && featAbil(f.id, f.ch); return k ? { [k]: 1 } : {}; };
 function luCommonHTML(g, L) {

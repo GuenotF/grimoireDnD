@@ -6,7 +6,7 @@ import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { FEATS, featApply, featByName, featChoiceOk, featUnapply } from "../rules/feats.js";
-import { featPickerHTML, pickState } from "./featpicker.js";
+import { featAllowed, featPickerHTML, pickState } from "./featpicker.js";
 import { foldHead, isFold } from "../ui/components.js";
 
 // ---------- Défenses : [code, libellé, suggestions]
@@ -95,7 +95,7 @@ onSubmit("def-add", () => {
 onClick("def-del", (b) => { const i = +b.dataset.i, prev = G().defs[i]; if (!prev) return; mutate(g => { g.defs.splice(i, 1); }); toast(`${defName(prev.t)} retirée : ${esc(prev.v)}`, () => { mutate(g => { g.defs.splice(i, 0, prev); }); return "Rétablie"; }); });
 onClick("trait-feat", () => { S.trEdit = "feat"; S.trDraft = null; S.fp = null; render(); const el = document.getElementById("fp-q"); if (el) el.focus({ preventScroll: true }); });
 onClick("fp-add", () => {
-  const st = pickState("tr"), id = st.sel; if (!id || S.lu) return;
+  const st = pickState("tr"), id = st.sel; if (!id || S.lu || !featAllowed(G(), id)) return;
   if (!featChoiceOk(id, st.ch)) { toast(`Termine le choix de <b>${esc(FEATS[id].n)}</b>`); return; }
   // Vigilant alors que +5 était déjà saisi en bonus d'initiative : ce bonus sort du « divers » pour ne pas compter deux fois
   const fixInit = id === "alert" && G().initX >= 5;

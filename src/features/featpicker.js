@@ -62,10 +62,10 @@ function featPickerHTML(g, ctx, b = g) {
     let r = `<button class="fprow${on ? " on" : ""}${why ? " off" : ""}" data-a="fp-sel" data-v="${f.id}" aria-pressed="${on}"><span class="rd" aria-hidden="true">${on ? "✓" : ""}</span><span class="bd"><span class="hd"><b>${esc(f.n)}</b>${f.pill ? `<span class="kp f">${esc(f.pill)}</span>` : ""}${tag(f)}</span>${why ? `<small>${esc(why)}</small>` : ""}</span></button>`;
     if (on) {
       const pv = featPreview(b, f.id, st.ch, b.level);
-      r += `<div class="fpdet">${f.pre ? `<p class="pre">Prérequis : ${esc(f.pre)}${why ? ` · <b>non rempli</b> (${esc(why)}) : à voir avec ton MJ` : ""}</p>` : ""}
+      r += `<div class="fpdet">${f.pre ? `<p class="pre">Prérequis : ${esc(f.pre)}${why ? ` · <b>non rempli</b> (${esc(why)}) : ce don ne peut pas être pris` : ""}</p>` : ""}
         <div class="fptxt">${f.d.map(p => p.startsWith("•") ? `<p class="bul">${esc(p.slice(1).trim())}</p>` : `<p>${esc(p)}</p>`).join("")}</div>
-        ${choiceHTML(b, f.id, st)}${pv.length ? `<div class="fpprev">${pv.map(esc).join(" · ")}</div>` : ""}
-        ${ctx === "tr" ? `<div class="cast"><button class="btn primary" data-a="fp-add">Ajouter le don</button><button class="btn ghost" data-a="trait-cancel">Annuler</button></div>` : ""}</div>`;
+        ${why ? "" : choiceHTML(b, f.id, st) + (pv.length ? `<div class="fpprev">${pv.map(esc).join(" · ")}</div>` : "")}
+        ${ctx === "tr" ? `<div class="cast">${why ? "" : `<button class="btn primary" data-a="fp-add">Ajouter le don</button>`}<button class="btn ghost" data-a="trait-cancel">${why ? "Fermer" : "Annuler"}</button></div>` : ""}</div>`;
     }
     return r;
   }).join("") || `<div class="empty">Aucun don ne correspond${st.all ? "" : " parmi les dons accessibles (essaie « Tous »)"}.</div>`;
@@ -81,4 +81,6 @@ onClick("fp-abil", (b) => { const st = cur(); st.ch = { ...st.ch, abil: b.datase
 onClick("fp-skill", (b) => { const st = cur(), k = b.dataset.v, s = st.ch.skills || []; st.ch = { ...st.ch, skills: s.includes(k) ? s.filter(x => x !== k) : [...s, k] }; if (S.lu) S.luKeep = true; render(); });
 onInput(t => /^fp-l\d$/.test(t.id), (t) => { const st = cur(), l = [...(st.ch.langs || [])]; l[+t.id.slice(4)] = t.value; st.ch = { ...st.ch, langs: l }; });
 
-export { featPickerHTML, featPreview, state as pickState };
+/** Le personnage remplit-il la condition du don ? (prise refusée sinon, dans la fiche comme dans l'assistant) */
+const featAllowed = (g, id) => !featBlock(g, id, canArmor(g));
+export { featPickerHTML, featPreview, featAllowed, state as pickState };
