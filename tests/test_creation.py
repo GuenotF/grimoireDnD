@@ -11,7 +11,7 @@ def nxt(a):
 
 
 def disabled(a, sel):
-    return a.js(f"(() => {{ const e = document.querySelector('{sel}'); return !e || e.disabled; }})()")
+    return a.js(f"(() => {{ const e = document.querySelector('{sel}'); return !e || e.disabled || e.getAttribute('aria-disabled') === 'true'; }})()")
 
 
 def test_roublarde_elfe_niveau_4(browser, devices, url):

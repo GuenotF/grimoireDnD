@@ -3,7 +3,7 @@
 // État : S.cr. Données et calculs : rules/creation.js.
 import { CLASSES, alwaysPrepared } from "../classes/index.js";
 import { onChange, onClick, onInput } from "../core/actions.js";
-import { esc, signed } from "../core/format.js";
+import { byName, esc, signed } from "../core/format.js";
 import { blank, norm } from "../core/schema.js";
 import { G, S } from "../core/state.js";
 import { newId, save, setCur } from "../core/store.js";
@@ -15,6 +15,8 @@ import { featApply, featChoiceOk } from "../rules/feats.js";
 import { BGS, BG_CUSTOM, CLASS_START, LANGS, PB_BUDGET, PB_COST, RACES, STD, TOOL_LISTS, baseScores, bgOf, bgSkills, bgTools, build, mod, pbSpent, pickList, raceAsi, raceGives, raceMissing, roll4d6, skillName, subOf } from "../rules/creation.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { featPickerHTML } from "./featpicker.js";
+import { keyPills, spellBody, tags } from "./spells.js";
+import { pickRow } from "../ui/components.js";
 import { luOpen } from "./levelup.js";
 
 const STEPS = [["classe", "Classe"], ["race", "Race"], ["carac", "Caractéristiques"], ["hist", "Historique"], ["comp", "Compétences"], ["sorts", "Sorts"], ["equip", "Équipement"], ["fin", "Récapitulatif"]];
@@ -118,14 +120,21 @@ function stepComp(c) {
 /** Sorts mineurs donnés d'office par la classe à la création (clerc : Lumière, sort de druide de la Nature), hors choix. */
 const autoCantrips = c => CLASSES[c.cls].creation && CLASSES[c.cls].creation.auto ? CLASSES[c.cls].creation.auto(c) : [];
 const cantripMax = (c, g) => R.cantrips(g) - autoCantrips(c).length;
+/** Sort à choisir à la création : ligne dépliable commune (fiche du sort au toucher du nom, rond pour choisir). */
+const crPick = (act, s, g, on, full) => pickRow({ act, id: s.id, on, full, name: esc(s.n) + tags(s), label: s.n, pills: keyPills(s, g), body: spellBody(s, g) });
+const fold = t => (t || "").toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
+/** Recherche par nom (les sorts choisis restent toujours visibles). */
+const crFind = (c, list, sel) => !c.sq ? list : list.filter(s => sel.includes(s.id) || fold(s.n).includes(fold(c.sq)));
 function stepSorts(c) {
   const g = preview(c), cMax = cantripMax(c, g), cs = CLASS_START[c.cls], auto = autoCantrips(c), ap = alwaysPrepared(g);
-  const cans = classSpells(g).filter(s => s.l === 0 && !auto.includes(s.id)), l1 = classSpells(g).filter(s => s.l === 1 && !ap.includes(s.id));
-  let h = `<div class="crbudget"><span>Sorts mineurs</span><b>${c.cantrips.length} / ${cMax}</b></div><div class="chips">${cans.map(s => { const on = c.cantrips.includes(s.id); return chip('data-a="cr-can"', s.id, on, esc(s.n), !on && c.cantrips.length >= cMax); }).join("")}</div>`;
-  if (cs.book) h += `<div class="crbudget" style="margin-top:12px"><span>Grimoire : ${cs.book} sorts de niveau 1</span><b>${c.spells.length} / ${cs.book}</b></div><div class="chips">${l1.map(s => { const on = c.spells.includes(s.id); return chip('data-a="cr-book"', s.id, on, esc(s.n), !on && c.spells.length >= cs.book); }).join("")}</div>`;
+  const cans = classSpells(g).filter(s => s.l === 0 && !auto.includes(s.id)).sort(byName), l1 = classSpells(g).filter(s => s.l === 1 && !ap.includes(s.id)).sort(byName);
+  const list = (act, arr, sel, max) => `<div class="luplist">${crFind(c, arr, sel).map(s => crPick(act, s, g, sel.includes(s.id), sel.length >= max)).join("") || `<div class="empty">Aucun sort ne correspond.</div>`}</div>`;
+  let h = `<input id="cr-sq" type="search" value="${esc(c.sq || "")}" placeholder="Chercher un sort" aria-label="Chercher un sort" autocomplete="off"><p class="help" style="margin:4px 0 0">Touche un nom pour lire le sort ; le rond à droite le choisit.</p>`;
+  h += `<div class="crbudget" style="margin-top:10px"><span>Sorts mineurs</span><b>${c.cantrips.length} / ${cMax}</b></div>${list('data-a="cr-can"', cans, c.cantrips, cMax)}`;
+  if (cs.book) h += `<div class="crbudget" style="margin-top:12px"><span>Grimoire : ${cs.book} sorts de niveau 1</span><b>${c.spells.length} / ${cs.book}</b></div>${list('data-a="cr-book"', l1, c.spells, cs.book)}`;
   const pool = cs.book ? l1.filter(s => c.spells.includes(s.id)) : l1, pMax = R.prepMax(g);
   if (auto.length || ap.length) h = `<p class="help">${[auto.length ? `Déjà acquis : ${auto.map(id => esc(BY_ID[id].n)).join(", ")} (en plus des sorts mineurs).` : "", ap.length ? `Toujours préparés : ${ap.map(id => esc(BY_ID[id].n)).join(", ")} (hors limite).` : ""].filter(Boolean).join(" ")}</p>` + h;
-  if (R.slots(g).length && pMax) h += `<div class="crbudget" style="margin-top:12px"><span>${CLASSES[c.cls].known ? "Sorts connus" : `Sorts préparés (${CLASSES[c.cls].abN} + niveau)`}</span><b>${c.prep.length} / ${pMax}</b></div><p class="help">Facultatif : modifiable ensuite chaque jour dans l'onglet Sorts.</p><div class="chips">${pool.map(s => { const on = c.prep.includes(s.id); return chip('data-a="cr-prep"', s.id, on, esc(s.n), !on && c.prep.length >= pMax); }).join("") || `<span class="muted">Choisis d'abord les sorts du grimoire.</span>`}</div>`;
+  if (R.slots(g).length && pMax) h += `<div class="crbudget" style="margin-top:12px"><span>${CLASSES[c.cls].known ? "Sorts connus" : `Sorts préparés (${CLASSES[c.cls].abN} + niveau)`}</span><b>${c.prep.length} / ${pMax}</b></div><p class="help">Facultatif : modifiable ensuite chaque jour dans l'onglet Sorts.</p>${pool.length ? list('data-a="cr-prep"', pool, c.prep, pMax) : `<span class="muted">Choisis d'abord les sorts du grimoire.</span>`}`;
   return h;
 }
 function stepEquip(c) {
@@ -204,9 +213,11 @@ onChange(t => t.dataset.crbgtool != null, t => upd(c => { c.bc.tools = [t.value]
 onChange(t => t.dataset.crbglang != null, t => upd(c => { const l = [...(c.bc.langs || [])]; l[+t.dataset.crbglang] = t.value; c.bc.langs = l; }));
 onClick("cr-skill", (b) => upd(c => { const cs = CLASS_START[c.cls]; c.skills = toggle(c.skills, b.dataset.v, cs.skills.n); c.exp = c.exp.filter(x => x === "tools" || c.skills.includes(x) || [...(raceGives(c) || { skills: [] }).skills, ...bgSkills(c)].includes(x)); }));
 onClick("cr-exp", (b) => upd(c => { c.exp = toggle(c.exp, b.dataset.v, CLASS_START[c.cls].expertise || 0); }));
-onClick("cr-can", (b) => upd(c => { c.cantrips = toggle(c.cantrips, b.dataset.v, cantripMax(c, preview(c))); }));
-onClick("cr-book", (b) => upd(c => { c.spells = toggle(c.spells, b.dataset.v, CLASS_START[c.cls].book); c.prep = c.prep.filter(x => c.spells.includes(x)); }));
-onClick("cr-prep", (b) => upd(c => { c.prep = toggle(c.prep, b.dataset.v, R.prepMax(preview(c))); }));
+const full = (arr, id, max) => !arr.includes(id) && arr.length >= max ? (toast(`Limite atteinte (${arr.length}/${max}) : retire d'abord un sort`), true) : false;
+onClick("cr-can", (b) => { const c = S.cr, id = b.dataset.id || b.dataset.v; if (!c || full(c.cantrips, id, cantripMax(c, preview(c)))) return; upd(c => { c.cantrips = toggle(c.cantrips, id, cantripMax(c, preview(c))); }); });
+onInput("#cr-sq", t => { if (!S.cr) return; S.cr.sq = t.value; S.luKeep = true; render(); });
+onClick("cr-book", (b) => { const c0 = S.cr, id = b.dataset.id || b.dataset.v; if (!c0 || full(c0.spells, id, CLASS_START[c0.cls].book)) return; upd(c => { c.spells = toggle(c.spells, id, CLASS_START[c.cls].book); c.prep = c.prep.filter(x => c.spells.includes(x)); }); });
+onClick("cr-prep", (b) => { const c = S.cr, id = b.dataset.id || b.dataset.v; if (!c || full(c.prep, id, R.prepMax(preview(c)))) return; upd(c => { c.prep = toggle(c.prep, id, R.prepMax(preview(c))); }); });
 onClick("cr-eqmode", (b) => upd(c => { c.eqMode = b.dataset.v; }));
 onClick("cr-eq", (b) => upd(c => { c.eq = { ...c.eq, [b.dataset.k]: +b.dataset.v }; }));
 onChange(t => t.dataset.crpick != null, t => upd(c => { c.picks = { ...c.picks, [t.dataset.crpick]: t.value }; }));
