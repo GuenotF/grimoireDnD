@@ -15,7 +15,8 @@ const R = {
   mod: sc => Math.floor((sc - 10) / 2),
   ab: (g, k) => R.mod(+(g.abil || {})[k] || 10),  // modificateur d'une caractéristique (str, dex…)
   am: g => R.ab(g, C(g).ab),                       // modificateur de la caractéristique d'incantation
-  slots: (g, lv = g.level) => C(g).slots[lv] || [],
+  // Emplacements du niveau ; au niveau actuel (lv omis), + ceux créés par la classe (ensorceleur : Source de magie, perdus au repos long)
+  slots: (g, lv) => { const b = C(g).slots[lv == null ? g.level : lv] || []; if (lv != null || !C(g).extraSlots) return b; const x = C(g).extraSlots(g); return b.map((n, i) => n + (x[i + 1] || 0)); },
   maxLevel: (g, lv = g.level) => (C(g).slots[lv] || []).length,
   unlockAt: (g, sl) => { for (let lv = 1; lv <= 20; lv++) if ((C(g).slots[lv] || []).length >= sl) return lv; return 21; },
   cantrips: (g, lv = g.level) => C(g).cantrips(lv) + (C(g).cantripBonus ? C(g).cantripBonus({ ...g, level: lv }) : 0), // + sort mineur de sous-classe

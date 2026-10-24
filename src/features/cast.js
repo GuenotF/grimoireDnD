@@ -15,7 +15,8 @@ const slotsLeft = (g, lv) => Math.max(0, (R.slots(g)[lv - 1] || 0) - (+(g.used[l
 const firstFree = (g, s) => { for (let lv = s.l; lv <= R.maxLevel(g); lv++) if (slotsLeft(g, lv) > 0) return lv; return 0; };
 function castHTML(g, s, prepared) {
   // Sort mineur : pas d'emplacement ; bouton seulement s'il demande la concentration (suivi dans la barre du bas)
-  if (s.l === 0) return s.c ? `<div class="cast"><button class="btn cast-go" data-a="cast" data-id="${s.id}" data-l="0">Lancer · concentration</button></div>` : "";
+  const mx = C(g).castExtras ? C(g).castExtras(g, s) : ""; // ex. ensorceleur : métamagie
+  if (s.l === 0) return s.c || mx ? `${mx}<div class="cast"><button class="btn cast-go" data-a="cast" data-id="${s.id}" data-l="0">Lancer${s.c ? " · concentration" : ""}</button></div>` : "";
   let h = "";
   if (prepared) {
     const lv = firstFree(g, s), higher = !!s.up && R.maxLevel(g) > s.l; // ▲ seulement si le sort gagne quelque chose à monter
@@ -24,7 +25,7 @@ function castHTML(g, s, prepared) {
   }
   if (s.ri && C(g).canRitual && C(g).canRitual(prepared)) h += `<button class="btn cast-rit" data-a="cast-rit" data-id="${s.id}">Rituel · +10 min</button>`;
   if (!h) return "";
-  h = `<div class="cast">${h}</div>`;
+  h = `${mx}<div class="cast">${h}</div>`;
   if (prepared && S.castOpen === s.id) {
     const lvls = []; for (let lv = s.l; lv <= R.maxLevel(g); lv++) lvls.push(lv);
     h += `<div class="chooser"><span class="lbl">Lancer avec un emplacement de</span><div class="lvls">${lvls.map(lv => {
@@ -76,7 +77,7 @@ onClick(["cast", "cast-rit", "cast-force"], (b, a, e) => {
   const cur = concOf(g);
   if (a !== "cast-force" && s.c && cur && cur.id !== s.id) { S.concWarn = { id: s.id, lv, rit }; S.castOpen = null; render(); return; }
   S.concWarn = null; S.castOpen = null;
-  const SNAP = ["used", "effects", "wardMade", "wardHp", "schoolU"], prev = JSON.parse(JSON.stringify(Object.fromEntries(SNAP.filter(k => k in g).map(k => [k, g[k]]))));
+  const SNAP = ["used", "effects", "wardMade", "wardHp", "schoolU", ...(C(g).castSnap || [])], prev = JSON.parse(JSON.stringify(Object.fromEntries(SNAP.filter(k => k in g).map(k => [k, g[k]]))));
   let extra = "";
   mutate(g => {
     if (!free) g.used[lv] = (+(g.used[lv] || 0)) + 1;

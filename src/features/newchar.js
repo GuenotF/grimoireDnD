@@ -12,6 +12,7 @@ const CLASS_INFO = {
   barbare: { i: "B", col: "#C2410C", d: "Rage, Défense sans armure, Attaque téméraire ; voie primitive au niveau 3. Pas de sorts.", tags: ["Combattant", "Dé de vie d12"] },
   clerc: { i: "C", col: "#8A6516", d: "Sorts préparés dans toute la liste, domaine divin dès le niveau 1 (sorts de domaine), Conduit divin, Renvoi des morts-vivants. Caractéristique : Sagesse.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },
   druide: { i: "D", col: "#2F6B45", d: "Sorts préparés dans toute la liste, sorts mineurs, rituels, Forme sauvage. Caractéristique : Sagesse.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },
+  ensorceleur: { i: "E", col: "#6B3FA0", d: "Sorts connus, points de sorcellerie (créer des emplacements), métamagie ; origine dès le niveau 1 (Lignée draconique, Magie sauvage). Caractéristique : Charisme.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },
   magicien: { i: "M", col: "#2D4A9A", d: "Grimoire, sorts copiés, Restauration arcanique. Caractéristique : Intelligence.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },
   paladin: { i: "P", col: "#A2261C", d: "Sorts préparés dans toute la liste, sorts de serment, Imposition des mains, Châtiment divin. Caractéristique : Charisme.", tags: ["Demi-lanceur", "Sorts niv. 1 à 5"] },
   rodeur: { i: "R", col: "#22573A", d: "Sorts connus (pas de préparation), Ennemi juré, Explorateur-né ; Chasseur ou Maître des bêtes au niveau 3. Caractéristique : Sagesse.", tags: ["Demi-lanceur", "Sorts niv. 1 à 5"] },

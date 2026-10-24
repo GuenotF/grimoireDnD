@@ -128,8 +128,8 @@ function grimoireHTML(g) {
   h += `<div class="rubric" id="slots-top" style="margin-top:4px"><h2>Emplacements de sorts</h2><span class="aside">touche un cercle quand tu lances un sort</span></div><div class="slots">`;
   if (!slots.length) h += `<p class="muted" style="margin:0 0 6px">Pas encore d'emplacement : les sorts arrivent au niveau ${R.unlockAt(g, 1)}.</p>`;
   slots.forEach((n, i) => {
-    const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0));
-    h += `<div class="slotrow"><span class="lv">Niveau ${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
+    const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0)), base = (C(g).slots[g.level] || [])[i] || 0; // au-delà de base : emplacements créés (pointillés)
+    h += `<div class="slotrow"><span class="lv">Niveau ${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}${k >= base ? " made" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
   });
   // Repos court (dés de vie + récupération de la classe) et repos long : features/rest.js
   h += `</div>` + restBarHTML(g);
@@ -206,7 +206,7 @@ function jeuRow(g, s, kind) {
     else if (kind === "cantrip" && s.c) act = `<button class="btn cast-go sm" data-a="cast" data-id="${s.id}" data-l="0">Lancer</button>`;
   }
   return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${noteMark(g, s)}${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${act}</div>
-  ${open ? `<div class="jbody">${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${noteOf(g, s) ? noteBox(g, s) : ""}${(kind !== "cantrip" || s.c) ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
+  ${open ? `<div class="jbody">${pillsHTML(s, g)}<div class="eff">${esc(s.e)}</div>${s.up ? `<div class="up">${s.l === 0 ? "Progression" : "Emplacement plus élevé"} : ${esc(s.up)}</div>` : ""}${noteOf(g, s) ? noteBox(g, s) : ""}${(kind !== "cantrip" || s.c || C(g).castExtras) ? castHTML(g, s, kind === "prep") : ""}</div>` : ""}${concWarnHTML(g, s)}</div>`;
 }
 function jeuHTML(g) {
   const prepared = new Set(g.prepared), max = R.maxLevel(g), slots = R.slots(g), ready = castable(g);

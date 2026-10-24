@@ -46,7 +46,7 @@ function choiceHTML(g, id, st) {
   if (f.spells) { // Initié à la magie, Mage offensif, Magie rituelle
     h += `<span class="lusub">Classe (caractéristique d'incantation)</span><div class="chips">${Object.entries(SPELL_CLASSES).map(([k, [n, ab]]) => `<button class="chip" data-a="fp-cls" data-v="${k}" aria-pressed="${ch.cls === k}">${n} · ${ABN[ab]}</button>`).join("")}</div>`;
     if (ch.cls) {
-      if (!["magicien", "druide", "clerc"].includes(ch.cls)) h += `<small class="muted">La liste complète de cette classe n'est pas dans l'appli : tous les sorts du niveau sont proposés, vérifie qu'il fait partie de la liste.</small>`;
+      if (!["magicien", "druide", "clerc", "ensorceleur"].includes(ch.cls)) h += `<small class="muted">La liste complète de cette classe n'est pas dans l'appli : tous les sorts du niveau sont proposés, vérifie qu'il fait partie de la liste.</small>`;
       const sel = ch.spells || [], blk = (lv, n, lbl) => { const pool = featSpellPool(id, ch.cls, lv), cnt = sel.filter(x => BY_ID[x] && BY_ID[x].l === lv).length;
         return `<span class="lusub">${lbl} · ${cnt}/${n}</span><div class="chips">${pool.map(s => { const on = sel.includes(s.id); return `<button class="chip" data-a="fp-spell" data-v="${s.id}" data-n="${n}" aria-pressed="${on}"${!on && cnt >= n ? " disabled" : ""}>${esc(s.n)}</button>`; }).join("")}</div>`; };
       if (f.spells.cantrips) h += blk(0, f.spells.cantrips, f.spells.atk ? "Sort mineur avec jet d'attaque" : "Sorts mineurs");

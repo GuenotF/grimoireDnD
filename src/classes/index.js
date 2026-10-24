@@ -8,8 +8,9 @@ import barbare from "./barbare.js";
 import roublard from "./roublard.js";
 import rodeur from "./rodeur.js";
 import clerc from "./clerc.js";
+import ensorceleur from "./ensorceleur.js";
 
-export const CLASSES = { magicien, paladin, druide, clerc, barbare, roublard, rodeur };
+export const CLASSES = { magicien, paladin, druide, clerc, ensorceleur, barbare, roublard, rodeur };
 /** Définition de la classe d'un personnage (magicien pour les anciens fichiers sans classe). */
 export const C = g => CLASSES[g && g.cls] || CLASSES.magicien;
 /** Sorts toujours préparés, hors limite (sorts de serment du paladin). */

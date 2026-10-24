@@ -53,6 +53,7 @@ src/
     roublard.js             classe sans sorts : Attaque sournoise, Ruse, Esquive instinctive, Assassin
     barbare.js              classe sans sorts : Rage, Frénésie (Berserker), Défense sans armure, Attaque téméraire
     clerc.js                contrat + 8 domaines, Conduit divin, Renvoi et Destruction des morts-vivants, Intervention divine
+    ensorceleur.js          contrat + points de sorcellerie, métamagie, Lignée draconique, Magie sauvage (ensorceleur-sauvage.js : table d100)
     rodeur.js               contrat + sorts connus, Ennemi juré, Explorateur-né, Chasseur, réglages (voir AJOUTER_UNE_CLASSE.md)
     rodeur-compagnon.js     Maître des bêtes : compagnon (Bestiaire, maîtrise, PV)
     druide-wildshape.js     Forme sauvage : formes possibles, forme active, Changeforme de combat, Bestiaire
@@ -110,6 +111,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `renderSheets(g, levelUpOpen)` | Volets propres (Imposition des mains, formes possibles) | | ✓ | ✓ |
 | `levelUp` | Assistant : étapes propres (`init`, `steps`, `apply`…) ou crochets des étapes communes (`rowsBefore`, `rowsAfter`, `summaryExtra`, `notes`, `choicesFirst`, `choices`, `recapBefore`, `recapAfter`, `recapNotes`, `apply`) | ✓ | ✓ | ✓ |
 | `weaponProf`, `armorProf`, `tools` en fonction | Maîtrises selon le personnage (domaine du clerc : armures lourdes, armes de guerre) | | | |
+| `extraSlots(g)`, `castExtras(g, sort)`, `castSnap`, `hpLv(g)` | Emplacements créés en plus au niveau actuel (`R.slots`), options au moment de lancer (métamagie), champs remis par « Annuler » après un sort, PV de plus par niveau (Résilience draconique) | | | |
 | `known(lv)` | Classe à **sorts connus** (rôdeur, puis barde, ensorceleur, occultiste) : nombre de sorts connus au niveau. Les sorts connus sont rangés dans `g.prepared` (tous lançables) ; `R.prepMax` renvoie ce nombre. Gérer : apprendre / oublier ; assistant : apprendre les sorts gagnés, en remplacer un | | | |
 | `settings(g)` | Réglages propres à la classe en mode Gérer, après les capacités (rôdeur : ennemis jurés, terrains, compagnon) | | | |
 | `afterAttacks(g)` | Bloc en jeu sous les attaques (rôdeur : carte du compagnon) | | | |

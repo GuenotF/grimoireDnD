@@ -82,3 +82,13 @@ button.rubric.fold.oath { border-bottom-color: var(--gold); } button.rubric.fold
 .pqa { display: inline-flex; gap: 5px; align-items: center; }
 .petcalc { font-size: 12.5px; color: var(--ok); font-weight: 700; }
 .crcls { display: grid; gap: 7px; margin-top: 14px; }
+/* Ensorceleur : emplacements créés, métamagie, magie sauvage */
+.pip.made { border-style: dashed; background: var(--rubric-soft); }
+.pip.made.used { border-style: solid; }
+.mmbox { display: grid; gap: 6px; margin: 4px 0 2px; }
+.mmlist { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
+.mmdesc p { margin: 0 0 4px; font-size: 13.5px; line-height: 1.4; }
+.wildcard { background: var(--ps-bg); border: 1.5px solid var(--ps-bd); border-radius: 10px; padding: 10px 12px; display: grid; gap: 7px; margin: 4px 0 10px; }
+.wildcard .wh { font-family: var(--f-display); font-size: 16px; }
+.wsurge { display: grid; gap: 3px; background: var(--surface); border: 1.5px solid var(--rubric); border-radius: 8px; padding: 8px 10px; font-size: 14px; line-height: 1.4; }
+.wsurge .wn small { color: var(--muted); margin-left: 4px; }
