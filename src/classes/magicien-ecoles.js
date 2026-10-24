@@ -1,7 +1,7 @@
 // Magicien : capacités de classe et des 8 écoles (traditions arcaniques, Manuel des joueurs 2014, texte d'AideDD
 // résumé pour la table). Ressources suivies : Protection arcanique (Abjuration, absorbe les dégâts avant les PV),
 // Présage (Divination), et une utilisation par repos pour Permutation, Double illusoire et Métamorphe.
-import { onClick, onInput } from "../core/actions.js";
+import { onChange, onClick, onInput } from "../core/actions.js";
 import { esc, signed } from "../core/format.js";
 import { G } from "../core/state.js";
 import { mutate } from "../core/store.js";
@@ -85,8 +85,9 @@ function wizResHTML(g) {
   }
   if (isSchool(g, "Divination", 2)) {
     const n = portentN(g), v = g.portent || [], u = g.portentU || [];
-    rows += `<div class="resrow"><span class="rn"><b>Présage</b><small>${n} d20 après chaque repos long · toucher pour barrer</small></span></div>
-    <div class="portent">${Array.from({ length: n }, (_, i) => v[i] ? `<button class="pdie${u[i] ? " used" : ""}" data-a="portent-use" data-i="${i}" aria-pressed="${!!u[i]}" aria-label="Présage ${v[i]}${u[i] ? ", utilisé" : ""}">${v[i]}</button>` : `<input id="portent-${i}" class="pdie" type="number" inputmode="numeric" min="1" max="20" placeholder="d20" aria-label="Résultat du d20 de Présage ${i + 1}">`).join("")}</div>`;
+    rows += `<div class="resrow"><span class="rn"><b>Présage</b><small>${n} d20 après chaque repos long · touche un résultat pour l'utiliser</small></span></div>
+    <div class="portent">${Array.from({ length: n }, (_, i) => v[i] ? `<button class="pdie${u[i] ? " used" : ""}" data-a="portent-use" data-i="${i}" aria-pressed="${!!u[i]}" aria-label="Présage ${v[i]}${u[i] ? ", utilisé (toucher pour annuler)" : ", disponible"}">${v[i]}${u[i] ? "<small>utilisé</small>" : ""}</button>` : `<input id="portent-${i}" class="pdie" type="number" inputmode="numeric" min="1" max="20" placeholder="d20" aria-label="Résultat du d20 de Présage ${i + 1}" enterkeyhint="done">`).join("")}
+    ${v.some(Boolean) ? `<button class="linkbtn" data-a="portent-clear">Corriger les résultats</button>` : ""}</div>`;
   }
   const su = schoolUse(g);
   if (su) rows += capRow(g, "schoolu", su.n, su.rest, `<button class="pip${g.schoolU ? " used" : ""}" data-a="school-use" aria-label="${su.n}, ${g.schoolU ? "utilisé" : "disponible"}"></button>`, false, () => pillsRaw([["f", "Effet", (wizFeats(g).find(f => f.n === su.n) || {}).pill ? wizFeats(g).find(f => f.n === su.n).pill(g) : ""]]));
@@ -111,11 +112,18 @@ function wizOnCast(g, s, lv) {
 const wizDmgBonus = (g, s) => isSchool(g, "Évocation", 10) && s.s === "Évocation" && s.p && s.p.startsWith("d:") ? R.ab(g, "int") : 0;
 
 onClick("ward-add", (b) => { mutate(g => { g.wardHp = Math.min(wardMax(g), (g.wardHp || 0) + +b.dataset.v); }); });
-onClick("portent-use", (b) => { mutate(g => { const u = [...(g.portentU || [])]; u[+b.dataset.i] = !u[+b.dataset.i]; g.portentU = u; }); });
-onInput(t => /^portent-\d$/.test(t.id), (t) => {
-  const n = Math.floor(+t.value); if (!(n >= 1 && n <= 20)) return;
-  mutate(g => { const v = [...(g.portent || [])]; v[+t.id.slice(8)] = n; g.portent = v; }, false); setTimeout(render, 0);
-});
+onClick("portent-use", (b) => { const g = G(); if (!g) return; const i = +b.dataset.i, v = (g.portent || [])[i], was = !!(g.portentU || [])[i];
+  mutate(g => { const u = [...(g.portentU || [])]; u[i] = !was; g.portentU = u; });
+  toast(was ? `Présage <b>${v}</b> de nouveau disponible` : `<b>Présage ${v}</b> utilisé : il remplace le d20`, was ? null : () => { mutate(g => { const u = [...(g.portentU || [])]; u[i] = false; g.portentU = u; }); return "Présage rendu"; }); });
+// Saisie d'un d20 : validée au bout de deux chiffres, ou d'un seul de 3 à 9 (1 et 2 peuvent commencer 10 à 20) ; sinon en quittant le champ ou avec Entrée
+const portentSet = (t, now) => { const raw = t.value.trim(), n = Math.floor(+raw); if (!(n >= 1 && n <= 20)) return;
+  if (!now && raw.length < 2 && n <= 2) return;
+  const i = +t.id.slice(8); mutate(g => { const v = [...(g.portent || [])]; v[i] = n; g.portent = v; }, false);
+  setTimeout(() => { render(); const nx = document.getElementById(`portent-${i + 1}`) || document.querySelector('input[id^="portent-"]'); if (nx) nx.focus({ preventScroll: true }); }, 0); };
+onInput(t => /^portent-\d$/.test(t.id), t => portentSet(t, false));
+onChange(t => /^portent-\d$/.test(t.id), t => portentSet(t, true));
+onClick("portent-clear", () => { const g = G(); if (!g) return; const prev = JSON.parse(JSON.stringify({ portent: g.portent || [], portentU: g.portentU || [] }));
+  mutate(g => { g.portent = []; g.portentU = []; }); toast("Résultats du Présage effacés : tape-les de nouveau", () => { mutate(g => Object.assign(g, prev)); return "Résultats rétablis"; }); });
 onClick("school-use", () => { const g = G(); if (!g) return; const su = schoolUse(g); mutate(g => { g.schoolU = g.schoolU ? 0 : 1; }); if (su && !g.schoolU) toast(`<b>${esc(su.n)}</b> utilisé`); });
 
 /** Champs propres aux écoles (normalisation) et repos. */

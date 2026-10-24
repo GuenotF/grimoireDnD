@@ -33,10 +33,15 @@ def test_abjuration_protection(browser, devices, url):
 
 def test_divination_presage(browser, devices, url):
     a = App(browser, devices, url, char=dict(NEMEIA, school="Divination"), view="jeu")
-    a.pg.fill("#portent-0", "17"); a.pg.wait_for_timeout(80); a.pg.fill("#portent-1", "3"); a.pg.wait_for_timeout(80)
+    a.pg.click("#portent-0"); a.pg.keyboard.type("1"); a.pg.wait_for_timeout(80)
+    check(a.js("(G().portent || []).length") == 0, "un seul chiffre (1) : pas encore validé")
+    a.pg.keyboard.type("7"); a.pg.wait_for_timeout(120)
+    a.pg.keyboard.type("3"); a.pg.wait_for_timeout(120)
     check(a.js("JSON.stringify(G().portent)") == "[17,3]", "deux résultats notés")
     a.click('[data-a="portent-use"][data-i="1"]')
-    check(a.g("portentU[1]") and a.count(".pdie.used") == 1, "résultat barré")
+    check(a.g("portentU[1]") and a.count(".pdie.used") == 1 and a.js("getComputedStyle(document.querySelector('.pdie.used')).textDecorationLine") == "line-through", "résultat barré")
+    a.undo(); check(not a.g("portentU[1]"), "annulable")
+    a.click('[data-a="portent-use"][data-i="1"]')
     a.click('[data-a="longrest"]')
     check(a.js("G().portent.length") == 0, "repos long : nouveau Présage")
     a.close()

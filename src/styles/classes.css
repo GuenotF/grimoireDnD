@@ -114,3 +114,10 @@ button.rubric.fold.oath { border-bottom-color: var(--gold); } button.rubric.fold
 .kicnt { display: inline-flex; align-items: center; gap: 8px; }
 .kicnt b { font-family: var(--f-display); font-size: 20px; min-width: 2.6em; text-align: center; }
 .kicnt b small { font-size: 13px; color: var(--muted); }
+
+/* Magicien, Divination : dés de Présage (résultat à toucher pour l'utiliser, barré une fois utilisé) */
+.portent { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 4px 0 8px; }
+.portent .pdie { width: 3.4em; height: 3.4em; box-sizing: border-box; border-radius: 10px; border: 2px solid var(--pf-bd); background: var(--pf-bg); color: var(--pf-fg); font-family: var(--f-display); font-size: 20px; font-weight: 700; text-align: center; padding: 0; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; cursor: pointer; }
+.portent input.pdie { background: var(--surface); color: var(--ink); border-style: dashed; cursor: text; font-size: 18px; }
+.portent .pdie.used { background: var(--sunk); border-color: var(--rule); color: var(--muted); text-decoration: line-through; }
+.portent .pdie small { font-family: var(--f-body, inherit); font-size: 10px; font-weight: 400; text-decoration: none; margin-top: 2px; }
