@@ -9,7 +9,7 @@ import { pCantrips, pClassList, pConc, pDots, pExtras, pFoot, pHeader, pNotes, p
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { SLOTS } from "../rules/tables.js";
-import { capRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pillsRaw, statLabel } from "../ui/components.js";
 import { MV, SIZES, actRest, bestiaryHTML, fpLabel, modOf, newForms, spdTxt, wsActiveHTML, wsAllowed, wsConcHTML, wsSheetHTML } from "./druide-wildshape.js";
 
 const DRU_FEATS = [
@@ -40,7 +40,7 @@ function druResHTML(g) {
   const n = DRU.ws(g); if (!n) return "";
   const u = Math.min(n, g.wsU);
   const pips = n > 10 ? `<span class="muted">illimitée</span>` : Array.from({ length: n }, (_, k) => `<button class="pip${k < u ? " used" : ""}" data-a="res-pip" data-r="ws" data-k="${k}" aria-label="Forme sauvage ${k + 1}, ${k < u ? "utilisée" : "disponible"}"></button>`).join("");
-  return `<div class="rubric"><h2>Ressources du druide</h2></div><div class="slots res">${capRow(g, "ws", "Forme sauvage", "repos court", pips, false, wsBody)}</div>`;
+  return foldSec("res-cls", "Ressources du druide", "", `<div class="slots res">${capRow(g, "ws", "Forme sauvage", "repos court", pips, false, wsBody)}</div>`);
 }
 onChange("#f-circle", t => { mutate(g => { g.circle = t.value; }); });
 onChange("#f-terrain", t => { mutate(g => { g.terrain = t.value; }); });

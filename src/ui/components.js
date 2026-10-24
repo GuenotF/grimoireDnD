@@ -47,4 +47,6 @@ function pickRow({ act, id, on, full, off, why, name, label, pills, body }) {
 }
 onClick("pk-open", (b) => { const k = "pk:" + b.dataset.id; if (S.open.has(k)) S.open.delete(k); else S.open.add(k); if (S.lu || S.cr) S.luKeep = true; render(); });
 
-export { foldKey, isFold, foldHead, pillsRaw, capRow, removeBtn, statLabel, pickRow };
+/** Section repliable (ressources de classe, réglages) : en-tête ▾ comme les autres sections ; body omis si repliée. */
+const foldSec = (k, title, aside, body, summary = "") => !body ? "" : foldHead(k, "", title, aside || "", summary) + (isFold(k) ? "" : body);
+export { foldKey, isFold, foldHead, foldSec, pillsRaw, capRow, removeBtn, statLabel, pickRow };

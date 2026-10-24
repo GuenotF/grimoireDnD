@@ -12,7 +12,7 @@ import { pCantrips, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, pSpel
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { setTemp } from "../rules/hp.js";
-import { capRow, pickRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pickRow, pillsRaw, statLabel } from "../ui/components.js";
 
 // ---------- Tables
 const KNOWN = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
@@ -133,11 +133,11 @@ function resHTML(g) {
   const list = resOf(g), inn = innate(g);
   let h = "";
   if (list.length || g.patron === "fielon") {
-    h += `<div class="rubric"><h2>Ressources de l'occultiste</h2></div><div class="slots res">`;
+    let r = `<div class="slots res">`;
     list.forEach((x, i) => { const u = g[x.r + "U"] || 0;
-      h += capRow(g, x.r, x.n, x.rest, `<button class="pip${u ? " used" : ""}" data-a="res-pip" data-r="${x.r}" data-k="0" aria-label="${esc(x.n)}, ${u ? "utilisé" : "disponible"}"></button>`, i > 0, () => pillsRaw(x.pills(g)) + (x.r === "omaster" ? `<div class="cast"><button class="btn cast-go sm" data-a="occ-master"${u ? " disabled" : ""}>Récupérer les emplacements</button></div>` : "")); });
-    if (g.patron === "fielon") h += `<div class="resrow${list.length ? " sep" : ""}"><span class="rn"><b>Bénédiction du ténébreux</b><small>quand tu réduis un ennemi à 0 PV</small></span><button class="btn cast-go sm" data-a="occ-bless">+${OCC.bless(g)} PV temp.</button></div>`;
-    h += `</div>`;
+      r += capRow(g, x.r, x.n, x.rest, `<button class="pip${u ? " used" : ""}" data-a="res-pip" data-r="${x.r}" data-k="0" aria-label="${esc(x.n)}, ${u ? "utilisé" : "disponible"}"></button>`, i > 0, () => pillsRaw(x.pills(g)) + (x.r === "omaster" ? `<div class="cast"><button class="btn cast-go sm" data-a="occ-master"${u ? " disabled" : ""}>Récupérer les emplacements</button></div>` : "")); });
+    if (g.patron === "fielon") r += `<div class="resrow${list.length ? " sep" : ""}"><span class="rn"><b>Bénédiction du ténébreux</b><small>quand tu réduis un ennemi à 0 PV</small></span><button class="btn cast-go sm" data-a="occ-bless">+${OCC.bless(g)} PV temp.</button></div>`;
+    h += foldSec("res-cls", "Ressources de l'occultiste", "", r + `</div>`);
   }
   const grp = k => inn.filter(x => x.grp === k);
   if (grp("arc").length) h += innateBlock(g, grp("arc"), "occ-arc", "Arcanum mystique", "une fois par repos long, sans emplacement");

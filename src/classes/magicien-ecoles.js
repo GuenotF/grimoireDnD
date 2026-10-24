@@ -7,7 +7,7 @@ import { G } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { R } from "../rules/common.js";
-import { capRow, pillsRaw } from "../ui/components.js";
+import { capRow, foldSec, pillsRaw } from "../ui/components.js";
 
 const dd = g => 8 + R.prof(g.level) + R.am(g);
 const school = g => g.school;
@@ -91,7 +91,7 @@ function wizResHTML(g) {
   }
   const su = schoolUse(g);
   if (su) rows += capRow(g, "schoolu", su.n, su.rest, `<button class="pip${g.schoolU ? " used" : ""}" data-a="school-use" aria-label="${su.n}, ${g.schoolU ? "utilisé" : "disponible"}"></button>`, false, () => pillsRaw([["f", "Effet", (wizFeats(g).find(f => f.n === su.n) || {}).pill ? wizFeats(g).find(f => f.n === su.n).pill(g) : ""]]));
-  return rows ? `<div class="rubric"><h2>Ressources de l'école</h2></div><div class="slots res">${rows}</div>` : "";
+  return rows ? foldSec("res-cls", "Ressources de l'école", "", `<div class="slots res">${rows}</div>`) : "";
 }
 /** Dégâts encaissés par la Protection arcanique avant les PV (appelé par les dégâts du personnage). */
 function wardAbsorb(g, n) {

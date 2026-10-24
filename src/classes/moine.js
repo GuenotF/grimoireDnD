@@ -19,7 +19,7 @@ import { TOOL_LISTS } from "../rules/creation.js";
 import { acCalc } from "../rules/equipment.js";
 import { heal, hpCur } from "../rules/hp.js";
 import { ABILITIES } from "../rules/tables.js";
-import { capRow, pickRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pickRow, pillsRaw, statLabel } from "../ui/components.js";
 
 // ---------- Tables
 const MON = {
@@ -69,7 +69,7 @@ const OPTS = [
   { id: "deluge", lv: 2, cost: 1, n: "Déluge de coups", p: () => [["d", "Attaques", "2 à mains nues"], ["n", "Temps", "action bonus"]], d: g => `Après l'action Attaquer : deux attaques à mains nues en action bonus.${trad(g) === "paume" ? ` Technique de la paume, à chaque coup : JdS DEX ${MON.dd(g)} ou à terre, JdS FOR ${MON.dd(g)} ou repoussée de 4,50 m, ou plus de réaction jusqu'à la fin de ton prochain tour.` : ""}` },
   { id: "patiente", lv: 2, cost: 1, n: "Défense patiente", p: () => [["f", "Effet", "Esquiver"], ["n", "Temps", "action bonus"]], d: () => "Action Esquiver en action bonus." },
   { id: "aerien", lv: 2, cost: 1, n: "Déplacement aérien", p: () => [["f", "Effet", "Se désengager ou Foncer"], ["n", "Temps", "action bonus"]], d: () => "Se désengager ou Foncer en action bonus ; distance de saut doublée pour ce tour." },
-  { id: "renvoi", lv: 3, cost: 1, n: "Parade de projectiles : renvoyer", p: g => [["a", "Attaque", signed(R.prof(g.level) + Math.max(R.ab(g, "dex"), R.ab(g, "str")))], ["d", "Dégâts", `${MON.die(g.level)} + DEX`], ["n", "Portée", "6/18 m"]], d: () => "Si la Parade réduit les dégâts à 0 et que tu as une main libre : attrape le projectile, et pour 1 ki renvoie-le (attaque de moine, maîtrisée)." },
+  { id: "renvoi", lv: 3, cost: 1, n: "Parade de projectiles : renvoyer", p: g => [["s", "Réduction (réaction)", `1d10 + ${R.ab(g, "dex") + g.level}`], ["a", "Attaque", signed(R.prof(g.level) + Math.max(R.ab(g, "dex"), R.ab(g, "str")))], ["d", "Dégâts", `${MON.die(g.level)} + DEX`], ["n", "Portée", "6/18 m"]], d: () => "Si la Parade réduit les dégâts à 0 et que tu as une main libre : attrape le projectile, et pour 1 ki renvoie-le (attaque de moine, maîtrisée)." },
   { id: "etourdir", lv: 5, cost: 1, n: "Frappe étourdissante", p: g => [["s", "JdS", `CON ${MON.dd(g)}`], ["f", "Effet", "étourdie"]], d: () => "Quand tu touches au corps à corps : la cible fait un JdS de Constitution ou est étourdie jusqu'à la fin de ton prochain tour." },
   { id: "ame", lv: 14, cost: 1, n: "Âme de diamant : relance", p: () => [["f", "Effet", "relance un JdS raté"]], d: () => "Relance un jet de sauvegarde raté ; tu dois garder le second résultat." },
   { id: "fremissante", lv: 17, c: "paume", cost: 3, n: "Paume frémissante", p: g => [["s", "JdS", `CON ${MON.dd(g)}`], ["d", "Effet", "0 PV, ou 10d10 nécrotique"]], d: g => `Quand tu touches à mains nues : vibrations pendant ${g.level} jours. Action plus tard (même plan) : JdS de Constitution ; échec : 0 PV ; réussite : 10d10 nécrotiques. Une seule créature à la fois.` },
@@ -95,28 +95,28 @@ function resHTML(g) {
   let h = "";
   if (MON.ki(g)) {
     const n = MON.ki(g), u = Math.min(n, g.kiU || 0);
-    h += `<div class="rubric"><h2>Ki</h2><span class="aside">DD ${MON.dd(g)} · repos court</span></div><div class="slots res">`;
+    let r = `<div class="slots res">`;
     // Au-delà de 6 points, un compteur (−/+) plutôt qu'une rangée de cercles
     const pips = n <= 6 ? Array.from({ length: n }, (_, k) => `<button class="pip${k < u ? " used" : ""}" data-a="res-pip" data-r="ki" data-k="${k}" aria-label="Point de ki ${k + 1}, ${k < u ? "dépensé" : "disponible"}"></button>`).join("")
       : `<span class="kicnt"><button class="btn sm" data-a="ki-adj" data-d="1" aria-label="Dépenser un point de ki"${u >= n ? " disabled" : ""}>−</button><b aria-live="polite">${n - u}<small>/${n}</small></b><button class="btn sm" data-a="ki-adj" data-d="-1" aria-label="Rendre un point de ki"${u ? "" : " disabled"}>+</button></span>`;
-    h += capRow(g, "ki", "Points de ki", "repos court", pips, false, kiBody);
-    if (trad(g) === "paume" && g.level >= 6) h += capRow(g, "pl", "Plénitude physique", "repos long", `<button class="pip${g.plU ? " used" : ""}" data-a="res-pip" data-r="pl" data-k="0" aria-label="Plénitude physique, ${g.plU ? "utilisée" : "disponible"}"></button>`, true,
+    r += capRow(g, "ki", "Points de ki", "repos court", pips, false, kiBody);
+    if (trad(g) === "paume" && g.level >= 6) r += capRow(g, "pl", "Plénitude physique", "repos long", `<button class="pip${g.plU ? " used" : ""}" data-a="res-pip" data-r="pl" data-k="0" aria-label="Plénitude physique, ${g.plU ? "utilisée" : "disponible"}"></button>`, true,
       () => `${pillsRaw([["f", "Soins", `${3 * g.level} PV`], ["n", "Temps", "action"]])}<div class="cast"><button class="btn cast-go sm" data-a="mo-plen"${g.plU ? " disabled" : ""}>Se soigner : +${3 * g.level} PV</button></div>`);
-    h += `</div>`;
+    h += foldSec("res-ki", "Ki", `${kiLeft(g)} / ${MON.ki(g)} · DD ${MON.dd(g)} · repos court`, r + `</div>`);
   }
   // Voie de l'ombre : sorts pour 2 ki ; Illusion mineure à volonté
   if (trad(g) === "ombre") {
     const left = kiLeft(g);
-    h += `<div class="rubric"><h2>Arts des ombres</h2><span class="aside">2 ki · sans composantes matérielles</span></div><div class="slots res">${optsOf(g).filter(o => o.shadow).map(o => `<div class="capopt"><b>${esc(o.n)}${BY_ID[o.sp].c ? ` <span class="tag c" title="Concentration">C</span>` : ""}</b>${pillsRaw(o.p(g))}<div class="eff">${esc(o.d(g))}</div><div class="cast">${kiBtn(o.id, 2, left, "Lancer")}</div></div>`).join("")}</div>`;
+    h += foldSec("res-ombre", "Arts des ombres", "2 ki · sans composantes matérielles", `<div class="slots res">${optsOf(g).filter(o => o.shadow).map(o => `<div class="capopt"><b>${esc(o.n)}${BY_ID[o.sp].c ? ` <span class="tag c" title="Concentration">C</span>` : ""}</b>${pillsRaw(o.p(g))}<div class="eff">${esc(o.d(g))}</div><div class="cast">${kiBtn(o.id, 2, left, "Lancer")}</div></div>`).join("")}</div>`);
     h += innateBlock(g, innateSpells(g).filter(x => x.cls), "mo-ill", "Sort mineur", "Arts des ombres · à volonté");
   }
   // Voie des quatre éléments : disciplines connues, ki en plus (−/+), Lancer retire le total
   if (trad(g) === "elements") {
     const left = kiLeft(g);
-    h += `<div class="rubric"><h2>Disciplines élémentaires</h2><span class="aside">${left} ki · ${MON.kiMax(g.level)} ki au plus par discipline</span></div><div class="slots res">${known(g).map(k => { const x = DISC[k], e = discExtra(g, k), cost = x.cost + e, s = x.sp && BY_ID[x.sp];
+    h += foldSec("res-disc", "Disciplines élémentaires", `${left} ki · ${MON.kiMax(g.level)} ki au plus par discipline`, `<div class="slots res">${known(g).map(k => { const x = DISC[k], e = discExtra(g, k), cost = x.cost + e, s = x.sp && BY_ID[x.sp];
       const room = x.plus ? Math.min(x.plus === "hit" ? 1 : 9, MON.kiMax(g.level) - x.cost) : 0;
       return `<div class="capopt"><b>${esc(x.n)}${s && s.c ? ` <span class="tag c" title="Concentration">C</span>` : ""}</b>${pillsRaw(discPills(g, k, x.plus === "hit" ? 0 : e))}<div class="eff">${esc(x.d)}${x.plus === "lv" ? " Plus de ki : niveau de sort plus élevé." : ""}</div>
-      <div class="cast">${room > 0 ? `<span class="kistep" role="group" aria-label="Ki en plus pour ${esc(x.n)}"><button class="btn sm" data-a="ki-x" data-v="${k}" data-d="-1" aria-label="Un ki de moins"${e ? "" : " disabled"}>−</button><b>${x.plus === "hit" ? (e ? "+1d10" : "+0") : `+${e}`}</b><button class="btn sm" data-a="ki-x" data-v="${k}" data-d="1" aria-label="Un ki de plus"${e < room ? "" : " disabled"}>+</button></span>` : ""}${kiBtn("d-" + k, cost, left, x.cost ? "Lancer" : "Utiliser")}</div></div>`; }).join("")}</div>`;
+      <div class="cast">${room > 0 ? `<span class="kistep" role="group" aria-label="Ki en plus pour ${esc(x.n)}"><button class="btn sm" data-a="ki-x" data-v="${k}" data-d="-1" aria-label="Un ki de moins"${e ? "" : " disabled"}>−</button><b>${x.plus === "hit" ? (e ? "+1d10" : "+0") : `+${e}`}</b><button class="btn sm" data-a="ki-x" data-v="${k}" data-d="1" aria-label="Un ki de plus"${e < room ? "" : " disabled"}>+</button></span>` : ""}${kiBtn("d-" + k, cost, left, x.cost ? "Lancer" : "Utiliser")}</div></div>`; }).join("")}</div>`);
   }
   return h;
 }

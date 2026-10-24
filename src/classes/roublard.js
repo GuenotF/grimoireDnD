@@ -13,7 +13,7 @@ import { R, classSpells } from "../rules/common.js";
 import { acOf } from "../rules/equipment.js";
 import { THIRD, THIRD_KNOWN, thirdFree, thirdOk } from "../rules/tables.js";
 import { BY_ID, SPELLS } from "../data.js";
-import { capRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pillsRaw, statLabel } from "../ui/components.js";
 
 // Archétypes du Manuel des joueurs
 const ARCH = { escroc: { n: "Escroc arcanique", full: "Escroc arcanique", sum: "Sorts de magicien (surtout enchantement et illusion), main de mage invisible pour l'escamotage, Embuscade magique (9), Escroc polyvalent (13), Voleur de sort (17)." }, assassin: { n: "Assassin", full: "Assassin", sum: "Assassinat : avantage contre qui n'a pas encore joué, critique contre une créature surprise. Puis fausse identité, Imposteur, Frappe mortelle." },
@@ -67,7 +67,7 @@ function sneakCard(g) {
 }
 function rouResHTML(g) {
   let h = "";
-  if (g.level >= 2) h += `<div class="rubric"><h2>Ruse</h2><span class="aside">action bonus, à chaque tour</span></div><div class="pills" style="margin-bottom:6px">${[["n", "Foncer", "vitesse doublée"], ["n", "Se désengager", "pas d'attaque d'opportunité"], ["n", "Se cacher", "test de Discrétion " + signed(skillBonus(g, "stealth"))], ...(g.level >= 3 && g.arch === "voleur" ? [["n", "Mains lestes", "Escamotage " + signed(skillBonus(g, "sleight")) + ", outils, objet"]] : [])].map(([k, l, v]) => `<div class="pill ${k}"><span class="pl">${l}</span><span class="pv">${esc(v)}</span></div>`).join("")}</div>`;
+  if (g.level >= 2) h += foldSec("res-ruse", "Ruse", "action bonus, à chaque tour", `<div class="pills" style="margin-bottom:6px">${[["n", "Foncer", "vitesse doublée"], ["n", "Se désengager", "pas d'attaque d'opportunité"], ["n", "Se cacher", "test de Discrétion " + signed(skillBonus(g, "stealth"))], ...(g.level >= 3 && g.arch === "voleur" ? [["n", "Mains lestes", "Escamotage " + signed(skillBonus(g, "sleight")) + ", outils, objet"]] : [])].map(([k, l, v]) => `<div class="pill ${k}"><span class="pl">${l}</span><span class="pv">${esc(v)}</span></div>`).join("")}</div>`);
   if (at(g) && g.level >= 17) h += `<div class="slots res">${capRow(g, "thief", "Voleur de sort", "repos long", `<button class="pip${g.thiefU ? " used" : ""}" data-a="res-pip" data-r="thief" data-k="0" aria-label="Voleur de sort, ${g.thiefU ? "utilisé" : "disponible"}"></button>`, false, () => pillsRaw([["n", "Temps", "réaction"], ["s", "JdS du lanceur", `DD ${8 + R.prof(g.level) + R.ab(g, "int")}`], ["f", "Effet", "sort volé 8 heures"]]))}</div>`;
   if (g.level >= 20) {
     const u = Math.min(1, g.luckU);

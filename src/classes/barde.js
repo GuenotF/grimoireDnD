@@ -12,7 +12,7 @@ import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills, spellBody, tags } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { SKILLS, SLOTS } from "../rules/tables.js";
-import { capRow, pickRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pickRow, pillsRaw, statLabel } from "../ui/components.js";
 import { CLASSES } from "./index.js";
 
 const KNOWN = [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 15, 16, 18, 19, 19, 20, 22, 22, 22];
@@ -62,10 +62,10 @@ function insBody(g) {
 }
 function resHTML(g) {
   const n = BAR.ins(g);
-  let h = `<div class="rubric"><h2>Ressources du barde</h2></div><div class="slots res">`;
+  let h = `<div class="slots res">`;
   h += capRow(g, "ins", `Inspiration bardique <span class="kp p">${BAR.die(g.level)}</span>`, g.level >= 5 ? "repos court" : "repos long", Array.from({ length: n }, (_, k) => `<button class="pip${k < Math.min(n, g.insU) ? " used" : ""}" data-a="res-pip" data-r="ins" data-k="${k}" aria-label="Inspiration bardique ${k + 1}, ${k < g.insU ? "utilisée" : "disponible"}"></button>`).join(""), false, insBody);
   if (g.level >= 6) h += `<div class="resrow sep"><span class="rn"><b>Contre-charme</b><small>action · 9 m · jusqu'à ton prochain tour</small></span><span class="kp s">avantage contre charme et effroi</span></div>`;
-  return h + `</div>`;
+  return foldSec("res-cls", "Ressources du barde", "", h + `</div>`);
 }
 onClick("ins-use", (b) => {
   const g = G(); if (!g || g.insU >= BAR.ins(g)) return; const k = b.dataset.v, prev = g.insU, die = BAR.die(g.level);

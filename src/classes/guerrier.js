@@ -18,7 +18,7 @@ import { R, classSpells } from "../rules/common.js";
 import { TOOL_LISTS } from "../rules/creation.js";
 import { acOf } from "../rules/equipment.js";
 import { heal, hpCur } from "../rules/hp.js";
-import { capRow, pickRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pickRow, pillsRaw, statLabel } from "../ui/components.js";
 
 // ---------- Tables
 const STYLES = stylesOf(["archerie", "deuxmains", "deuxarmes", "defense", "duel", "protection"]); // les six styles du guerrier (AideDD)
@@ -109,12 +109,12 @@ function supBody(g) {
     + `<span class="muted" style="font-size:12.5px">${left} dé${left > 1 ? "s" : ""} restant${left > 1 ? "s" : ""} · DD ${GUE.dd(g)} · repos court ou long.</span>`;
 }
 function resHTML(g) {
-  let h = `<div class="rubric"><h2>Ressources du guerrier</h2></div><div class="slots res">`;
+  let h = `<div class="slots res">`;
   h += capRow(g, "sw", "Second souffle", "repos court", pipRow("sw", 1, g.swU, "Second souffle"), false, swBody);
   if (GUE.surge(g.level)) h += capRow(g, "surge", "Fougue", "repos court", pipRow("surge", GUE.surge(g.level), g.surgeU, "Fougue"), true, () => `<div class="eff">Une action de plus à ce tour.${ek(g) && g.level >= 15 ? " Charge arcanique : téléport de 9 m avant ou après." : ""}</div>`);
   if (mdg(g)) h += capRow(g, "sup", `Dés de supériorité <span class="kp p">${GUE.supD(g.level)}</span>`, "repos court", pipRow("sup", GUE.supN(g.level), g.supU, "Dé de supériorité"), true, supBody);
   if (GUE.ind(g.level)) h += capRow(g, "ind", "Indomptable", "repos long", pipRow("ind", GUE.ind(g.level), g.indU, "Indomptable"), true, () => `<div class="eff">Relance un jet de sauvegarde raté ; le nouveau résultat compte.</div>`);
-  return h + `</div>`;
+  return foldSec("res-cls", "Ressources du guerrier", "", h + `</div>`);
 }
 onClick("sw-go", () => { const g = G(), el = document.getElementById("sw-n"), n = Math.floor(+(el && el.value) || 0); if (!g || g.swU) return;
   if (n < 1 || n > 10) { toast("Tape le résultat du d10 (1 à 10)"); if (el) el.focus(); return; }

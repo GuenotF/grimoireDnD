@@ -13,7 +13,7 @@ import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { HALF } from "../rules/tables.js";
-import { capRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pillsRaw, statLabel } from "../ui/components.js";
 
 // Détail de Perception divine (capacité dépliable)
 function dsBody(g) {
@@ -31,12 +31,12 @@ function cdBody(g) {
 function palResHTML(g) {
   const pool = PAL.loh(g), left = Math.max(0, pool - g.loh), ds = PAL.ds(g), cd = PAL.cd(g);
   const pips = (r, n, u, lbl) => Array.from({ length: n }, (_, k) => `<button class="pip${k < u ? " used" : ""}" data-a="res-pip" data-r="${r}" data-k="${k}" aria-label="${lbl} ${k + 1}, ${k < u ? "utilisée" : "disponible"}"></button>`).join("");
-  return `<div class="rubric"><h2>Ressources du paladin</h2></div><div class="slots res">
+  return foldSec("res-cls", "Ressources du paladin", "", `<div class="slots res">
   <div class="resrow"><span class="rn"><b>Imposition des mains</b><small>réserve · repos long</small></span><span class="rv">${left}<small>/${pool}</small></span><button class="btn cast-go sm" data-a="loh-open"${(left ? "" : " disabled")}>Soigner</button></div>
   <div class="bar"><span style="width:${pool ? Math.round(100 * left / pool) : 0}%"></span></div>
   ${capRow(g, "ds", "Perception divine", "repos long", pips("ds", ds, Math.min(ds, g.dsU), "Perception divine"), true, dsBody)}
   ${cd ? capRow(g, "cd", "Conduit divin", "repos court", pips("cd", cd, Math.min(cd, g.cdU), "Conduit divin"), false, cdBody) : ""}
-  </div>`;
+  </div>`);
 }
 const STYLES = stylesOf(["deuxmains", "defense", "duel", "protection"]); // AideDD : les quatre styles du paladin
 const auraR = g => g.level >= 18 ? "9 m" : "3 m";

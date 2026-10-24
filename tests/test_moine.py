@@ -29,6 +29,9 @@ def test_arts_martiaux_et_ki(browser, devices, url):
     check(a.count('[data-a="res-pip"][data-r="ki"]') == 5, "5 points de ki (cercles)")
     a.click('[data-a="row"][data-id="res:ki"]')
     check("JdS CON 14" in a.text("#panel") or "CON 14" in a.text("#panel"), "Frappe étourdissante : DD 14 (8 + 3 + SAG 3)")
+    check("1d10 + 8" in a.text("#panel"), "Parade de projectiles : réduction 1d10 + DEX + niveau")
+    a.click('[data-a="fold"][data-k="res-ki"]'); check(a.count('[data-a="ki-use"]') == 0, "section Ki repliable")
+    a.click('[data-a="fold"][data-k="res-ki"]')
     a.click('[data-a="ki-use"][data-v="deluge"]')
     check(a.g("kiU") == 1 and "reste 4" in a.toast(), "Déluge de coups : 1 ki retiré")
     a.undo(); check(a.g("kiU") == 0, "annulable")
@@ -81,6 +84,8 @@ def test_niveau_3_elements(browser, devices, url):
 def test_ombre(browser, devices, url):
     a = App(browser, devices, url, char=dict(SHEN, level=6, mtrad="ombre"), tab="caps", view="jeu")
     check("Arts des ombres" in a.text("#panel") and "Illusion mineure" in a.text("#panel"), "Arts des ombres et illusion mineure")
+    a.click('[data-a="fold"][data-k="res-ombre"]'); check(a.count('[data-a="ki-use"][data-v="om-silence"]') == 0, "Arts des ombres repliable")
+    a.click('[data-a="fold"][data-k="res-ombre"]')
     a.click('[data-a="ki-use"][data-v="om-silence"]')
     check(a.g("kiU") == 2 and a.js("G().effects.some(e => e.id === 'silence' && e.c)"), "Silence : 2 ki, concentration suivie")
     a.close()

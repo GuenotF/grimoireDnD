@@ -13,7 +13,7 @@ import { pCantrips, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, pSpel
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { SLOTS } from "../rules/tables.js";
-import { capRow, pickRow, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pickRow, statLabel } from "../ui/components.js";
 import { surge } from "./ensorceleur-sauvage.js";
 
 // Sorts connus par niveau d'ensorceleur ; sorts mineurs 4, 5 (niveau 4), 6 (niveau 10)
@@ -115,7 +115,7 @@ function srcBody(g) {
 }
 function resHTML(g) {
   const pts = ENS.pts(g); if (!pts && g.sorig !== "sauvage") return "";
-  let h = `<div class="rubric"><h2>Source de magie</h2><span class="aside">repos long</span></div><div class="slots res">`;
+  let h = `<div class="slots res">`;
   if (pts) { const left = ENS.left(g);
     h += `<div class="resrow"><span class="rn"><b>Points de sorcellerie</b><small>repos long</small></span><span class="rv">${left}<small>/${pts}</small></span><button class="btn ghost sm" data-a="sp-adj" data-v="1" aria-label="Un point de moins"${left ? "" : " disabled"}>−</button><button class="btn ghost sm" data-a="sp-adj" data-v="-1" aria-label="Un point de plus"${left < pts ? "" : " disabled"}>+</button></div>
     <div class="bar"><span style="width:${Math.round(100 * left / pts)}%"></span></div>
@@ -127,7 +127,7 @@ function resHTML(g) {
   if (g.sorig === "draco" && g.level >= 6) h += `<div class="cast" style="margin-top:6px"><button class="btn sm" data-a="sp-spend" data-v="res"${ENS.left(g) >= 1 ? "" : " disabled"}>Résistance au ${anc(g)[1]} · 1 pt</button>${g.level >= 18 ? `<button class="btn sm" data-a="sp-spend" data-v="presence"${ENS.left(g) >= 5 ? "" : " disabled"}>Présence draconique · 5 pts</button>` : ""}</div>`;
   if (g.level >= 20) h += `<div class="cast" style="margin-top:6px"><button class="btn sm" data-a="sp-spend" data-v="restore"${g.spU ? "" : " disabled"}>Restauration ensorcelée · +4 (repos court)</button></div>`;
   if (g.level >= 3) h += `<div class="mmlist"><span class="lusub">Métamagie</span>${metaN(g).length ? metaN(g).map(n => `<span class="kp p">${esc(n)}</span>`).join("") : `<span class="muted">à choisir en mode Gérer</span>`}</div>`;
-  return h + `</div>`;
+  return foldSec("res-cls", "Source de magie", "repos long", h + `</div>`);
 }
 const snap = g => JSON.parse(JSON.stringify({ spU: g.spU || 0, made: g.made || {}, used: g.used, effects: g.effects, tideU: g.tideU || 0 }));
 const undo = prev => () => { mutate(g => Object.assign(g, prev)); return "Annulé"; };

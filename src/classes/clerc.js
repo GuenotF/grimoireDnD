@@ -14,7 +14,7 @@ import { keyPills } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { LANGS } from "../rules/creation.js";
 import { SLOTS, SKILLS } from "../rules/tables.js";
-import { capRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pillsRaw, statLabel } from "../ui/components.js";
 
 const DD = g => 8 + R.prof(g.level) + R.am(g);
 const WIS = g => Math.max(1, R.am(g));
@@ -126,11 +126,11 @@ const pipsOf = (r, n, u, lbl) => Array.from({ length: n }, (_, k) => `<button cl
 function cleResHTML(g) {
   const cd = CLE.cd(g), d = dom(g), rs = d.res;
   if (!cd && !rs) return "";
-  let h = `<div class="rubric"><h2>Ressources du clerc</h2></div><div class="slots res">`;
+  let h = `<div class="slots res">`;
   if (cd) h += capRow(g, "ccd", "Conduit divin", "repos court", pipsOf("ccd", cd, Math.min(cd, g.ccdU), "Conduit divin"), false, cdBody);
   if (rs) { const f = d.feats.find(x => x.n === rs.n); h += capRow(g, "dres", rs.n, "repos long", pipsOf("dres", rs.max(g), Math.min(rs.max(g), g.dresU), rs.n), !!cd, () => f ? `<div class="eff">${esc(f.d(g))}</div>` : ""); }
   if (g.level >= 10) h += capRow(g, "di", "Intervention divine", g.level >= 20 ? "réussite automatique" : `d100 ≤ ${g.level} · 7 jours si elle réussit`, pipsOf("di", 1, Math.min(1, g.diU), "Intervention divine"), true, () => `<div class="eff">${esc(BASE[3].d(g))}</div><div class="cast"><button class="btn cast-go sm" data-a="di-roll"${g.diU ? " disabled" : ""}>Implorer · lancer 1d100</button></div>`);
-  return h + `</div>`;
+  return foldSec("res-cls", "Ressources du clerc", "", h + `</div>`);
 }
 onClick("ccd-use", (b) => {
   const g = G(); if (!g || g.ccdU >= CLE.cd(g)) return; const x = cdOpts(g).find(o => o.k === b.dataset.v); if (!x) return;
