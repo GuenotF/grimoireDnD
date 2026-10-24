@@ -157,6 +157,7 @@ export default {
   features: g => feats(g),
   capsTop: g => rageCard(g),
   resourceMax: { rage: g => Math.min(BAR.rage(g), 10) },
+  longOnly: g => [g.rageU ? "Rage" : ""],
   longRest: g => { g.rageU = 0; g.raging = false; g.frenzy = false; },
   slotbarChips: g => g.raging ? `<button class="chip fire" data-a="rage-top">🔥 Rage${frenzyOn(g) ? " · Frénésie" : ""}</button>` : "",
   // Défense sans armure (bouclier permis) ; Déplacement rapide (niveau 5, sans armure lourde)

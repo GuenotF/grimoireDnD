@@ -263,6 +263,7 @@ export default {
   attackNotes: g => [g.level >= 8 && dom(g).feats.some(f => f.n === "Frappe divine") ? `<b>Frappe divine</b> : 1 fois par tour, +${CLE.strike(g)} ${dom(g).feats.find(f => f.n === "Frappe divine").pill(g).replace(/^\+\S+ /, "").replace(" · 1 fois par tour", "")}.` : "",
     g.domain === "guerre" ? `<b>Prêtre de guerre</b> : une attaque d'arme en action bonus après l'action Attaquer (${WIS(g)} fois par repos long).` : ""].filter(Boolean),
   longRest: g => { g.ccdU = 0; g.dresU = 0; },
+  longOnly: g => [g.dresU && dom(g).res && dom(g).res.rest === "long" ? dom(g).res.n : ""],
   shortRest: g => CLE.cd(g) ? { field: "ccdU", label: "Conduit divin", done: "récupéré" } : null,
   creation,
   levelUp: {

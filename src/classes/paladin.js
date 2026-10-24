@@ -268,6 +268,7 @@ export default {
   resources: g => palResHTML(g),
   resourceMax: { ds: g => PAL.ds(g), cd: g => PAL.cd(g) },
   longRest: g => { g.loh = 0; g.dsU = 0; g.cdU = 0; },
+  longOnly: g => [g.loh ? "Imposition des mains" : "", g.dsU ? "Perception divine" : ""],
   playTop: g => smiteHTML(g),
   onDown: g => g.oath === "anciens" && g.level >= 15 ? "Sentinelle immortelle : tu peux rester à 1 PV (une fois par repos long)" : "",
   shortRest: { field: "cdU", label: "Conduit divin", done: "récupéré" },

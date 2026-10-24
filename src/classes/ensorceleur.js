@@ -245,6 +245,7 @@ export default {
   dmgBonus: (g, s) => g.sorig === "draco" && g.level >= 6 && (s.p || "").startsWith("d:") && s.p.includes(anc(g)[1]) ? R.am(g) : 0,
   hpLv: g => g.sorig === "draco" ? 1 : 0,
   acBase: g => g.sorig === "draco" ? [["Résilience draconique : 13 + DEX", 13 + R.ab(g, "dex")]] : [],
+  longOnly: g => [g.spU ? "points de sorcellerie" : "", g.tideU ? "Marée du chaos" : ""],
   longRest: g => { g.spU = 0; g.made = {}; g.tideU = 0; S.wild = null; },
   creation,
   levelUp: {

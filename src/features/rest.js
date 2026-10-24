@@ -17,6 +17,12 @@ import { rechargeItems } from "../rules/magic.js";
 
 /** Ressource récupérée au repos court : objet, ou fonction du personnage (ex. Coup de chance du roublard au niveau 20). */
 const SR = g => typeof C(g).shortRest === "function" ? C(g).shortRest(g) : C(g).shortRest;
+/** Ressources dépensées qui ne reviennent pas au repos court (rappel dans le panneau et le message) : classe (C(g).longOnly) + emplacements de sorts. */
+function longOnly(g) {
+  const out = C(g).longOnly ? C(g).longOnly(g).filter(Boolean) : [];
+  if (!(C(g).pact && C(g).pact(g)) && Object.values(g.used || {}).some(v => +v > 0)) out.push(`emplacements de sorts${C(g).recovery && C(g).recovery(g) ? " (sauf récupération ci-dessous)" : ""}`);
+  return out;
+}
 /** Boutons de repos ; C(g).restBar ajoute ce qui est propre à la classe (case Restauration arcanique…). */
 function restBarHTML(g) {
   return `<div class="restbar"><button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}">Repos court ${S.shortOpen ? "▴" : "▾"}</button><button class="btn" data-a="longrest">Repos long</button>${C(g).restBar && C(g).restBar(g) != null ? C(g).restBar(g)
@@ -40,8 +46,10 @@ function shortRestHTML(g) {
   const lines = (sr ? `<p><b>${sr.label.charAt(0).toUpperCase() + sr.label.slice(1)}</b> : ${sr.done} en terminant le repos.</p>` : "") + (items.length ? `<p><b>Objets</b> : ${items.map(x => esc(x.n)).join(", ")}, charges récupérées en terminant le repos.</p>` : "")
     + (feats.length ? `<p><b>Dons</b> : ${feats.map(id => esc(FEATS[id].n)).join(", ")}, récupéré${feats.length > 1 ? "s" : ""} en terminant le repos.</p>` : "");
   const rec = C(g).recovery && C(g).recovery(g) ? recoveryHTML(g, true) : ""; // Restauration arcanique, Récupération naturelle
-  if (!lines) return h + rec + `<div class="cast"><button class="btn ghost" data-a="short-close">Fermer</button></div></div>`; // rien d'autre à récupérer (barbare, roublard)
-  return h + `${lines}${rec}
+  const wait = longOnly(g);
+  if (isDown(g)) return h + `<div class="cast"><button class="btn ghost" data-a="short-close">Fermer</button></div></div>`; // à 0 PV : pas de repos
+  // Toujours un bouton pour terminer, même sans rien à récupérer : même geste pour toute la table
+  return h + `${lines || `<p class="muted">Rien d'autre ne revient au repos court${wait.length ? "" : " pour l'instant"}.</p>`}${wait.length ? `<p class="muted"><b>Au repos long seulement</b> : ${wait.join(" ; ")}.</p>` : ""}${rec}
   <div class="cast"><button class="btn cast-go" data-a="short-done">Terminer le repos court</button><button class="btn ghost" data-a="short-close">Fermer</button></div></div>`;
 }
 
@@ -51,7 +59,9 @@ onClick("short-close", () => { S.shortOpen = false; S.sr = {}; render(); });
 onClick("short-done", () => {
   const g = G(); if (!g) return; const sr = SR(g), fields = sr ? sr.fields || [sr.field] : [], prev = JSON.parse(JSON.stringify({ items: g.items, featU: g.featU, ...Object.fromEntries(fields.map(f => [f, g[f]])) })); S.shortOpen = false;
   let n = 0, fr = []; mutate(g => { if (sr) { if (sr.reset) sr.reset(g); else g[sr.field] = 0; } n = rechargeItems(g, "court"); fr = featRecharge(g, "court"); });
-  toast(`Repos court : ${[sr ? `${sr.label} ${sr.done}` : "", n ? `charges de ${n} objet${n > 1 ? "s" : ""}` : "", ...fr].filter(Boolean).join(", ") || "terminé"}`, () => { mutate(g => Object.assign(g, prev)); return "Repos court annulé"; });
+  const wait = longOnly(g);
+  const got = [sr ? `${sr.label} ${sr.done}` : "", n ? `charges de ${n} objet${n > 1 ? "s" : ""}` : "", ...fr].filter(Boolean).join(", ");
+  toast(`Repos court terminé${got ? ` : ${got}` : ""}${wait.length ? ` · au repos long : ${wait.join(", ")}` : ""}`, () => { mutate(g => Object.assign(g, prev)); return "Repos court annulé"; });
 });
 onClick("hp-hd", () => {
   const g = G(), el = document.getElementById("hd-n"), n = Math.floor(+(el && el.value) || 0); if (!g) return;

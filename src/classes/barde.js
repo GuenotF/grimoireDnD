@@ -202,6 +202,7 @@ export default {
   restBar: g => g.level >= 2 ? `<span class="muted">Repos court : dés de vie${g.level >= 5 ? ", Inspiration bardique" : ""} ; Chant reposant, +1${BAR.song(g.level)} PV par allié qui dépense un dé. Repos long : tout.</span>` : null,
   attackNotes: g => [valor(g) && g.level >= 6 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "", valor(g) && g.level >= 14 ? "<b>Magie de combat</b> : après un sort de barde (action), une attaque d'arme en action bonus." : ""].filter(Boolean),
   longRest: g => { g.insU = 0; },
+  longOnly: g => [g.level < 5 && g.insU ? "Inspiration bardique (repos court dès le niveau 5)" : ""],
   shortRest: g => g.level >= 5 ? { field: "insU", label: "Inspiration bardique", done: "récupérée" } : null,
   creation,
   levelUp: {

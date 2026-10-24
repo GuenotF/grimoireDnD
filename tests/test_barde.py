@@ -79,3 +79,19 @@ def test_passage_niveau_3(browser, devices, url):
     check(a.g("level") == 3 and a.g("skills.history") == 2 and a.g("skills.performance") == 2 and a.g("skills.medicine") == 1, "niveau 3 : compétences et Expertise")
     check(a.g("prepared.length") == 6, "un sort connu de plus")
     a.close()
+
+
+def test_repos_court_commun(browser, devices, url):
+    a = App(browser, devices, url, char=dict(LYS, level=3, insU=2), tab="grimoire", view="jeu")
+    a.click('[data-a="short-open"]')
+    t = a.text("#short-panel")
+    check(a.count('[data-a="short-done"]') == 1 and "Inspiration bardique (repos court dès le niveau 5)" in t, "PV pleins, rien à récupérer : bouton Terminer et rappel du repos long")
+    a.click('[data-a="short-done"]')
+    check(a.g("insU") == 2 and "Repos court terminé" in a.toast() and "Inspiration bardique" in a.toast(), "niveau 3 : inspiration non récupérée, message explicite")
+    a.close()
+    bar = {"name": "Brok", "cls": "barbare", "level": 2, "v": 3, "abil": {"str": 16, "dex": 14, "con": 14, "int": 8, "wis": 10, "cha": 10}, "hpMax": 25, "rageU": 1, "updatedAt": 1}
+    a = App(browser, devices, url, char=bar, tab="perso", view="jeu")
+    a.click('[data-a="short-open"]')
+    check(a.count('[data-a="short-done"]') == 1 and "Rage" in a.text("#short-panel"), "barbare : bouton Terminer, Rage au repos long")
+    a.click('[data-a="short-done"]'); check("Repos court terminé" in a.toast(), "repos court terminé sans ressource")
+    a.close()
