@@ -65,7 +65,7 @@ def test_gerer_et_niveau(browser, devices, url):
     t = a.text("#panel")
     check("Faveur de pacte" in t and "Manifestations occultes" in t and "5 sur 5" in t and "Arcanum mystique" in t, "Gérer : pacte, manifestations, arcanum")
     a.click('[data-a="row"][data-id="occ:inv"]')
-    check(a.count('[data-a="occ-inv"][data-id="chaines-carceres"].full') == 1, "prérequis non rempli (niveau 15, chaîne) : grisé")
+    check(disabled(a, '[data-a="occ-inv"][data-id="chaines-carceres"]') and "Prérequis : niveau 15" in a.text("#panel"), "prérequis non rempli (niveau 15, chaîne) : grisé, avec la raison")
     a.click('[data-a="occ-inv"][data-id="decharge-repulsive"]'); a.click('[data-a="occ-inv"][data-id="presence-captivante"]')
     check(a.js("G().inv.includes('presence-captivante')") and a.js("skillBonus(G(), 'persuasion')") == 4 + 4 if a.js("typeof skillBonus") != "undefined" else a.js("G().inv.includes('presence-captivante')"), "Présence captivante : maîtrise de Persuasion")
     a.close()

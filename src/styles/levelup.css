@@ -86,3 +86,21 @@ body.lu-on, body.ws-on { overflow: hidden; }
 .subopt.on .rd { background: var(--rubric); border-color: var(--rubric); box-shadow: inset 0 0 0 3px var(--surface); }
 .subopt .bd { display: grid; gap: 3px; } .subopt b { font-family: var(--f-display); font-size: 16px; } .subopt small { font-size: 13px; color: var(--muted); line-height: 1.35; }
 .subx { display: grid; gap: 6px; margin: -2px 0 2px 28px; }
+
+/* Ligne de choix dépliable (assistant, Gérer) : nom ▾ + pastilles, rond à droite (+ / ✓) */
+.pkrow { border-bottom: 1px solid var(--rule); padding: 7px 0 7px 10px; display: grid; gap: 6px; }
+.pkrow.on { box-shadow: inset 3px 0 0 var(--rubric); background: linear-gradient(90deg, var(--rubric-soft), transparent 75%); }
+.pkrow.off { opacity: .55; }
+.pkline { display: flex; align-items: center; gap: 8px; }
+.pkmain { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.pkname { all: unset; cursor: pointer; font-family: var(--f-display); font-weight: 700; font-size: 16px; color: var(--ink); }
+.pkname .chev { color: var(--muted); font-size: 12px; margin-left: 4px; }
+.pkname:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 3px; }
+.pkmain .kps { display: flex; gap: 5px; flex-wrap: wrap; }
+.pkwhy { font-size: 12px; color: var(--muted); }
+.pktog { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--rubric); background: var(--surface); color: var(--rubric); font-size: 18px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.pktog.on { background: var(--rubric); color: var(--surface); font-weight: 700; font-size: 16px; }
+.pktog.full { border-style: dashed; border-color: var(--pn-bd); color: var(--muted); }
+.pktog:disabled { border: 1.5px dashed var(--pn-bd); background: var(--sunk); cursor: default; }
+.pkbody { font-size: 13.5px; line-height: 1.45; display: grid; gap: 6px; padding-right: 4px; }
+.pkbody .eff { margin: 0; }

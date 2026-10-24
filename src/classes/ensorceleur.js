@@ -13,7 +13,7 @@ import { pCantrips, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, pSpel
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { SLOTS } from "../rules/tables.js";
-import { capRow, statLabel } from "../ui/components.js";
+import { capRow, pickRow, statLabel } from "../ui/components.js";
 import { surge } from "./ensorceleur-sauvage.js";
 
 // Sorts connus par niveau d'ensorceleur ; sorts mineurs 4, 5 (niveau 4), 6 (niveau 10)
@@ -251,13 +251,15 @@ export default {
   levelUp: {
     rowsAfter: (g, b) => row("Sorts mineurs connus", R.cantrips(g), R.cantrips(b), "--rubric") + (ENS.pts(b) ? row("Points de sorcellerie", ENS.pts(g), ENS.pts(b), "--ok") : "") + (ENS.meta(b.level) ? row("Métamagie", ENS.meta(g.level), ENS.meta(b.level), "--ok") : ""),
     choices: (g, b, L) => { const n = ENS.meta(b.level); if (n <= (g.meta || []).length) return ""; const sel = L.mm || g.meta || [];
-      return `<div class="luprep"><h3>Métamagie · ${sel.length}/${n}</h3><div class="chips">${Object.entries(MM).map(([k, m]) => { const on = sel.includes(k), old = (g.meta || []).includes(k); return `<button class="chip" data-a="lu-mm" data-v="${k}" aria-pressed="${on}"${old || (!on && sel.length >= n) ? " disabled" : ""} title="${esc(m.d)}">${esc(m.n.replace("Sort ", ""))} · ${k === "jumeau" ? "niv." : m.cost(1)}</button>`; }).join("")}</div>
-      ${sel.filter(k => !(g.meta || []).includes(k)).map(k => `<span class="muted" style="font-size:13px"><b>${esc(MM[k].n)}</b> : ${esc(MM[k].d)}</span>`).join("")}</div>`; },
+      return `<div class="luprep"><h3>Métamagie · ${sel.length}/${n}</h3><div class="luplist">${Object.entries(MM).map(([k, m]) => { const on = sel.includes(k), old = (g.meta || []).includes(k);
+        return pickRow({ act: 'data-a="lu-mm"', id: k, on, full: sel.length >= n, off: old, why: "déjà connue", name: esc(m.n), label: m.n, pills: `<span class="kp f">${k === "jumeau" ? "points = niveau du sort" : `${m.cost(1)} point${m.cost(1) > 1 ? "s" : ""}`}</span>`, body: `<div class="eff">${esc(m.d)}</div>` }); }).join("")}</div></div>`; },
     recapBefore: (g, b, L) => L.mm && L.mm.length > (g.meta || []).length ? `<div><span class="n">Métamagie</span><small>+ ${L.mm.filter(k => !(g.meta || []).includes(k)).map(k => esc(MM[k].n)).join(", ")}</small></div>` : "",
     notes: (g, to) => [to === 2 ? `<span><b>Source de magie</b> : 2 points de sorcellerie, dans les ressources (En jeu).</span>` : ""].filter(Boolean),
     apply: (g, L) => { if (L.mm) g.meta = [...L.mm]; },
   },
 };
-onClick("lu-mm", (b) => { const L = S.lu, g = G(); if (!L || !g) return; const s = L.mm || [...(g.meta || [])], k = b.dataset.v;
-  L.mm = s.includes(k) ? s.filter(x => x !== k) : s.length < ENS.meta(L.to) ? [...s, k] : s; S.luKeep = true; render(); });
+onClick("lu-mm", (b) => { const L = S.lu, g = G(); if (!L || !g) return; const s = L.mm || [...(g.meta || [])], k = b.dataset.id;
+  if ((g.meta || []).includes(k)) return; // déjà connue
+  if (!s.includes(k) && s.length >= ENS.meta(L.to)) { toast(`${ENS.meta(L.to)} options de métamagie à ce niveau : retire d'abord une option`); return; }
+  L.mm = s.includes(k) ? s.filter(x => x !== k) : [...s, k]; S.luKeep = true; render(); });
 export { MM, ANC, ENS };

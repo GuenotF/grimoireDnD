@@ -69,8 +69,9 @@ def test_magie_sauvage(browser, devices, url):
 def test_passage_niveau_3(browser, devices, url):
     a = App(browser, devices, url, char=dict(YSOLDE, level=2, meta=[], prepared=["magic-missile", "shield", "sleep"]), tab="grimoire", view="jeu")
     a.click('[data-a="lu-open"]'); a.click(".lufoot .primary")
-    for k in ["accelere", "subtil"]: a.click(f'[data-a="lu-mm"][data-v="{k}"]')
-    check(disabled(a, '[data-a="lu-mm"][data-v="jumeau"]'), "2 options de métamagie au niveau 3")
+    for k in ["accelere", "subtil"]: a.click(f'[data-a="lu-mm"][data-id="{k}"]')
+    check(a.count('[data-a="lu-mm"][data-id="jumeau"].full') == 1, "2 options de métamagie au niveau 3")
+    a.click('[data-a="pk-open"][data-id="accelere"]'); check("1 action bonus" in a.text("#lvlup"), "description dépliable")
     a.click('[data-a="lu-kpick"][data-id="mirror-image"]') if a.count('[data-a="lu-kpick"][data-id="mirror-image"]') else a.click('[data-a="lu-pflt"][data-v="2"]') or a.click('[data-a="lu-kpick"][data-id="mirror-image"]')
     a.click(".lufoot .primary"); a.click('[data-a="lu-go"]')
     check(a.g("level") == 3 and a.js("G().meta.join()") == "accelere,subtil" and a.g("prepared.length") == 4, "niveau 3 : métamagie et un sort connu de plus")

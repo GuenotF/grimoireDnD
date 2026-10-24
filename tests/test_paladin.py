@@ -55,7 +55,7 @@ def test_passage_de_niveau(browser, devices, url):
     check("Sorts de niveau 2" in a.text(".lubody"), "niveau 5 : sorts de niveau 2")
     a.click(".lufoot .primary")
     a.click('[data-a="lu-pflt"][data-v="1"]')
-    a.pg.check('[data-a="lu-pprep"][data-id="bless"]'); a.pg.wait_for_timeout(40)
+    a.click('.pktog[data-a="lu-pprep"][data-id="bless"]')
     a.click(".lufoot .primary"); a.click('[data-a="lu-go"]')
     check(a.g("level") == 5 and a.g("prepared.includes('bless')"), "niveau 5 avec Bénédiction")
     a.undo(); check(a.g("level") == 4, "annulé")

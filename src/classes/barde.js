@@ -9,10 +9,10 @@ import { render, toast } from "../core/ui.js";
 import { BY_ID, SPELLS } from "../data.js";
 import { pCantrips, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, pSpellRow, printHTML } from "../features/print.js";
 import { castingRules, concentrationRules } from "../features/rules.js";
-import { keyPills, tags } from "../features/spells.js";
+import { keyPills, spellBody, tags } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { SKILLS, SLOTS } from "../rules/tables.js";
-import { capRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, pickRow, pillsRaw, statLabel } from "../ui/components.js";
 import { CLASSES } from "./index.js";
 
 const KNOWN = [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 15, 16, 18, 19, 19, 20, 22, 22, 22];
@@ -86,7 +86,8 @@ function secretPicker(b, st, sel, max, act, have) {
   return `<input id="sec-q" type="search" value="${esc(st.q || "")}" placeholder="Chercher un sort" aria-label="Chercher un sort" autocomplete="off">
   <div class="chips"><button class="chip" data-a="sec-cls" data-v="" aria-pressed="${!st.cls}">Toutes</button>${Object.entries(CLS_N()).filter(([k]) => k !== "barde").map(([k, n]) => `<button class="chip" data-a="sec-cls" data-v="${k}" aria-pressed="${st.cls === k}">${n}</button>`).join("")}</div>
   <div class="chips">${lvls.map(l => `<button class="chip" data-a="sec-lv" data-v="${l}" aria-pressed="${l === lv}">Niv. ${l}</button>`).join("")}</div>
-  <div class="luplist">${list.map(s => { const on = sel.includes(s.id); return `<label class="lurowp${on ? " on" : ""}"><input type="checkbox" ${act === "lu-bsec" ? 'data-a="lu-bsec"' : 'data-a="sec-pick"'} data-id="${s.id}"${on ? " checked" : ""}${!on && sel.length >= max ? ' class="full" aria-disabled="true"' : ""}><span class="n">${esc(s.n)}${tags(s)}<small class="secorg"> ${esc(origin(s))}</small></span><span class="kps">${keyPills(s, b)}</span></label>`; }).join("") || `<div class="empty">Aucun sort ne correspond.</div>`}</div>`;
+  <div class="luplist">${list.map(s => { const on = sel.includes(s.id);
+    return pickRow({ act: act === "lu-bsec" ? 'data-a="lu-bsec"' : 'data-a="sec-pick"', id: s.id, on, full: sel.length >= max, name: `${esc(s.n)}${tags(s)}<small class="secorg"> ${esc(origin(s))}</small>`, label: s.n, pills: keyPills(s, b), body: spellBody(s, b) }); }).join("") || `<div class="empty">Aucun sort ne correspond.</div>`}</div>`;
 }
 const secSt = () => S.lu ? (S.lu.secF = S.lu.secF || {}) : (S.secF = S.secF || {});
 onClick("sec-cls", (b) => { secSt().cls = b.dataset.v || null; if (S.lu) S.luKeep = true; render(); });
@@ -100,7 +101,9 @@ function settingsHTML(g) {
   <button class="linkbtn" data-a="row" data-id="sec:pick" aria-expanded="${open}">${open ? "Fermer le choix ▴" : sel.length < n ? `Choisir ${n - sel.length} sort${n - sel.length > 1 ? "s" : ""} ▾` : "Modifier le choix ▾"}</button>
   ${open ? `<div class="secpick">${secretPicker(g, S.secF = S.secF || {}, sel, n, "sec-pick", [...g.prepared, ...sel])}</div>` : ""}`;
 }
-onChange("sec-pick", t => { const id = t.dataset.id; mutate(g => { const s = g.secrets || []; g.secrets = t.checked ? (s.length < BAR.secrets(g) ? [...s, id] : s) : s.filter(x => x !== id); }); });
+onClick("sec-pick", t => { const id = t.dataset.id, g = G(); if (!g) return; const s = g.secrets || [], want = !s.includes(id);
+  if (want && s.length >= BAR.secrets(g)) { toast(`${BAR.secrets(g)} Secrets magiques : retire d'abord un sort`); return; }
+  mutate(g => { g.secrets = want ? [...s, id] : s.filter(x => x !== id); }); });
 
 // ---------- Assistant de niveau : collège (Savoir : 3 compétences), Expertise, Secrets magiques
 function luChoices(g, b, L) {
@@ -117,9 +120,9 @@ function luChoices(g, b, L) {
 const tog = (arr, v, max) => arr.includes(v) ? arr.filter(x => x !== v) : arr.length < max ? [...arr, v] : arr;
 onClick("lu-bsk", (b) => { if (!S.lu) return; S.lu.lsk = tog(S.lu.lsk || [], b.dataset.v, 3); S.luKeep = true; render(); });
 onClick("lu-bexp", (b) => { if (!S.lu) return; S.lu.bexp = tog(S.lu.bexp || [], b.dataset.v, 2); S.luKeep = true; render(); });
-onChange("lu-bsec", t => { const L = S.lu, g = G(); if (!L || !g) return; const n = BAR.secrets({ ...g, level: L.to, bcol: L.sub || g.bcol }) - BAR.secrets(g);
-  if (t.checked && (L.sec || []).length >= n) { t.checked = false; toast(`${n} sort${n > 1 ? "s" : ""} à ce niveau : décoche d'abord un sort`); return; }
-  L.sec = t.checked ? [...(L.sec || []), t.dataset.id] : (L.sec || []).filter(x => x !== t.dataset.id); S.luKeep = true; render(); });
+onClick("lu-bsec", t => { const L = S.lu, g = G(); if (!L || !g) return; const n = BAR.secrets({ ...g, level: L.to, bcol: L.sub || g.bcol }) - BAR.secrets(g), want = !(L.sec || []).includes(t.dataset.id);
+  if (want && (L.sec || []).length >= n) { toast(`${n} sort${n > 1 ? "s" : ""} à ce niveau : retire d'abord un sort`); return; }
+  L.sec = want ? [...(L.sec || []), t.dataset.id] : (L.sec || []).filter(x => x !== t.dataset.id); S.luKeep = true; render(); });
 onChange("#f-bcol", t => { mutate(g => { g.bcol = t.value; }); });
 
 // ---------- Création (étape Compétences) : 3 instruments de musique

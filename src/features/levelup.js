@@ -11,7 +11,10 @@ import { R, classSpells } from "../rules/common.js";
 import { FEATS, featAbil, featApply, featChoiceOk } from "../rules/feats.js";
 import { ABILITIES } from "../rules/tables.js";
 import { featAllowed, featPickerHTML, featPreview } from "./featpicker.js";
-import { keyPills, tags } from "./spells.js";
+import { keyPills, spellBody, tags } from "./spells.js";
+import { pickRow } from "../ui/components.js";
+/** Sort à choisir dans l'assistant : ligne dépliable (fiche complète du sort au toucher du nom). */
+const spellPick = (act, s, b, on, full) => pickRow({ act, id: s.id, on, full, name: esc(s.n) + tags(s), label: s.n, pills: keyPills(s, b), body: spellBody(s, b) });
 
 // Assistant ouvert par le bouton « ↑ Niveau N » : ce qui change, sorts gratuits, validation.
 // Le sélecteur de niveau reste un réglage direct (création, correction), sans assistant.
@@ -130,14 +133,14 @@ function preparedLu2(g, b) {
   const needC = Math.max(0, R.cantrips(b) - R.cantrips(g));
   if (needC) {
     const known = new Set(g.cantrips), list = classSpells(b).filter(s => s.l === 0 && !known.has(s.id)).sort(byName), fullC = L.cpicks.length >= needC;
-    h += `<div class="rubric"><h3>Sort mineur à apprendre</h3><span class="aside">${L.cpicks.length} / ${needC}</span></div><div class="luplist">${list.map(s => { const on = L.cpicks.includes(s.id); return `<label class="lurowp${on ? " on" : ""}"><input type="checkbox" data-a="lu-cpick" data-id="${s.id}"${on ? " checked" : ""}${!on && fullC ? ' class="full" aria-disabled="true"' : ""}><span class="n">${esc(s.n)}${tags(s)}</span><span class="kps">${keyPills(s, b)}</span></label>`; }).join("")}</div>`;
+    h += `<div class="rubric"><h3>Sort mineur à apprendre</h3><span class="aside">${L.cpicks.length} / ${needC}</span></div><div class="luplist">${list.map(s => { const on = L.cpicks.includes(s.id); return spellPick('data-a="lu-cpick"', s, b, on, fullC); }).join("")}</div>`;
   }
   if (lu.choices) h += lu.choices(g, b, L); // ex. paladin : style de combat
   if (C(g).noSpells) return h || `<div class="empty">Rien à choisir à ce niveau : passe à l'étape suivante.</div>`;
   if (!max) return h + `<div class="empty">Le ${C(g).n.toLowerCase()} ${C(g).known ? "apprend" : "prépare"} ses sorts à partir du niveau ${R.unlockAt(g, 1)}.</div>`;
   if (C(g).known) return h + knownLu2(g, b, L);
   const prep = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id)), full = prep.length >= pMax;
-  const box = (s, on) => `<label class="lurowp${on ? " on" : ""}"><input type="checkbox" data-a="lu-pprep" data-id="${s.id}"${on ? " checked" : ""}${!on && full ? ' class="full" aria-disabled="true"' : ""}><span class="n">${esc(s.n)}${tags(s)}</span><span class="kps">${keyPills(s, b)}</span></label>`;
+  const box = (s, on) => spellPick('data-a="lu-pprep"', s, b, on, full);
   h += `<div style="font-size:14px;line-height:1.4">Tes sorts préparés au niveau ${b.level} : <b>${pMax}</b>${C(g).prepNote || ""}.${!R.maxLevel(g) ? ` Choisis-les dans la liste du niveau 1.` : R.maxLevel(g) < max ? ` Tu peux en remplacer un par un sort de niveau ${max}.` : ""} <span class="muted">En principe au repos long : vois avec ton MJ.</span></div>`;
   // Liste stable : les sorts déjà préparés restent affichés, cochés ou non
   const newLv = R.maxLevel(g) < max ? max : 0;
@@ -164,7 +167,7 @@ function knownLu2(g, b, L) {
     h += `<div style="font-size:14px;line-height:1.4">Apprends <b>${plural(need, "sort")}</b> de ${C(g).n.toLowerCase()} de niveau 1${max > 1 ? ` à ${max}` : ""}.${isNew && max > 1 ? ` Nouveau : sorts de niveau ${max}.` : ""}</div>
     <div class="chips">${lvls.map(lv => `<button class="chip" data-a="lu-pflt" data-v="${lv}" aria-pressed="${flt === lv}">Niv. ${lv}${isNew && lv === max ? " · nouveau" : ""}</button>`).join("")}</div>
     <div class="luplist">${classSpells(b).filter(s => s.l === flt && (!have.has(s.id) || kn.includes(s.id))).sort(byName).map(s => { const on = kn.includes(s.id);
-      return `<label class="lurowp${on ? " on" : ""}"><input type="checkbox" data-a="lu-kpick" data-id="${s.id}"${on ? " checked" : ""}${!on && full ? ' class="full" aria-disabled="true"' : ""}><span class="n">${esc(s.n)}${tags(s)}</span><span class="kps">${keyPills(s, b)}</span></label>`; }).join("") || `<div class="empty">Tous les sorts de ce niveau sont déjà connus.</div>`}</div>`;
+      return spellPick('data-a="lu-kpick"', s, b, on, full); }).join("") || `<div class="empty">Tous les sorts de ce niveau sont déjà connus.</div>`}</div>`;
   }
   const mine = g.prepared.map(id => BY_ID[id]).filter(Boolean).sort((x, y) => x.l - y.l || byName(x, y));
   if (mine.length) {
@@ -236,23 +239,24 @@ onClick("lu-asi", (b) => {
   const next = n === 0 ? 1 : n === 1 && used < 2 && g.abil[k] + 2 <= 20 ? 2 : 0;
   if (next) L.asi[k] = next; else delete L.asi[k]; S.luKeep = true; render();
 });
-onChange("lu-cpick", t => {
+onClick("lu-cpick", t => {
   if (!S.lu) return;
-  const id = t.dataset.id, g = G(), need = Math.max(0, R.cantrips(g, S.lu.to) - R.cantrips(g));
-  if (t.checked && S.lu.cpicks.length >= need) { t.checked = false; toast(`${plural(need, "sort mineur", "sorts mineurs")} à ce niveau : décoche d'abord l'autre`); return; }
-  S.lu.cpicks = t.checked ? [...S.lu.cpicks, id] : S.lu.cpicks.filter(x => x !== id); S.luKeep = true; render();
+  const id = t.dataset.id, g = G(), need = Math.max(0, R.cantrips(g, S.lu.to) - R.cantrips(g)), want = !S.lu.cpicks.includes(id);
+  if (want && S.lu.cpicks.length >= need) { toast(`${plural(need, "sort mineur", "sorts mineurs")} à ce niveau : retire d'abord l'autre`); return; }
+  S.lu.cpicks = want ? [...S.lu.cpicks, id] : S.lu.cpicks.filter(x => x !== id); S.luKeep = true; render();
 });
-onChange("lu-pprep", t => {
+onClick("lu-pprep", t => {
   if (!S.lu) return;
   const id = t.dataset.id, g = G(), b = { ...g, level: S.lu.to }, oath = alwaysPrepared(b), max = R.maxLevel(b);
   const cur = S.lu.prep.filter(x => BY_ID[x] && BY_ID[x].l <= max && !oath.includes(x));
-  if (t.checked && cur.length >= R.prepMax(b)) { t.checked = false; toast(`Limite atteinte (${cur.length}/${R.prepMax(b)}) : décoche d'abord un sort`); return; }
-  S.lu.prep = t.checked ? [...cur, id] : cur.filter(x => x !== id); S.luKeep = true; render();
+  const want = !cur.includes(id);
+  if (want && cur.length >= R.prepMax(b)) { toast(`Limite atteinte (${cur.length}/${R.prepMax(b)}) : retire d'abord un sort`); return; }
+  S.lu.prep = want ? [...cur, id] : cur.filter(x => x !== id); S.luKeep = true; render();
 });
-onChange("lu-kpick", t => {
-  if (!S.lu) return; const g = G(), id = t.dataset.id, need = knownNew(g, { ...g, level: S.lu.to }), kn = S.lu.kn || [];
-  if (t.checked && kn.length >= need) { t.checked = false; toast(`${plural(need, "sort")} à apprendre à ce niveau : décoche d'abord un sort`); return; }
-  S.lu.kn = t.checked ? [...kn, id] : kn.filter(x => x !== id); S.luKeep = true; render();
+onClick("lu-kpick", t => {
+  if (!S.lu) return; const g = G(), id = t.dataset.id, need = knownNew(g, { ...g, level: S.lu.to }), kn = S.lu.kn || [], want = !kn.includes(id);
+  if (want && kn.length >= need) { toast(`${plural(need, "sort")} à apprendre à ce niveau : retire d'abord un sort`); return; }
+  S.lu.kn = want ? [...kn, id] : kn.filter(x => x !== id); S.luKeep = true; render();
 });
 onChange("#lu-kout", t => { if (!S.lu) return; S.lu.kout = t.value || null; if (!t.value) S.lu.kin = null; S.luKeep = true; render(); });
 onChange("#lu-kin", t => { if (!S.lu) return; S.lu.kin = t.value || null; S.luKeep = true; render(); });

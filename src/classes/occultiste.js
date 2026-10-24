@@ -12,7 +12,7 @@ import { pCantrips, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, pSpel
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { setTemp } from "../rules/hp.js";
-import { capRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, pickRow, pillsRaw, statLabel } from "../ui/components.js";
 
 // ---------- Tables
 const KNOWN = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
@@ -157,9 +157,10 @@ const skOf = id => BY_ID[id];
 /** Liste de manifestations à cocher. b : personnage au niveau visé ; sel : choisies ; max ; lu : assistant (sinon Gérer) ; locked : anciennes à garder. */
 function invPicker(b, sel, max, lu, locked = []) {
   const list = Object.entries(INV).sort((x, y) => x[1].n.localeCompare(y[1].n, "fr"));
-  return `<div class="luplist">${list.map(([k, i]) => { const on = sel.includes(k), ok = preOk(b, k), lock = locked.includes(k), dis = !on && (!ok || sel.length >= max);
-    const attr = lu ? 'data-a="lu-oinv"' : 'data-a="occ-inv"';
-    return `<label class="lurowp${on ? " on" : ""}${!ok ? " off" : ""}"><input type="checkbox" ${attr} data-id="${k}"${on ? " checked" : ""}${dis || lock ? ' class="full" aria-disabled="true"' : ""}><span class="n">${esc(i.n)}<small class="secorg"> ${KIND[i.k]}${i.pre ? ` · ${esc(preText(i.pre))}` : ""}</small><span class="invd">${esc(i.d)}</span></span></label>`; }).join("")}</div>`;
+  return `<div class="luplist">${list.map(([k, i]) => { const on = sel.includes(k), ok = preOk(b, k), lock = locked.includes(k);
+    const kp = `<span class="kp ${i.k === "w" ? "f" : i.k === "s" ? "s" : "n"}">${KIND[i.k]}</span>${i.sp && BY_ID[i.sp] ? `<span class="kp n">${esc(BY_ID[i.sp].n)}</span>` : ""}`;
+    return pickRow({ act: lu ? 'data-a="lu-oinv"' : 'data-a="occ-inv"', id: k, on, full: sel.length >= max || lock, off: !ok && !on, why: i.pre ? `Prérequis : ${preText(i.pre)}` : "", name: esc(i.n), label: i.n, pills: kp,
+      body: `<div class="eff">${esc(i.d)}</div>${i.pre ? `<span class="muted" style="font-size:12.5px">Prérequis : ${esc(preText(i.pre))}</span>` : ""}` }); }).join("")}</div>`;
 }
 const cantripPool = () => SPELLS.filter(s => s.l === 0).sort(byName);
 const ritualPool = g => SPELLS.filter(s => s.ri && s.l >= 1 && s.l <= Math.ceil(g.level / 2)).sort((a, b) => a.l - b.l || byName(a, b));
@@ -196,8 +197,9 @@ onClick("occ-tome-rm", (b) => { mutate(g => { g.tomeC = (g.tomeC || []).filter(x
 onChange("#occ-rit", t => { if (!t.value) return; mutate(g => { g.bookR = [...new Set([...(g.bookR || []), t.value])]; }); });
 onClick("occ-rit-rm", (b) => { mutate(g => { g.bookR = (g.bookR || []).filter(x => x !== b.dataset.v); }); });
 onChange(t => t.classList.contains("occarc"), t => { mutate(g => { g.arc = { ...(g.arc || {}), [t.dataset.l]: t.value || undefined }; if (!t.value) delete g.arc[t.dataset.l]; }); });
-onChange("occ-inv", t => { const id = t.dataset.id; mutate(g => { const s = g.inv || [];
-  g.inv = t.checked ? (s.length < INV_N[g.level] && preOk(g, id) ? [...s, id] : s) : s.filter(x => x !== id); }); });
+onClick("occ-inv", t => { const id = t.dataset.id, g = G(); if (!g) return; const s = g.inv || [], want = !s.includes(id);
+  if (want && (s.length >= INV_N[g.level] || !preOk(g, id))) { toast(s.length >= INV_N[g.level] ? `${INV_N[g.level]} manifestations : retire d'abord une manifestation` : "Prérequis non remplis"); return; }
+  mutate(g => { g.inv = want ? [...s, id] : s.filter(x => x !== id); }); });
 
 // ---------- Assistant de niveau : faveur de pacte (3), manifestations (gagnées, une à remplacer), Arcanum mystique
 function luChoices(g, b, L) {
@@ -205,17 +207,17 @@ function luChoices(g, b, L) {
   if (b.level === 3) h += `<div class="luprep"><h3>Faveur de pacte</h3><div class="chips">${Object.entries(PACTS).map(([k, p]) => `<button class="chip" data-a="lu-opact" data-v="${k}" aria-pressed="${L.opact === k}">${p.short}</button>`).join("")}</div>${PACTS[L.opact] ? `<span class="muted" style="font-size:13px">${esc(PACTS[L.opact].sum)}</span>` : ""}</div>`;
   const n = INV_N[b.level];
   if (n) { const old = g.inv || [], sel = L.oinv || old, gone = old.filter(k => !sel.includes(k)).length;
-    h += `<div class="luprep"><h3>Manifestations occultes · ${sel.length}/${n}</h3><span class="muted">${n > INV_N[g.level] ? `${n - INV_N[g.level]} de plus. ` : ""}Tu peux aussi en remplacer une : décoche-la puis choisis-en une autre${gone ? ` (${gone} remplacée)` : ""}. Grisées : prérequis non remplis.</span>${invPicker(b, sel, n, true, gone >= 1 ? old.filter(k => sel.includes(k)) : [])}</div>`; }
+    h += `<div class="luprep"><h3>Manifestations occultes · ${sel.length}/${n}</h3><span class="muted">${n > INV_N[g.level] ? `${n - INV_N[g.level]} de plus. ` : ""}Tu peux aussi en remplacer une : retire-la (✓) puis choisis-en une autre${gone ? ` (${gone} remplacée)` : ""}. Grisées : prérequis non remplis.</span>${invPicker(b, sel, n, true, gone >= 1 ? old.filter(k => sel.includes(k)) : [])}</div>`; }
   const arc = Object.entries(ARC_AT).find(([, at]) => at === b.level);
   if (arc) { const l = +arc[0];
     h += `<div class="luprep"><h3>Arcanum mystique · sort de niveau ${l}</h3><select id="lu-oarc" aria-label="Sort d'Arcanum mystique"><option value="">Choisir…</option>${classSpells(b).filter(s => s.l === l).sort(byName).map(s => `<option value="${s.id}"${L.oarc === s.id ? " selected" : ""}>${esc(s.n)}</option>`).join("")}</select><span class="muted">Une fois par repos long, sans emplacement.</span></div>`; }
   return h;
 }
 onClick("lu-opact", (b) => { if (!S.lu) return; S.lu.opact = b.dataset.v; S.luKeep = true; render(); });
-onChange("lu-oinv", t => { const L = S.lu, g = G(); if (!L || !g) return; const old = g.inv || [], sel = L.oinv || [...old], id = t.dataset.id, n = INV_N[L.to];
+onClick("lu-oinv", t => { const L = S.lu, g = G(); if (!L || !g) return; const old = g.inv || [], sel = L.oinv || [...old], id = t.dataset.id, n = INV_N[L.to];
   const b = { ...g, level: L.to, pacte: L.opact || g.pacte, cantrips: [...g.cantrips, ...(L.cpicks || [])] };
-  if (t.checked) { if (sel.length >= n || !preOk(b, id)) { t.checked = false; toast(sel.length >= n ? `${n} manifestations à ce niveau : décoche d'abord une manifestation` : "Prérequis non remplis"); return; } L.oinv = [...sel, id]; }
-  else { if (old.includes(id) && old.filter(k => !sel.includes(k)).length >= 1) { t.checked = true; toast("Une seule manifestation remplacée par niveau"); return; } L.oinv = sel.filter(x => x !== id); }
+  if (!sel.includes(id)) { if (sel.length >= n || !preOk(b, id)) { toast(sel.length >= n ? `${n} manifestations à ce niveau : retire d'abord une manifestation` : "Prérequis non remplis"); return; } L.oinv = [...sel, id]; }
+  else { if (old.includes(id) && old.filter(k => !sel.includes(k)).length >= 1) { toast("Une seule manifestation remplacée par niveau"); return; } L.oinv = sel.filter(x => x !== id); }
   S.luKeep = true; render(); });
 onChange("#lu-oarc", t => { if (!S.lu) return; S.lu.oarc = t.value || null; S.luKeep = true; render(); });
 
