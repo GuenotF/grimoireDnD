@@ -1,6 +1,6 @@
 // Atelier du Grimoire : point d'entrée. Écran principal (en-tête, onglets), démarrage.
 // Les modules importés déclarent leurs actions (boutons, champs) en se chargeant.
-import { C, CLASSES, alwaysPrepared } from "./classes/index.js";
+import { C, CLASSES, alwaysPrepared, noSpells } from "./classes/index.js";
 import { beforeEachClick, onChange, onClick, onInput, onKey, startActions } from "./core/actions.js";
 import { esc, signed } from "./core/format.js";
 import { showIosTip } from "./core/pwa.js";
@@ -99,7 +99,7 @@ function heroHTML(g) {
   return `<section class="hero">
   <div class="herohead">
     <div class="ht"><h1 class="title" id="title"><span class="initial">${first}</span>${rest}</h1>
-    <div class="subline">${C(g).subline(g)}${C(g).noSpells ? "" : ` · ${max ? `sorts jusqu'au niveau ${max}` : `sorts au niveau ${R.unlockAt(g, 1)}`}`}</div></div>
+    <div class="subline">${C(g).subline(g)}${noSpells(g) ? "" : ` · ${max ? `sorts jusqu'au niveau ${max}` : `sorts au niveau ${R.unlockAt(g, 1)}`}`}</div></div>
     <div class="hbtns">${g.level < 20 ? `<button class="btn lvup" data-a="lu-open" title="Assistant de passage de niveau">↑ Niveau ${g.level + 1}</button>` : ""}<button class="btn edit" data-a="hero-edit" aria-expanded="${S.heroEdit}">✎ ${S.heroEdit ? "Fermer" : "Modifier"}</button></div>
   </div>
   ${S.heroEdit ? `<div class="setup">
@@ -110,7 +110,7 @@ function heroHTML(g) {
     ${raceField(g)}
   </div>` : ""}
   ${S.tab === "perso" ? `<div class="statcap">Caractéristiques</div><div class="stats" role="list" aria-label="Caractéristiques">${heroAbilities(g)}</div>`
-    : C(g).noSpells ? `<div class="statcap">${C(g).n}</div><div class="stats" role="list" aria-label="${C(g).n}">${C(g).heroStats(g)}</div>` : spells}
+    : noSpells(g) || S.tab === "caps" ? `<div class="statcap">${C(g).n}</div><div class="stats" role="list" aria-label="${C(g).n}">${C(g).heroStats(g)}</div>` : spells}
   ${showIosTip() ? `<div class="banner">Sur iPhone ou iPad, installe l'atelier : bouton <b>Partager</b>, puis <b>Sur l'écran d'accueil</b>. Ouvre-le ensuite toujours depuis cette icône : c'est là que tes grimoires sont le mieux conservés. <button class="btn ghost" data-a="hide-ios">Masquer</button></div>` : ""}
   </section>`;
 }

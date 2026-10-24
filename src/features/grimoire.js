@@ -43,7 +43,7 @@ function preparedGererHTML(g) {
     h += foldHead("o", "oath", ap.title, ap.aside, plural(list.length, "sort"));
     if (!isFold("o")) list.forEach(s => { h += gererRow(g, s, null, s.l > max, true, false, true); });
   }
-  if (C(g).cantrips(20) > 0) {
+  if (R.cantrips(g, 20) > 0) {
     const cMax = R.cantrips(g), cans = g.cantrips.map(id => BY_ID[id]).filter(Boolean).sort(byName);
     h += foldHead("c", "", "Sorts mineurs", `${cans.length} sur ${cMax} connus · à volonté, jamais préparés`, plural(cans.length, "sort"));
     if (!isFold("c")) { if (!cans.length) h += `<div class="empty">Aucun sort mineur. Choisis-en ${cMax} dans la bibliothèque (filtre « Mineurs »).</div>`; cans.forEach(s => { h += gererRow(g, s, null, false, false, true); }); }
@@ -67,7 +67,7 @@ function preparedGererHTML(g) {
 function knownGererHTML(g) {
   const max = R.maxLevel(g), kMax = R.prepMax(g), known = new Set(g.prepared), n = g.prepared.length;
   let h = "";
-  if (C(g).cantrips(20) > 0) {
+  if (R.cantrips(g, 20) > 0) {
     const cMax = R.cantrips(g), cans = g.cantrips.map(id => BY_ID[id]).filter(Boolean).sort(byName);
     h += foldHead("c", "", "Sorts mineurs", `${cans.length} sur ${cMax} connus · à volonté`, plural(cans.length, "sort"));
     if (!isFold("c")) { if (!cans.length) h += `<div class="empty">Aucun sort mineur. Choisis-en ${cMax} dans la bibliothèque (filtre « Mineurs »).</div>`; cans.forEach(s => { h += gererRow(g, s, null, false, false, true); }); }
@@ -85,7 +85,8 @@ function knownGererHTML(g) {
 }
 function knownRow(g, s, on, full) {
   const open = S.open.has(s.id), locked = s.l > R.maxLevel(g);
-  const act = on ? `<button class="btn sm knbtn off" data-a="kn-toggle" data-id="${s.id}" aria-label="Oublier ${esc(s.n)}">Oublier</button>` : `<button class="btn sm knbtn" data-a="kn-toggle" data-id="${s.id}" aria-label="Apprendre ${esc(s.n)}"${full || locked ? " disabled" : ""}>Apprendre</button>`;
+  const why = !on && C(g).knownOk ? C(g).knownOk(g, s, g.prepared) : ""; // Chevalier occulte : école non permise
+  const act = on ? `<button class="btn sm knbtn off" data-a="kn-toggle" data-id="${s.id}" aria-label="Oublier ${esc(s.n)}">Oublier</button>` : `<button class="btn sm knbtn" data-a="kn-toggle" data-id="${s.id}" aria-label="Apprendre ${esc(s.n)}"${full || locked || why ? " disabled" : ""}${why ? ` title="${esc(why)}"` : ""}>Apprendre</button>`;
   const body = open ? `<div class="jbody"><span class="vo">${esc(s.en)}</span>${spellBody(s, g)}${noteOf(g, s) && S.noteEdit !== s.id ? noteBox(g, s) : ""}${on && !locked ? castHTML(g, s, true) : ""}<div class="rowact"><span class="origin">${on ? "Sort connu" : `Liste du ${C(g).n.toLowerCase()}`}</span></div></div>` : "";
   return `<div class="jrow${on ? " on" : ""}"><div class="jline"><span class="knmark${on ? " on" : ""}" aria-hidden="true">${on ? "✓" : ""}</span><div class="jmain"><button class="jname" data-a="row" data-id="${s.id}" aria-expanded="${open}">${esc(s.n)}${tags(s)}<span class="chev">${open ? "▴" : "▾"}</span></button>${liveMark(g, s)}<span class="kps">${keyPills(s, g)}</span></div>${notePen(g, s)}${act}</div>${noteGerer(g, s)}${body}${concWarnHTML(g, s)}</div>`;
 }
@@ -93,6 +94,7 @@ onClick("kn-flt", (b) => { S.knf = b.dataset.v; render(); });
 onClick("kn-toggle", (b) => {
   const g = G(), id = b.dataset.id, s = BY_ID[id]; if (!g || !s) return; const on = g.prepared.includes(id), prev = [...g.prepared];
   if (!on && g.prepared.length >= R.prepMax(g)) { toast(`Limite atteinte (${g.prepared.length}/${R.prepMax(g)}) : oublie d'abord un sort`); return; }
+  const why = !on && C(g).knownOk ? C(g).knownOk(g, s, g.prepared) : ""; if (why) { toast(why); return; }
   mutate(g => { g.prepared = on ? g.prepared.filter(x => x !== id) : [...g.prepared, id]; });
   toast(`<b>${esc(s.n)}</b> ${on ? "oublié" : "appris"} · ${G().prepared.length} / ${R.prepMax(g)}`, () => { mutate(g => { g.prepared = prev; }); return on ? "Sort de nouveau connu" : "Annulé"; });
 });
@@ -129,7 +131,7 @@ function grimoireHTML(g) {
   h += `<div class="rubric" id="slots-top" style="margin-top:4px"><h2>${pact ? "Magie de pacte" : "Emplacements de sorts"}</h2><span class="aside">${pact ? `${slots.length ? `emplacements de niveau ${slots.length}` : ""} · repos court ou long` : "touche un cercle quand tu lances un sort"}</span></div><div class="slots">`;
   if (!slots.length) h += `<p class="muted" style="margin:0 0 6px">Pas encore d'emplacement : les sorts arrivent au niveau ${R.unlockAt(g, 1)}.</p>`;
   slots.forEach((n, i) => {
-    const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0)), base = (C(g).slots[g.level] || [])[i] || 0; // au-delà de base : emplacements créés (pointillés)
+    const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0)), base = (R.table(g)[g.level] || [])[i] || 0; // au-delà de base : emplacements créés (pointillés)
     if (!n) return; // magie de pacte : seul le niveau du pacte a des emplacements
     h += `<div class="slotrow"><span class="lv">${pact ? "Pacte · niv. " : "Niveau "}${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}${k >= base ? " made" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
   });

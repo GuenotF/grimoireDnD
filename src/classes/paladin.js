@@ -234,7 +234,7 @@ export default {
   // Duel : +2 aux dégâts à une main (corps à corps, sans arme à deux mains) ; Arme à deux mains : relance des 1 et 2
   attackMods: (g, w) => {
     if (g.level < 2) return {};
-    if (g.style === "duel" && w.rng === "melee" && !w.two) return { dmg: 2, dmg2: 0, pills: ["Duel : +2 à une main"] };
+    if (g.style === "duel" && w.rng === "melee" && !w.two && w.id !== "unarmed") return { dmg: 2, dmg2: 0, pills: ["Duel : +2 à une main"] };
     if (g.style === "deuxmains" && w.rng === "melee" && (w.two || w.vers)) return { pills: ["relance les 1 et 2 (à deux mains)"] };
     return {};
   },

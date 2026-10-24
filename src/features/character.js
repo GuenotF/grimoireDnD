@@ -1,7 +1,7 @@
 // Onglet Personnage : caractéristiques, combat (CA, vitesse, initiative, PV max), jets de sauvegarde, compétences ;
 // PV et repos (hp.js, rest.js) ; défenses, dons et traits, historique, notes (traits.js).
 // Gérer : on recopie la feuille du joueur. En jeu : on consulte les valeurs calculées.
-import { C } from "../classes/index.js";
+import { C, noSpells } from "../classes/index.js";
 import { onChange, onClick } from "../core/actions.js";
 import { cap, fmt, signed } from "../core/format.js";
 import { S } from "../core/state.js";
@@ -33,7 +33,7 @@ function abilitiesGerer(g) {
   let h = foldHead("ch-ab", "", "Caractéristiques", "valeurs de ta feuille", sum);
   if (isFold("ch-ab")) return h;
   h += `<div class="abgrid">${ABILITIES.map(([k, a, n]) => `<label class="abcell${k === C(g).ab ? " mine" : ""}" title="${n}"><span class="abk">${a}</span><input id="ab-${k}" data-abil="${k}" type="number" inputmode="numeric" min="1" max="30" value="${g.abil[k]}" aria-label="${n}"><b class="abm">${signed(R.ab(g, k))}</b></label>`).join("")}</div>`;
-  return h + `<p class="chhelp">Le modificateur se calcule seul.${C(g).noSpells ? "" : ` ${cap(C(g).abArticle || "l'" + C(g).abN)} sert aussi à tes sorts : DD, attaque et sorts préparés la lisent ici.`}</p>`;
+  return h + `<p class="chhelp">Le modificateur se calcule seul.${noSpells(g) ? "" : ` ${cap(C(g).abArticle || "l'" + C(g).abN)} sert aussi à tes sorts : DD, attaque et sorts préparés la lisent ici.`}</p>`;
 }
 function combatGerer(g) {
   const sum = `CA ${acOf(g) ?? "?"} · PV ${g.hpMax ?? "?"} · ${speedTxt(g)}`;
@@ -81,7 +81,7 @@ function jeuHTML(g) {
   const st = (v, l, cls = "") => `<div class="chstat${cls}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
   const stats = `<div class="chstats">${st(acOf(g) ?? "?", "CA")}${st(signed(initiative(g)), "Initiative")}${st(speedTxt(g), "Vitesse")}${st(signed(R.prof(g.level)), "Maîtrise")}</div>`;
   let sk = foldHead("ch-skj", "", "Compétences", `Perception passive ${passivePerception(g)}`);
-  if (!isFold("ch-skj")) sk += `<div class="skplay">${SKILLS.map(([k, n]) => { const l = skillLevel(g, k); return `<div class="${l ? "on" : ""}"><span class="mk" aria-hidden="true">${l === 2 ? "◉" : l ? "●" : halfProf(g) ? "½" : ""}</span><span class="n">${n}${l ? `<span class="sr"> (${LV_NAME[l]})</span>` : ""}</span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("")}</div>`;
+  if (!isFold("ch-skj")) sk += `<div class="skplay">${SKILLS.map(([k, n, a]) => { const l = skillLevel(g, k); return `<div class="${l ? "on" : ""}"><span class="mk" aria-hidden="true">${l === 2 ? "◉" : l ? "●" : halfProf(g, a) ? "½" : ""}</span><span class="n">${n}${l ? `<span class="sr"> (${LV_NAME[l]})</span>` : ""}</span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("")}</div>`;
   return hpCardHTML(g) + restBarHTML(g) + stats + sk + toolsJeu(g) + equipmentJeu(g) + traitsSheetJeu(g); // les caractéristiques sont dans l'en-tête (heroAbilities)
 }
 

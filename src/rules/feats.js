@@ -12,7 +12,7 @@
 //   play       : rappel en partie (texte, ou fonction du personnage) ; res : ressource {n, rest: "court" | "long", label} (g.featU[id] dépensés)
 //   concAdv    : avantage aux JdS de concentration (Mage de guerre)
 //   pre        : condition { abil: {dex: 13} } (toutes), { any: {int: 13, wis: 13} } (l'une), { spell: true }, { armor: "medium" }
-import { C } from "../classes/index.js";
+import { noSpells } from "../classes/index.js";
 import { S } from "../core/state.js";
 import { BY_ID, FEAT_LIST, SPELLS } from "../data.js";
 import { R } from "./common.js";
@@ -117,7 +117,7 @@ function featBlock(g, id, armorProf) {
   const p = FEATS[id].pre; if (!p) return null;
   if (p.abil) { const k = Object.keys(p.abil).find(k => g.abil[k] < p.abil[k]); if (k) return `${ABN[k]} ${p.abil[k]} requise (tu as ${g.abil[k]})`; }
   if (p.any && !Object.entries(p.any).some(([k, v]) => g.abil[k] >= v)) return `${Object.entries(p.any).map(([k, v]) => `${ABN[k]} ${v}`).join(" ou ")} requise`;
-  if (p.spell && C(g).noSpells) return "il faut pouvoir lancer au moins un sort";
+  if (p.spell && noSpells(g)) return "il faut pouvoir lancer au moins un sort";
   if (p.armor && !armorProf(p.armor)) return `maîtrise des armures ${ARMOR_N[p.armor]} requise`;
   return null;
 }

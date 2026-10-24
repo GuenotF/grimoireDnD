@@ -206,7 +206,7 @@ export default {
   attackMods: (g, w, ab, off) => {
     if (g.level < 2) return {};
     if (g.style === "archerie" && w.rng === "ranged") return { hit: 2, pills: ["Archerie +2"] };
-    if (g.style === "duel" && w.rng === "melee" && !w.two) return { dmg: 2, dmg2: 0, pills: ["Duel : +2 à une main"] };
+    if (g.style === "duel" && w.rng === "melee" && !w.two && w.id !== "unarmed") return { dmg: 2, dmg2: 0, pills: ["Duel : +2 à une main"] };
     if (g.style === "deuxarmes" && off) return { offMod: true, pills: ["Combat à deux armes : mod. aux dégâts"] };
     return {};
   },

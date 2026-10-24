@@ -1,5 +1,5 @@
 // Assistant de passage de niveau (structure commune et étapes des classes à sorts préparés).
-import { C, alwaysPrepared, classFeats } from "../classes/index.js";
+import { C, alwaysPrepared, classFeats, noSpells } from "../classes/index.js";
 import { onChange, onClick, onInput } from "../core/actions.js";
 import { byName, cap, esc, plural, signed } from "../core/format.js";
 import { G, S } from "../core/state.js";
@@ -14,7 +14,7 @@ import { featAllowed, featPickerHTML, featPreview } from "./featpicker.js";
 import { keyPills, spellBody, tags } from "./spells.js";
 import { pickRow } from "../ui/components.js";
 /** Sort à choisir dans l'assistant : ligne dépliable (fiche complète du sort au toucher du nom). */
-const spellPick = (act, s, b, on, full) => pickRow({ act, id: s.id, on, full, name: esc(s.n) + tags(s), label: s.n, pills: keyPills(s, b), body: spellBody(s, b) });
+const spellPick = (act, s, b, on, full, why) => pickRow({ act, id: s.id, on, full, off: !on && !!why, why, name: esc(s.n) + tags(s), label: s.n, pills: keyPills(s, b), body: spellBody(s, b) });
 
 // Assistant ouvert par le bouton « ↑ Niveau N » : ce qui change, sorts gratuits, validation.
 // Le sélecteur de niveau reste un réglage direct (création, correction), sans assistant.
@@ -38,7 +38,7 @@ function subHTML(g, L) {
     ${sc.opts(g).map(([k, n, sum]) => { const on = k === cur; return `<button class="subopt${on ? " on" : ""}" data-a="lu-sub" data-v="${esc(k)}" aria-pressed="${on}"><span class="rd" aria-hidden="true"></span><span class="bd"><b>${esc(n)}</b>${sum ? `<small>${esc(sum)}</small>` : ""}</span></button>${on && ex ? `<div class="subx"><span class="lusub">${esc(ex.label)}</span><div class="chips">${ex.opts.map(([t, tn]) => `<button class="chip" data-a="lu-subx" data-v="${esc(t)}" aria-pressed="${t === ex.cur}">${esc(tn)}</button>`).join("")}</div>${(ex.opts.find(o => o[0] === ex.cur) || [])[2] ? `<span class="fpprev">${esc(ex.opts.find(o => o[0] === ex.cur)[2])}</span>` : ""}</div>` : ""}`; }).join("")}</div>`;
 }
 /** Classe sans sorts et rien à choisir à ce niveau : l'étape 2 est sautée. */
-const skip2 = g => !!C(g).noSpells && !LU(g).steps && preparedLu2(g, luB(g)).startsWith('<div class="empty">');
+const skip2 = g => !!noSpells(g) && !LU(g).steps && preparedLu2(g, luB(g)).startsWith('<div class="empty">');
 function luOpen(g) {
   S.lu = LU(g).init ? LU(g).init(g) : { step: 1, to: g.level + 1, style: g.style || "", prep: [...g.prepared], cpicks: [], wsfav: [], open: null };
   Object.assign(S.lu, { hp: { mode: "avg", roll: "" }, asi: {} }); // communs à toutes les classes : PV gagnés, amélioration de caractéristiques
@@ -98,7 +98,7 @@ function luHTML(g) {
   const head = `<div class="luhead"><div class="t"><h2><span class="initial">${esc(fn.charAt(0))}</span>${esc(fn.slice(1))} passe au niveau ${to}</h2><button class="x" data-a="lu-close" aria-label="Fermer l'assistant">✕</button></div>
   <div class="lusteps">${names.map((n, i) => `<div class="${i + 1 < step ? "done" : i + 1 === step ? "cur" : ""}"${i + 1 === step ? ' aria-current="step"' : ""}>${i + 1} · ${n}</div>`).join("")}</div></div>`;
   const body = (step === 1 ? luCommonHTML(g, L) : "") + steps[step - 1](g, b) + (step === 3 ? luCommonRecap(g, L) : "");
-  const foot = step === 1 ? `<button class="btn" data-a="lu-close">Annuler</button><button class="btn primary" data-a="lu-next">${lu.nextLabel ? lu.nextLabel(g, to) : C(g).noSpells ? "Suivant" : "Préparation"} →</button>`
+  const foot = step === 1 ? `<button class="btn" data-a="lu-close">Annuler</button><button class="btn primary" data-a="lu-next">${lu.nextLabel ? lu.nextLabel(g, to) : noSpells(g) ? "Suivant" : "Préparation"} →</button>`
     : step === 2 ? `<button class="btn" data-a="lu-back">← Retour</button><button class="btn primary" data-a="lu-next">Suivant →</button>`
     : `<button class="btn" data-a="lu-back">← Retour</button><button class="btn primary" data-a="lu-go" style="font-weight:700">Passer au niveau ${to}</button>`;
   return `<div class="lubox">${head}<div class="lubody">${body}</div><div class="lufoot">${foot}</div></div>`;
@@ -115,10 +115,10 @@ function preparedLu1(g, b) {
   }
   const mod = R.am(g), mod1 = R.am(b), row = (l, o, n, cls) => `<div class="${o === n ? "same" : ""}"><span>${l}</span><span class="old">${o}</span><span class="ar">→</span><b${cls && o !== n ? ` style="color:var(${cls})"` : ""}>${n}</b></div>`;
   h += `<div class="lutab"><div class="hd"><span></span><span>Niv. ${from}</span><span></span><span>Niv. ${to}</span></div>
-  ${C(g).noSpells ? row("Bonus de maîtrise", signed(R.prof(from)), signed(R.prof(to)), "--ps-fg") : `${row("DD des sorts", 8 + R.prof(from) + mod, 8 + R.prof(to) + mod1, "--ps-fg")}
+  ${noSpells(g) ? row("Bonus de maîtrise", signed(R.prof(from)), signed(R.prof(to)), "--ps-fg") : `${row("DD des sorts", 8 + R.prof(from) + mod, 8 + R.prof(to) + mod1, "--ps-fg")}
   ${row("Attaque de sort", signed(R.prof(from) + mod), signed(R.prof(to) + mod1), "--pa-fg")}`}
   ${lu.rowsBefore ? lu.rowsBefore(g, b) : ""}
-  ${C(g).noSpells ? "" : row(C(g).known ? "Sorts connus" : "Sorts préparés", R.maxLevel(g) ? R.prepMax(g) : 0, R.maxLevel(b) ? R.prepMax(b) : 0)}
+  ${noSpells(g) ? "" : row(C(g).known ? "Sorts connus" : "Sorts préparés", R.maxLevel(g) ? R.prepMax(g) : 0, R.maxLevel(b) ? R.prepMax(b) : 0)}
   ${lu.rowsAfter ? lu.rowsAfter(g, b) : ""}</div>`;
   const feats = classFeats(b).filter(f => f.lv === to);
   if (feats.length) h += `<div style="display:grid;gap:6px"><span class="lusub">Nouvelle capacité</span>${feats.map(f => `<div class="lucan"><span class="n">${f.n}</span><span class="kp ${f.k}">${esc(f.pill(b))}</span></div>`).join("")}</div>`;
@@ -136,7 +136,7 @@ function preparedLu2(g, b) {
     h += `<div class="rubric"><h3>Sort mineur à apprendre</h3><span class="aside">${L.cpicks.length} / ${needC}</span></div><div class="luplist">${list.map(s => { const on = L.cpicks.includes(s.id); return spellPick('data-a="lu-cpick"', s, b, on, fullC); }).join("")}</div>`;
   }
   if (lu.choices) h += lu.choices(g, b, L); // ex. paladin : style de combat
-  if (C(g).noSpells) return h || `<div class="empty">Rien à choisir à ce niveau : passe à l'étape suivante.</div>`;
+  if (noSpells(b)) return h || `<div class="empty">Rien à choisir à ce niveau : passe à l'étape suivante.</div>`;
   if (!max) return h + `<div class="empty">Le ${C(g).n.toLowerCase()} ${C(g).known ? "apprend" : "prépare"} ses sorts à partir du niveau ${R.unlockAt(g, 1)}.</div>`;
   if (C(g).known) return h + knownLu2(g, b, L);
   const prep = L.prep.filter(id => BY_ID[id] && BY_ID[id].l <= max && !oath.includes(id)), full = prep.length >= pMax;
@@ -158,6 +158,8 @@ function preparedLu2(g, b) {
 const knownNew = (g, b) => Math.max(0, R.prepMax(b) - (R.maxLevel(g) ? R.prepMax(g) : 0));
 /** Sorts connus après validation. */
 const knownAfter = (g, L) => [...g.prepared.filter(id => id !== (L.kin ? L.kout : null)), ...(L.kout && L.kin ? [L.kin] : []), ...(L.kn || [])].filter((id, i, a) => BY_ID[id] && a.indexOf(id) === i);
+/** Restriction propre à la classe (Chevalier occulte : écoles d'abjuration et d'évocation) : raison si le sort n'est pas permis. */
+const okWhy = (g, b, s, ids) => C(g).knownOk ? C(g).knownOk(b, s, ids) : "";
 function knownLu2(g, b, L) {
   const max = R.maxLevel(b), need = knownNew(g, b), kn = L.kn || [], have = new Set([...g.prepared, ...kn, ...(L.kin ? [L.kin] : [])]), full = kn.length >= need;
   let h = `<div class="rubric"><h3>Sorts connus · ${R.maxLevel(g) ? R.prepMax(g) : 0} → ${R.prepMax(b)}</h3><span class="aside">${need ? `${kn.length} / ${need} appris` : "aucun nouveau sort"}</span></div>`;
@@ -167,11 +169,11 @@ function knownLu2(g, b, L) {
     h += `<div style="font-size:14px;line-height:1.4">Apprends <b>${plural(need, "sort")}</b> de ${C(g).n.toLowerCase()} de niveau 1${max > 1 ? ` à ${max}` : ""}.${isNew && max > 1 ? ` Nouveau : sorts de niveau ${max}.` : ""}</div>
     <div class="chips">${lvls.map(lv => `<button class="chip" data-a="lu-pflt" data-v="${lv}" aria-pressed="${flt === lv}">Niv. ${lv}${isNew && lv === max ? " · nouveau" : ""}</button>`).join("")}</div>
     <div class="luplist">${classSpells(b).filter(s => s.l === flt && (!have.has(s.id) || kn.includes(s.id))).sort(byName).map(s => { const on = kn.includes(s.id);
-      return spellPick('data-a="lu-kpick"', s, b, on, full); }).join("") || `<div class="empty">Tous les sorts de ce niveau sont déjà connus.</div>`}</div>`;
+      return spellPick('data-a="lu-kpick"', s, b, on, full, okWhy(g, b, s, knownAfter(g, L))); }).join("") || `<div class="empty">Tous les sorts de ce niveau sont déjà connus.</div>`}</div>`;
   }
   const mine = g.prepared.map(id => BY_ID[id]).filter(Boolean).sort((x, y) => x.l - y.l || byName(x, y));
   if (mine.length) {
-    const pool = classSpells(b).filter(s => s.l >= 1 && s.l <= max && (!have.has(s.id) || s.id === L.kin)).sort((x, y) => x.l - y.l || byName(x, y));
+    const pool = classSpells(b).filter(s => s.l >= 1 && s.l <= max && (!have.has(s.id) || s.id === L.kin) && !okWhy(g, b, s, knownAfter(g, L).filter(id => id !== L.kout && id !== L.kin))).sort((x, y) => x.l - y.l || byName(x, y));
     h += `<div class="rubric"><h3>Remplacer un sort connu</h3><span class="aside">facultatif</span></div>
     <div class="knswap"><select id="lu-kout" aria-label="Sort à oublier"><option value="">Aucun</option>${mine.map(s => `<option value="${s.id}"${L.kout === s.id ? " selected" : ""}>${esc(s.n)} · niv. ${s.l}</option>`).join("")}</select><span aria-hidden="true">→</span>
     <select id="lu-kin" aria-label="Nouveau sort"${L.kout ? "" : " disabled"}><option value="">Choisir…</option>${pool.map(s => `<option value="${s.id}"${L.kin === s.id ? " selected" : ""}>${esc(s.n)} · niv. ${s.l}</option>`).join("")}</select></div>
@@ -192,7 +194,7 @@ function preparedLu3(g, b) {
   <div style="display:grid;gap:4px;font-size:13.5px;color:var(--muted);line-height:1.45">
     ${gained.length ? `<span>• ${cap(gained.map(([lv, d]) => `${d > 1 ? `les ${d} emplacements` : "le nouvel emplacement"} de niveau ${lv}`).join(" et "))} ${gained.length > 1 || gained[0][1] > 1 ? "sont disponibles" : "est disponible"} tout de suite.</span>` : ""}
     ${lu.recapNotes ? lu.recapNotes(g, b) : ""}
-    <span>• ${C(g).noSpells ? "Capacités, attaques et ressources" : "DD, attaque et capacités"} sont mis à jour partout.</span>
+    <span>• ${noSpells(g) ? "Capacités, attaques et ressources" : "DD, attaque et capacités"} sont mis à jour partout.</span>
     <span>• Tu peux revenir au niveau ${g.level} avec le sélecteur de niveau.</span></div>`;
 }
 onClick("lu-open", () => { const g = G(); if (!g || g.level >= 20) return; luOpen(g); render(); const x = document.querySelector("#lvlup .lufoot .primary"); if (x) x.focus({ preventScroll: true }); });
@@ -241,7 +243,7 @@ onClick("lu-asi", (b) => {
 });
 onClick("lu-cpick", t => {
   if (!S.lu) return;
-  const id = t.dataset.id, g = G(), need = Math.max(0, R.cantrips(g, S.lu.to) - R.cantrips(g)), want = !S.lu.cpicks.includes(id);
+  const id = t.dataset.id, g = G(), need = Math.max(0, R.cantrips(luB(g)) - R.cantrips(g)), want = !S.lu.cpicks.includes(id);
   if (want && S.lu.cpicks.length >= need) { toast(`${plural(need, "sort mineur", "sorts mineurs")} à ce niveau : retire d'abord l'autre`); return; }
   S.lu.cpicks = want ? [...S.lu.cpicks, id] : S.lu.cpicks.filter(x => x !== id); S.luKeep = true; render();
 });
@@ -255,6 +257,7 @@ onClick("lu-pprep", t => {
 });
 onClick("lu-kpick", t => {
   if (!S.lu) return; const g = G(), id = t.dataset.id, need = knownNew(g, { ...g, level: S.lu.to }), kn = S.lu.kn || [], want = !kn.includes(id);
+  const why = want ? okWhy(g, luB(g), BY_ID[id], knownAfter(g, S.lu)) : ""; if (why) { toast(why); return; }
   if (want && kn.length >= need) { toast(`${plural(need, "sort")} à apprendre à ce niveau : retire d'abord un sort`); return; }
   S.lu.kn = want ? [...kn, id] : kn.filter(x => x !== id); S.luKeep = true; render();
 });

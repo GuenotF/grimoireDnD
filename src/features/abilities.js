@@ -12,7 +12,7 @@ import { restBarHTML } from "./rest.js";
 function abilitiesHTML(g) {
   const jeu = S.view === "jeu";
   let h = `<div class="viewsw" role="group" aria-label="Affichage des capacités"><button data-a="view" data-v="gerer" aria-pressed="${!jeu}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${jeu}">En jeu</button></div>`;
-  if (!jeu) return h + featsHTML(g); // Gérer : réglages seulement (capacités, style…), aucune action
+  if (!jeu) return h + featsHTML(g) + (C(g).capsSettings ? C(g).capsSettings(g) : ""); // Gérer : réglages seulement (capacités, style, manœuvres…), aucune action
   if (C(g).capsTop) h += C(g).capsTop(g);         // carte propre à la classe (Rage, Attaque sournoise…)
   h += attacksHTML(g) + itemsActionHTML(g) + featsPlayHTML(g) + innateHTML(g); // attaques, objets, dons
   if (C(g).resources) h += C(g).resources(g);      // autres ressources (Ruse, Coup de chance…)

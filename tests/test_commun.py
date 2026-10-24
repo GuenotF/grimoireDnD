@@ -11,7 +11,7 @@ def test_accueil_et_creation(browser, devices, url):
     check(a.count('label[for="f-import"]') == 1, "bouton Importer sur l'accueil")
     a.click('.welcome [data-a="new"]')
     classes = a.texts(".nwcard b")
-    check(classes == ["Barbare", "Barde", "Clerc", "Druide", "Ensorceleur", "Magicien", "Occultiste", "Paladin", "Rôdeur", "Roublard"], f"classes proposées : {classes}")
+    check(classes == ["Barbare", "Barde", "Clerc", "Druide", "Ensorceleur", "Guerrier", "Magicien", "Occultiste", "Paladin", "Rôdeur", "Roublard"], f"classes proposées : {classes}")
     a.click('[data-a="nw-cls"][data-v="paladin"]'); a.pg.fill("#nw-name", "Ser Kael"); a.click(".nwgo")
     check(a.g("cls") == "paladin" and a.g("name") == "Ser Kael", "paladin créé")
     check("Paladin niveau 1" in a.text(".subline"), "sous-titre du paladin")

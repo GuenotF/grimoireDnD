@@ -12,8 +12,9 @@ const saveProf = (g, k) => saveFromClass(g, k) || saveFromFeat(g, k) || (g.saveX
 const saveBonus = (g, k) => R.ab(g, k) + (saveProf(g, k) ? R.prof(g.level) : 0);
 /** Initiative : modificateur de DEX + dons (Vigilant) + bonus divers saisi. */
 /** Touche-à-tout (barde) : moitié de la maîtrise aux tests de caractéristique sans maîtrise. */
-const halfProf = g => C(g).halfProf && C(g).halfProf(g) ? Math.floor(R.prof(g.level) / 2) : 0;
-const initiative = g => R.ab(g, "dex") + featInit(g) + (g.initX || 0) + halfProf(g);
+/** Moitié de la maîtrise sans maîtrise (Touche-à-tout du barde, arrondi inférieur ; Athlète remarquable du Champion, FOR/DEX/CON, arrondi supérieur). ab : caractéristique du test. */
+const halfProf = (g, ab) => { const v = C(g).halfProf ? C(g).halfProf(g, ab) : false; return v === "up" ? Math.ceil(R.prof(g.level) / 2) : v ? Math.floor(R.prof(g.level) / 2) : 0; };
+const initiative = g => R.ab(g, "dex") + featInit(g) + (g.initX || 0) + halfProf(g, "dex");
 /** Vitesse en mètres : saisie + bonus de classe (Déplacement rapide du barbare…). */
 const speedOf = g => g.speed + (C(g).speedBonus ? C(g).speedBonus(g) : 0) + featSpeed(g); // + Mobile
 /** Taille du dé de vie de la classe (8 pour « 1d8 »). */
@@ -22,7 +23,7 @@ const hitDieSize = g => +String(C(g).hitDie || "1d8").split("d")[1] || 8;
 const hpAverage = g => { const d = hitDieSize(g), con = R.ab(g, "con"); return Math.max(g.level, d + (g.level - 1) * (d / 2 + 1) + g.level * con); };
 /** Compétence : mod. de la caractéristique + maîtrise (×1) ou expertise (×2). g.skills = { code: 1 | 2 }. */
 const skillLevel = (g, k) => Math.max((g.skills || {})[k] || 0, C(g).skillProf ? C(g).skillProf(g, k) : 0); // + maîtrise donnée par la classe (Présence captivante)
-const skillBonus = (g, k) => { const s = SKILLS.find(x => x[0] === k); return R.ab(g, s[2]) + (skillLevel(g, k) ? skillLevel(g, k) * R.prof(g.level) : halfProf(g)); };
+const skillBonus = (g, k) => { const s = SKILLS.find(x => x[0] === k); return R.ab(g, s[2]) + (skillLevel(g, k) ? skillLevel(g, k) * R.prof(g.level) : halfProf(g, s[2])); };
 /** Perception passive : 10 + bonus de Perception. */
 const passivePerception = g => 10 + skillBonus(g, "perception") + featPassive(g); // + Observateur
 /** Niveaux d'amélioration de caractéristiques (classes actuelles ; une classe peut fournir les siens). */

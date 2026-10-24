@@ -68,7 +68,7 @@ const pHeader = (g, sub, stats) => `<h1><b>${esc(g.name.charAt(0))}</b>${esc(g.n
 /** Emplacements de sorts, avec le prochain niveau en pointillés. */
 function pSlots(g) {
   const slots = R.slots(g), max = slots.length, next = Math.min(C(g).top, max + 1);
-  const futSlots = next > max ? (C(g).slots[R.unlockAt(g, next)] || [])[next - 1] || 0 : 0;
+  const futSlots = next > max ? (R.table(g)[R.unlockAt(g, next)] || [])[next - 1] || 0 : 0;
   return `<h2>Emplacements de sorts <small>cocher un cercle à chaque sort lancé</small></h2>
 ${slots.map((n, i) => `<div class="slot"><span class="l">Niveau ${i + 1}</span>${pDots(n)}<span class="r">${n} emplacement${n > 1 ? "s" : ""}</span></div>`).join("")}
 ${next > max ? `<div class="slot"><span class="l" style="color:#9aa0ae">Niveau ${next}</span>${pDots(futSlots, true)}<span class="r">s'ouvre au niveau ${R.unlockAt(g, next)}</span></div>` : ""}`;
@@ -98,7 +98,7 @@ function pClassList(g, exclude = []) {
 }
 /** Page « Personnage » (commune) : caractéristiques, combat, PV à remplir, compétences, défenses, dons et traits, historique, notes. */
 function pCharacter(g) {
-  const sk = SKILLS.map(([k, n, a]) => { const l = skillLevel(g, k); return `<div class="sk${l ? " on" : ""}"><span class="mk">${l === 2 ? "◉" : l ? "●" : halfProf(g) ? "½" : "○"}</span><span class="n">${n} <i>${ABILITIES.find(x => x[0] === a)[1]}</i></span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("");
+  const sk = SKILLS.map(([k, n, a]) => { const l = skillLevel(g, k); return `<div class="sk${l ? " on" : ""}"><span class="mk">${l === 2 ? "◉" : l ? "●" : halfProf(g, a) ? "½" : "○"}</span><span class="n">${n} <i>${ABILITIES.find(x => x[0] === a)[1]}</i></span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("");
   const DEFN = { res: "Résistance", imm: "Immunité", vul: "Vulnérabilité", adv: "Avantage" };
   return `<h1><b>${esc(g.name.charAt(0))}</b>${esc(g.name.slice(1))}</h1>
 <div class="sub">${C(g).n} niveau ${g.level}${g.bg.n ? ` · ${esc(g.bg.n)}` : ""} · Remplir au crayon</div>
