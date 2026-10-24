@@ -65,3 +65,21 @@ def test_main_secondaire_au_choix(browser, devices, url):
     a.view("gerer"); a.click('[data-a="it-open"][data-i="3"]')
     check("11 + DEX" in a.text(".itdet") and "maîtrisée" in a.text(".itdet"), "Gérer : armure dépliée")
     a.close()
+
+
+def test_escroc_arcanique(browser, devices, url):
+    from test_creation import disabled
+    a = App(browser, devices, url, char=dict(OMBRE, level=2, arch="assassin"), tab="caps", view="jeu")
+    a.click('[data-a="lu-open"]'); a.click('[data-a="lu-sub"][data-v="escroc"]'); a.click(".lufoot .primary")
+    check("Main de mage" in a.text("#lvlup") and "offert" in a.text("#lvlup"), "main de mage offerte")
+    for i in ["minor-illusion", "fire-bolt"]: a.click(f'.pktog[data-a="lu-cpick"][data-id="{i}"]')
+    check(a.count('.pktog[data-a="lu-cpick"][data-id="light"].full') == 1, "2 sorts mineurs à choisir en plus")
+    a.click('.pktog[data-a="lu-kpick"][data-id="sleep"]'); a.click('.pktog[data-a="lu-kpick"][data-id="magic-missile"]')
+    check(disabled(a, '.pktog[data-a="lu-kpick"][data-id="shield"]') and "Enchantement ou Illusion" in a.text("#lvlup"), "une seule école libre au niveau 3")
+    a.click('.pktog[data-a="lu-kpick"][data-id="charm-person"]')
+    a.click(".lufoot .primary"); a.click('[data-a="lu-go"]')
+    check(a.g("level") == 3 and a.g("arch") == "escroc" and a.g("prepared.length") == 3 and a.js("G().cantrips.join()") == "mage-hand,minor-illusion,fire-bolt", "niveau 3 : 3 sorts connus, main de mage + 2 sorts mineurs")
+    check(a.count('[data-a="tab"][data-v="grimoire"]') == 1, "onglet Sorts")
+    a.tab("grimoire"); a.view("jeu")
+    check(a.count('.slotrow [data-a="pip"]') == 2 and "DD" in a.text(".hero"), "2 emplacements, en-tête des sorts")
+    a.close()

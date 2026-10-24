@@ -21,4 +21,15 @@ const SKILLS = [["acrobatics","Acrobaties","dex"],["arcana","Arcanes","int"],["a
   ["perception","Perception","wis"],["persuasion","Persuasion","cha"],["religion","Religion","int"],["performance","Représentation","cha"],
   ["deception","Supercherie","cha"],["survival","Survie","wis"]];
 
-export { SCHOOLS, SCHOOL_VAR, SLOTS, HALF, LVL_NAME, ABILITIES, SKILLS };
+// Tiers de lanceur (Chevalier occulte, Escroc arcanique) : emplacements et sorts connus par niveau
+const THIRD = { 3: [2], 4: [3], 5: [3], 6: [3], 7: [4, 2], 8: [4, 2], 9: [4, 2], 10: [4, 3], 11: [4, 3], 12: [4, 3], 13: [4, 3, 2], 14: [4, 3, 2], 15: [4, 3, 2], 16: [4, 3, 3], 17: [4, 3, 3], 18: [4, 3, 3], 19: [4, 3, 3, 1], 20: [4, 3, 3, 1] };
+const THIRD_KNOWN = [0, 0, 0, 3, 4, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 10, 11, 11, 11, 12, 13];
+/** Sorts d'une école libre (hors des deux écoles imposées) : un aux niveaux 3, 8, 14 et 20. */
+const thirdFree = lv => [3, 8, 14, 20].filter(l => lv >= l).length;
+/** Restriction d'école des tiers de lanceur : raison si le sort s n'est pas permis parmi les sorts connus ids. */
+function thirdOk(lv, schools, s, ids, byId) {
+  if (!s || s.l < 1 || schools.includes(s.s)) return "";
+  const n = ids.map(id => byId[id]).filter(x => x && x.l >= 1 && !schools.includes(x.s) && x.id !== s.id).length, max = thirdFree(lv);
+  return n >= max ? `${schools.join(" ou ").replace(/^./, c => c.toUpperCase())} : ${max} sort${max > 1 ? "s" : ""} d'une autre école au niveau ${lv} (niveaux 3, 8, 14, 20)` : "";
+}
+export { SCHOOLS, SCHOOL_VAR, SLOTS, HALF, LVL_NAME, ABILITIES, SKILLS, THIRD, THIRD_KNOWN, thirdFree, thirdOk };

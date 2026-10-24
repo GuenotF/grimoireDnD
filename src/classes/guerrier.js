@@ -3,6 +3,7 @@
 // sorts de magicien d'abjuration et d'évocation). Classe sans sorts sauf en Chevalier occulte (niveau 3) : onglet Capacités, puis Sorts.
 // Résumés rédigés pour la table, à vérifier dans le livre.
 import { onChange, onClick } from "../core/actions.js";
+import { THIRD, THIRD_KNOWN, thirdFree, thirdOk } from "../rules/tables.js";
 import { stylesOf, styleAC, styleMods, styleNotes } from "../rules/styles.js";
 import { byName, esc, signed } from "../core/format.js";
 import { G, S } from "../core/state.js";
@@ -46,8 +47,7 @@ const MAN = {
   riposte: { n: "Riposte", p: [["d", "+{d} dégâts"], ["n", "réaction"]], d: "Quand une créature te rate au corps à corps, réaction : une attaque d'arme au corps à corps contre elle ; si elle touche, ajoute le dé aux dégâts." },
 };
 // Chevalier occulte : tiers de lanceur
-const EK_SLOTS = { 3: [2], 4: [3], 5: [3], 6: [3], 7: [4, 2], 8: [4, 2], 9: [4, 2], 10: [4, 3], 11: [4, 3], 12: [4, 3], 13: [4, 3, 2], 14: [4, 3, 2], 15: [4, 3, 2], 16: [4, 3, 3], 17: [4, 3, 3], 18: [4, 3, 3], 19: [4, 3, 3, 1], 20: [4, 3, 3, 1] };
-const EK_KNOWN = [0, 0, 0, 3, 4, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 10, 11, 11, 11, 12, 13];
+const EK_SLOTS = THIRD, EK_KNOWN = THIRD_KNOWN;
 const EK_SCHOOLS = ["Abjuration", "Évocation"];
 const WIZ = () => SPELLS.filter(s => (s.cl || []).includes("magicien")).map(s => s.id);
 const ek = g => g.garch === "ek" && g.level >= 3;
@@ -62,7 +62,7 @@ const GUE = {
   manN: lv => lv >= 15 ? 9 : lv >= 10 ? 7 : lv >= 7 ? 5 : lv >= 3 ? 3 : 0,
   dd: g => 8 + R.prof(g.level) + Math.max(R.ab(g, "str"), R.ab(g, "dex")),
   crit: g => g.level >= 15 ? "18-20" : "19-20",
-  free: lv => [3, 8, 14, 20].filter(l => lv >= l).length, // Chevalier occulte : sorts d'une école libre
+  free: lv => thirdFree(lv), // Chevalier occulte : sorts d'une école libre
 };
 const styles = g => [g.style, champ(g) && g.level >= 10 ? g.gstyle2 : ""].filter(k => STYLES[k]);
 const manPills = (g, k) => MAN[k].p.map(([c, t]) => `<span class="kp ${c}">${esc(t.replace("{d}", GUE.supD(g.level)).replace("JdS SAG", `JdS SAG ${GUE.dd(g)}`).replace("JdS FOR", `JdS FOR ${GUE.dd(g)}`))}</span>`).join("");
@@ -206,9 +206,7 @@ export default {
   cantrips: () => 0, cantripBonus: g => g.garch === "ek" && g.level >= 3 ? (g.level >= 10 ? 3 : 2) : 0,
   known: lv => EK_KNOWN[lv] || 0, prep: () => 0,
   extraList: g => g.garch === "ek" ? WIZ() : [],                     // liste du magicien
-  knownOk: (g, s, ids) => { if (g.garch !== "ek" || !s || s.l < 1 || EK_SCHOOLS.includes(s.s)) return "";
-    const n = ids.map(id => BY_ID[id]).filter(x => x && x.l >= 1 && !EK_SCHOOLS.includes(x.s) && x.id !== s.id).length, max = GUE.free(g.level);
-    return n >= max ? `Abjuration ou évocation : ${max} sort${max > 1 ? "s" : ""} d'une autre école au niveau ${g.level} (niveaux 3, 8, 14, 20)` : ""; },
+  knownOk: (g, s, ids) => g.garch === "ek" ? thirdOk(g.level, EK_SCHOOLS, s, ids, BY_ID) : "",
   saves: ["str", "con"],
   weaponProf: ["simple", "martial"], armorProf: ["light", "medium", "heavy", "shield"],
   asiLevels: [4, 6, 8, 12, 14, 16, 19],

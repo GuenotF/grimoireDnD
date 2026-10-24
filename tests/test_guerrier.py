@@ -71,7 +71,7 @@ def test_chevalier_occulte(browser, devices, url):
     a.click('[data-a="lu-open"]'); a.click('[data-a="lu-sub"][data-v="ek"]'); a.click(".lufoot .primary")
     for i in ["fire-bolt", "shocking-grasp"]: a.click(f'.pktog[data-a="lu-cpick"][data-id="{i}"]')
     a.click('.pktog[data-a="lu-kpick"][data-id="shield"]'); a.click('.pktog[data-a="lu-kpick"][data-id="sleep"]')
-    check(disabled(a, '.pktog[data-a="lu-kpick"][data-id="charm-person"]') and "Abjuration ou évocation" in a.text("#lvlup"), "une seule école libre au niveau 3")
+    check(disabled(a, '.pktog[data-a="lu-kpick"][data-id="charm-person"]') and "Abjuration ou Évocation" in a.text("#lvlup"), "une seule école libre au niveau 3")
     a.click('.pktog[data-a="lu-kpick"][data-id="magic-missile"]')
     a.click(".lufoot .primary"); a.click('[data-a="lu-go"]')
     check(a.g("level") == 3 and a.g("garch") == "ek" and a.g("prepared.length") == 3 and a.g("cantrips.length") == 2, "niveau 3 : 3 sorts connus, 2 sorts mineurs")

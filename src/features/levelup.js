@@ -21,6 +21,8 @@ const spellPick = (act, s, b, on, full, why) => pickRow({ act, id: s.id, on, ful
 // Étapes : celles de la classe (magicien : sorts gratuits du grimoire) ou les étapes communes des classes à sorts préparés,
 // complétées par les crochets de la classe (C(g).levelUp : lignes du tableau, choix, récapitulatif…).
 const LU = g => C(g).levelUp || {};
+/** Sorts mineurs donnés d'office au passage de niveau (Escroc arcanique : Main de mage), hors choix. */
+const luAuto = (g, b) => (LU(g).autoCantrips ? LU(g).autoCantrips(g, b) : []).filter(id => !g.cantrips.includes(id));
 /** Le personnage tel qu'il sera au niveau visé (améliorations de caractéristiques comprises). */
 function luB(g) { const abil = { ...g.abil }; Object.entries(luAsi(S.lu)).forEach(([k, n]) => { abil[k] = Math.min(20, abil[k] + n); }); return { ...g, level: S.lu.to, abil, ...luSubFields(g, S.lu) }; }
 // ---------- Sous-classe : choisie dans l'assistant au niveau où elle arrive (C(g).subclass : lv, label, field, opts, extra, apply)
@@ -130,9 +132,10 @@ function preparedLu1(g, b) {
 function preparedLu2(g, b) {
   const L = S.lu, lu = LU(g), max = R.maxLevel(b), pMax = max ? R.prepMax(b) : 0, oath = alwaysPrepared(b);
   let h = lu.choicesFirst ? lu.choicesFirst(g, b, L) : ""; // ex. druide : nouvelles formes à mettre en favori
-  const needC = Math.max(0, R.cantrips(b) - R.cantrips(g));
+  const auto = luAuto(g, b), needC = Math.max(0, R.cantrips(b) - R.cantrips(g) - auto.length);
+  if (auto.length) h += `<div class="lunote"><span><b>Sort${auto.length > 1 ? "s" : ""} mineur${auto.length > 1 ? "s" : ""} offert${auto.length > 1 ? "s" : ""}</b> : ${auto.map(id => esc(BY_ID[id].n)).join(", ")}.</span></div>`;
   if (needC) {
-    const known = new Set(g.cantrips), list = classSpells(b).filter(s => s.l === 0 && !known.has(s.id)).sort(byName), fullC = L.cpicks.length >= needC;
+    const known = new Set([...g.cantrips, ...auto]), list = classSpells(b).filter(s => s.l === 0 && !known.has(s.id)).sort(byName), fullC = L.cpicks.length >= needC;
     h += `<div class="rubric"><h3>Sort mineur à apprendre</h3><span class="aside">${L.cpicks.length} / ${needC}</span></div><div class="luplist">${list.map(s => { const on = L.cpicks.includes(s.id); return spellPick('data-a="lu-cpick"', s, b, on, fullC); }).join("")}</div>`;
   }
   if (lu.choices) h += lu.choices(g, b, L); // ex. paladin : style de combat
@@ -220,8 +223,9 @@ onClick("lu-go", () => {
     chainLevel(); return;
   }
   const to = L.to, fn = firstName(g), max = R.maxLevel(g, to), oath = alwaysPrepared({ ...g, level: to });
-  const prev = JSON.parse(JSON.stringify(g));
+  const prev = JSON.parse(JSON.stringify(g)), auto = luAuto(g, { ...g, level: L.to, ...luSubFields(g, L) }); // S.lu est déjà vidé ici
   mutate(g => {
+    auto.forEach(id => { if (!g.cantrips.includes(id)) g.cantrips.push(id); });
     luCommonApply(g, L);
     g.level = to;
     if (LU(g).apply) LU(g).apply(g, L); // ex. style de combat, formes favorites
@@ -243,7 +247,7 @@ onClick("lu-asi", (b) => {
 });
 onClick("lu-cpick", t => {
   if (!S.lu) return;
-  const id = t.dataset.id, g = G(), need = Math.max(0, R.cantrips(luB(g)) - R.cantrips(g)), want = !S.lu.cpicks.includes(id);
+  const id = t.dataset.id, g = G(), need = Math.max(0, R.cantrips(luB(g)) - R.cantrips(g) - luAuto(g, luB(g)).length), want = !S.lu.cpicks.includes(id);
   if (want && S.lu.cpicks.length >= need) { toast(`${plural(need, "sort mineur", "sorts mineurs")} à ce niveau : retire d'abord l'autre`); return; }
   S.lu.cpicks = want ? [...S.lu.cpicks, id] : S.lu.cpicks.filter(x => x !== id); S.luKeep = true; render();
 });
