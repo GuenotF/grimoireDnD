@@ -21,7 +21,7 @@ const hitDieSize = g => +String(C(g).hitDie || "1d8").split("d")[1] || 8;
 /** PV maximum à la moyenne : dé plein au niveau 1, puis moyenne arrondie au-dessus ; + mod. de CON à chaque niveau. */
 const hpAverage = g => { const d = hitDieSize(g), con = R.ab(g, "con"); return Math.max(g.level, d + (g.level - 1) * (d / 2 + 1) + g.level * con); };
 /** Compétence : mod. de la caractéristique + maîtrise (×1) ou expertise (×2). g.skills = { code: 1 | 2 }. */
-const skillLevel = (g, k) => (g.skills || {})[k] || 0;
+const skillLevel = (g, k) => Math.max((g.skills || {})[k] || 0, C(g).skillProf ? C(g).skillProf(g, k) : 0); // + maîtrise donnée par la classe (Présence captivante)
 const skillBonus = (g, k) => { const s = SKILLS.find(x => x[0] === k); return R.ab(g, s[2]) + (skillLevel(g, k) ? skillLevel(g, k) * R.prof(g.level) : halfProf(g)); };
 /** Perception passive : 10 + bonus de Perception. */
 const passivePerception = g => 10 + skillBonus(g, "perception") + featPassive(g); // + Observateur

@@ -2,7 +2,7 @@
 import { C, alwaysPrepared } from "../classes/index.js";
 import { BY_ID, SPELLS } from "../data.js";
 
-const inClass = (g, s) => (s.cl || ["magicien"]).includes(g.cls || "magicien");
+const inClass = (g, s) => (s.cl || ["magicien"]).includes(g.cls || "magicien") || !!(C(g).extraList && C(g).extraList(g).includes(s.id)); // + liste du patron (occultiste)
 const classSpells = g => SPELLS.filter(s => inClass(g, s));
 // Sorts lançables en jeu : préparés (+ sorts toujours préparés, comme ceux du serment du paladin)
 function castable(g) {

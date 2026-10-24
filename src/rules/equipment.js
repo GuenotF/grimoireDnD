@@ -66,6 +66,7 @@ function attackOf(g, w, off = false, item = null) { // off : main secondaire (pa
   if (w.two) pills.push("à deux mains"); if (w.heavy) pills.push("lourde"); if (w.light) pills.push("légère");
   (x.pills || []).forEach(p => pills.push(p)); f.pills.forEach(p => pills.push(p));
   if ((g.effects || []).some(e => e.id === "hunters-mark")) pills.push("+1d6 Marque du chasseur"); // contre la cible marquée (rôdeur, paladin de la vengeance)
+  if ((g.effects || []).some(e => e.id === "hex")) pills.push("+1d6 nécrotique Maléfice"); // contre la cible maudite (occultiste)
   return { hit, ab, melee: w.rng === "melee", prof: !!prof, dmg: w.dmg ? `${w.dmg}${plus(dmod)} ${w.dt}${xd}` : "aucun dégât", pills, notes: [w.special, ...(x.notes || [])].filter(Boolean) };
 }
 const POLE = ["glaive", "halberd", "quarterstaff", "spear"]; // Maître d'hast (la pique n'a pas de talon)

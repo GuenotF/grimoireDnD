@@ -125,11 +125,13 @@ function grimoireHTML(g) {
   // Gérer : préparation et capacités seulement ; emplacements, repos et ressources (actions) sont dans En jeu
   if (!jeu) return h + featsHTML(g) + (C(g).settings ? C(g).settings(g) : "") + (C(g).book ? bookGererHTML(g) : C(g).known ? knownGererHTML(g) : preparedGererHTML(g)); // réglages de la classe (rôdeur : ennemis jurés, compagnon…)
   if (C(g).beforeSlots) h += C(g).beforeSlots(g); // ex. druide : forme active
-  h += `<div class="rubric" id="slots-top" style="margin-top:4px"><h2>Emplacements de sorts</h2><span class="aside">touche un cercle quand tu lances un sort</span></div><div class="slots">`;
+  const pact = C(g).pact && C(g).pact(g); // occultiste : un seul niveau d'emplacements, récupérés au repos court
+  h += `<div class="rubric" id="slots-top" style="margin-top:4px"><h2>${pact ? "Magie de pacte" : "Emplacements de sorts"}</h2><span class="aside">${pact ? `${slots.length ? `emplacements de niveau ${slots.length}` : ""} · repos court ou long` : "touche un cercle quand tu lances un sort"}</span></div><div class="slots">`;
   if (!slots.length) h += `<p class="muted" style="margin:0 0 6px">Pas encore d'emplacement : les sorts arrivent au niveau ${R.unlockAt(g, 1)}.</p>`;
   slots.forEach((n, i) => {
     const lv = i + 1, used = Math.min(n, +(g.used[lv] || 0)), base = (C(g).slots[g.level] || [])[i] || 0; // au-delà de base : emplacements créés (pointillés)
-    h += `<div class="slotrow"><span class="lv">Niveau ${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}${k >= base ? " made" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
+    if (!n) return; // magie de pacte : seul le niveau du pacte a des emplacements
+    h += `<div class="slotrow"><span class="lv">${pact ? "Pacte · niv. " : "Niveau "}${lv}</span><span class="pips">${Array.from({length:n},(_, k)=>`<button class="pip${k < used ? " used" : ""}${k >= base ? " made" : ""}" data-a="pip" data-l="${lv}" data-k="${k}" aria-label="Emplacement de niveau ${lv}, ${k < used ? "dépensé" : "disponible"}"></button>`).join("")}</span><span class="left">${n - used} / ${n}</span></div>`;
   });
   // Repos court (dés de vie + récupération de la classe) et repos long : features/rest.js
   h += `</div>` + restBarHTML(g);
@@ -225,7 +227,8 @@ function jeuHTML(g) {
   for (let lv = 1; lv <= max; lv++) {
     const list = ready.filter(s => s.l === lv && !isAlwaysPrepared(g, s)).sort(byName);
     if (!list.length) continue;
-    h += foldHead("l" + lv, "", `Niveau ${lv}`, `${slotsLeft(g, lv)} / ${slots[lv - 1]} restant${slotsLeft(g, lv) > 1 ? "s" : ""}`, plural(list.length, "sort"));
+    const at = C(g).pact && C(g).pact(g) ? max : lv; // magie de pacte : lancés au niveau du pacte
+    h += foldHead("l" + lv, "", `Niveau ${lv}`, `${at > lv ? `lancés au niveau ${at} · ` : ""}${slotsLeft(g, at)} / ${slots[at - 1]} restant${slotsLeft(g, at) > 1 ? "s" : ""}`, plural(list.length, "sort"));
     if (!isFold("l" + lv)) list.forEach(s => { h += jeuRow(g, s, "prep"); });
   }
   if (!ready.length && max) h += `<div class="empty">${C(g).known ? "Aucun sort connu. Passe en mode « Gérer » pour apprendre tes sorts." : "Aucun sort préparé. Passe en mode « Gérer » pour cocher les sorts du jour."}</div>`;

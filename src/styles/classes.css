@@ -96,3 +96,14 @@ button.rubric.fold.oath { border-bottom-color: var(--gold); } button.rubric.fold
 /* Barde : origine des Secrets magiques */
 .secorg { font-weight: 400; font-size: 12.5px; color: var(--muted); font-family: var(--sans, inherit); }
 .secpick { margin-top: 8px; }
+
+/* Occultiste : manifestations, Décharge occulte */
+.invlist { display: grid; gap: 2px; margin-top: -4px; }
+.invrow { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 7px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.invrow .invstar { color: var(--gold); font-size: 14px; }
+.invrow.off small b { text-decoration: none; color: var(--rubric); }
+.invrow small { grid-column: 2 / -1; color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+.invrow.off b { color: var(--muted); text-decoration: line-through; }
+.lurowp .invd { display: block; font-weight: 400; font-size: 12.5px; color: var(--muted); line-height: 1.35; font-family: var(--sans, inherit); }
+.lurowp.off { opacity: .55; }
+.occeb { display: grid; gap: 3px; background: var(--pf-bg, #F3EDF9); border-radius: 6px; padding: 7px 9px; font-size: 13px; line-height: 1.4; margin: 4px 0; }

@@ -1,6 +1,7 @@
 // Registre des classes. Chaque fichier de classe exporte une définition de même forme (le « contrat »,
 // décrit dans docs/ARCHITECTURE.md) ; le reste de l'application ne teste jamais la classe d'un personnage,
 // il appelle ce que la classe fournit.
+import occultiste from "./occultiste.js";
 import magicien from "./magicien.js";
 import paladin from "./paladin.js";
 import druide from "./druide.js";
@@ -11,7 +12,7 @@ import barde from "./barde.js";
 import clerc from "./clerc.js";
 import ensorceleur from "./ensorceleur.js";
 
-export const CLASSES = { magicien, paladin, druide, clerc, ensorceleur, barde, barbare, roublard, rodeur };
+export const CLASSES = { magicien, paladin, druide, clerc, ensorceleur, barde, occultiste, barbare, roublard, rodeur };
 /** Définition de la classe d'un personnage (magicien pour les anciens fichiers sans classe). */
 export const C = g => CLASSES[g && g.cls] || CLASSES.magicien;
 /** Sorts toujours préparés, hors limite (sorts de serment du paladin). */

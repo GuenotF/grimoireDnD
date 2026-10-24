@@ -19,7 +19,7 @@ function castHTML(g, s, prepared) {
   if (s.l === 0) return s.c || mx ? `${mx}<div class="cast"><button class="btn cast-go" data-a="cast" data-id="${s.id}" data-l="0">Lancer${s.c ? " · concentration" : ""}</button></div>` : "";
   let h = "";
   if (prepared) {
-    const lv = firstFree(g, s), higher = !!s.up && R.maxLevel(g) > s.l; // ▲ seulement si le sort gagne quelque chose à monter
+    const lv = firstFree(g, s), higher = !!s.up && R.slots(g).filter((n, i) => n && i + 1 >= s.l).length > 1; // ▲ seulement si le sort gagne quelque chose à monter (et qu'un autre niveau a des emplacements)
     h += lv ? `<button class="btn cast-go" data-a="cast" data-id="${s.id}" data-l="${lv}">Lancer · niv. ${lv}</button>` : `<button class="btn cast-none" disabled>Plus d'emplacement</button>`;
     if (higher && lv) h += `<button class="btn cast-up" data-a="cast-open" data-id="${s.id}" aria-label="Lancer ${esc(s.n)} à un niveau supérieur" aria-expanded="${S.castOpen === s.id}">▲</button>`;
   }
@@ -27,7 +27,7 @@ function castHTML(g, s, prepared) {
   if (!h) return "";
   h = `${mx}<div class="cast">${h}</div>`;
   if (prepared && S.castOpen === s.id) {
-    const lvls = []; for (let lv = s.l; lv <= R.maxLevel(g); lv++) lvls.push(lv);
+    const lvls = []; for (let lv = s.l; lv <= R.maxLevel(g); lv++) if (R.slots(g)[lv - 1]) lvls.push(lv);
     h += `<div class="chooser"><span class="lbl">Lancer avec un emplacement de</span><div class="lvls">${lvls.map(lv => {
       const left = slotsLeft(g, lv);
       return `<button class="btn" data-a="cast" data-id="${s.id}" data-l="${lv}"${left ? "" : " disabled"}><b>Niveau ${lv}</b><small>${left ? `${left} restant${left > 1 ? "s" : ""}` : "épuisé"}</small></button>`;
@@ -43,6 +43,7 @@ function slotbarHTML(g, pre = "") {
   const fx = g.effects.length || wf ? `<div class="fx">${wf}${cur ? `<button class="chip conc" data-a="conc-panel" aria-expanded="${S.concPanel}">◉ ${esc(cur.name)} · conc.</button>` : ""}${others.map(e => `<button class="chip" data-a="fx-open">${esc(e.name)} · ${esc(e.d)}</button>`).join("")}${g.effects.length > 1 || (g.effects.length && !cur) ? `<button class="chip" data-a="fx-open" style="background:transparent;border-color:var(--rule);color:var(--muted)">Tout voir</button>` : ""}</div>` : "";
   if (!R.slots(g).length) return fx; // classe sans sorts (ou pas encore d'emplacement) : seulement les puces
   return `${fx}<button class="line" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g).map((n, i) => {
+    if (!n) return ""; // magie de pacte
     const used = Math.min(n, +(g.used[i + 1] || 0));
     return `<span class="lv" aria-label="Niveau ${i + 1} : ${n - used} sur ${n}"><b>${i + 1}</b>${Array.from({ length: n }, (_, k) => `<span class="d${k < used ? " u" : ""}"></span>`).join("")}</span>`;
   }).join("")}</span>${S.view !== "jeu" && R.maxLevel(g) ? `<span class="prepc${g.prepared.length > R.prepMax(g) ? " over" : ""}">${C(g).known ? "Connus" : "Préparés"} <b>${g.prepared.length}</b>/${R.prepMax(g)}</span>` : ""}<span class="go">Emplacements ⌃</span></button>`;

@@ -105,7 +105,7 @@ function norm(g) {
   ["cantrips","spells","prepared","extras"].forEach(k => { if (!Array.isArray(o[k])) o[k] = []; });
   o.spells = o.spells.filter(x => x && BY_ID[x.id]); o.cantrips = o.cantrips.filter(id => BY_ID[id]);
   // Magicien : un sort préparé doit être dans le grimoire. Paladin : dans la liste de sa classe.
-  o.prepared = [...new Set(o.prepared)].filter(id => o.cls === "magicien" ? o.spells.some(x => x.id === id) : BY_ID[id] && (BY_ID[id].cl || []).includes(o.cls));
+  o.prepared = [...new Set(o.prepared)].filter(id => o.cls === "magicien" ? o.spells.some(x => x.id === id) : BY_ID[id] && ((BY_ID[id].cl || []).includes(o.cls) || !!(CLASSES[o.cls] && CLASSES[o.cls].extraList && CLASSES[o.cls].extraList(o).includes(id)))); // + liste du patron (occultiste)
   if (!o.used || typeof o.used !== "object") o.used = {};
   if (!o.snotes || typeof o.snotes !== "object" || Array.isArray(o.snotes)) o.snotes = {}; // notes personnelles par sort : {id: texte}
   if (!Array.isArray(o.effects)) o.effects = []; // sorts en cours : {k, id, name, d, c (concentration), note}

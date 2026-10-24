@@ -49,8 +49,8 @@ const snapHP = g => JSON.parse(JSON.stringify({ hp: g.hp, hdU: g.hdU }));
 onClick("short-open", () => { S.shortOpen = !S.shortOpen; S.sr = {}; render(); });
 onClick("short-close", () => { S.shortOpen = false; S.sr = {}; render(); });
 onClick("short-done", () => {
-  const g = G(); if (!g) return; const sr = SR(g), prev = JSON.parse(JSON.stringify({ items: g.items, featU: g.featU, ...(sr ? { [sr.field]: g[sr.field] } : {}) })); S.shortOpen = false;
-  let n = 0, fr = []; mutate(g => { if (sr) g[sr.field] = 0; n = rechargeItems(g, "court"); fr = featRecharge(g, "court"); });
+  const g = G(); if (!g) return; const sr = SR(g), fields = sr ? sr.fields || [sr.field] : [], prev = JSON.parse(JSON.stringify({ items: g.items, featU: g.featU, ...Object.fromEntries(fields.map(f => [f, g[f]])) })); S.shortOpen = false;
+  let n = 0, fr = []; mutate(g => { if (sr) { if (sr.reset) sr.reset(g); else g[sr.field] = 0; } n = rechargeItems(g, "court"); fr = featRecharge(g, "court"); });
   toast(`Repos court : ${[sr ? `${sr.label} ${sr.done}` : "", n ? `charges de ${n} objet${n > 1 ? "s" : ""}` : "", ...fr].filter(Boolean).join(", ") || "terminé"}`, () => { mutate(g => Object.assign(g, prev)); return "Repos court annulé"; });
 });
 onClick("hp-hd", () => {
