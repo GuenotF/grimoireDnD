@@ -97,4 +97,4 @@ onClick("note-clear", (b) => {
 });
 onInput("#n-edit", t => { S.ndraft = t.value; });
 
-export { metaLine, pillData, tier, pText, pillsHTML, spellBody, tags, noteOf, notePen, noteGerer, noteMark, noteBox, keyPills };
+export { metaLine, pillData, tier, pText, upcast, pillsHTML, spellBody, tags, noteOf, notePen, noteGerer, noteMark, noteBox, keyPills };

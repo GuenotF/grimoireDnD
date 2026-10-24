@@ -141,8 +141,8 @@ function stepEquip(c) {
   const cs = CLASS_START[c.cls], b = bgOf(c);
   let h = `<p class="help"><b>L'un ou l'autre</b>, pas les deux : le paquetage de la classe et de l'historique, <b>ou</b> l'or de départ pour tout acheter toi-même.</p>
   <div class="viewsw" role="group" aria-label="Équipement : paquetage ou or de départ"><button data-a="cr-eqmode" data-v="pack" aria-pressed="${c.eqMode === "pack"}">Paquetage</button><button data-a="cr-eqmode" data-v="gold" aria-pressed="${c.eqMode === "gold"}">Or de départ</button></div>`;
-  if (c.eqMode === "gold") return h + `<p class="help"><b>Aucun objet n'est ajouté</b> : ${cs.gold} × 10 po à la place de l'équipement de la classe et de l'historique, puis tu achètes ton équipement dans Personnage › Équipement.</p>
-    <div class="crgold"><input id="cr-gold" type="number" inputmode="numeric" min="0" value="${esc(c.gold)}" placeholder="po" aria-label="Or de départ"><button class="btn" data-a="cr-goldroll">🎲 Lancer ${cs.gold} × 10</button></div>`;
+  if (c.eqMode === "gold") return h + `<p class="help"><b>Aucun objet n'est ajouté</b> : ${cs.gold}${cs.goldX === 1 ? "" : " × 10"} po à la place de l'équipement de la classe et de l'historique, puis tu achètes ton équipement dans Personnage › Équipement.</p>
+    <div class="crgold"><input id="cr-gold" type="number" inputmode="numeric" min="0" value="${esc(c.gold)}" placeholder="po" aria-label="Or de départ"><button class="btn" data-a="cr-goldroll">🎲 Lancer ${cs.gold}${cs.goldX === 1 ? "" : " × 10"}</button></div>`;
   cs.equip.forEach((line, i) => {
     h += `<div class="crcard">${line.map(([lbl, items], j) => { const on = (c.eq[i] || 0) === j;
       return `<button class="cropt${on ? " on" : ""}" data-a="cr-eq" data-k="${i}" data-v="${j}" aria-pressed="${on}"><span class="rd" aria-hidden="true"></span>${esc(lbl)}</button>${on ? items.map((it, k) => it.pick ? `<select data-crpick="${i}-${j}-${k}" aria-label="Arme au choix"><option value="">Choisir l'arme…</option>${pickList(it.pick).map(w => `<option value="${w.id}"${c.picks[`${i}-${j}-${k}`] === w.id ? " selected" : ""}>${esc(w.n)} · ${w.dmg} ${w.dt}</option>`).join("")}</select>` : "").join("") : ""}`; }).join("")}</div>`;
@@ -223,7 +223,7 @@ onClick("cr-eq", (b) => upd(c => { c.eq = { ...c.eq, [b.dataset.k]: +b.dataset.v
 onChange(t => t.dataset.crpick != null, t => upd(c => { c.picks = { ...c.picks, [t.dataset.crpick]: t.value }; }));
 onInput("#cr-gold", t => { if (S.cr) S.cr.gold = t.value; });
 onChange("#cr-gold", () => upd(() => {}));
-onClick("cr-goldroll", () => upd(c => { const n = +CLASS_START[c.cls].gold.split("d")[0], d = Array.from({ length: n }, () => 1 + Math.floor(Math.random() * 4)); c.gold = String(10 * d.reduce((a, x) => a + x, 0)); toast(`${CLASS_START[c.cls].gold} : ${d.join(" + ")} → <b>${c.gold} po</b>`); }));
+onClick("cr-goldroll", () => upd(c => { const n = +CLASS_START[c.cls].gold.split("d")[0], d = Array.from({ length: n }, () => 1 + Math.floor(Math.random() * 4)); c.gold = String((CLASS_START[c.cls].goldX || 10) * d.reduce((a, x) => a + x, 0)); toast(`${CLASS_START[c.cls].gold} : ${d.join(" + ")} → <b>${c.gold} po</b>`); }));
 onClick("cr-lv", (b) => upd(c => { c.level = Math.max(1, Math.min(20, c.level + +b.dataset.v)); }));
 onClick("cr-go", () => {
   const c = S.cr; if (!c || missing(c, "fin")) return;

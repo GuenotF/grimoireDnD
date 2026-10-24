@@ -7,6 +7,7 @@ import paladin from "./paladin.js";
 import druide from "./druide.js";
 import barbare from "./barbare.js";
 import guerrier from "./guerrier.js";
+import moine from "./moine.js";
 import roublard from "./roublard.js";
 import rodeur from "./rodeur.js";
 import barde from "./barde.js";
@@ -15,7 +16,7 @@ import ensorceleur from "./ensorceleur.js";
 
 /** Classe sans sorts (le guerrier en a en Chevalier occulte, au niveau 3). */
 export const noSpells = g => { const n = C(g).noSpells; return typeof n === "function" ? n(g) : !!n; };
-export const CLASSES = { magicien, paladin, druide, clerc, ensorceleur, barde, occultiste, barbare, guerrier, roublard, rodeur };
+export const CLASSES = { magicien, paladin, druide, clerc, ensorceleur, barde, occultiste, barbare, guerrier, moine, roublard, rodeur };
 /** Définition de la classe d'un personnage (magicien pour les anciens fichiers sans classe). */
 export const C = g => CLASSES[g && g.cls] || CLASSES.magicien;
 /** Sorts toujours préparés, hors limite (sorts de serment du paladin). */

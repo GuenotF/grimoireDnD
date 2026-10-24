@@ -50,6 +50,7 @@ const acOf = g => acMode(g) === "calc" ? acCalc(g).total : g.ac;
  * maîtrise si la classe maîtrise l'arme, bonus de classe (attackMods). Renvoie { hit, ab, dmg (texte), pills, notes }.
  */
 function attackOf(g, w, off = false, item = null) { // off : main secondaire (pas de modificateur positif aux dégâts) ; item : objet porté (bonus magique)
+  if (C(g).weaponAdjust) w = C(g).weaponAdjust(g, w); // ex. moine : arme de moine (DEX, dé d'arts martiaux)
   const str = R.ab(g, "str"), dex = R.ab(g, "dex");
   const ab = w.finesse ? (dex > str ? "dex" : "str") : w.rng === "ranged" ? "dex" : "str", mod = ab === "dex" ? dex : str;
   const prof = weaponProf(g, w) ? R.prof(g.level) : 0, x = C(g).attackMods ? C(g).attackMods(g, w, ab, off) : {};
@@ -92,9 +93,13 @@ function attacks(g) {
     list.splice(list.findIndex(x => x.n === pole.item.n) + 1, 0, { ...a, n: `${pole.item.n} (talon)`, q: 1, pills: ["action bonus", "Maître d'hast"], notes: [] });
   }
   if (C(g).extraAttacks) C(g).extraAttacks(g, list); // ex. Frénésie du berserker
-  const x = C(g).attackMods ? C(g).attackMods(g, { id: "unarmed", rng: "melee", cat: "simple" }, "str") : {}; // attaque d'arme au corps à corps (Rage…)
-  const ud = featUnarmed(g), um = str + (x.dmg || 0); // Bagarreur de tavernes : 1d4 + FOR
-  list.push({ n: "Mains nues", q: 1, hit: str + R.prof(g.level) + (x.hit || 0), ab: "str", melee: true, prof: true, dmg: ud ? `${ud}${um ? ` ${um > 0 ? "+" : "−"} ${Math.abs(um)}` : ""} contondant` : `${Math.max(1, 1 + um)} contondant`, pills: x.pills || [], notes: [] });
+  // Mains nues ; moine (C(g).unarmed) : dé d'arts martiaux, DEX si meilleure, attaque en action bonus
+  const ma = C(g).unarmed ? C(g).unarmed(g) : null, dex = R.ab(g, "dex"), uab = ma && dex > str ? "dex" : "str", umod = uab === "dex" ? dex : str;
+  const x = C(g).attackMods ? C(g).attackMods(g, { id: "unarmed", rng: "melee", cat: "simple" }, uab) : {}; // attaque d'arme au corps à corps (Rage…)
+  const ud = (ma && ma.die) || featUnarmed(g), um = umod + (x.dmg || 0); // Bagarreur de tavernes : 1d4 + FOR
+  const un = { n: "Mains nues", q: 1, hit: umod + R.prof(g.level) + (x.hit || 0), ab: uab, melee: true, prof: true, dmg: ud ? `${ud}${um ? ` ${um > 0 ? "+" : "−"} ${Math.abs(um)}` : ""} ${(ma && ma.dt) || "contondant"}` : `${Math.max(1, 1 + um)} contondant`, pills: [...((ma && ma.pills) || []), ...(x.pills || [])], notes: [] };
+  list.push(un);
+  if (ma && ma.bonus) list.push({ ...un, n: "Mains nues (action bonus)", pills: ["action bonus", "Arts martiaux", ...(x.pills || [])] });
   return list;
 }
 
