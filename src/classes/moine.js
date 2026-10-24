@@ -19,7 +19,7 @@ import { TOOL_LISTS } from "../rules/creation.js";
 import { acCalc } from "../rules/equipment.js";
 import { heal, hpCur } from "../rules/hp.js";
 import { ABILITIES } from "../rules/tables.js";
-import { capRow, foldSec, pickRow, pillsRaw, statLabel } from "../ui/components.js";
+import { foldSec, pickRow, pillsRaw, statLabel } from "../ui/components.js";
 
 // ---------- Tables
 const MON = {
@@ -86,37 +86,40 @@ function discPills(g, k, extra = 0) {
   return (x.p || []).map(([c, t]) => [c, c === "d" ? "Dégâts" : c === "s" ? "JdS" : c === "n" ? "Portée" : "Effet", t.replace("{n}", 3 + extra).replace("JdS DEX", `DEX ${MON.dd(g)}`).replace("JdS FOR", `FOR ${MON.dd(g)}`).replace(/^JdS /, "")]);
 }
 const kiBtn = (id, cost, left, label = "Utiliser") => `<button class="btn cast-go sm" data-a="ki-use" data-v="${id}"${cost > left ? " disabled" : ""}>${label}${cost ? ` · ${cost} ki` : ""}</button>`;
-function kiBody(g) {
-  const left = kiLeft(g), list = optsOf(g).filter(o => !o.shadow);
-  return list.map(o => `<div class="capopt"><b>${esc(o.n)}</b>${pillsRaw(o.p(g))}<div class="eff">${esc(o.d(g))}</div><div class="cast">${kiBtn(o.id, o.cost, left)}</div></div>`).join("")
-    + `<span class="muted" style="font-size:12.5px">${left} ki restant${left > 1 ? "s" : ""} sur ${MON.ki(g)} · DD ${MON.dd(g)} · repos court ou long.</span>`;
+/** Pastilles courtes (ligne repliée) : valeurs des deux premières pastilles. */
+const kps = list => list.slice(0, 2).map(([k, , v]) => `<span class="kp ${k === "a" ? "a" : k}">${esc(v)}</span>`).join("");
+/** Ligne d'action comme un sort en jeu : nom ▾ + pastilles + bouton ; détail (pastilles complètes, texte) au toucher du nom. */
+function abRow(key, name, pills, btn, body) {
+  const open = S.open.has(key);
+  return `<div class="jrow"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="${key}" aria-expanded="${open}">${name}<span class="chev">${open ? "▴" : "▾"}</span></button><span class="kps">${pills}</span></div>${btn}</div>${open ? `<div class="jbody">${body}</div>` : ""}</div>`;
 }
+const conc = s => s && s.c ? `<span class="tag c" title="Concentration">C</span>` : "";
 function resHTML(g) {
   let h = "";
   if (MON.ki(g)) {
-    const n = MON.ki(g), u = Math.min(n, g.kiU || 0);
-    let r = `<div class="slots res">`;
-    // Au-delà de 6 points, un compteur (−/+) plutôt qu'une rangée de cercles
+    const n = MON.ki(g), u = Math.min(n, g.kiU || 0), left = kiLeft(g);
+    // Points de ki : toujours visibles ; au-delà de 6 points, un compteur (−/+) plutôt qu'une rangée de cercles
     const pips = n <= 6 ? Array.from({ length: n }, (_, k) => `<button class="pip${k < u ? " used" : ""}" data-a="res-pip" data-r="ki" data-k="${k}" aria-label="Point de ki ${k + 1}, ${k < u ? "dépensé" : "disponible"}"></button>`).join("")
       : `<span class="kicnt"><button class="btn sm" data-a="ki-adj" data-d="1" aria-label="Dépenser un point de ki"${u >= n ? " disabled" : ""}>−</button><b aria-live="polite">${n - u}<small>/${n}</small></b><button class="btn sm" data-a="ki-adj" data-d="-1" aria-label="Rendre un point de ki"${u ? "" : " disabled"}>+</button></span>`;
-    r += capRow(g, "ki", "Points de ki", "repos court", pips, false, kiBody);
-    if (trad(g) === "paume" && g.level >= 6) r += capRow(g, "pl", "Plénitude physique", "repos long", `<button class="pip${g.plU ? " used" : ""}" data-a="res-pip" data-r="pl" data-k="0" aria-label="Plénitude physique, ${g.plU ? "utilisée" : "disponible"}"></button>`, true,
-      () => `${pillsRaw([["f", "Soins", `${3 * g.level} PV`], ["n", "Temps", "action"]])}<div class="cast"><button class="btn cast-go sm" data-a="mo-plen"${g.plU ? " disabled" : ""}>Se soigner : +${3 * g.level} PV</button></div>`);
-    h += foldSec("res-ki", "Ki", `${kiLeft(g)} / ${MON.ki(g)} · DD ${MON.dd(g)} · repos court`, r + `</div>`);
+    let r = `<div class="slots res"><div class="resrow"><span class="rn"><b>Points de ki</b><small>repos court · DD ${MON.dd(g)}</small></span><span class="pips">${pips}</span></div></div>`;
+    r += optsOf(g).filter(o => !o.shadow).map(o => abRow("ki:" + o.id, esc(o.n), kps(o.p(g)), kiBtn(o.id, o.cost, left), `${pillsRaw(o.p(g))}<div class="eff">${esc(o.d(g))}</div>`)).join("");
+    if (trad(g) === "paume" && g.level >= 6) r += abRow("ki:plen", "Plénitude physique", `<span class="kp f">${3 * g.level} PV</span><span class="kp n">repos long</span>`,
+      `<button class="btn cast-go sm" data-a="mo-plen"${g.plU ? " disabled" : ""}>${g.plU ? "Utilisée" : `Se soigner · +${3 * g.level}`}</button>`, `${pillsRaw([["f", "Soins", `${3 * g.level} PV`], ["n", "Temps", "action"]])}<div class="eff">Une fois par repos long.</div>`);
+    h += foldSec("res-ki", "Ki", `${left} / ${n} · DD ${MON.dd(g)} · repos court`, r);
   }
   // Voie de l'ombre : sorts pour 2 ki ; Illusion mineure à volonté
   if (trad(g) === "ombre") {
     const left = kiLeft(g);
-    h += foldSec("res-ombre", "Arts des ombres", "2 ki · sans composantes matérielles", `<div class="slots res">${optsOf(g).filter(o => o.shadow).map(o => `<div class="capopt"><b>${esc(o.n)}${BY_ID[o.sp].c ? ` <span class="tag c" title="Concentration">C</span>` : ""}</b>${pillsRaw(o.p(g))}<div class="eff">${esc(o.d(g))}</div><div class="cast">${kiBtn(o.id, 2, left, "Lancer")}</div></div>`).join("")}</div>`);
+    h += foldSec("res-ombre", "Arts des ombres", "2 ki · sans composantes matérielles", optsOf(g).filter(o => o.shadow).map(o => abRow("ki:" + o.id, esc(o.n) + conc(BY_ID[o.sp]), kps(o.p(g)), kiBtn(o.id, 2, left, "Lancer"), `${pillsRaw(o.p(g))}<div class="eff">${esc(o.d(g))}</div>`)).join(""));
     h += innateBlock(g, innateSpells(g).filter(x => x.cls), "mo-ill", "Sort mineur", "Arts des ombres · à volonté");
   }
-  // Voie des quatre éléments : disciplines connues, ki en plus (−/+), Lancer retire le total
+  // Voie des quatre éléments : disciplines connues ; ki en plus (−/+) dans le détail, Lancer retire le total
   if (trad(g) === "elements") {
     const left = kiLeft(g);
-    h += foldSec("res-disc", "Disciplines élémentaires", `${left} ki · ${MON.kiMax(g.level)} ki au plus par discipline`, `<div class="slots res">${known(g).map(k => { const x = DISC[k], e = discExtra(g, k), cost = x.cost + e, s = x.sp && BY_ID[x.sp];
-      const room = x.plus ? Math.min(x.plus === "hit" ? 1 : 9, MON.kiMax(g.level) - x.cost) : 0;
-      return `<div class="capopt"><b>${esc(x.n)}${s && s.c ? ` <span class="tag c" title="Concentration">C</span>` : ""}</b>${pillsRaw(discPills(g, k, x.plus === "hit" ? 0 : e))}<div class="eff">${esc(x.d)}${x.plus === "lv" ? " Plus de ki : niveau de sort plus élevé." : ""}</div>
-      <div class="cast">${room > 0 ? `<span class="kistep" role="group" aria-label="Ki en plus pour ${esc(x.n)}"><button class="btn sm" data-a="ki-x" data-v="${k}" data-d="-1" aria-label="Un ki de moins"${e ? "" : " disabled"}>−</button><b>${x.plus === "hit" ? (e ? "+1d10" : "+0") : `+${e}`}</b><button class="btn sm" data-a="ki-x" data-v="${k}" data-d="1" aria-label="Un ki de plus"${e < room ? "" : " disabled"}>+</button></span>` : ""}${kiBtn("d-" + k, cost, left, x.cost ? "Lancer" : "Utiliser")}</div></div>`; }).join("")}</div>`);
+    h += foldSec("res-disc", "Disciplines élémentaires", `${left} ki · ${MON.kiMax(g.level)} ki au plus par discipline`, known(g).map(k => { const x = DISC[k], e = discExtra(g, k), cost = x.cost + e, s = x.sp && BY_ID[x.sp];
+      const room = x.plus ? Math.min(x.plus === "hit" ? 1 : 9, MON.kiMax(g.level) - x.cost) : 0, pl = discPills(g, k, x.plus === "hit" ? 0 : e);
+      const step = room > 0 ? `<div class="cast"><span class="kistep" role="group" aria-label="Ki en plus pour ${esc(x.n)}"><button class="btn sm" data-a="ki-x" data-v="${k}" data-d="-1" aria-label="Un ki de moins"${e ? "" : " disabled"}>−</button><b>${x.plus === "hit" ? (e ? "+1d10" : "+0") : `+${e} ki`}</b><button class="btn sm" data-a="ki-x" data-v="${k}" data-d="1" aria-label="Un ki de plus"${e < room ? "" : " disabled"}>+</button></span><span class="muted" style="font-size:12.5px">${x.plus === "d10" ? "+1d10 par ki" : x.plus === "lv" ? "niveau de sort +1 par ki" : "+1d10 feu au toucher"}</span></div>` : "";
+      return abRow("ki:d-" + k, esc(x.n) + conc(s), kps(pl.slice(s ? 1 : 0)), kiBtn("d-" + k, cost, left, x.cost ? "Lancer" : "Utiliser"), `${pillsRaw(pl)}<div class="eff">${esc(x.d)}</div>${step}`); }).join(""));
   }
   return h;
 }
