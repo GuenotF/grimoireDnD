@@ -29,3 +29,7 @@ Recette suivie pour le rôdeur (octobre 2026), à reprendre pour les classes sui
 
 ## 5. Publication
 README (fonctionnalités), `ARCHITECTURE.md` si le contrat change, captures, commit et push.
+
+## Exemples
+- **Rôdeur** (octobre 2026) : sorts connus (`known`), réglages (`settings`), compagnon (`afterAttacks`), choix de création (`creation`).
+- **Clerc** (octobre 2026) : modèle du paladin et du druide (préparation dans toute la liste, sorts toujours préparés) ; sous-classe au niveau 1, donc choisie à la création (`creation`, avec `auto` pour les sorts mineurs donnés par le domaine) ; maîtrises selon le domaine (`armorProf` en fonction) ; bonus calculés par `dmgBonus` (soins, sorts mineurs) et `acBonus`.

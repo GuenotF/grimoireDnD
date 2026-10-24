@@ -52,6 +52,7 @@ src/
     druide.js               contrat + cercles, ressource Forme sauvage
     roublard.js             classe sans sorts : Attaque sournoise, Ruse, Esquive instinctive, Assassin
     barbare.js              classe sans sorts : Rage, Frénésie (Berserker), Défense sans armure, Attaque téméraire
+    clerc.js                contrat + 8 domaines, Conduit divin, Renvoi et Destruction des morts-vivants, Intervention divine
     rodeur.js               contrat + sorts connus, Ennemi juré, Explorateur-né, Chasseur, réglages (voir AJOUTER_UNE_CLASSE.md)
     rodeur-compagnon.js     Maître des bêtes : compagnon (Bestiaire, maîtrise, PV)
     druide-wildshape.js     Forme sauvage : formes possibles, forme active, Changeforme de combat, Bestiaire
@@ -108,10 +109,11 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `restBar(g)`, `shortPanel(g)`, `shortRest`, `longRest(g)` | Ajouts à la barre de repos, panneau propre au repos court (Restauration arcanique) ou ressource récupérée, repos long (dés de vie et PV : communs, `features/rest.js`) | ✓ | ✓ | ✓ |
 | `renderSheets(g, levelUpOpen)` | Volets propres (Imposition des mains, formes possibles) | | ✓ | ✓ |
 | `levelUp` | Assistant : étapes propres (`init`, `steps`, `apply`…) ou crochets des étapes communes (`rowsBefore`, `rowsAfter`, `summaryExtra`, `notes`, `choicesFirst`, `choices`, `recapBefore`, `recapAfter`, `recapNotes`, `apply`) | ✓ | ✓ | ✓ |
+| `weaponProf`, `armorProf`, `tools` en fonction | Maîtrises selon le personnage (domaine du clerc : armures lourdes, armes de guerre) | | | |
 | `known(lv)` | Classe à **sorts connus** (rôdeur, puis barde, ensorceleur, occultiste) : nombre de sorts connus au niveau. Les sorts connus sont rangés dans `g.prepared` (tous lançables) ; `R.prepMax` renvoie ce nombre. Gérer : apprendre / oublier ; assistant : apprendre les sorts gagnés, en remplacer un | | | |
 | `settings(g)` | Réglages propres à la classe en mode Gérer, après les capacités (rôdeur : ennemis jurés, terrains, compagnon) | | | |
 | `afterAttacks(g)` | Bloc en jeu sous les attaques (rôdeur : carte du compagnon) | | | |
-| `creation` | Choix propres à la classe dans l'assistant de création, étape Compétences : `{ html(c), missing(c), apply(g, c) }` (rôdeur : ennemi juré, terrain favori) | | | |
+| `creation` | Choix propres à la classe dans l'assistant de création, étape Compétences : `{ html(c), missing(c), apply(g, c), auto(c) }` (rôdeur : ennemi juré, terrain favori ; clerc : domaine dès le niveau 1, et `auto` : sorts mineurs donnés d'office, hors choix) | | | |
 | `attackMods(g, arme, carac, mainSecondaire)` | Peut renvoyer `offMod: true` (Combat à deux armes : modificateur aux dégâts de la main secondaire) et `hit` (Archerie) | | | |
 | `rules(g)`, `print(g)` | Onglet Règles et fiche imprimable (pilotes, à venir pour paladin et druide) | via `panels` | | |
 

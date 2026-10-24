@@ -142,7 +142,7 @@ function featChoiceOk(id, ch = {}) {
 const SPELL_CLASSES = { barde: ["Barde", "cha"], clerc: ["Clerc", "wis"], druide: ["Druide", "wis"], ensorceleur: ["Ensorceleur", "cha"], magicien: ["Magicien", "int"], occultiste: ["Occultiste", "cha"] };
 /** Sorts proposés par le don pour une classe (liste de la classe si l'appli la connaît, sinon tous les sorts du niveau). */
 function featSpellPool(id, cls, lv) {
-  const f = FEATS[id].spells, known = ["magicien", "druide"].includes(cls);
+  const f = FEATS[id].spells, known = ["magicien", "druide", "clerc"].includes(cls);
   return SPELLS.filter(s => s.l === lv && (!known || (s.cl || []).includes(cls)) && (!f.atk || s.j === "atk") && (!f.ritual || s.ri)).sort((a, b) => a.n.localeCompare(b.n, "fr"));
 }
 /** Caractéristique augmentée de 1 par le don (choisie, ou imposée), ou null. */

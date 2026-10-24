@@ -1,7 +1,7 @@
 // Assistant de création de personnage (règles 2014) : classe et nom, race, caractéristiques, historique, compétences,
 // sorts de départ, équipement, récapitulatif et niveau de départ (l'assistant de passage de niveau s'enchaîne ensuite).
 // État : S.cr. Données et calculs : rules/creation.js.
-import { CLASSES } from "../classes/index.js";
+import { CLASSES, alwaysPrepared } from "../classes/index.js";
 import { onChange, onClick, onInput } from "../core/actions.js";
 import { esc, signed } from "../core/format.js";
 import { blank, norm } from "../core/schema.js";
@@ -115,11 +115,16 @@ function stepComp(c) {
   if (CLASSES[c.cls].creation) h += CLASSES[c.cls].creation.html(c); // choix propres à la classe au niveau 1 (rôdeur : ennemi juré, terrain favori)
   return h;
 }
+/** Sorts mineurs donnés d'office par la classe à la création (clerc : Lumière, sort de druide de la Nature), hors choix. */
+const autoCantrips = c => CLASSES[c.cls].creation && CLASSES[c.cls].creation.auto ? CLASSES[c.cls].creation.auto(c) : [];
+const cantripMax = (c, g) => R.cantrips(g) - autoCantrips(c).length;
 function stepSorts(c) {
-  const g = preview(c), cMax = R.cantrips(g), cs = CLASS_START[c.cls], cans = classSpells(g).filter(s => s.l === 0), l1 = classSpells(g).filter(s => s.l === 1);
+  const g = preview(c), cMax = cantripMax(c, g), cs = CLASS_START[c.cls], auto = autoCantrips(c), ap = alwaysPrepared(g);
+  const cans = classSpells(g).filter(s => s.l === 0 && !auto.includes(s.id)), l1 = classSpells(g).filter(s => s.l === 1 && !ap.includes(s.id));
   let h = `<div class="crbudget"><span>Sorts mineurs</span><b>${c.cantrips.length} / ${cMax}</b></div><div class="chips">${cans.map(s => { const on = c.cantrips.includes(s.id); return chip('data-a="cr-can"', s.id, on, esc(s.n), !on && c.cantrips.length >= cMax); }).join("")}</div>`;
   if (cs.book) h += `<div class="crbudget" style="margin-top:12px"><span>Grimoire : ${cs.book} sorts de niveau 1</span><b>${c.spells.length} / ${cs.book}</b></div><div class="chips">${l1.map(s => { const on = c.spells.includes(s.id); return chip('data-a="cr-book"', s.id, on, esc(s.n), !on && c.spells.length >= cs.book); }).join("")}</div>`;
   const pool = cs.book ? l1.filter(s => c.spells.includes(s.id)) : l1, pMax = R.prepMax(g);
+  if (auto.length || ap.length) h = `<p class="help">${[auto.length ? `Déjà acquis : ${auto.map(id => esc(BY_ID[id].n)).join(", ")} (en plus des sorts mineurs).` : "", ap.length ? `Toujours préparés : ${ap.map(id => esc(BY_ID[id].n)).join(", ")} (hors limite).` : ""].filter(Boolean).join(" ")}</p>` + h;
   if (R.slots(g).length && pMax) h += `<div class="crbudget" style="margin-top:12px"><span>${CLASSES[c.cls].known ? "Sorts connus" : `Sorts préparés (${CLASSES[c.cls].abN} + niveau)`}</span><b>${c.prep.length} / ${pMax}</b></div><p class="help">Facultatif : modifiable ensuite chaque jour dans l'onglet Sorts.</p><div class="chips">${pool.map(s => { const on = c.prep.includes(s.id); return chip('data-a="cr-prep"', s.id, on, esc(s.n), !on && c.prep.length >= pMax); }).join("") || `<span class="muted">Choisis d'abord les sorts du grimoire.</span>`}</div>`;
   return h;
 }
@@ -155,7 +160,7 @@ function missing(c, k) {
   if (k === "carac") { if (c.method === "pb" && pbSpent(c.pb) > PB_BUDGET) return "trop de points dépensés"; return baseScores(c) ? "" : "attribue toutes les caractéristiques"; }
   if (k === "hist") { const b = bgOf(c); if (!b) return "choisis un historique"; if (bgSkills(c).some(x => !x) || (c.bg === "perso" && (c.bc.skills || []).length < 2)) return "choisis tes compétences d'historique"; if (b.toolChoice && !(c.bc.tools || [])[0]) return "choisis l'outil"; if (bgTools(c, clsToolsOf(c)).some(x => !x)) return "remplace l'outil en double"; if ((c.bc.langs || []).filter(Boolean).length < (b.langChoice || 0)) return "choisis les langues"; return ""; }
   if (k === "comp") { const cs = CLASS_START[c.cls], locked = new Set([...(raceGives(c) || { skills: [] }).skills, ...bgSkills(c)]), n = Math.min(cs.skills.n, cs.skills.list.filter(x => !locked.has(x)).length); if (c.skills.length < n) return `choisis ${n - c.skills.length} compétence(s)`; if (cs.expertise && c.exp.length < cs.expertise) return "choisis ton Expertise"; return CLASSES[c.cls].creation ? CLASSES[c.cls].creation.missing(c) : ""; }
-  if (k === "sorts") { const g = preview(c), cs = CLASS_START[c.cls]; if (c.cantrips.length < R.cantrips(g)) return "choisis tes sorts mineurs"; if (cs.book && c.spells.length < cs.book) return `choisis ${cs.book} sorts pour le grimoire`; return ""; }
+  if (k === "sorts") { const g = preview(c), cs = CLASS_START[c.cls]; if (c.cantrips.length < cantripMax(c, g)) return "choisis tes sorts mineurs"; if (cs.book && c.spells.length < cs.book) return `choisis ${cs.book} sorts pour le grimoire`; return ""; }
   if (k === "equip") { if (c.eqMode === "gold") return +c.gold > 0 ? "" : "indique ton or de départ"; const cs = CLASS_START[c.cls]; const need = cs.equip.flatMap((line, i) => line[c.eq[i] || 0][1].map((it, j) => it.pick ? `${i}-${c.eq[i] || 0}-${j}` : null)).filter(Boolean); return need.every(x => c.picks[x]) ? "" : "choisis les armes"; }
   return "";
 }
@@ -199,7 +204,7 @@ onChange(t => t.dataset.crbgtool != null, t => upd(c => { c.bc.tools = [t.value]
 onChange(t => t.dataset.crbglang != null, t => upd(c => { const l = [...(c.bc.langs || [])]; l[+t.dataset.crbglang] = t.value; c.bc.langs = l; }));
 onClick("cr-skill", (b) => upd(c => { const cs = CLASS_START[c.cls]; c.skills = toggle(c.skills, b.dataset.v, cs.skills.n); c.exp = c.exp.filter(x => x === "tools" || c.skills.includes(x) || [...(raceGives(c) || { skills: [] }).skills, ...bgSkills(c)].includes(x)); }));
 onClick("cr-exp", (b) => upd(c => { c.exp = toggle(c.exp, b.dataset.v, CLASS_START[c.cls].expertise || 0); }));
-onClick("cr-can", (b) => upd(c => { c.cantrips = toggle(c.cantrips, b.dataset.v, R.cantrips(preview(c))); }));
+onClick("cr-can", (b) => upd(c => { c.cantrips = toggle(c.cantrips, b.dataset.v, cantripMax(c, preview(c))); }));
 onClick("cr-book", (b) => upd(c => { c.spells = toggle(c.spells, b.dataset.v, CLASS_START[c.cls].book); c.prep = c.prep.filter(x => c.spells.includes(x)); }));
 onClick("cr-prep", (b) => upd(c => { c.prep = toggle(c.prep, b.dataset.v, R.prepMax(preview(c))); }));
 onClick("cr-eqmode", (b) => upd(c => { c.eqMode = b.dataset.v; }));
