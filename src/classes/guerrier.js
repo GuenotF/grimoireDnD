@@ -3,6 +3,7 @@
 // sorts de magicien d'abjuration et d'évocation). Classe sans sorts sauf en Chevalier occulte (niveau 3) : onglet Capacités, puis Sorts.
 // Résumés rédigés pour la table, à vérifier dans le livre.
 import { onChange, onClick } from "../core/actions.js";
+import { stylesOf, styleAC, styleMods, styleNotes } from "../rules/styles.js";
 import { byName, esc, signed } from "../core/format.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
@@ -19,14 +20,7 @@ import { heal, hpCur } from "../rules/hp.js";
 import { capRow, pickRow, pillsRaw, statLabel } from "../ui/components.js";
 
 // ---------- Tables
-const STYLES = {
-  archerie: { n: "Archerie", k: "+2 à distance", d: "+2 aux jets d'attaque avec une arme à distance." },
-  defense: { n: "Défense", k: "+1 CA", d: "+1 à la CA quand tu portes une armure." },
-  duel: { n: "Duel", k: "+2 dégâts à une main", d: "+2 aux dégâts avec une arme de corps à corps tenue à une main, sans autre arme." },
-  deuxmains: { n: "Arme à deux mains", k: "relance 1 et 2", d: "Avec une arme à deux mains ou polyvalente tenue à deux mains, relance les 1 et 2 des dés de dégâts (une fois)." },
-  protection: { n: "Protection", k: "réaction, bouclier", d: "Avec un bouclier, réaction : désavantage à une attaque contre une créature à 1,5 m de toi." },
-  deuxarmes: { n: "Combat à deux armes", k: "mod. aux dégâts de la 2e arme", d: "Quand tu attaques avec ta seconde arme (action bonus), tu ajoutes ton modificateur de caractéristique aux dégâts." },
-};
+const STYLES = stylesOf(["archerie", "deuxmains", "deuxarmes", "defense", "duel", "protection"]); // les six styles du guerrier (AideDD)
 const ARCH = {
   champion: { n: "Champion", full: "Champion", sum: "Critique 19-20 (18-20 au niveau 15), Athlète remarquable, second style de combat (10), Survivant (18)." },
   mdg: { n: "Maître de guerre", full: "Maître de guerre", sum: "Dés de supériorité et manœuvres, Étudiant de la guerre (un outil d'artisan), Connaissez votre ennemi (7)." },
@@ -247,18 +241,10 @@ export default {
   shortRest: () => ({ fields: SHORT, label: "Second souffle, Fougue et dés de supériorité", done: "récupérés", reset: g => { SHORT.forEach(f => { g[f] = 0; }); } }),
   longOnly: g => [g.indU ? "Indomptable" : ""],
   longRest: g => { SHORT.forEach(f => { g[f] = 0; }); g.indU = 0; },
-  acBonus: (g, armor) => styles(g).includes("defense") && armor ? [["Style de combat : Défense", 1]] : [],
-  attackMods: (g, w, ab, off) => {
-    const x = { pills: [] }, st = styles(g);
-    if (st.includes("archerie") && w.rng === "ranged") { x.hit = 2; x.pills.push("Archerie +2"); }
-    if (st.includes("duel") && w.rng === "melee" && !w.two && w.id !== "unarmed") { x.dmg = 2; x.dmg2 = 0; x.pills.push("Duel : +2 à une main"); }
-    if (st.includes("deuxmains") && w.rng === "melee" && (w.two || w.vers)) x.pills.push("Arme à deux mains : relance 1-2");
-    if (st.includes("deuxarmes") && off) { x.offMod = true; x.pills.push("Combat à deux armes : mod. aux dégâts"); }
-    if (champ(g)) x.pills.push(`critique ${GUE.crit(g)}`);
-    return x;
-  },
+  acBonus: (g, armor) => styleAC(styles(g), armor),
+  attackMods: (g, w, ab, off) => { const x = styleMods(g, styles(g), w, off); if (champ(g)) x.pills.push(`critique ${GUE.crit(g)}`); return x; },
   attackNotes: g => [GUE.attacks(g.level) > 1 ? `<b>Attaque supplémentaire</b> : ${GUE.attacks(g.level)} attaques par action Attaquer.` : "",
-    styles(g).includes("protection") ? "<b>Protection</b> : avec un bouclier, réaction pour imposer un désavantage à une attaque contre un allié à 1,5 m." : "",
+    ...styleNotes(g, styles(g)),
     ek(g) && g.level >= 7 ? `<b>Magie de guerre</b> : ${g.level >= 18 ? "après un sort" : "après un sort mineur"} lancé avec ton action, une attaque d'arme en action bonus.` : "",
     ek(g) && g.level >= 10 ? "<b>Frappe occulte</b> : la cible touchée a un désavantage à son prochain JdS contre ton sort." : "",
     champ(g) && g.level >= 18 ? `<b>Survivant</b> : à moitié de tes PV ou moins, +${5 + R.ab(g, "con")} PV au début de ton tour.` : ""].filter(Boolean),

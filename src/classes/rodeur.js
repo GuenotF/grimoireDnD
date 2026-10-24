@@ -1,6 +1,7 @@
 // Rôdeur (Manuel des joueurs 2014) : sorts connus, Ennemi juré, Explorateur-né, style de combat, Chasseur, Maître des bêtes.
 // Résumés rédigés pour la table, à vérifier dans le livre. Compagnon (Maître des bêtes) : rodeur-compagnon.js.
 import { onChange, onClick, onInput } from "../core/actions.js";
+import { stylesOf, styleAC, styleMods } from "../rules/styles.js";
 import { byName, esc, signed } from "../core/format.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
@@ -18,12 +19,7 @@ const KNOWN = [0, 0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11
 const FOES = { aberrations: "Aberrations", betes: "Bêtes", celestes: "Célestes", artificielles: "Créatures artificielles", dragons: "Dragons", elementaires: "Élémentaires",
   fees: "Fées", fielons: "Fiélons", geants: "Géants", monstruosites: "Monstruosités", mortsvivants: "Morts-vivants", plantes: "Plantes", vases: "Vases", humanoides: "Deux races d'humanoïdes" };
 const TERRS = { arctique: "Arctique", cote: "Côte", desert: "Désert", foret: "Forêt", marais: "Marais", montagne: "Montagne", prairie: "Prairie", outreterre: "Outreterre" };
-const STYLES = {
-  archerie: { n: "Archerie", k: "+2 à distance", d: "+2 aux jets d'attaque avec une arme à distance." },
-  defense: { n: "Défense", k: "+1 CA", d: "+1 à la CA quand tu portes une armure." },
-  duel: { n: "Duel", k: "+2 dégâts à une main", d: "+2 aux dégâts avec une arme de corps à corps tenue à une main, sans autre arme." },
-  deuxarmes: { n: "Combat à deux armes", k: "mod. aux dégâts de la 2e arme", d: "Quand tu attaques avec ta seconde arme (action bonus), tu ajoutes ton modificateur de caractéristique aux dégâts." },
-};
+const STYLES = stylesOf(["archerie", "defense", "duel", "deuxarmes"]); // les quatre styles du rôdeur
 const ARCH = {
   chasseur: { n: "Chasseur", full: "Chasseur", sum: "Une technique à choisir aux niveaux 3, 7, 11 et 15 : Proie du chasseur (Tueur de colosses…), Tactiques défensives, Attaques multiples, Défense supérieure." },
   betes: { n: "Maître des bêtes", full: "Maître des bêtes", sum: "Un compagnon animal (taille M au plus, FP 1/4 au plus) qui gagne ta maîtrise, combat sur tes ordres et progresse avec toi." },
@@ -202,14 +198,8 @@ export default {
     o.hunt = o.hunt && typeof o.hunt === "object" ? Object.fromEntries(Object.entries(o.hunt).filter(([lv, k]) => HUNT[lv] && HUNT[lv].o[k])) : {};
     o.pet = o.pet && BEAST[o.pet.id] && PET_OK(BEAST[o.pet.id]) ? { id: o.pet.id, name: typeof o.pet.name === "string" ? o.pet.name : "", hp: o.pet.hp == null ? null : Math.max(0, Math.floor(+o.pet.hp) || 0) } : null;
   },
-  acBonus: (g, armor) => g.level >= 2 && g.style === "defense" && armor ? [["Style de combat : Défense", 1]] : [],
-  attackMods: (g, w, ab, off) => {
-    if (g.level < 2) return {};
-    if (g.style === "archerie" && w.rng === "ranged") return { hit: 2, pills: ["Archerie +2"] };
-    if (g.style === "duel" && w.rng === "melee" && !w.two && w.id !== "unarmed") return { dmg: 2, dmg2: 0, pills: ["Duel : +2 à une main"] };
-    if (g.style === "deuxarmes" && off) return { offMod: true, pills: ["Combat à deux armes : mod. aux dégâts"] };
-    return {};
-  },
+  acBonus: (g, armor) => g.level >= 2 ? styleAC([g.style], armor) : [],
+  attackMods: (g, w, ab, off) => g.level >= 2 ? styleMods(g, [g.style], w, off) : {},
   attackNotes: g => [g.level >= 5 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "",
     g.level >= 3 && g.rarch === "chasseur" && huntOf(g, 3) ? `<b>${esc(huntOf(g, 3).n)}</b> : ${esc(huntOf(g, 3).d)}` : "",
     foeList(g).length ? `<b>Ennemi juré</b> (${esc(foeList(g).join(", "))}) : avantage pour les pister et te souvenir d'eux.` : ""].filter(Boolean),

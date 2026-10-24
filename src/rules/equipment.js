@@ -98,4 +98,4 @@ function attacks(g) {
   return list;
 }
 
-export { gearOf, weaponProf, armorProf, acCalc, acMode, acOf, attackOf, attacks };
+export { gearOf, weaponProf, armorProf, acCalc, acMode, acOf, attackOf, attacks, twoWeapons };

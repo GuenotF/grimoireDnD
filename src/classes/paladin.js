@@ -1,5 +1,6 @@
 // Paladin : serments, Imposition des mains, Perception divine, Conduit divin, Châtiment divin, capacités.
 import { onChange, onClick, onKey } from "../core/actions.js";
+import { stylesOf, styleAC, styleMods, styleNotes } from "../rules/styles.js";
 import { byName, esc, signed } from "../core/format.js";
 import { fxKey } from "../core/schema.js";
 import { G, S } from "../core/state.js";
@@ -37,12 +38,7 @@ function palResHTML(g) {
   ${cd ? capRow(g, "cd", "Conduit divin", "repos court", pips("cd", cd, Math.min(cd, g.cdU), "Conduit divin"), false, cdBody) : ""}
   </div>`;
 }
-const STYLES = {
-  defense: { n: "Défense", k: "+1 CA", d: "+1 à la CA quand tu portes une armure." },
-  duel: { n: "Duel", k: "+2 dégâts à une main", d: "+2 aux dégâts avec une arme de corps à corps tenue à une main, sans autre arme." },
-  deuxmains: { n: "Arme à deux mains", k: "relance 1 et 2", d: "Avec une arme à deux mains ou polyvalente tenue à deux mains, relance les 1 et 2 des dés de dégâts (une fois)." },
-  protection: { n: "Protection", k: "réaction, bouclier", d: "Avec un bouclier, réaction : désavantage à une attaque contre une créature à 1,5 m de toi." },
-};
+const STYLES = stylesOf(["deuxmains", "defense", "duel", "protection"]); // AideDD : les quatre styles du paladin
 const auraR = g => g.level >= 18 ? "9 m" : "3 m";
 const PAL_FEATS = [
   { id: "style", lv: 2, n: "Style de combat", control: g => `<select id="f-style" aria-label="Style de combat"><option value="">À choisir</option>${Object.entries(STYLES).map(([k, s]) => `<option value="${k}"${g.style === k ? " selected" : ""}>${s.n}</option>`).join("")}</select>`, pill: g => STYLES[g.style] ? `${STYLES[g.style].n} · ${STYLES[g.style].k}` : "à choisir", k: "f", d: g => STYLES[g.style] ? STYLES[g.style].d : "Choisis-le en mode Gérer : Défense, Duel, Arme à deux mains ou Protection." },
@@ -230,15 +226,10 @@ export default {
   n: "Paladin", ab: "cha", abN: "Charisme", abArticle: "le Charisme", slots: HALF, top: 5, hitDie: "1d10",
   saves: ["wis", "cha"],
   weaponProf: ["simple", "martial"], armorProf: ["light", "medium", "heavy", "shield"],
-  acBonus: (g, armor) => g.level >= 2 && g.style === "defense" && armor ? [["Style de combat : Défense", 1]] : [],
-  // Duel : +2 aux dégâts à une main (corps à corps, sans arme à deux mains) ; Arme à deux mains : relance des 1 et 2
-  attackMods: (g, w) => {
-    if (g.level < 2) return {};
-    if (g.style === "duel" && w.rng === "melee" && !w.two && w.id !== "unarmed") return { dmg: 2, dmg2: 0, pills: ["Duel : +2 à une main"] };
-    if (g.style === "deuxmains" && w.rng === "melee" && (w.two || w.vers)) return { pills: ["relance les 1 et 2 (à deux mains)"] };
-    return {};
-  },
-  attackNotes: g => [g.level >= 5 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "",
+  acBonus: (g, armor) => g.level >= 2 ? styleAC([g.style], armor) : [],
+  // Styles de combat (rules/styles.js) : Duel, Défense calculés ; Arme à deux mains, Protection rappelés
+  attackMods: (g, w, ab, off) => g.level >= 2 ? styleMods(g, [g.style], w, off) : {},
+  attackNotes: g => [g.level >= 5 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "", ...(g.level >= 2 ? styleNotes(g, [g.style]) : []),
     g.level >= 2 ? `Touché au corps à corps ? <b>Châtiment divin</b> : dépense un emplacement, +2d8 radiant (+1d8 par niveau au-dessus du 1er, +1d8 contre morts-vivants et fiélons).` : "",
     (g.effects || []).some(e => e.name === "Arme sacrée") ? `<b>Arme sacrée</b> active : +${Math.max(1, R.am(g))} au toucher avec l'arme choisie.` : ""].filter(Boolean),             // jets de sauvegarde maîtrisés par la classe
   cantrips: () => 0,

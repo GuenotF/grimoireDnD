@@ -79,3 +79,17 @@ def test_chevalier_occulte(browser, devices, url):
     a.tab("grimoire"); a.view("jeu")
     check(a.count('.slotrow [data-a="pip"]') == 2 and "DD" in a.text(".hero"), "2 emplacements de niveau 1, en-tête des sorts")
     a.close()
+
+
+def test_styles_aidedd(browser, devices, url):
+    deux = dict(ALDWIN, level=1, style="duel", items=[{"n": "Épée longue", "q": 1, "ref": "longsword", "eq": True}, {"n": "Épée courte", "q": 1, "ref": "shortsword", "eq": True, "oh": True}])
+    a = App(browser, devices, url, char=deux, tab="caps", view="jeu")
+    check("Duel : +2" not in a.text(".atk") and "1d8 + 4 tranchant" in a.text(".atk"), "Duel : pas de bonus avec une seconde arme en main")
+    a.close()
+    prot = dict(ALDWIN, level=1, style="protection")
+    a = App(browser, devices, url, char=prot, tab="caps", view="jeu")
+    check("bouclier porté" in a.text("#panel"), "Protection : rappel avec le bouclier porté")
+    a.close()
+    a = App(browser, devices, url, char=dict(prot, items=[{"n": "Épée longue", "q": 1, "ref": "longsword", "eq": True}]), tab="caps", view="jeu")
+    check("il faut porter un bouclier" in a.text("#panel"), "Protection : bouclier requis")
+    a.close()
