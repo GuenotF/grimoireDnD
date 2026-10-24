@@ -12,6 +12,9 @@ const { toolLists: TOOL_LISTS, langs: LANGS, packs: PACKS } = ORIGINS;
 // Classes : compétences au choix, Expertise au niveau 1, équipement (options a / b / c), équipement fixe, or de départ (×10 po)
 const W = (ref, q = 1) => ({ ref, q }), O = (n, q = 1, c = false) => ({ n, q, c }), P = pick => ({ pick });
 const CLASS_START = {
+  barde: { skills: { n: 3, list: ["acrobatics", "arcana", "athletics", "stealth", "animal", "sleight", "history", "intimidation", "insight", "investigation", "medicine", "nature", "perception", "persuasion", "religion", "performance", "survival", "deception"] }, gold: "5d4",
+    equip: [[["une rapière", [W("rapier")]], ["une épée longue", [W("longsword")]], ["une arme courante", [P("simple")]]], [["un sac de diplomate", [O("Sac de diplomate")]], ["un sac d'artiste", [O("Sac d'artiste")]]], [["un luth", [O("Luth")]], ["un autre instrument de musique", [O("Instrument de musique")]]]],
+    fixed: [W("leather"), W("dagger")] },
   barbare: { skills: { n: 2, list: ["athletics", "animal", "intimidation", "nature", "perception", "survival"] }, gold: "2d4",
     equip: [[["une hache à deux mains", [W("greataxe")]], ["une arme de guerre de corps à corps", [P("martial-melee")]]], [["deux hachettes", [W("handaxe", 2)]], ["une arme courante", [P("simple")]]]],
     fixed: [O("Sac d'explorateur"), W("javelin", 4)] },

@@ -19,7 +19,7 @@ import { rechargeItems } from "../rules/magic.js";
 const SR = g => typeof C(g).shortRest === "function" ? C(g).shortRest(g) : C(g).shortRest;
 /** Boutons de repos ; C(g).restBar ajoute ce qui est propre à la classe (case Restauration arcanique…). */
 function restBarHTML(g) {
-  return `<div class="restbar"><button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}">Repos court ${S.shortOpen ? "▴" : "▾"}</button><button class="btn" data-a="longrest">Repos long</button>${C(g).restBar ? C(g).restBar(g)
+  return `<div class="restbar"><button class="btn" data-a="short-open" aria-expanded="${S.shortOpen}">Repos court ${S.shortOpen ? "▴" : "▾"}</button><button class="btn" data-a="longrest">Repos long</button>${C(g).restBar && C(g).restBar(g) != null ? C(g).restBar(g)
     : `<span class="muted">Repos court : dés de vie${SR(g) ? `, ${SR(g).label}` : ""}. Repos long : tout.</span>`}</div>${S.shortOpen ? shortRestHTML(g) : ""}`;
 }
 

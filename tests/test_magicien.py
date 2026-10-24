@@ -56,7 +56,7 @@ def test_restauration_arcanique(browser, devices, url):
 
 def test_bibliotheque(browser, devices, url):
     a = App(browser, devices, url, char=NEMEIA, tab="biblio")
-    check("214 sorts" in a.text(".found"), a.text(".found"))
+    check("215 sorts" in a.text(".found"), a.text(".found"))
     a.pg.fill("#f-q", "boule de feu"); a.pg.wait_for_timeout(100)
     check(a.count(".spell") >= 1, "recherche affichée en entier")
     a.pg.fill("#f-q", ""); a.pg.wait_for_timeout(50)

@@ -112,6 +112,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `levelUp` | Assistant : étapes propres (`init`, `steps`, `apply`…) ou crochets des étapes communes (`rowsBefore`, `rowsAfter`, `summaryExtra`, `notes`, `choicesFirst`, `choices`, `recapBefore`, `recapAfter`, `recapNotes`, `apply`) | ✓ | ✓ | ✓ |
 | `weaponProf`, `armorProf`, `tools` en fonction | Maîtrises selon le personnage (domaine du clerc : armures lourdes, armes de guerre) | | | |
 | `extraSlots(g)`, `castExtras(g, sort)`, `castSnap`, `hpLv(g)` | Emplacements créés en plus au niveau actuel (`R.slots`), options au moment de lancer (métamagie), champs remis par « Annuler » après un sort, PV de plus par niveau (Résilience draconique) | | | |
+| `halfProf(g)` | Touche-à-tout (barde) : moitié de la maîtrise aux compétences non maîtrisées (marquées ½) et à l'initiative, `rules/character.js` | | | |
 | `known(lv)` | Classe à **sorts connus** (rôdeur, puis barde, ensorceleur, occultiste) : nombre de sorts connus au niveau. Les sorts connus sont rangés dans `g.prepared` (tous lançables) ; `R.prepMax` renvoie ce nombre. Gérer : apprendre / oublier ; assistant : apprendre les sorts gagnés, en remplacer un | | | |
 | `settings(g)` | Réglages propres à la classe en mode Gérer, après les capacités (rôdeur : ennemis jurés, terrains, compagnon) | | | |
 | `afterAttacks(g)` | Bloc en jeu sous les attaques (rôdeur : carte du compagnon) | | | |

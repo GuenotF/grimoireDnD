@@ -10,6 +10,7 @@ import { crStart } from "./creation.js";
 
 const CLASS_INFO = {
   barbare: { i: "B", col: "#C2410C", d: "Rage, Défense sans armure, Attaque téméraire ; voie primitive au niveau 3. Pas de sorts.", tags: ["Combattant", "Dé de vie d12"] },
+  barde: { i: "B", col: "#B4436C", d: "Sorts connus, Inspiration bardique, Touche-à-tout, Secrets magiques (sorts de toutes les classes) ; collège au niveau 3. Caractéristique : Charisme.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },
   clerc: { i: "C", col: "#8A6516", d: "Sorts préparés dans toute la liste, domaine divin dès le niveau 1 (sorts de domaine), Conduit divin, Renvoi des morts-vivants. Caractéristique : Sagesse.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },
   druide: { i: "D", col: "#2F6B45", d: "Sorts préparés dans toute la liste, sorts mineurs, rituels, Forme sauvage. Caractéristique : Sagesse.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },
   ensorceleur: { i: "E", col: "#6B3FA0", d: "Sorts connus, points de sorcellerie (créer des emplacements), métamagie ; origine dès le niveau 1 (Lignée draconique, Magie sauvage). Caractéristique : Charisme.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },

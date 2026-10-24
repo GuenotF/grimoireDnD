@@ -5,7 +5,7 @@ import { byName, cap, esc, fmt, signed } from "../core/format.js";
 import { G } from "../core/state.js";
 import { toast } from "../core/ui.js";
 import { BY_ID } from "../data.js";
-import { speedOf, hitDieSize, initiative, passivePerception, saveBonus, saveProf, skillBonus, skillLevel } from "../rules/character.js";
+import { halfProf, speedOf, hitDieSize, initiative, passivePerception, saveBonus, saveProf, skillBonus, skillLevel } from "../rules/character.js";
 import { R, classSpells } from "../rules/common.js";
 import { acOf, attacks } from "../rules/equipment.js";
 import { FEATS } from "../rules/feats.js";
@@ -98,7 +98,7 @@ function pClassList(g, exclude = []) {
 }
 /** Page « Personnage » (commune) : caractéristiques, combat, PV à remplir, compétences, défenses, dons et traits, historique, notes. */
 function pCharacter(g) {
-  const sk = SKILLS.map(([k, n, a]) => { const l = skillLevel(g, k); return `<div class="sk${l ? " on" : ""}"><span class="mk">${l === 2 ? "◉" : l ? "●" : "○"}</span><span class="n">${n} <i>${ABILITIES.find(x => x[0] === a)[1]}</i></span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("");
+  const sk = SKILLS.map(([k, n, a]) => { const l = skillLevel(g, k); return `<div class="sk${l ? " on" : ""}"><span class="mk">${l === 2 ? "◉" : l ? "●" : halfProf(g) ? "½" : "○"}</span><span class="n">${n} <i>${ABILITIES.find(x => x[0] === a)[1]}</i></span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("");
   const DEFN = { res: "Résistance", imm: "Immunité", vul: "Vulnérabilité", adv: "Avantage" };
   return `<h1><b>${esc(g.name.charAt(0))}</b>${esc(g.name.slice(1))}</h1>
 <div class="sub">${C(g).n} niveau ${g.level}${g.bg.n ? ` · ${esc(g.bg.n)}` : ""} · Remplir au crayon</div>

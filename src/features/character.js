@@ -7,7 +7,7 @@ import { cap, fmt, signed } from "../core/format.js";
 import { S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render } from "../core/ui.js";
-import { speedOf, hitDieSize, hpAverage, initiative, passivePerception, saveBonus, saveFromClass, saveFromFeat, saveProf, sheetIncomplete, skillBonus, skillLevel } from "../rules/character.js";
+import { halfProf, speedOf, hitDieSize, hpAverage, initiative, passivePerception, saveBonus, saveFromClass, saveFromFeat, saveProf, sheetIncomplete, skillBonus, skillLevel } from "../rules/character.js";
 import { R } from "../rules/common.js";
 import { acCalc, acMode, acOf } from "../rules/equipment.js";
 import { featInit } from "../rules/feats.js";
@@ -81,7 +81,7 @@ function jeuHTML(g) {
   const st = (v, l, cls = "") => `<div class="chstat${cls}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
   const stats = `<div class="chstats">${st(acOf(g) ?? "?", "CA")}${st(signed(initiative(g)), "Initiative")}${st(speedTxt(g), "Vitesse")}${st(signed(R.prof(g.level)), "Maîtrise")}</div>`;
   let sk = foldHead("ch-skj", "", "Compétences", `Perception passive ${passivePerception(g)}`);
-  if (!isFold("ch-skj")) sk += `<div class="skplay">${SKILLS.map(([k, n]) => { const l = skillLevel(g, k); return `<div class="${l ? "on" : ""}"><span class="mk" aria-hidden="true">${l === 2 ? "◉" : l ? "●" : ""}</span><span class="n">${n}${l ? `<span class="sr"> (${LV_NAME[l]})</span>` : ""}</span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("")}</div>`;
+  if (!isFold("ch-skj")) sk += `<div class="skplay">${SKILLS.map(([k, n]) => { const l = skillLevel(g, k); return `<div class="${l ? "on" : ""}"><span class="mk" aria-hidden="true">${l === 2 ? "◉" : l ? "●" : halfProf(g) ? "½" : ""}</span><span class="n">${n}${l ? `<span class="sr"> (${LV_NAME[l]})</span>` : ""}</span><b>${signed(skillBonus(g, k))}</b></div>`; }).join("")}</div>`;
   return hpCardHTML(g) + restBarHTML(g) + stats + sk + toolsJeu(g) + equipmentJeu(g) + traitsSheetJeu(g); // les caractéristiques sont dans l'en-tête (heroAbilities)
 }
 
