@@ -33,6 +33,7 @@ def test_magie_de_pacte(browser, devices, url):
     t = a.text("#panel")
     check("Magie de pacte" in t and a.count(".slotrow") == 1 and a.count('.slotrow [data-a="pip"]') == 3, "une ligne : 3 emplacements de niveau 5")
     check("10d6 feu" in t, "Boule de feu lancée au niveau 5 : 10d6")
+    check("25 PV temp., 25 froid" in t, "Armure d'Agathys lancée au niveau 5 : 25 PV temporaires, 25 froid")
     check("3 rayons · 1d10 + 4 force" in t, "Décharge occulte : 3 rayons, Décharge déchirante (+CHA)")
     check("lancés au niveau 5" in t, "sorts de niveau inférieur lancés au niveau du pacte")
     a.click('[data-a="row"][data-id="hex"]'); a.click('[data-a="cast"][data-id="hex"]')

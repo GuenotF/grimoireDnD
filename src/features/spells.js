@@ -33,14 +33,16 @@ function pText(s, lv, g) {
   if (!s.p) return ""; let v = s.p.slice(2);
   if (s.l === 0 && s.p.startsWith("d:") && s.up) v = v.replace(/^(\d+)d/, (m, n) => (n * tier(lv)) + "d");
   const at = g && s.l > 0 && C(g).pact && C(g).pact(g) ? R.maxLevel(g) : 0; // magie de pacte : toujours lancé au niveau du pacte
-  if (at > s.l && s.p.startsWith("d:")) v = upcast(v, s.up, at - s.l);
+  if (at > s.l) v = upcast(v, s.up, at - s.l);
   const b = g && C(g).dmgBonus ? C(g).dmgBonus(g, s) : 0; // ex. Évocation améliorée : + INT à un jet de dégâts
   if (b && !v.includes("×")) v = v.replace(/(\d+d\d+)/, `$1 ${b > 0 ? "+" : "−"} ${Math.abs(b)}`);
   return g && C(g).pillText ? C(g).pillText(g, s, v) : v; // ex. Décharge occulte : nombre de rayons
 }
 /** Dégâts à un niveau d'emplacement plus élevé (n niveaux au-dessus) : « +1d6 par niveau » ou « +1 rayon par niveau ». */
 function upcast(v, up, n) {
-  let m = /^\+(\d+)d(\d+)[^,;]* par niveau d'emplacement/.exec(up || "");
+  let m = /^\+(\d+) PV temporaires(?: et \+(\d+) (\S+))? par niveau d'emplacement/.exec(up || ""); // Armure d'Agathys, Simulacre de vie
+  if (m) { v = v.replace(/(\d+) PV temp/, (_, k) => `${+k + n * +m[1]} PV temp`); if (m[2]) v = v.replace(new RegExp(`(\\d+) ${m[3]}`), (_, k) => `${+k + n * +m[2]} ${m[3]}`); return v; }
+  m = /^\+(\d+)d(\d+)[^,;]* par niveau d'emplacement/.exec(up || "");
   if (m) return v.replace(new RegExp(`(\\d+)d${m[2]}`), (_, k) => `${+k + n * +m[1]}d${m[2]}`);
   m = /^\+(\d+) (rayon|fléchette|cible)s? par niveau d'emplacement/.exec(up || "");
   if (m && /^\d+ ×/.test(v)) return v.replace(/^(\d+)/, k => +k + n * +m[1]);
