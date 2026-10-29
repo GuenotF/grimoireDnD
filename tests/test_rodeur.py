@@ -92,7 +92,7 @@ def test_maitre_des_betes(browser, devices, url):
     a.pg.fill("#pet-n", "3"); a.click('[data-a="pet-heal"]')
     check(a.g("pet.hp") == 16, "soins au compagnon")
     a.undo(); check(a.g("pet.hp") == 13, "annuler le soin")
-    check("13/20" in a.text('[data-a="pet-top"]'), "puce du compagnon dans la barre du bas")
+    check("13/20" in a.text('[data-a="pet-top"]'), "puce du compagnon dans la barre du haut")
     a.pg.fill("#pet-n", "30"); a.click('[data-a="pet-dmg"]')
     check(a.g("pet.hp") == 0 and "à 0 PV" in a.text("#pet-card"), "compagnon à 0 PV")
     a.click('[data-a="longrest"]') if a.count('[data-a="longrest"]') else None

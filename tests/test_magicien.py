@@ -34,11 +34,11 @@ def test_lancer_et_choix_du_niveau(browser, devices, url):
 def test_concentration(browser, devices, url):
     a = App(browser, devices, url, char=NEMEIA, view="jeu")
     a.click('.jline [data-a="cast"][data-id="levitate"]')
-    check("Lévitation" in a.text(".slotbar .chip.conc"), "puce de concentration")
+    check("Lévitation" in a.text("#topbar .chip.conc"), "puce de concentration")
     a.click('.jline [data-a="cast"][data-id="suggestion"]')
     check(a.count(".concwarn") == 1, "avertissement avant de remplacer la concentration")
     a.click('[data-a="cast-force"]')
-    check("Suggestion" in a.text(".slotbar .chip.conc"), "concentration remplacée")
+    check("Suggestion" in a.text("#topbar .chip.conc"), "concentration remplacée")
     a.click('[data-a="conc-panel"]'); a.pg.fill("#conc-dmg", "24"); a.pg.wait_for_timeout(50)
     check(a.text("#conc-dd") == "JdS CON · DD 12", "DD de concentration calculé")
     a.close()

@@ -90,7 +90,7 @@ def test_sorts_en_cours_et_repos_long(browser, devices, url):
         a.click(f'.jline [data-a="cast"][data-id="{sid}"]')
     names = a.js("G().effects.map(e => e.name + (e.c ? '*' : ''))")
     check(names == ["Charme-personne", "Bouclier", "Lévitation*"], f"effets suivis : {names}")
-    a.click('.slotbar .chip[data-a="fx-open"]')
+    a.click('#topbar .chip[data-a="fx-open"]')
     check(a.count(".fxitem") == 3, "volet des sorts en cours")
     a.click('[data-a="fx-all"]')
     check(a.g("effects.length") == 0, "tout terminer")

@@ -1,4 +1,4 @@
-// Lancer un sort, emplacements restants (barre du bas), concentration, sorts en cours.
+// Lancer un sort, concentration, sorts en cours (puces de la barre du haut : features/topbar.js).
 import { C } from "../classes/index.js";
 import { onChange, onClick, onInput } from "../core/actions.js";
 import { esc } from "../core/format.js";
@@ -14,7 +14,7 @@ const NO_TRACK = ["Instantanée", "Jusqu'à dissipation", "Spéciale"]; // duré
 const slotsLeft = (g, lv) => Math.max(0, (R.slots(g)[lv - 1] || 0) - (+(g.used[lv] || 0)));
 const firstFree = (g, s) => { for (let lv = s.l; lv <= R.maxLevel(g); lv++) if (slotsLeft(g, lv) > 0) return lv; return 0; };
 function castHTML(g, s, prepared) {
-  // Sort mineur : pas d'emplacement ; bouton seulement s'il demande la concentration (suivi dans la barre du bas)
+  // Sort mineur : pas d'emplacement ; bouton seulement s'il demande la concentration (suivi dans la barre du haut)
   const mx = C(g).castExtras ? C(g).castExtras(g, s) : ""; // ex. ensorceleur : métamagie
   if (s.l === 0) return s.c || mx ? `${mx}<div class="cast"><button class="btn cast-go" data-a="cast" data-id="${s.id}" data-l="0">Lancer${s.c ? " · concentration" : ""}</button></div>` : "";
   let h = "";
@@ -36,18 +36,6 @@ function castHTML(g, s, prepared) {
   return h;
 }
 // pre : puces placées en tête (PV, fournis par app.js)
-function slotbarHTML(g, pre = "") {
-  const cur = concOf(g);
-  const others = g.effects.filter(e => !e.c);
-  const wf = pre + (C(g).slotbarChips ? C(g).slotbarChips(g) : ""); // ex. druide : forme active
-  const fx = g.effects.length || wf ? `<div class="fx">${wf}${cur ? `<button class="chip conc" data-a="conc-panel" aria-expanded="${S.concPanel}">◉ ${esc(cur.name)} · conc.</button>` : ""}${others.map(e => `<button class="chip" data-a="fx-open">${esc(e.name)} · ${esc(e.d)}</button>`).join("")}${g.effects.length > 1 || (g.effects.length && !cur) ? `<button class="chip" data-a="fx-open" style="background:transparent;border-color:var(--rule);color:var(--muted)">Tout voir</button>` : ""}</div>` : "";
-  if (!R.slots(g).length) return fx; // classe sans sorts (ou pas encore d'emplacement) : seulement les puces
-  return `${fx}<button class="line" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g).map((n, i) => {
-    if (!n) return ""; // magie de pacte
-    const used = Math.min(n, +(g.used[i + 1] || 0));
-    return `<span class="lv" aria-label="Niveau ${i + 1} : ${n - used} sur ${n}"><b>${i + 1}</b>${Array.from({ length: n }, (_, k) => `<span class="d${k < used ? " u" : ""}"></span>`).join("")}</span>`;
-  }).join("")}</span>${S.view !== "jeu" && R.maxLevel(g) ? `<span class="prepc${g.prepared.length > R.prepMax(g) ? " over" : ""}">${C(g).known ? "Connus" : "Préparés"} <b>${g.prepared.length}</b>/${R.prepMax(g)}</span>` : ""}<span class="go">Emplacements ⌃</span></button>`;
-}
 const concOf = g => (g.effects || []).find(e => e.c);
 const concDD = dmg => Math.max(10, Math.floor((+dmg || 0) / 2));
 function concPanelHTML(cur, g) {
@@ -113,4 +101,4 @@ onClick("to-slots", () => { const el = document.getElementById("slots-top"); if 
 onChange(t => t.classList.contains("fxnote"), t => { mutate(g => { const e = g.effects.find(e => e.k === t.dataset.k); if (e) e.note = t.value.trim(); }, false); });
 onInput("#conc-dmg", t => { const el = document.getElementById("conc-dd"); if (el) el.textContent = `JdS CON · DD ${concDD(t.value)}`; });
 
-export { NO_TRACK, slotsLeft, firstFree, castHTML, slotbarHTML, concOf, concDD, concPanelHTML, concWarnHTML, fxSheetHTML, liveMark };
+export { NO_TRACK, slotsLeft, firstFree, castHTML, concOf, concDD, concPanelHTML, concWarnHTML, fxSheetHTML, liveMark };

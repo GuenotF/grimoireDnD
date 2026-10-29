@@ -72,7 +72,7 @@ function petPlayHTML(g) {
 /** Ligne courte des attaques (fiche repliée). */
 const petQuick = (g, b) => { const p = R.prof(g.level), a = b.ac.filter(x => x.b != null && x.d);
   return `<div class="petquick"><span class="kp">CA ${b.ca + p}</span>${a.map(x => `<span class="pqa"><b>${esc(x.n)}</b> <span class="kp a">${signed(x.b + p)}</span> <span class="kp d">${esc(dmgPlus(x.d, p))}</span></span>`).join("")}</div>`; };
-/** Puce de la barre du bas. */
+/** Puce de la barre du haut. */
 const petChips = g => { const b = g.pet && BEAST[g.pet.id]; return b ? `<button class="chip ws" data-a="pet-top">🐾 ${esc(petName(g))} · ${petHp(g)}/${petMax(g)}</button>` : ""; };
 
 // ---------- Gérer (réglages du rôdeur) : compagnon choisi, fiche dépliable, changement

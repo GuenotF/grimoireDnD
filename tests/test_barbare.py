@@ -1,4 +1,4 @@
-"""Barbare : classe sans sorts (onglets, en-tête, barre du bas), Rage, Frénésie, Attaque téméraire, Défense sans armure, épuisement."""
+"""Barbare : classe sans sorts (onglets, en-tête, barre du haut), Rage, Frénésie, Attaque téméraire, Défense sans armure, épuisement."""
 from helpers import App, check
 
 GARAL = {"name": "Garal Ulcer", "cls": "barbare", "level": 4, "v": 3, "voie": "berserker",
@@ -16,7 +16,7 @@ def test_classe_sans_sorts(browser, devices, url):
     a.pg.keyboard.press("Escape")
     check(a.text(".statcap") == "Barbare" and "3/3" in a.texts(".stats .v")[0] and a.texts(".stats .v")[2] == "14", f"en-tête : {a.texts('.stats .v')}")
     check("sorts" not in a.text(".subline"), "pas de « sorts jusqu'au niveau »")
-    check(a.count("#slotbar:not([hidden]) .chip.hp") == 1, "barre du bas avec les PV, sans emplacements")
+    check(a.count("#topbar .chip.hp") == 1, "barre du haut avec les PV, sans emplacements")
     check(a.count(".atk") == 3, "attaques dans l'onglet Capacités (hache, hachette, mains nues)")
     a.view("gerer")
     check(a.count('[data-a="rage-start"]') == 0 and a.count(".atk") == 0 and a.count('[data-a="short-open"]') == 0, "Gérer : ni Rage, ni attaques, ni repos (réglages seulement)")
@@ -32,7 +32,7 @@ def test_rage_frenesie(browser, devices, url):
     a = App(browser, devices, url, char=GARAL, view="jeu")
     a.pg.check('[data-a="rage-frenzy"]'); a.click('[data-a="rage-start"]')
     check(a.g("raging") and a.g("frenzy") and a.g("rageU") == 1 and a.count(".ragecard.on") == 1, "en rage, avec Frénésie")
-    check("🔥 Rage" in a.text("#slotbar .chip.fire"), "puce Rage dans la barre du bas")
+    check("🔥 Rage" in a.text("#topbar .chip.fire"), "puce Rage dans la barre du haut")
     atk = a.texts(".atk .ah")
     check(atk[0] == "Hache à deux mains +5 1d12 + 5 tranchant" and "Frénésie" in atk[1], f"rage +2 et attaque de Frénésie : {atk}")
     check("lancée : sans bonus de rage" in a.text(".atk:nth-child(3)") or "lancée : sans bonus de rage" in a.text(".atkbox"), "hachette lancée : pas de bonus")

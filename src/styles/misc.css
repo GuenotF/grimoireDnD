@@ -20,6 +20,5 @@
 .welcome h1 { font-family: var(--f-display); font-weight: 500; font-size: 40px; margin: 0; }
 .welcome h1 .initial { color: var(--rubric); font-weight: 700; }
 .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: var(--r); font-size: 14px; z-index: 9; max-width: calc(100% - 32px); width: max-content; display: flex; align-items: center; gap: 14px; }
-.toast.above-bar { bottom: calc(var(--barh, 58px) + 16px); }
 .toast.on-top { bottom: auto; top: calc(14px + env(safe-area-inset-top, 0px)); }
 .toast .undo { background: transparent; border: 0; color: var(--rubric-soft); font-weight: 700; padding: 4px 2px; }

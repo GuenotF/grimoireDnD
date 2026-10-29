@@ -20,7 +20,7 @@ def test_rituel_et_sort_mineur_de_concentration(browser, devices, url):
     a.click('[data-a="row"][data-id="speak-with-animals"]')
     check(a.count('.jbody [data-a="cast-rit"]') == 1, "rituel préparé lançable")
     a.click('.jline [data-a="cast"][data-id="create-bonfire"]')
-    check(a.js("JSON.stringify(G().used)") == "{}" and "Embrasement" in a.text(".slotbar .chip.conc"), "Embrasement : concentration sans emplacement")
+    check(a.js("JSON.stringify(G().used)") == "{}" and "Embrasement" in a.text("#topbar .chip.conc"), "Embrasement : concentration sans emplacement")
     a.click('.jline [data-a="cast"][data-id="moonbeam"]')
     check(a.count(".concwarn") == 1, "Rayon de lune remplacerait Embrasement")
     a.close()

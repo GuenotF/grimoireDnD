@@ -38,4 +38,4 @@
 .wscf { display: grid; gap: 6px; border-top: 1px solid var(--rule); padding-top: 8px; }
 .wscf .chip small { color: var(--muted); font-weight: 400; }
 .wsactive .cast { display: flex; gap: 8px; flex-wrap: wrap; }
-.slotbar .chip.ws { background: var(--surface); border-color: var(--rubric); color: var(--pa-fg); font-weight: 700; }
+.topbar .chip.ws { background: var(--surface); border-color: var(--rubric); color: var(--pa-fg); font-weight: 700; }

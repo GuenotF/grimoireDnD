@@ -28,7 +28,8 @@ def test_niveaux_roublard(browser, devices, url):
     check(a.count('[data-a="lu-asi"]') == 6 and "5d6" in a.text(".lutab"), "amélioration au niveau 10, sournoise 5d6")
     a.close()
     b = App(browser, devices, url, char=dict(OMBRE, level=15), tab="perso", view="jeu")
-    check(b.count('[data-a="hp-dmg"][data-half]') == 1 and "JdS +7" in b.texts(".stats .js.on")[-1], "Esquive instinctive ; Esprit fuyant : JdS SAG maîtrisé")
+    b.click('[data-a="ab-open"][data-v="wis"]')
+    check(b.count('[data-a="hp-dmg"][data-half]') == 1 and b.texts("#absheet .abrow")[0].endswith("+7") and "maîtrisé" in b.texts("#absheet .abrow")[0], "Esquive instinctive ; Esprit fuyant : JdS SAG maîtrisé")
     b.close()
 
 

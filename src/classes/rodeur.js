@@ -221,7 +221,7 @@ export default {
   features: g => feats(g),
   settings: g => settingsHTML(g),
   afterAttacks: g => g.level >= 3 && g.rarch === "betes" ? petPlayHTML(g) : "",
-  slotbarChips: g => g.level >= 3 && g.rarch === "betes" ? petChips(g) : "",
+  barChips: g => g.level >= 3 && g.rarch === "betes" ? petChips(g) : "",
   longRest: g => { if (g.pet) g.pet.hp = null; },
   creation,
   levelUp: {

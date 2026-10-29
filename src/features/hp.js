@@ -1,4 +1,4 @@
-// Suivi des points de vie : carte de l'onglet Personnage (En jeu), puce de la barre du bas, rappel de concentration.
+// Suivi des points de vie : carte de l'onglet Personnage (En jeu), puce de la barre du haut, rappel de concentration.
 // Les règles (dégâts, soins, jets contre la mort, dés de vie) sont dans rules/hp.js.
 import { C } from "../classes/index.js";
 import { onClick } from "../core/actions.js";
@@ -29,7 +29,7 @@ const EXH = ["désavantage aux tests", "vitesse ÷ 2", "désavantage attaques et
 const halfLabel = g => (C(g).halfDamage && C(g).halfDamage(g)) || (g.defs.some(d => d.t === "res") ? `résistance (${g.defs.filter(d => d.t === "res").map(d => d.v).join(", ")})` : "");
 /** Maître des armures lourdes, en armure lourde : −3 aux dégâts physiques non magiques. */
 const ham = g => hasFeat(g, "heavy-armor-master") && (acCalc(g).armor || {}).cat === "heavy";
-function hpCardHTML(g, panel = false) { // panel : volet ouvert depuis la barre du bas (sans dés de vie ni épuisement)
+function hpCardHTML(g, panel = false) { // panel : volet ouvert depuis la barre du haut (sans dés de vie ni épuisement)
   if (g.hpMax == null) return `<section class="hpcard"><div class="hph"><span class="k">Points de vie</span></div><p class="muted" style="margin:0">Saisis tes PV maximum (mode <button class="linkbtn" data-a="view" data-v="gerer">Gérer</button>) pour suivre tes points de vie.</p></section>`;
   const cur = hpCur(g), t = g.hpTemp || 0, d = g.death, down = isDown(g), dead = isDead(g);
   const pct = Math.round(100 * cur / g.hpMax), tpct = Math.min(100 - pct, Math.round(100 * t / g.hpMax));
@@ -54,7 +54,7 @@ function hpCardHTML(g, panel = false) { // panel : volet ouvert depuis la barre 
   return h + hpConcHTML(g) + foot + `</section>`;
 }
 
-/** Puce de la barre du bas (onglet d'action) : PV actuels, toucher pour ouvrir le volet des PV sur place. */
+/** Puce de la barre du haut (onglet d'action) : PV actuels, toucher pour ouvrir le volet des PV sur place. */
 function hpChipHTML(g) {
   if (g.hpMax == null) return "";
   const lbl = isDead(g) ? "Mort" : isDown(g) ? "À terre" : `${hpCur(g)}/${g.hpMax}${g.hpTemp ? ` +${g.hpTemp}` : ""}`;
@@ -93,7 +93,11 @@ onClick("ds", (b) => {
 onClick("exh", (b) => { mutate(g => { g.exh = Math.min(6, Math.max(0, (g.exh || 0) + +b.dataset.v)); }); });
 onClick("hp-revive", () => { const g = G(); if (!g) return; const prev = snap(g); mutate(g => { g.death = { s: 0, f: 0, stable: false }; g.hp = 1; }); toast("De retour à 1 PV", () => { restore(prev); return "Annulé"; }); });
 onClick("hpconc-ok", () => { S.hpConc = null; render(); const c = concOf(G()); if (c) toast(`Concentration maintenue : <b>${esc(c.name)}</b>`); });
-onClick("hp-go", () => { S.hpOpen = !S.hpOpen; S.concPanel = false; S.fxOpen = false; render(); }); // pas de focus d'office : le clavier ne s'ouvre qu'en touchant le champ
+onClick("hp-go", () => {
+  const card = S.tab === "perso" && document.getElementById("hp-card"); // Personnage : la carte des PV est déjà là, on y descend
+  if (card) { S.hpOpen = false; card.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" }); return; }
+  S.hpOpen = !S.hpOpen; S.concPanel = false; S.fxOpen = false; S.abOpen = null; render();
+}); // pas de focus d'office : le clavier ne s'ouvre qu'en touchant le champ
 onClick("hp-close", () => { S.hpOpen = false; S.hpConc = null; render(); });
 onClick("hp-sheet", () => {
   S.hpOpen = false; S.tab = "perso"; S.view = "jeu"; try { localStorage.setItem("grimoire.tab", S.tab); localStorage.setItem("grimoire.view", S.view); } catch (e) {}

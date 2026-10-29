@@ -159,7 +159,7 @@ export default {
   resourceMax: { rage: g => Math.min(BAR.rage(g), 10) },
   longOnly: g => [g.rageU ? "Rage" : ""],
   longRest: g => { g.rageU = 0; g.raging = false; g.frenzy = false; },
-  slotbarChips: g => g.raging ? `<button class="chip fire" data-a="rage-top">🔥 Rage${frenzyOn(g) ? " · Frénésie" : ""}</button>` : "",
+  barChips: g => g.raging ? `<button class="chip fire" data-a="rage-top">🔥 Rage${frenzyOn(g) ? " · Frénésie" : ""}</button>` : "",
   // Défense sans armure (bouclier permis) ; Déplacement rapide (niveau 5, sans armure lourde)
   acBase: g => [["Défense sans armure : 10 + DEX + CON", 10 + R.ab(g, "dex") + R.ab(g, "con")]],
   speedBonus: g => g.level >= 5 && (acCalc(g).armor || {}).cat !== "heavy" ? 3 : 0,

@@ -27,7 +27,7 @@ def test_forme_active_pv_et_retour(browser, devices, url):
     a = App(browser, devices, url, char=MALFAEL, view="jeu")
     transform(a, "ours-brun")
     check(a.g("wsForm.hp") == 34 and a.g("wsU") == 1, "ours brun, 34 PV")
-    check("Ours brun · 34/34" in a.text(".slotbar .chip.ws"), "puce dans la barre du bas")
+    check("Ours brun · 34/34" in a.text("#topbar .chip.ws"), "puce dans la barre du haut")
     a.pg.fill("#ws-n", "10"); a.click('[data-a="ws-dmg"]')
     check(a.g("wsForm.hp") == 24, "dégâts")
     a.pg.fill("#ws-n", "40"); a.click('[data-a="ws-dmg"]')

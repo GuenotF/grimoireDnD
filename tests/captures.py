@@ -19,11 +19,11 @@ def prendre(out):
     os.makedirs(out, exist_ok=True)
     srv, url = run.serve()
     def full(a, name):
-        a.pg.add_style_tag(content="#slotbar{position:absolute!important}")  # barre fixe : sinon sa place varie pendant la capture
+        a.pg.add_style_tag(content=".stick{position:static!important}")  # barre collée : sinon sa place varie pendant la capture
         a.pg.wait_for_timeout(150); a.pg.screenshot(path=f"{out}/{name}.png", full_page=True, animations="disabled")
     srv, url = run.serve()
     def full(a, name):
-        a.pg.add_style_tag(content="#slotbar{position:absolute!important}")  # barre fixe : sinon sa place varie pendant la capture
+        a.pg.add_style_tag(content=".stick{position:static!important}")  # barre collée : sinon sa place varie pendant la capture
         a.pg.wait_for_timeout(150); a.pg.screenshot(path=f"{out}/{name}.png", full_page=True, animations="disabled")
     with sync_playwright() as p:
         b = p.chromium.launch()

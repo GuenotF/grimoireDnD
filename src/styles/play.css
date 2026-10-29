@@ -56,9 +56,9 @@
 .jbody .vo { font-size: 13px; color: var(--muted); font-style: italic; }
 .jbody .meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .jbody .rowact { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px dotted var(--rule); }
-.slotbar .prepc { font-size: 13px; color: var(--muted); white-space: nowrap; }
-.slotbar .prepc b { color: var(--ink); font-size: 14px; }
-.slotbar .prepc.over, .slotbar .prepc.over b { color: var(--warn); }
+.slotline .prepc { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.slotline .prepc b { color: var(--ink); font-size: 14px; }
+.slotline .prepc.over, .slotline .prepc.over b { color: var(--warn); }
 @media (max-width: 560px) { .filters { position: static; } }
 .libmark { flex: none; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
 .libmark.ok { color: var(--ok); font-weight: 500; }

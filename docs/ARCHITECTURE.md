@@ -60,7 +60,7 @@ src/
   ui/components.js          éléments réutilisables : sections repliables, capacités dépliables, bouton Retirer
   features/                 mécaniques partagées par toutes les classes
     character.js            onglet Personnage : caractéristiques, combat, jets de sauvegarde (Gérer, En jeu)
-    hp.js                   carte des points de vie, puce de la barre du bas, rappel de concentration
+    hp.js                   carte des points de vie, puce de la barre du haut, rappel de concentration
     equipment.js            équipement : bourse et objets (Gérer, En jeu)
     abilities.js            onglet Capacités des classes sans sorts
     attacks.js              section Attaques (Personnage ou Capacités)
@@ -68,7 +68,8 @@ src/
     traits.js               défenses, dons et traits, historique, notes du personnage (Gérer, En jeu)
     rest.js                 repos court (dés de vie + récupération de la classe) et repos long, dans Personnage et Sorts
     spells.js               affichage d'un sort, notes personnelles
-    cast.js                 Lancer, barre des emplacements, concentration, sorts en cours
+    cast.js                 Lancer, concentration, sorts en cours
+    topbar.js               barre du haut collée (PV, CA, initiative, puces en cours, six caracs), ligne des emplacements, volet d'une carac. (JdS, test, compétences)
     grimoire.js             onglet Sorts/Grimoire : Gérer, En jeu, capacités de classe, repos
     library.js              Bibliothèque
     levelup.js              assistant de passage de niveau (structure et étapes des classes à sorts préparés)
@@ -91,7 +92,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `hitDie`, `fileLabel`, `prepNote` | Dé de vie (PV moyens, rappel), nom des sauvegardes, précision sur la préparation | ✓ | ✓ | ✓ |
 | `weaponProf`, `armorProf`, `noMetal` | Maîtrises d'armes (catégories `simple`, `martial` ou identifiants) et d'armures (`light`, `medium`, `heavy`, `shield`) ; refus du métal (druide) | ✓ | ✓ | ✓ |
 | `acBonus(g, armure)`, `attackMods(g, arme)`, `attackNotes(g)` | Bonus de CA (style Défense), modificateurs d'attaque (Duel, Arme à deux mains), rappels sous les attaques (Châtiment divin) | | ✓ | |
-| `noSpells` | Classe sans sorts : onglet Capacités (`tabs` → `caps`, `panels.caps` = `abilitiesHTML`), en-tête de la classe (`heroStats` : six cases), barre du bas sans emplacements, assistant de niveau sans lignes de sorts | | | |
+| `noSpells` | Classe sans sorts : onglet Capacités (`tabs` → `caps`, `panels.caps` = `abilitiesHTML`), en-tête de la classe (`heroStats` : six cases), barre du haut sans emplacements, assistant de niveau sans lignes de sorts | | | |
 | `capsTop(g)`, `attackOptions(g)`, `extraAttacks(g, liste)` | Carte en tête de l'onglet Capacités (Rage), cases d'options sous les attaques (Attaque téméraire), attaques ajoutées (Frénésie) | | | |
 | `acBase(g)`, `speedBonus(g)` | CA sans armure (Défense sans armure), bonus de vitesse (Déplacement rapide) | | | |
 | `halfDamage(g)`, `onDown(g)` | Résistance active : bouton « Dégâts ½ » de la carte des PV ; effet d'une chute à 0 PV (fin de la rage) | | | |
@@ -106,7 +107,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `canRitual(prepared)`, `ritualNeedsPrep` | Lancer en rituel | ✓ | | ✓ |
 | `features(g)` | Capacités de classe (avec `control(g)` pour un réglage, ex. style de combat) | | ✓ | ✓ |
 | `resources(g)`, `resourceMax` | Ressources en haut de l'onglet et maximum de chaque compteur | | ✓ | ✓ |
-| `beforeSlots(g)`, `playTop(g)`, `slotbarChips(g)` | Ajouts à l'écran : forme active, Châtiment divin, puce de la barre du bas | | ✓ | ✓ |
+| `beforeSlots(g)`, `playTop(g)`, `barChips(g)` | Ajouts à l'écran : forme active, Châtiment divin, puce de la barre du haut | | ✓ | ✓ |
 | `restBar(g)`, `shortPanel(g)`, `shortRest`, `longRest(g)` | Ajouts à la barre de repos, panneau propre au repos court (Restauration arcanique) ou ressource récupérée, repos long (dés de vie et PV : communs, `features/rest.js`) | ✓ | ✓ | ✓ |
 | `renderSheets(g, levelUpOpen)` | Volets propres (Imposition des mains, formes possibles) | | ✓ | ✓ |
 | `levelUp` | Assistant : étapes propres (`init`, `steps`, `apply`…) ou crochets des étapes communes (`rowsBefore`, `rowsAfter`, `summaryExtra`, `notes`, `choicesFirst`, `choices`, `recapBefore`, `recapAfter`, `recapNotes`, `apply`) | ✓ | ✓ | ✓ |

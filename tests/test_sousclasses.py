@@ -19,7 +19,7 @@ def test_abjuration_protection(browser, devices, url):
     check("créée par ton premier sort" in a.text('#panel'), "pas encore de protection")
     a.click('.jline [data-a="cast"][data-id="shield"]')
     check(a.g("wardMade") and a.g("wardHp") == 12 and "Protection arcanique : 12 PV" in a.toast(), "Bouclier (abjuration) : protection 2 × 4 + 4")
-    a.click(".slotbar .chip.hp"); a.pg.fill("#hp-n", "7"); a.click('#hppanel [data-a="hp-dmg"]')
+    a.click("#topbar .chip.hp"); a.pg.fill("#hp-n", "7"); a.click('#hppanel [data-a="hp-dmg"]')
     check(a.g("wardHp") == 5 and a.g("hp") is None and "7 absorbés par la Protection arcanique" in a.toast(), "dégâts encaissés par la protection")
     a.pg.fill("#hp-n", "8"); a.click('#hppanel [data-a="hp-dmg"]')
     check(a.g("wardHp") == 0 and a.g("hp") == 23, "excédent sur les PV")

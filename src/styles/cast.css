@@ -11,22 +11,48 @@
 .chooser .lvls .btn { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; border-color: var(--rubric); color: var(--pa-fg); }
 .chooser .lvls .btn small { font-size: 12px; }
 .chooser .hint { font-size: 13.5px; color: var(--pd-fg); background: var(--pd-bg); border-radius: 5px; padding: 6px 8px; }
-/* Barre fixe des emplacements */
-.slotbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; background: var(--surface); border-top: 1px solid var(--rule); padding: 0 16px env(safe-area-inset-bottom, 0px); color: var(--ink); }
-.slotbar .fx { display: flex; gap: 6px; padding-top: 8px; overflow-x: auto; scrollbar-width: none; }
-.slotbar .chip { flex: none; font-size: 13px; border-radius: 999px; padding: 3px 10px; white-space: nowrap; border: 1px solid var(--pf-bd); background: var(--pf-bg); color: var(--pf-fg); }
-.slotbar .chip.conc { background: var(--rubric); border-color: var(--rubric); color: var(--surface); font-weight: 700; }
-.slotbar .line { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 54px; background: transparent; border: 0; padding: 0; color: inherit; text-align: left; }
-.slotbar .grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; min-width: 0; }
-.slotbar .lv { display: inline-flex; align-items: center; gap: 4px; }
-.slotbar .lv b { font-family: var(--f-display); font-size: 15px; margin-right: 2px; }
-.slotbar .d { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--rubric); box-sizing: border-box; display: inline-block; }
-.slotbar .d.u { background: var(--rubric); }
-#slots-top { scroll-margin-top: 12px; }
-.slotbar .go { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
-body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
+/* Barre du haut : collée sous le nom avec les onglets (et la ligne des emplacements dans l'onglet principal) */
+.stick { position: sticky; top: 0; z-index: 4; background: var(--bg); margin-inline: -16px; padding-inline: 16px; margin-top: 12px; }
+html { scroll-padding-top: calc(var(--stickh, 150px) + 8px); } /* les ancres (emplacements, rage…) ne passent pas sous la barre */
+.stick .tabs { margin-top: 0; }
+.topbar { display: grid; gap: 4px; padding: 7px 0 5px; }
+.tbrow { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.tbst { display: inline-flex; align-items: baseline; gap: 3px; padding: 0 6px; flex: none; }
+.tbst b { font-family: var(--f-display); font-size: 19px; font-variant-numeric: tabular-nums; }
+.tbst span { font-family: var(--f-sc); font-size: 11.5px; letter-spacing: .04em; color: var(--muted); }
+.topbar .fx { flex: 1; min-width: 0; display: flex; justify-content: flex-end; gap: 5px; overflow-x: auto; scrollbar-width: none; }
+.topbar .fx::-webkit-scrollbar { display: none; }
+.topbar .chip { flex: none; font-size: 13px; border-radius: 999px; padding: 3px 10px; white-space: nowrap; border: 1px solid var(--pf-bd); background: var(--pf-bg); color: var(--pf-fg); }
+.topbar .chip.hp { font-size: 15px; padding: 3px 11px; }
+.topbar .chip.conc { font-weight: 700; border-width: 1.5px; max-width: 170px; overflow: hidden; text-overflow: ellipsis; flex-shrink: 1; min-width: 60px; }
+.topbar .chip.more { background: var(--surface); border-color: var(--rule); color: var(--ink); }
+.tbabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 2px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r); padding: 2px; }
+.tbab { display: grid; justify-items: center; gap: 0; border: 0; background: transparent; border-radius: 5px; padding: 3px 0 2px; color: var(--ink); min-width: 0; }
+.tbab .l { font-family: var(--f-sc); font-size: 11px; letter-spacing: .05em; color: var(--muted); }
+.tbab .l.js { color: var(--rubric); }
+.tbab .l { line-height: 1.3; }
+.tbab .l i { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--rubric); margin-left: 3px; vertical-align: 2px; }
+.tbab b { font-family: var(--f-display); font-size: 19px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tbab.on { background: var(--rubric-soft); box-shadow: inset 0 0 0 1.5px var(--rubric); }
+.slotline { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 38px; background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 2px 0; color: inherit; text-align: left; }
+.slotline .grp { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; min-width: 0; }
+.slotline .lv { display: inline-flex; align-items: center; gap: 4px; }
+.slotline .lv b { font-family: var(--f-display); font-size: 15px; margin-right: 2px; }
+.slotline .d { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--rubric); box-sizing: border-box; display: inline-block; }
+.slotline .d.u { background: var(--rubric); }
+.slotline .go { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+/* Volet d'une caractéristique : JdS, test, compétences */
+.absheet .head .abv { font-size: 14px; color: var(--muted); }
+.absheet .head .abv b { font-family: var(--f-display); font-size: 26px; color: var(--ink); margin-left: 6px; }
+.abrow { display: flex; align-items: baseline; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.abrow .mk { width: 12px; flex: none; color: var(--rubric); font-size: 11px; }
+.abrow .n { flex: 1; font-size: 15.5px; }
+.abrow.on .n { font-weight: 700; }
+.abrow small { font-size: 12.5px; color: var(--muted); font-weight: 400; }
+.abrow b { font-family: var(--f-display); font-size: 19px; font-variant-numeric: tabular-nums; }
+.abcap { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--muted); margin-top: 4px; }
 /* Panneau de concentration */
-.concpanel { position: fixed; left: 10px; right: 10px; bottom: calc(var(--barh, 58px) + 8px); z-index: 6; max-width: 520px; margin: 0 auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 6px 20px rgba(27,33,54,.18); padding: 12px 14px; display: grid; gap: 10px; }
+.concpanel { position: fixed; left: 10px; right: 10px; bottom: 8px; z-index: 6; max-width: 520px; margin: 0 auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 6px 20px rgba(27,33,54,.18); padding: 12px 14px; display: grid; gap: 10px; }
 .concpanel .head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .concpanel .head b { font-family: var(--f-display); font-size: 17px; }
 .concpanel p { margin: 0; font-size: 14px; line-height: 1.4; }
@@ -43,9 +69,9 @@ body.has-slotbar .wrap { padding-block-end: calc(var(--barh, 58px) + 40px); }
 .wsprimal .kp { margin-right: 4px; }
 .wsactive .wsconc { margin-top: 0; max-width: none; }
 .live { font-size: 12.5px; font-weight: 700; color: var(--rubric); white-space: nowrap; margin-left: 6px; }
-/* Volet des PV (cœur de la barre du bas) : la carte des PV, sans cadre en double */
+/* Volet des PV (puce ♥ de la barre du haut) : la carte des PV, sans cadre en double */
 .hppanel { padding: 0; background: none; border: 0; box-shadow: none; }
-.hppanel .hpcard { margin: 0; box-shadow: 0 8px 24px rgba(27,33,54,.22); max-height: calc(100vh - var(--barh, 58px) - 40px); overflow-y: auto; }
+.hppanel .hpcard { margin: 0; box-shadow: 0 8px 24px rgba(27,33,54,.22); max-height: calc(100vh - 40px); overflow-y: auto; }
 .hpfoot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px; }
 .hpcard.down .hpfoot .btn { color: #C9CED8; }
 /* Clavier ouvert (téléphone) : le volet remonte au-dessus du clavier et tient dans la partie visible */
@@ -54,3 +80,6 @@ body.kb-open .hppanel .hpcard { max-height: calc(var(--vvh, 100vh) - 24px); }
 
 /* Volets du bas (nouveau personnage, effets…) au-dessus du clavier du téléphone */
 body.kb-open .fxsheet { bottom: var(--kb, 0px); max-height: calc(var(--vvh, 100vh) - 16px); }
+/* Volet ouvert : la barre reste touchable au-dessus du voile, pour passer d'une carac. à l'autre */
+body.ab-on .stick { z-index: 9; }
+.absheet { max-height: calc(100vh - var(--stickh, 150px) - 16px); }

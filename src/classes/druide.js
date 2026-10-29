@@ -177,7 +177,7 @@ export default {
   longRest: g => { g.natRec = false; g.wsU = 0; g.wsForm = null; S.wsDice = ""; S.wsConc = null; },
   // Forme active (ou rappel de concentration si la forme vient de prendre fin), au-dessus des emplacements
   beforeSlots: g => g.wsForm ? wsActiveHTML(g) : wsConcHTML(g),
-  slotbarChips: g => g.wsForm && BEAST[g.wsForm.id] ? `<button class="chip ws" data-a="ws-top">🐾 ${esc(BEAST[g.wsForm.id].n)} · ${g.wsForm.hp}/${g.wsForm.max}</button>` : "",
+  barChips: g => g.wsForm && BEAST[g.wsForm.id] ? `<button class="chip ws" data-a="ws-top">🐾 ${esc(BEAST[g.wsForm.id].n)} · ${g.wsForm.hp}/${g.wsForm.max}</button>` : "",
   shortRest: { field: "wsU", label: "Forme sauvage", done: "récupérée" },
   // Cercle de la Terre : sorts de cercle, sort mineur de plus, Récupération naturelle
   cantripBonus: g => isLand(g) && g.level >= 2 ? 1 : 0,

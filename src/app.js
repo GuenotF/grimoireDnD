@@ -8,10 +8,11 @@ import { G, S } from "./core/state.js";
 import { loadLocal, mutate, pickCurrent, setCur } from "./core/store.js";
 import { render, setRenderer, setStatus, toast } from "./core/ui.js";
 import { BEAST, BEASTS, BY_ID, SPELLS } from "./data.js";
-import { concOf, concPanelHTML, fxSheetHTML, slotbarHTML } from "./features/cast.js";
-import { characterHTML, heroAbilities } from "./features/character.js";
+import { concOf, concPanelHTML, fxSheetHTML } from "./features/cast.js";
+import { abSheetHTML, slotLineHTML, topbarHTML } from "./features/topbar.js";
+import { characterHTML } from "./features/character.js";
 import { grimoireHTML } from "./features/grimoire.js";
-import { hpCardHTML, hpChipHTML } from "./features/hp.js";
+import { hpCardHTML } from "./features/hp.js";
 import { luHTML } from "./features/levelup.js";
 import { biblioHTML } from "./features/library.js";
 import { crHTML } from "./features/creation.js";
@@ -38,23 +39,20 @@ function renderApp() {
   const g = G(); const main = document.getElementById("main");
   if (!g) { main.innerHTML = welcomeHTML(); }
   else {
-    main.innerHTML = heroHTML(g) + tabsHTML(g) + `<div class="panel" id="panel">${panelHTML(g)}</div>`;
+    const line = S.tab === C(g).tabs(g)[0][0] ? slotLineHTML(g) : ""; // emplacements : onglet principal de la classe seulement
+    main.innerHTML = heroHTML(g) + `<div class="stick">${topbarHTML(g)}${tabsHTML(g)}${line}</div><div class="panel" id="panel">${panelHTML(g)}</div>`;
   }
   setStatus(S.statusText || "", S.statusErr);
-  // Barre du bas : dans l'onglet principal de la classe, s'il y a des emplacements de sorts ou des puces (PV, Rage…)
-  const barChips = g ? hpChipHTML(g) : "", mainTab = g ? C(g).tabs(g)[0][0] : "";
-  const showBar = !!g && S.tab === mainTab && (R.slots(g).length > 0 || !!barChips || !!(C(g).slotbarChips && C(g).slotbarChips(g)));
-  const bar = document.getElementById("slotbar");
-  bar.hidden = !showBar; if (showBar) bar.innerHTML = slotbarHTML(g, barChips);
-  document.body.classList.toggle("has-slotbar", showBar);
-  document.documentElement.style.setProperty("--barh", (showBar ? bar.offsetHeight : 0) + "px");
-  document.getElementById("toast").classList.toggle("above-bar", showBar);
-  // Volet des PV ouvert depuis le cœur de la barre du bas (même carte que l'onglet Personnage, sans les repos)
-  const hpp = document.getElementById("hppanel"), showHp = showBar && !!S.hpOpen && !!barChips;
+  const stick = main.querySelector(".stick"); document.documentElement.style.setProperty("--stickh", (stick ? stick.offsetHeight : 0) + "px");
+  // Volet des PV ouvert depuis la puce ♥ de la barre du haut (même carte que l'onglet Personnage, sans les repos)
+  const hpp = document.getElementById("hppanel"), showHp = !!g && !!S.hpOpen && g.hpMax != null;
   hpp.hidden = !showHp; if (showHp) hpp.innerHTML = hpCardHTML(g, true); else S.hpOpen = false;
-  const cp = document.getElementById("concpanel"), cur = g && concOf(g), showCp = showBar && S.concPanel && !!cur && !showHp;
+  const cp = document.getElementById("concpanel"), cur = g && concOf(g), showCp = !!g && S.concPanel && !!cur && !showHp;
   cp.hidden = !showCp; if (showCp) cp.innerHTML = concPanelHTML(cur, g);
-  const showFx = showBar && S.fxOpen && g.effects.length > 0, fs = document.getElementById("fxsheet");
+  const showAb = !!g && !!S.abOpen && !showHp, ab = document.getElementById("absheet");
+  ab.hidden = !showAb; document.getElementById("abback").hidden = !showAb; if (showAb) ab.innerHTML = abSheetHTML(g); else S.abOpen = null;
+  document.body.classList.toggle("ab-on", showAb);
+  const showFx = !!g && S.fxOpen && g.effects.length > 0, fs = document.getElementById("fxsheet");
   fs.hidden = !showFx; document.getElementById("fxback").hidden = !showFx; if (showFx) fs.innerHTML = fxSheetHTML(g);
   if (!showFx) S.fxOpen = false;
   const nw = document.getElementById("nwsheet"), showNw = !!S.newOpen;
@@ -68,7 +66,7 @@ function renderApp() {
   if (showLu) { const sc = lu.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; lu.innerHTML = luHTML(g); const nb = lu.querySelector(".lubody"); if (nb && S.luKeep) nb.scrollTop = top; S.luKeep = false; }
   // Volets propres aux classes (Imposition des mains, formes possibles) : chaque classe gère les siens, refermés si le personnage affiché est d'une autre classe
   const showSheet = Object.values(CLASSES).map(c => c.renderSheets ? c.renderSheets(g && C(g) === c ? g : null, showLu) : false).some(Boolean);
-  document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showNw || showSheet || showHp || showCr); // le message ne couvre pas le volet ouvert
+  document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showNw || showSheet || showHp || showCr || showAb); // le message ne couvre pas le volet ouvert
   // Focus retrouvé en dernier : les volets (assistant de niveau…) sont redessinés juste avant
   if (keep) { const el = document.querySelector(keep.sel); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
 }
@@ -84,7 +82,7 @@ function welcomeHTML() {
   <div class="frow"><button class="btn primary" data-a="new">Créer un personnage</button><label class="btn" for="f-import">Importer une sauvegarde</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden></div></div>`;
 }
 // En-tête : nom, sous-titre, ↑ Niveau et ✎ Modifier (nom, niveau, sous-classe repliés), puis six cases selon l'onglet :
-// caractéristiques dans Personnage, statistiques de sorts ailleurs. Intitulés courts sur téléphone (statLabel).
+// rien dans Personnage (caractéristiques dans la barre du haut), statistiques de sorts ou de classe ailleurs. Intitulés courts sur téléphone (statLabel).
 function heroHTML(g) {
   const prof = R.prof(g.level), mod = R.am(g), max = R.maxLevel(g);
   const nPrep = g.prepared.length, pMax = R.prepMax(g), abShort = (ABILITIES.find(a => a[0] === C(g).ab) || [])[1];
@@ -109,7 +107,7 @@ function heroHTML(g) {
     ${!C(g).subclass || g.level >= C(g).subclass.lv ? C(g).subclassField(g) : ""}
     ${raceField(g)}
   </div>` : ""}
-  ${S.tab === "perso" ? `<div class="statcap">Caractéristiques</div><div class="stats" role="list" aria-label="Caractéristiques">${heroAbilities(g)}</div>`
+  ${S.tab === "perso" ? "" // caractéristiques : dans la barre du haut
     : noSpells(g) || S.tab === "caps" ? `<div class="statcap">${C(g).n}</div><div class="stats" role="list" aria-label="${C(g).n}">${C(g).heroStats(g)}</div>` : spells}
   ${showIosTip() ? `<div class="banner">Sur iPhone ou iPad, installe l'atelier : bouton <b>Partager</b>, puis <b>Sur l'écran d'accueil</b>. Ouvre-le ensuite toujours depuis cette icône : c'est là que tes grimoires sont le mieux conservés. <button class="btn ghost" data-a="hide-ios">Masquer</button></div>` : ""}
   </section>`;
