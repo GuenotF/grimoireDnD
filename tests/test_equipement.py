@@ -192,3 +192,23 @@ def test_equipement_en_jeu(browser, devices, url):
     a.undo()
     check(a.g("items.length") == 1, "retrait annulable")
     a.close()
+
+
+def test_ajout_avec_details(browser, devices, url):
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE), tab="perso", view="jeu")
+    a.pg.fill("#it-new", "Perles"); a.click('[data-a="it-det"]')
+    check(a.count(".itform.itnew") == 1 and a.pg.input_value("#it-name") == "Perles" and a.count('.itnew [data-a="it-del"]') == 0, "✎ Détails : formulaire complet, nom repris, sans Retirer")
+    a.click('.itnew [data-a="it-cancel"]')
+    check(a.g("items.length") == 0 and a.count(".itnew") == 0, "Annuler : rien n'est créé")
+    a.pg.fill("#it-new", "Perles"); a.click('[data-a="it-det"]')
+    a.pg.fill("#it-q", "12"); a.pg.fill("#it-note", "valeur à estimer"); a.click('.itnew [type="submit"]')
+    check(a.g("items.length") == 1 and a.g("items[0].q") == 12 and a.g("items[0].note") == "valeur à estimer" and "×12" in a.toast(), "12 perles en une fois")
+    a.pg.fill("#it-new", "Épée longue"); a.click('[data-a="it-det"]')
+    check(a.pg.input_value("#it-ref") == "longsword", "nom du Manuel : arme déjà liée")
+    a.pg.select_option("#it-bonus", "1"); a.pg.check("#it-eq"); a.click('.itnew [type="submit"]')
+    check(a.g("items[1].bonus") == 1 and a.g("items[1].eq") and a.g("items[1].ref") == "longsword" and "✦" in a.toast(), "objet magique ajouté, équipé, en une fois")
+    a.undo()
+    check(a.g("items.length") == 1, "ajout annulable")
+    a.pg.fill("#it-new", "Corde"); a.click('.itadd [type="submit"]')
+    check(a.g("items.length") == 2 and a.g("items[1].n") == "Corde", "＋ : ajout rapide inchangé")
+    a.close()

@@ -27,11 +27,12 @@ function purseHTML(g) {
   return h;
 }
 /** Ajout d'un objet (Gérer et En jeu) : nom libre, ou arme / armure du Manuel proposée pendant la saisie. */
-const addFormHTML = g => `<form class="itadd" data-a="it-add"><input id="it-new" type="text" placeholder="${S.view === "jeu" ? "＋ Ajouter un objet" : "Nom de l'objet (ex. épée, cuir, rations)"}" aria-label="Nouvel objet" autocomplete="off" value="${esc(S.itQ || "")}"><button class="btn" type="submit">Ajouter</button></form>${suggestHTML(g)}`;
+// ＋ : ajout rapide ; ✎ Détails : le formulaire de Modifier (quantité, note, objet magique…), ouvert juste dessous
+const addFormHTML = g => `<form class="itadd" data-a="it-add"><input id="it-new" type="text" placeholder="Nom de l'objet" aria-label="Nouvel objet (ex. épée, cuir, rations)" autocomplete="off" value="${esc(S.itQ || "")}"><button class="btn cast-go itplus" type="submit" aria-label="Ajouter tout de suite" title="Ajouter tout de suite">＋</button><button class="btn" type="button" data-a="it-det" aria-expanded="${!!S.itNew}">✎ Détails</button></form>${S.itNew ? itemForm(g, S.itNew, "new") : suggestHTML(g)}`;
 // Arme pouvant aller en main secondaire : corps à corps légère, ou à une main avec le don Combattant à deux armes
 const offhandOk = (g, x) => { const w = gearOf(x); return !!w && w.kind === "weapon" && w.rng === "melee" && !w.two && (w.light || hasFeat(g, "dual-wielder")); };
-function itemForm(g, x, i) {
-  return `<form class="itform" data-a="it-save" data-i="${i}"><div class="frow2"><input id="it-name" type="text" value="${esc(x.n)}" aria-label="Nom" required><input id="it-q" type="number" inputmode="numeric" min="0" value="${x.q}" aria-label="Quantité"></div>
+function itemForm(g, x, i) { // i : indice de l'objet, ou "new" (ajout avec détails : rien n'est créé avant Ajouter)
+  return `<form class="itform${i === "new" ? " itnew" : ""}" data-a="it-save" data-i="${i}">${i === "new" ? `<div class="itnewh">Nouvel objet · détails</div>` : ""}<div class="frow2"><input id="it-name" type="text" value="${esc(x.n)}" aria-label="Nom" required><input id="it-q" type="number" inputmode="numeric" min="0" value="${x.q}" aria-label="Quantité"></div>
     <input id="it-note" type="text" value="${esc(x.note)}" placeholder="Note (effet, contenu, valeur…)" aria-label="Note">
     <label class="itref"><span>Arme ou armure du Manuel</span><select id="it-ref" aria-label="Arme ou armure du Manuel"><option value="">Aucune (objet libre)</option>${REF_GROUPS.map(([l, list]) => `<optgroup label="${l}">${list.map(r => `<option value="${r.id}"${r.id === x.ref ? " selected" : ""}>${esc(r.n)}</option>`).join("")}</optgroup>`).join("")}</select></label>
     <fieldset class="itmagic"><legend>✦ Objet magique</legend>
@@ -43,7 +44,7 @@ function itemForm(g, x, i) {
       <p class="wide">Le bonus s'applique au toucher et aux dégâts d'une arme du Manuel, ou à la CA d'une armure ou d'un bouclier. Un objet à harmonisation n'a d'effet qu'harmonisé (${MAX_ATT} au plus).</p>
     </fieldset>
     <div class="row"><label class="check"><input type="checkbox" id="it-eq"${x.eq ? " checked" : ""}> Équipé</label><label class="check"><input type="checkbox" id="it-c"${x.c ? " checked" : ""}> À décompter en jeu</label>${offhandOk(g, x) ? `<label class="check" title="Combat à deux armes : cette arme pour l'attaque en action bonus"><input type="checkbox" id="it-oh"${x.oh ? " checked" : ""}> Main secondaire</label>` : ""}
-    <span style="flex:1"></span><button type="button" class="btn ghost" data-a="it-del" data-i="${i}">Retirer</button><button type="button" class="btn ghost" data-a="it-cancel">Annuler</button><button class="btn primary" type="submit">Enregistrer</button></div></form>`;
+    <span style="flex:1"></span>${i === "new" ? "" : `<button type="button" class="btn ghost" data-a="it-del" data-i="${i}">Retirer</button>`}<button type="button" class="btn ghost" data-a="it-cancel">Annuler</button><button class="btn primary" type="submit">${i === "new" ? "Ajouter" : "Enregistrer"}</button></div></form>`;
 }
 // ---------- Catalogue (armes et armures du Manuel) : suggestions à l'ajout, résumé, étiquette
 const norm = t => String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[’']/g, "'");
@@ -143,12 +144,17 @@ onClick("it-pick", (b) => { const x = GEAR[b.dataset.id]; if (!x) return; S.itQ 
 onSubmit("it-add", () => { const el = document.getElementById("it-new"), n = el.value.trim(); if (!n) return; S.itQ = ""; const same = Object.values(GEAR).find(x => norm(x.n) === norm(n)); // nom exact du Manuel : relié au catalogue
   mutate(g => { g.items.push({ n, q: 1, eq: false, c: false, note: "", ...(same ? { ref: same.id } : {}) }); });
   toast(`Ajouté : <b>${esc(n)}</b>`, () => { mutate(g => { g.items.pop(); }); return "Ajout annulé"; }); const nx = document.getElementById("it-new"); if (nx) nx.focus({ preventScroll: true }); });
+onClick("it-det", () => {
+  const el = document.getElementById("it-new"), n = (el && el.value || "").trim(), same = n && Object.values(GEAR).find(x => norm(x.n) === norm(n)); // nom du Manuel : arme ou armure déjà liée
+  S.itNew = S.itNew ? null : { n, q: 1, eq: false, c: false, note: "", ...(same ? { ref: same.id } : {}) }; S.itQ = ""; S.itEdit = null; render();
+  const f = document.getElementById(n ? "it-q" : "it-name"); if (f) { f.focus(); if (f.select) f.select(); }
+});
 onClick("it-eq", (b) => { mutate(g => { const x = g.items[+b.dataset.i]; if (x) x.eq = !x.eq; }); });
-onClick("it-edit", (b) => { S.itEdit = +b.dataset.i; render(); const el = document.getElementById("it-name"); if (el) el.focus(); });
-onClick("it-cancel", () => { S.itEdit = null; render(); });
+onClick("it-edit", (b) => { S.itEdit = +b.dataset.i; S.itNew = null; render(); const el = document.getElementById("it-name"); if (el) el.focus(); });
+onClick("it-cancel", () => { S.itEdit = null; S.itNew = null; render(); });
 onClick("it-open", (b) => { const i = +b.dataset.i; S.itOpen = S.itOpen === i ? null : i; render(); });
 onSubmit("it-save", f => {
-  const i = +f.dataset.i, n = document.getElementById("it-name").value.trim(); if (!n) return;
+  const add = f.dataset.i === "new", i = add ? G().items.length : +f.dataset.i, n = document.getElementById("it-name").value.trim(); if (!n) return;
   const ref = document.getElementById("it-ref").value; // le lien avec le catalogue est conservé (attaques, CA)
   const x = { n, q: Math.max(0, Math.floor(+document.getElementById("it-q").value || 0)), eq: document.getElementById("it-eq").checked, c: document.getElementById("it-c").checked, note: document.getElementById("it-note").value.trim(), ...(GEAR[ref] ? { ref } : {}) };
   const v = id => document.getElementById(id), prev = G().items[i] || {}, bonus = +v("it-bonus").value, ch = Math.max(0, Math.min(50, Math.floor(+v("it-ch").value) || 0));
@@ -157,8 +163,9 @@ onSubmit("it-save", f => {
   if (ch) { x.chMax = ch; x.chU = Math.min(ch, prev.chU || 0); x.rec = v("it-rec").value; }
   const oh = !!(v("it-oh") && v("it-oh").checked && GEAR[ref] && offhandOk(G(), x)); if (oh) x.oh = true; // une seule arme en main secondaire
   if (x.attuned && !prev.attuned && attunedCount(G()) >= MAX_ATT) { x.attuned = false; toast(`Déjà ${MAX_ATT} objets harmonisés : défais d'abord une harmonisation`); }
-  else toast("Modification enregistrée");
-  S.itEdit = null; mutate(g => { if (oh) g.items.forEach(y => { delete y.oh; }); g.items[i] = x; });
+  else if (!add) toast("Modification enregistrée");
+  S.itEdit = null; S.itNew = null; mutate(g => { if (oh) g.items.forEach(y => { delete y.oh; }); g.items[i] = x; });
+  if (add) toast(`Ajouté : <b>${esc(x.n)}</b>${x.q !== 1 ? ` ×${x.q}` : ""}${isMagic(x) ? " ✦" : ""}${x.eq ? " · équipé" : ""}`, () => { mutate(g => { g.items.splice(i, 1); }); return "Ajout annulé"; });
 });
 onClick("it-del", (b) => { const i = +b.dataset.i, prev = G().items[i]; if (!prev) return; S.itEdit = null; S.itOpen = null; mutate(g => { g.items.splice(i, 1); }); toast(`Retiré : <b>${esc(prev.n)}</b>`, () => { mutate(g => { g.items.splice(i, 0, prev); }); return "Rétabli"; }); });
 onClick("it-chg", (b) => { mutate(g => { const x = g.items[+b.dataset.i]; if (!x) return; const k = +b.dataset.k, u = x.chU || 0; x.chU = k < u ? k : k + 1; }); });

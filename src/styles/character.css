@@ -142,7 +142,10 @@
 .it .q { color: var(--muted); font-size: 13.5px; }
 .itform { display: grid; gap: 6px; background: var(--bg); border-radius: 8px; padding: 8px; margin: 6px 0; }
 .itform .frow2 { grid-template-columns: minmax(0, 1fr) 4.5em; }
-.itadd { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; padding-top: 8px; }
+.itadd { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; padding-top: 8px; }
+.itadd .itplus { font-weight: 700; padding-inline: 13px; }
+.itform.itnew { border: 1.5px solid var(--rubric); border-radius: 10px; padding: 10px; margin-top: 6px; }
+.itnewh { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--rubric); }
 
 /* Équipement niveau 2 : catalogue, CA, attaques */
 .gtag { font-size: 11.5px; border: 1px solid; border-radius: 4px; padding: 0 5px; flex: none; }
