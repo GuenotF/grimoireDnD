@@ -74,6 +74,8 @@ const REF_GROUPS = [["simple", "Armes courantes"], ["martial", "Armes de guerre"
 const gearTag = x => `<span class="gtag ${x.kind === "weapon" ? "w" : "a"}">${x.kind === "weapon" ? "arme" : x.cat === "shield" ? "bouclier" : "armure"}</span>`;
 function suggestHTML(g) {
   const q = norm((S.itQ || "").trim()); if (q.length < 2) return "";
+  const exact = Object.values(GEAR).find(x => norm(x.n) === q); // nom du Manuel complet : l'objet sera relié au catalogue
+  if (exact) return `<div class="sugok"><span>✓ <b>${esc(exact.n)}</b> du Manuel · ${esc(gearLine(exact))}</span><small><b>＋</b> pour l'ajouter, <b>✎ Détails</b> pour un bonus (+1…) ou une quantité</small></div>`;
   const hits = Object.values(GEAR).filter(x => norm(x.n).includes(q) || norm(x.vo).includes(q)).slice(0, 6);
   if (!hits.length) return "";
   const prof = x => x.kind === "weapon" ? weaponProf(g, x) : armorProf(g, x);
@@ -140,10 +142,11 @@ onClick("m-spend", (b, a, e) => { e.preventDefault(); doSpend(); });
 onSubmit("m-form", () => doSpend()); // Entrée dans le montant : dépenser
 
 onInput("#it-new", t => { S.itQ = t.value; render(); });
-onClick("it-pick", (b) => { const x = GEAR[b.dataset.id]; if (!x) return; S.itQ = ""; mutate(g => { g.items.push({ n: x.n, q: 1, eq: false, c: false, note: "", ref: x.id }); }); toast(`Ajouté : <b>${esc(x.n)}</b> · ${S.view === "jeu" ? "touche-le puis Équiper" : "coche « équipé »"} pour ${x.kind === "weapon" ? "l'utiliser dans tes attaques" : "le compter dans ta CA"}`); const el = document.getElementById("it-new"); if (el) el.focus({ preventScroll: true }); });
+// Toucher une suggestion la recopie dans le champ (sans ajouter) : ＋ l'ajoute, ✎ Détails permet un bonus (+1) ou une quantité
+onClick("it-pick", (b) => { const x = GEAR[b.dataset.id]; if (!x) return; S.itQ = x.n; render(); const el = document.getElementById("it-new"); if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(el.value.length, el.value.length); } });
 onSubmit("it-add", () => { const el = document.getElementById("it-new"), n = el.value.trim(); if (!n) return; S.itQ = ""; const same = Object.values(GEAR).find(x => norm(x.n) === norm(n)); // nom exact du Manuel : relié au catalogue
   mutate(g => { g.items.push({ n, q: 1, eq: false, c: false, note: "", ...(same ? { ref: same.id } : {}) }); });
-  toast(`Ajouté : <b>${esc(n)}</b>`, () => { mutate(g => { g.items.pop(); }); return "Ajout annulé"; }); const nx = document.getElementById("it-new"); if (nx) nx.focus({ preventScroll: true }); });
+  toast(`Ajouté : <b>${esc(n)}</b>${same ? ` · ${S.view === "jeu" ? "touche-le puis Équiper" : "coche « équipé »"} pour ${same.kind === "weapon" ? "l'utiliser dans tes attaques" : "le compter dans ta CA"}` : ""}`, () => { mutate(g => { g.items.pop(); }); return "Ajout annulé"; }); const nx = document.getElementById("it-new"); if (nx) nx.focus({ preventScroll: true }); });
 onClick("it-det", () => {
   const el = document.getElementById("it-new"), n = (el && el.value || "").trim(), same = n && Object.values(GEAR).find(x => norm(x.n) === norm(n)); // nom du Manuel : arme ou armure déjà liée
   S.itNew = S.itNew ? null : { n, q: 1, eq: false, c: false, note: "", ...(same ? { ref: same.id } : {}) }; S.itQ = ""; S.itEdit = null; render();
