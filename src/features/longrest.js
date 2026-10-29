@@ -15,7 +15,7 @@ import { FEATS, featPlay, featRecharge } from "../rules/feats.js";
 import { hdLeft, hpCur, isDead, longRestHP } from "../rules/hp.js";
 import { rechargeItems } from "../rules/magic.js";
 import { pickRow } from "../ui/components.js";
-import { innateRest } from "./innate.js";
+import { breathOf, innateRest } from "./innate.js";
 import { keyPills, spellBody } from "./spells.js";
 
 /** Le personnage choisit-il ses sorts préparés après un repos long ? */
@@ -43,7 +43,7 @@ function recHTML(g) {
   h += row("Dés de vie", after > left ? `${left} / ${g.level}` : null, `${after} / ${g.level}`, `la moitié de ton niveau (${back}) revient`);
   R.slots(g).forEach((n, i) => { if (!n) return; const u = Math.min(n, +(g.used[i + 1] || 0)); h += row(`${C(g).pact && C(g).pact(g) ? "Magie de pacte" : "Emplacements"} niv. ${i + 1}`, u ? `${n - u} / ${n}` : null, `${n} / ${n}`); });
   const sr = SR(g), srUsed = sr && (sr.fields || [sr.field]).some(f => +g[f] > 0);
-  const res = [...(C(g).longOnly ? C(g).longOnly(g).filter(Boolean) : []), srUsed ? sr.label : ""].filter(Boolean);
+  const res = [...(C(g).longOnly ? C(g).longOnly(g).filter(Boolean) : []), srUsed ? sr.label : "", g.breathU && breathOf(g) ? "Souffle" : ""].filter(Boolean);
   if (res.length) h += row("Capacités", null, "récupérées", res.map(esc).join(", "));
   const items = g.items.filter(x => x.chMax && x.chU && x.rec !== "");
   if (items.length) h += row("Objets", null, "rechargés", items.map(x => esc(x.n)).join(", "));

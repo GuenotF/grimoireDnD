@@ -136,3 +136,36 @@ def test_sorts_innes(browser, devices, url):
     b.click('[data-a="hero-edit"]'); b.pg.select_option("#f-race", "elfe:drow")
     check("Lumières dansantes" in b.text("#panel") and "Lueurs féeriques" in b.text("#panel") and not any("Ténèbres" in x for x in b.texts(".jrow.inn")), "roublard drow : sorts innés dans Capacités (Ténèbres au niveau 5)")
     b.close()
+
+
+def test_souffle_drakeide(browser, devices, url):
+    from helpers import App as A2
+    base = {"v": 3, "name": "Kriv", "cls": "barbare", "level": 6, "abil": {"str": 16, "dex": 12, "con": 14, "int": 8, "wis": 10, "cha": 12}, "hpMax": 60, "updatedAt": 1,
+            "race": {"id": "drakeide", "n": "Drakéide"}, "traits": [{"n": "Ascendance draconique (dragon rouge)", "o": "race", "d": "Résistance : feu."}]}
+    a = A2(browser, devices, url, char=base, tab="caps", view="jeu")
+    check(a.g("race.anc") == 3, "ancienne fiche : ascendance retrouvée dans le trait (rouge)")
+    t = a.text(".jrow.inn")
+    check("Souffle" in t and "3d6 feu" in t and "DEX 13" in t and "cône de 4,5 m" in t, f"Souffle en jeu : 3d6 au niveau 6, DD 8 + CON + maîtrise ({t})")
+    a.click('[data-a="breath-use"]')
+    check(a.g("breathU") == 1 and a.count('[data-a="breath-use"]') == 0 and "Souffle" in a.toast(), "utilisé")
+    a.click('[data-a="short-open"]')
+    check("Souffle" in a.text("#short-panel"), "repos court : Souffle annoncé")
+    a.click('[data-a="short-done"]')
+    check(a.g("breathU") == 0 and "Souffle récupéré" in a.toast(), "récupéré au repos court")
+    a.close()
+
+
+def test_creation_drakeide_souffle(browser, devices, url):
+    a = App(browser, devices, url, char=None)
+    start(a, "paladin", "Vara")
+    a.click('[data-a="cr-race"][data-v="drakeide"]'); a.click('[data-a="cr-anc"][data-v="1"]'); nxt(a)
+    for k, v in zip(["str", "cha", "con", "wis", "dex", "int"], ["15", "14", "13", "12", "10", "8"]): a.pg.select_option(f'[data-crstd="{k}"]', v)
+    nxt(a)
+    a.click('[data-a="cr-bg"][data-v="acolyte"]'); a.pg.select_option('[data-crbglang="0"]', "Céleste"); a.pg.select_option('[data-crbglang="1"]', "Infernal"); nxt(a)
+    a.click('[data-a="cr-skill"][data-v="persuasion"]'); a.click('[data-a="cr-skill"][data-v="medicine"]'); nxt(a)
+    a.click('[data-a="cr-eq"][data-k="0"][data-v="0"]'); a.pg.select_option('[data-crpick="0-0-0"]', "longsword"); nxt(a); a.click('[data-a="cr-go"]')
+    check(a.g("race.anc") == 1, "ascendance gardée sur la fiche (bleu)")
+    a.tab("grimoire"); a.view("jeu")
+    t = a.text(".jrow.inn")
+    check("2d6 foudre" in t and "DEX 11" in t and "ligne de 1,5 × 9 m" in t, f"Souffle dans l'onglet d'action dès la création ({t})")
+    a.close()

@@ -43,9 +43,28 @@ function pills(g, x) {
   return h;
 }
 function innateHTML(g) {
-  const list = innateSpells(g).filter(x => !x.cls); if (!list.length) return "";
-  return innateBlock(g, list, "act-inn", "Sorts innés", `${esc([...new Set(list.map(x => x.src))].join(", "))} · sans emplacement`);
+  const list = innateSpells(g).filter(x => !x.cls);
+  return breathHTML(g) + (list.length ? innateBlock(g, list, "act-inn", "Sorts innés", `${esc([...new Set(list.map(x => x.src))].join(", "))} · sans emplacement`) : "");
 }
+// ---------- Souffle du drakéide (ascendance draconique : g.race.anc, indice dans la table de la race) : une fois par repos court ou long
+function breathOf(g) {
+  const d = raceDef(g); if (!d || !d.r.ancestry || g.race.anc == null || !d.r.ancestry[g.race.anc]) return null;
+  const [dn, dt, zone, sv] = d.r.ancestry[g.race.anc];
+  return { dn, dt, zone, sv, dice: 2 + (g.level >= 6) + (g.level >= 11) + (g.level >= 16), dc: 8 + R.ab(g, "con") + R.prof(g.level), used: !!g.breathU };
+}
+function breathHTML(g) {
+  const b = breathOf(g); if (!b) return "";
+  let h = foldHead("act-breath", "", "Souffle", `dragon ${esc(b.dn.toLowerCase())} · repos court ou long`, `${b.dice}d6 ${esc(b.dt)}${b.used ? " · utilisé" : ""}`);
+  if (isFold("act-breath")) return h;
+  const open = S.open.has("inn:breath"), sv = b.sv === "con" ? "CON" : "DEX";
+  return h + `<div class="jrow inn"><div class="jline"><div class="jmain"><button class="jname" data-a="row" data-id="inn:breath" aria-expanded="${open}">Souffle<span class="chev">${open ? "▴" : "▾"}</span></button></div><span class="kps"><span class="kp d">${b.dice}d6 ${esc(b.dt)}</span><span class="kp s" title="Jet de sauvegarde de la cible">${sv} ${b.dc}</span></span>${b.used ? `<button class="btn cast-none sm" disabled>Utilisé</button>` : `<button class="btn cast-go sm" data-a="breath-use">Souffler</button>`}</div>
+    <div class="innsub">${esc(b.zone)} · action · une fois par repos court ou long <button class="pip${b.used ? " used" : ""}" data-a="breath-pip" aria-label="Souffle : ${b.used ? "utilisé" : "disponible"}"></button></div>
+    ${open ? `<div class="jbody"><div class="eff">Tu souffles une énergie destructrice (${esc(b.dt)}) sur un ${esc(b.zone)}. Chaque créature de la zone fait un jet de sauvegarde de ${b.sv === "con" ? "Constitution" : "Dextérité"} (DD ${b.dc} : 8 + CON + maîtrise) : ${b.dice}d6 dégâts de ${esc(b.dt)}, moitié en cas de réussite. Dégâts : 2d6, 3d6 au niveau 6, 4d6 au 11, 5d6 au 16.</div></div>` : ""}</div>`;
+}
+onClick("breath-use", () => { const g = G(), b = g && breathOf(g); if (!b || b.used) return;
+  mutate(g => { g.breathU = 1; });
+  toast(`<b>Souffle</b> : ${b.dice}d6 ${esc(b.dt)}, JdS ${b.sv === "con" ? "CON" : "DEX"} DD ${b.dc} · récupéré au repos court ou long`, () => { mutate(g => { g.breathU = 0; }); return "Souffle rendu"; }); });
+onClick("breath-pip", () => { mutate(g => { g.breathU = g.breathU ? 0 : 1; }); });
 const useText = x => x.ritual ? "en rituel seulement (+10 minutes)" : x.s.l === 0 || x.will ? "à volonté" : x.slot ? "avec un emplacement de pacte, une fois par repos long" : `${x.at > x.s.l ? `niveau ${x.at}, ` : ""}une fois par repos long`;
 /** Liste de sorts sans emplacement (ou une fois par repos long), avec bouton Lancer : race, dons, et sections de classe (occultiste). */
 function innateBlock(g, list, key, title, aside) {
@@ -90,6 +109,7 @@ function raceField(g) {
   const opts = Object.values(RACES).flatMap(r => r.subs ? r.subs.map(s => [`${r.id}:${s.id}`, s.id === "standard" ? r.n : s.n]) : [[r.id, r.n]]);
   const d = raceDef(g), cantrip = d && d.s && (d.s.spells || []).some(x => x.choice === "cantrip");
   return `<div class="field"><label for="f-race">Race</label><select id="f-race"><option value="">Non précisée</option>${opts.map(([v, n]) => `<option value="${v}"${v === cur ? " selected" : ""}>${esc(n)}</option>`).join("")}</select></div>
+  ${d && d.r.ancestry ? `<div class="field"><label for="f-ranc">Ascendance draconique</label><select id="f-ranc"><option value="">Choisir…</option>${d.r.ancestry.map(([dn, dt], i) => `<option value="${i}"${g.race.anc === i ? " selected" : ""}>${esc(dn)} · ${esc(dt)}</option>`).join("")}</select></div>` : ""}
   ${cantrip ? `<div class="field"><label for="f-rcantrip">Sort mineur de haut-elfe</label><select id="f-rcantrip"><option value="">Choisir…</option>${Object.values(BY_ID).filter(s => s.l === 0 && (s.cl || []).includes("magicien")).sort((a, b) => a.n.localeCompare(b.n, "fr")).map(s => `<option value="${s.id}"${g.race.cantrip === s.id ? " selected" : ""}>${esc(s.n)}</option>`).join("")}</select></div>` : ""}`;
 }
 onChange("#f-race", t => {
@@ -101,8 +121,9 @@ onChange("#f-race", t => {
   });
   toast("Race enregistrée : sorts innés et maîtrises d'armes pris en compte (caractéristiques et traits inchangés)");
 });
+onChange("#f-ranc", t => { mutate(g => { if (g.race) { const r = { ...g.race }; if (t.value === "") delete r.anc; else r.anc = +t.value; g.race = r; } }); });
 onChange("#f-rcantrip", t => { mutate(g => { if (g.race) g.race = { ...g.race, cantrip: t.value || undefined }; }); });
 /** Repos long : sorts innés de nouveau disponibles. */
-const innateRest = g => { g.innU = {}; };
+const innateRest = g => { g.innU = {}; g.breathU = 0; };
 
-export { innateSpells, innateHTML, innateBlock, raceField, innateRest };
+export { innateSpells, innateHTML, innateBlock, raceField, innateRest, breathOf };

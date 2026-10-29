@@ -12,6 +12,7 @@ import { R } from "../rules/common.js";
 import { hdLeft, hpCur, isDown, spendHitDie } from "../rules/hp.js";
 import { FEATS, featPlay, featRecharge } from "../rules/feats.js";
 import { recoveryHTML } from "./recovery.js";
+import { breathOf } from "./innate.js";
 import { rechargeItems } from "../rules/magic.js";
 
 /** Ressource récupérée au repos court : objet, ou fonction du personnage (ex. Coup de chance du roublard au niveau 20). */
@@ -42,7 +43,7 @@ function shortRestHTML(g) {
   let h = `<div class="short" id="short-panel"><div><h3>Repos court</h3>${diceHTML(g)}</div>`;
   const items = g.items.filter(x => x.chMax && x.rec === "court" && x.chU); // objets magiques rechargés au repos court
   const feats = featPlay(g).filter(id => FEATS[id].res && FEATS[id].res.rest === "court" && (g.featU || {})[id]); // Adepte martial
-  const lines = (sr ? `<p><b>${sr.label.charAt(0).toUpperCase() + sr.label.slice(1)}</b> : ${sr.done} en terminant le repos.</p>` : "") + (items.length ? `<p><b>Objets</b> : ${items.map(x => esc(x.n)).join(", ")}, charges récupérées en terminant le repos.</p>` : "")
+  const lines = (g.breathU && breathOf(g) ? `<p><b>Souffle</b> : récupéré en terminant le repos.</p>` : "") + (sr ? `<p><b>${sr.label.charAt(0).toUpperCase() + sr.label.slice(1)}</b> : ${sr.done} en terminant le repos.</p>` : "") + (items.length ? `<p><b>Objets</b> : ${items.map(x => esc(x.n)).join(", ")}, charges récupérées en terminant le repos.</p>` : "")
     + (feats.length ? `<p><b>Dons</b> : ${feats.map(id => esc(FEATS[id].n)).join(", ")}, récupéré${feats.length > 1 ? "s" : ""} en terminant le repos.</p>` : "");
   const rec = C(g).recovery && C(g).recovery(g) ? recoveryHTML(g, true) : ""; // Restauration arcanique, Récupération naturelle
   const wait = longOnly(g);
@@ -56,10 +57,11 @@ const snapHP = g => JSON.parse(JSON.stringify({ hp: g.hp, hdU: g.hdU }));
 onClick("short-open", () => { S.shortOpen = !S.shortOpen; S.sr = {}; render(); });
 onClick("short-close", () => { S.shortOpen = false; S.sr = {}; render(); });
 onClick("short-done", () => {
-  const g = G(); if (!g) return; const sr = SR(g), fields = sr ? sr.fields || [sr.field] : [], prev = JSON.parse(JSON.stringify({ items: g.items, featU: g.featU, ...Object.fromEntries(fields.map(f => [f, g[f]])) })); S.shortOpen = false;
-  let n = 0, fr = []; mutate(g => { if (sr) { if (sr.reset) sr.reset(g); else g[sr.field] = 0; } n = rechargeItems(g, "court"); fr = featRecharge(g, "court"); });
+  const g = G(); if (!g) return; const sr = SR(g), fields = sr ? sr.fields || [sr.field] : [], prev = JSON.parse(JSON.stringify({ items: g.items, featU: g.featU, breathU: g.breathU || 0, ...Object.fromEntries(fields.map(f => [f, g[f]])) })); S.shortOpen = false;
+  const breath = !!g.breathU && !!breathOf(g); // Souffle du drakéide : repos court ou long
+  let n = 0, fr = []; mutate(g => { if (sr) { if (sr.reset) sr.reset(g); else g[sr.field] = 0; } n = rechargeItems(g, "court"); fr = featRecharge(g, "court"); g.breathU = 0; });
   const wait = longOnly(g);
-  const got = [sr ? `${sr.label} ${sr.done}` : "", n ? `charges de ${n} objet${n > 1 ? "s" : ""}` : "", ...fr].filter(Boolean).join(", ");
+  const got = [sr ? `${sr.label} ${sr.done}` : "", breath ? "Souffle récupéré" : "", n ? `charges de ${n} objet${n > 1 ? "s" : ""}` : "", ...fr].filter(Boolean).join(", ");
   toast(`Repos court terminé${got ? ` : ${got}` : ""}${wait.length ? ` · au repos long : ${wait.join(", ")}` : ""}`, () => { mutate(g => Object.assign(g, prev)); return "Repos court annulé"; });
 });
 onClick("hp-hd", () => {

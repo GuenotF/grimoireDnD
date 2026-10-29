@@ -4,6 +4,7 @@ import { BY_ID, GEAR } from "../data.js";
 import { FEATS, featByName } from "../rules/feats.js";
 import { COINS, blankPurse } from "../rules/money.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
+import { RACES } from "../rules/creation.js";
 
 /** Version actuelle du format. Les fichiers sans numéro sont la version 1. */
 export const VERSION = 3;
@@ -93,7 +94,11 @@ function norm(g) {
   const rc = o.race && typeof o.race === "object" ? o.race : null; // race choisie à la création : maîtrises et PV par niveau
   o.race = rc && str(rc.id) ? { id: str(rc.id), sub: rc.sub ? str(rc.sub) : null, n: str(rc.n), hpLv: Math.max(0, Math.min(2, Math.round(+rc.hpLv) || 0)),
     weapons: (Array.isArray(rc.weapons) ? rc.weapons : []).filter(id => GEAR[id]), armor: (Array.isArray(rc.armor) ? rc.armor : []).filter(a => ["light", "medium", "heavy", "shield"].includes(a)),
-    ...(BY_ID[rc.cantrip] ? { cantrip: rc.cantrip } : {}) } : null;
+    ...(BY_ID[rc.cantrip] ? { cantrip: rc.cantrip } : {}), ...(Number.isInteger(rc.anc) && rc.anc >= 0 && rc.anc < 10 ? { anc: rc.anc } : {}) } : null;
+  // Drakéide créé avant le suivi du Souffle : ascendance retrouvée dans le trait « Ascendance draconique (dragon rouge) »
+  if (o.race && o.race.id === "drakeide" && o.race.anc == null && RACES.drakeide) { const t = (o.traits || []).find(x => /^Ascendance draconique \(dragon (.+)\)$/i.test(x.n || ""));
+    const i = t ? RACES.drakeide.ancestry.findIndex(([dn]) => dn.toLowerCase() === /\(dragon (.+)\)/i.exec(t.n)[1].toLowerCase()) : -1; if (i >= 0) o.race.anc = i; }
+  o.breathU = o.breathU ? 1 : 0;
   const iu = o.innU && typeof o.innU === "object" ? o.innU : {}; o.innU = Object.fromEntries(Object.entries(iu).filter(([, v]) => v).map(([k]) => [k, 1])); // sorts innés utilisés (repos long)
   o.bg = { n: str((o.bg || {}).n), d: str((o.bg || {}).d) }; o.pnotes = str(o.pnotes);
   o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(x.oh ? { oh: true } : {}), ...magicOf(x), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : {}) }));
