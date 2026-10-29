@@ -238,3 +238,10 @@
 .itbox .itadd { margin-top: 8px; }
 .sugok { margin-top: 6px; display: grid; gap: 2px; padding: 7px 10px; border: 1px solid var(--ok); border-radius: 8px; background: var(--surface); font-size: 14px; }
 .sugok small { font-size: 12.5px; color: var(--muted); }
+/* Équipement : sections Équipé / Autres objets, flèches pour ranger (Gérer) */
+.itgrp { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--muted); padding: 8px 0 2px; border-bottom: 1px solid var(--rule); }
+.itgrp:first-child { padding-top: 0; }
+.itgrp span { font-family: var(--f-body); letter-spacing: 0; }
+.itmv { display: inline-flex; gap: 2px; flex: none; }
+.itmv .btn { padding: 2px 7px; font-size: 12px; line-height: 1.2; }
+.itmv .btn:disabled { opacity: .3; }

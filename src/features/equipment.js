@@ -14,8 +14,15 @@ import { MAX_ATT, REC, attunedCount, isMagic, recLabel } from "../rules/magic.js
 import { COINS, purseText, spend } from "../rules/money.js";
 import { foldHead, isFold } from "../ui/components.js";
 
-/** Ordre d'affichage : objets équipés d'abord, puis l'ordre d'ajout (indices du tableau d'origine). */
+/** Ordre d'affichage : objets équipés d'abord, puis l'ordre de la liste (indices du tableau d'origine, réglable avec ▲ ▼). */
 const order = g => g.items.map((x, i) => i).sort((a, b) => (g.items[b].eq - g.items[a].eq) || a - b);
+/** Deux sections, Équipé puis Autres objets : row(i, pos, n) dessine un objet (pos et n : place dans sa section, pour ▲ ▼). */
+function grouped(g, row) {
+  const ids = order(g), eq = ids.filter(i => g.items[i].eq), rest = ids.filter(i => !g.items[i].eq);
+  const sec = (l, list) => list.length ? `<div class="itgrp">${l} <span>${list.length}</span></div>` + list.map((i, p) => row(i, p, list.length)).join("") : "";
+  return sec("Équipé", eq) + sec(eq.length ? "Autres objets" : "Objets", rest);
+}
+const moveBtns = (x, i, p, n) => `<span class="itmv"><button class="btn ghost sm" data-a="it-mv" data-i="${i}" data-v="-1" aria-label="Monter ${esc(x.n)}"${p ? "" : " disabled"}>▲</button><button class="btn ghost sm" data-a="it-mv" data-i="${i}" data-v="1" aria-label="Descendre ${esc(x.n)}"${p < n - 1 ? "" : " disabled"}>▼</button></span>`;
 
 function purseHTML(g) {
   const coin = S.mCoin || "po";
@@ -91,8 +98,8 @@ function equipmentGerer(g) {
   let h = foldHead("ch-eq", "", "Équipement", `${g.items.length} objet${g.items.length > 1 ? "s" : ""}${attAside(g)}`, purseText(g.money));
   if (isFold("ch-eq")) return h;
   h += purseHTML(g) + (S.purseOpen ? "" : `<p class="chhelp" style="margin:4px 0 8px">Touche la bourse pour gagner ou dépenser.</p>`);
-  h += `<div class="chbox itbox">${order(g).map(i => { const x = g.items[i]; return S.itEdit === i ? itemForm(g, x, i)
-    : `<div class="it${x.c && !x.q ? " out" : ""}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button>${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${x.oh ? ` <i class="ct">main secondaire</i>` : ""}${magicMarks(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}`)}${gearOf(x) ? gearTag(gearOf(x)) : ""}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>${S.itOpen === i && gearOf(x) ? gearDetail(g, gearOf(x), x) : ""}`; }).join("")}
+  h += `<div class="chbox itbox">${grouped(g, (i, p, n) => { const x = g.items[i]; return S.itEdit === i ? itemForm(g, x, i)
+    : `<div class="it${x.c && !x.q ? " out" : ""}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button>${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${x.oh ? ` <i class="ct">main secondaire</i>` : ""}${magicMarks(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}`)}${gearOf(x) ? gearTag(gearOf(x)) : ""}${moveBtns(x, i, p, n)}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>${S.itOpen === i && gearOf(x) ? gearDetail(g, gearOf(x), x) : ""}`; })}
     ${addFormHTML(g)}</div>`;
   return h;
 }
@@ -111,8 +118,8 @@ function equipmentJeu(g) {
   let h = foldHead("ch-eqj", "", "Équipement", `${g.items.length} objet${g.items.length > 1 ? "s" : ""}${attAside(g)}`, purseText(g.money)); // comme en Gérer
   if (isFold("ch-eqj")) return h;
   h += purseHTML(g);
-  h += `<div class="chbox itbox">${order(g).map(i => { const x = g.items[i], open = S.itOpen === i;
-    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}"><button class="itn itopen" data-a="it-open" data-i="${i}" aria-expanded="${open}"><span><span class="chev" aria-hidden="true">${open ? "▾" : "▸"}</span> ${esc(x.n)}${magicMarks(x)}${x.eq ? ` <i class="eqtag">${gearOf(x) && gearOf(x).kind === "armor" && gearOf(x).cat !== "shield" ? "portée" : "équipé"}</i>` : ""}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}</button>${x.q !== 1 || x.c ? `<b class="q">×${x.q}</b>` : ""}</div>${open ? itemPlay(g, x, i) : ""}`; }).join("")}
+  h += `<div class="chbox itbox">${grouped(g, i => { const x = g.items[i], open = S.itOpen === i;
+    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}"><button class="itn itopen" data-a="it-open" data-i="${i}" aria-expanded="${open}"><span><span class="chev" aria-hidden="true">${open ? "▾" : "▸"}</span> ${esc(x.n)}${magicMarks(x)}${x.eq ? ` <i class="eqtag">${gearOf(x) && gearOf(x).kind === "armor" && gearOf(x).cat !== "shield" ? "portée" : "équipé"}</i>` : ""}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}</button>${x.q !== 1 || x.c ? `<b class="q">×${x.q}</b>` : ""}</div>${open ? itemPlay(g, x, i) : ""}`; })}
     ${addFormHTML(g)}
     ${g.items.some(actionable) ? `<p class="chhelp" style="margin:6px 0 0">Potions, munitions et charges s'utilisent depuis l'onglet ${C(g).tabs(g)[0][1]}.</p>` : ""}</div>`;
   return h;
@@ -152,6 +159,10 @@ onClick("it-det", () => {
   S.itNew = S.itNew ? null : { n, q: 1, eq: false, c: false, note: "", ...(same ? { ref: same.id } : {}) }; S.itQ = ""; S.itEdit = null; render();
   const f = document.getElementById(n ? "it-q" : "it-name"); if (f) { f.focus(); if (f.select) f.select(); }
 });
+// ▲ ▼ (Gérer) : échange avec l'objet voisin de la même section
+onClick("it-mv", (b) => { mutate(g => { const i = +b.dataset.i, x = g.items[i]; if (!x) return; const list = order(g).filter(k => !!g.items[k].eq === !!x.eq), p = list.indexOf(i), j = list[p + +b.dataset.v];
+  if (j == null) return; [g.items[i], g.items[j]] = [g.items[j], g.items[i]]; S.itOpen = null; S.itEdit = null; });
+  const el = document.querySelector(`[data-a="it-mv"][data-v="${b.dataset.v}"][aria-label="${CSS.escape(b.getAttribute("aria-label"))}"]`); if (el && !el.disabled) el.focus({ preventScroll: true }); });
 onClick("it-eq", (b) => { mutate(g => { const x = g.items[+b.dataset.i]; if (x) x.eq = !x.eq; }); });
 onClick("it-edit", (b) => { S.itEdit = +b.dataset.i; S.itNew = null; render(); const el = document.getElementById("it-name"); if (el) el.focus(); });
 onClick("it-cancel", () => { S.itEdit = null; S.itNew = null; render(); });

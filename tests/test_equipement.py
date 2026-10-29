@@ -214,3 +214,19 @@ def test_ajout_avec_details(browser, devices, url):
     a.pg.fill("#it-new", "Corde"); a.click('[data-a="it-add"] [type="submit"]')
     check(a.g("items.length") == 2 and a.g("items[1].n") == "Corde", "＋ : ajout rapide inchangé")
     a.close()
+
+
+def test_ranger_inventaire(browser, devices, url):
+    items = [{"n": "Bâton", "q": 1, "eq": True, "ref": "quarterstaff"}, {"n": "Corde", "q": 1}, {"n": "Rations", "q": 5}, {"n": "Torches", "q": 10}, {"n": "Bouclier", "q": 1, "eq": True, "ref": "shield"}]
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="perso", view="gerer")
+    check(a.texts(".itgrp") == ["Équipé 2", "Autres objets 3"], f"deux sections : {a.texts('.itgrp')}")
+    names = lambda: [t.split("×")[0].replace("▸", "").strip() for t in a.texts(".it .itn > span")]
+    check(names() == ["Bâton", "Bouclier", "Corde", "Rations", "Torches"], f"ordre : {names()}")
+    check(a.js("document.querySelector('[data-a=it-mv][data-i=\"1\"][data-v=\"-1\"]').disabled"), "premier de sa section : ▲ grisé")
+    a.click('[data-a="it-mv"][data-i="3"][data-v="-1"]')
+    check(names() == ["Bâton", "Bouclier", "Corde", "Torches", "Rations"], f"Torches monte d'une place : {names()}")
+    a.click('[data-a="it-mv"][data-i="4"][data-v="-1"]')
+    check(names() == ["Bouclier", "Bâton", "Corde", "Torches", "Rations"], f"Bouclier monte dans Équipé : {names()}")
+    a.view("jeu")
+    check(a.texts(".itgrp") == ["Équipé 2", "Autres objets 3"] and a.count('[data-a="it-mv"]') == 0, "En jeu : mêmes sections, sans flèches")
+    a.close()
