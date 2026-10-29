@@ -76,3 +76,9 @@ def test_passage_niveau_3(browser, devices, url):
     a.click(".lufoot .primary"); a.click('[data-a="lu-go"]')
     check(a.g("level") == 3 and a.js("G().meta.join()") == "accelere,subtil" and a.g("prepared.length") == 4, "niveau 3 : métamagie et un sort connu de plus")
     a.close()
+
+
+def test_ca_magie_sauvage(browser, devices, url):
+    a = App(browser, devices, url, char={"v": 3, "name": "Zéphyr", "cls": "ensorceleur", "level": 1, "sorig": "sauvage", "abil": {"str": 8, "dex": 14, "con": 12, "int": 10, "wis": 10, "cha": 16}, "acMode": "calc", "updatedAt": 1}, view="jeu")
+    check(a.js("acOf(G())") == 12, f"magie sauvage sans armure : 10 + DEX, pas 0 ({a.js('acOf(G())')})")
+    a.close()

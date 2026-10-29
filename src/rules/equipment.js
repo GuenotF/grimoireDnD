@@ -30,8 +30,14 @@ function acCalc(g) {
     parts.push([armor.dex ? `DEX${dexMax != null && dex > dexMax ? ` (plafonnée à +${dexMax})` : ""}` : "DEX (aucune en armure lourde)", armor.dex ? d : null]);
     if (armor.stealth && !(armor.cat === "medium" && hasFeat(g, "medium-armor-master"))) warn.push(`${armor.n} : <b>désavantage en Discrétion</b>.`);
     if (armor.str && g.abil.str < armor.str) warn.push(`${armor.n} : Force ${armor.str} requise (tu as ${g.abil.str}) : <b>−3 m de vitesse</b>.`);
-  } else if (C(g).acBase) C(g).acBase(g, !!shield).forEach(p => parts.push(p)); // ex. barbare : Défense sans armure
-  else parts.push(["Sans armure : 10 + DEX", 10 + dex]);
+  } else {
+    // Sans armure : la meilleure base entre celle de la classe (Défense sans armure…), 10 + DEX et Armure de mage en cours (13 + DEX) ; ces bases ne se cumulent pas
+    const own = C(g).acBase ? C(g).acBase(g, !!shield) : [];
+    const bases = [own.length ? own : [["Sans armure : 10 + DEX", 10 + dex]]];
+    if ((g.effects || []).some(e => e.id === "mage-armor")) bases.push([["Armure de mage (sort en cours) : 13 + DEX", 13 + dex]]);
+    const sum = b => b.reduce((t, [, n]) => t + (n || 0), 0);
+    bases.reduce((a, b) => sum(b) > sum(a) ? b : a).forEach(p => parts.push(p));
+  }
   if (shield) parts.push([`Bouclier${mb(sw.item) ? ` +${mb(sw.item)}` : ""}`, shield.ac + mb(sw.item)]);
   for (const [l, n] of (C(g).acBonus ? C(g).acBonus(g, armor) : [])) parts.push([l, n]);
   if (hasFeat(g, "dual-wielder") && !shield && twoWeapons(g)) parts.push(["Combattant à deux armes", 1]);

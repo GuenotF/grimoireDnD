@@ -89,3 +89,15 @@ def test_onglet_regles(browser, devices, url):
     for s in ["Concentration", "Jet de sauvegarde", "DD de 14", "Attaque de sort", "+6", "Restauration arcanique"]:
         check(s in t, f"règles du magicien : « {s} »")
     a.close()
+
+
+def test_armure_de_mage(browser, devices, url):
+    a = App(browser, devices, url, char=dict(NEMEIA, v=3, abil={"str": 8, "dex": 14, "con": 12, "int": 18, "wis": 10, "cha": 14}, spells=NEMEIA["spells"] + [{"id": "mage-armor", "how": "niv"}], prepared=NEMEIA["prepared"] + ["mage-armor"], acMode="calc"), view="jeu")
+    check(a.js("acOf(G())") == 12, "sans armure : 10 + DEX")
+    a.click('.jline [data-a="cast"][data-id="mage-armor"]')
+    check(a.js("acOf(G())") == 15 and a.text("#topbar .tbst").startswith("15"), f"Armure de mage en cours : 13 + DEX, barre à jour ({a.text('#topbar .tbst')})")
+    a.js("(mutate(g => { g.items.push({ n: 'Cuir', q: 1, eq: true, c: false, note: '', ref: 'leather' }); }), 0)")
+    check(a.js("acOf(G())") == 13, "une armure portée remplace Armure de mage (cuir 11 + DEX)")
+    a.js("(mutate(g => { g.items = []; g.effects = []; }), 0)")
+    check(a.js("acOf(G())") == 12, "sort terminé : retour à 10 + DEX")
+    a.close()
