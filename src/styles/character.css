@@ -228,3 +228,8 @@
 .fpcard p { margin: 0; font-size: 14px; line-height: 1.4; }
 .fpres { display: inline-flex; align-items: center; gap: 6px; } .fpres small { color: var(--muted); font-size: 12.5px; margin-right: 2px; }
 .adv { color: var(--ok); }
+/* Équipement en jeu : fiche d'un objet (Équiper / Ranger, Retirer) */
+.itplay { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; padding: 6px 10px; background: var(--bg); border-radius: 8px; font-size: 13px; }
+.it.j + .itdet + .itplay { margin-top: -4px; }
+.eqtag { font-style: normal; font-family: var(--f-body); font-size: 11px; font-weight: 700; color: var(--ok); border: 1px solid var(--ok); border-radius: 3px; padding: 0 3px; vertical-align: 1px; }
+.itbox .itadd { margin-top: 8px; }

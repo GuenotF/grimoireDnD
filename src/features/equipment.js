@@ -1,4 +1,4 @@
-// Onglet Personnage : équipement (bourse et objets). Gérer : saisie ; En jeu : bourse et objets à décompter.
+// Onglet Personnage : équipement (bourse et objets). Gérer : saisie complète ; En jeu : bourse, ajout, Équiper / Ranger, Retirer.
 // Objet : { n: nom, q: quantité, eq: équipé / porté sur soi, c: à décompter en jeu, note, ref : arme ou armure du catalogue,
 // objet magique : bonus, xdmg (dégâts en plus), att / attuned (harmonisation), chMax / chU / rec (charges) }.
 import { C } from "../classes/index.js";
@@ -26,6 +26,8 @@ function purseHTML(g) {
     <p>Pas assez de cette pièce ? L'atelier fait la monnaie (1 po = 10 pa = 100 pc) ; tout est annulable.</p></form>`;
   return h;
 }
+/** Ajout d'un objet (Gérer et En jeu) : nom libre, ou arme / armure du Manuel proposée pendant la saisie. */
+const addFormHTML = g => `<form class="itadd" data-a="it-add"><input id="it-new" type="text" placeholder="${S.view === "jeu" ? "＋ Ajouter un objet" : "Nom de l'objet (ex. épée, cuir, rations)"}" aria-label="Nouvel objet" autocomplete="off" value="${esc(S.itQ || "")}"><button class="btn" type="submit">Ajouter</button></form>${suggestHTML(g)}`;
 // Arme pouvant aller en main secondaire : corps à corps légère, ou à une main avec le don Combattant à deux armes
 const offhandOk = (g, x) => { const w = gearOf(x); return !!w && w.kind === "weapon" && w.rng === "melee" && !w.two && (w.light || hasFeat(g, "dual-wielder")); };
 function itemForm(g, x, i) {
@@ -88,7 +90,7 @@ function equipmentGerer(g) {
   h += purseHTML(g) + (S.purseOpen ? "" : `<p class="chhelp" style="margin:4px 0 8px">Touche la bourse pour gagner ou dépenser.</p>`);
   h += `<div class="chbox itbox">${order(g).map(i => { const x = g.items[i]; return S.itEdit === i ? itemForm(g, x, i)
     : `<div class="it${x.c && !x.q ? " out" : ""}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button>${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${x.oh ? ` <i class="ct">main secondaire</i>` : ""}${magicMarks(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}`)}${gearOf(x) ? gearTag(gearOf(x)) : ""}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>${S.itOpen === i && gearOf(x) ? gearDetail(g, gearOf(x), x) : ""}`; }).join("")}
-    <form class="itadd" data-a="it-add"><input id="it-new" type="text" placeholder="Nom de l'objet (ex. épée, cuir, rations)" aria-label="Nouvel objet" autocomplete="off" value="${esc(S.itQ || "")}"><button class="btn" type="submit">Ajouter</button></form>${suggestHTML(g)}</div>`;
+    ${addFormHTML(g)}</div>`;
   return h;
 }
 // Objets qui servent en action : charges (objets magiques) ou à décompter (potions, munitions)
@@ -101,15 +103,21 @@ function itemsActionHTML(g) {
   return h + `<div class="chbox itbox">${list.map(i => { const x = g.items[i];
     return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}"><div class="itn"><span>${esc(x.n)}${magicMarks(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}${x.chMax ? chargePips(x, i) : ""}</div>${x.c ? `<div class="qty"><button class="btn sm" data-a="it-dec" data-i="${i}" aria-label="${esc(x.n)} : un de moins"${x.q ? "" : " disabled"}>−</button><b>${x.q}</b><button class="btn sm" data-a="it-inc" data-i="${i}" aria-label="${esc(x.n)} : un de plus">+</button></div>` : ""}</div>`; }).join("")}</div>`;
 }
+// En jeu : bourse, objets (toucher un objet : sa fiche, Équiper / Ranger, Retirer) et ajout, comme à la table
 function equipmentJeu(g) {
-  if (!g.items.length && !Object.values(g.money).some(Boolean)) return "";
   let h = foldHead("ch-eqj", "", "Équipement", `${g.items.length} objet${g.items.length > 1 ? "s" : ""}${attAside(g)}`, purseText(g.money)); // comme en Gérer
   if (isFold("ch-eqj")) return h;
   h += purseHTML(g);
-  if (g.items.length) h += `<div class="chbox itbox">${order(g).map(i => { const x = g.items[i];
-    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}">${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${magicMarks(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}`)}${x.q !== 1 || x.c ? `<b class="q">×${x.q}</b>` : ""}</div>${S.itOpen === i && gearOf(x) ? gearDetail(g, gearOf(x), x) : ""}`; }).join("")}
+  h += `<div class="chbox itbox">${order(g).map(i => { const x = g.items[i], open = S.itOpen === i;
+    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}"><button class="itn itopen" data-a="it-open" data-i="${i}" aria-expanded="${open}"><span><span class="chev" aria-hidden="true">${open ? "▾" : "▸"}</span> ${esc(x.n)}${magicMarks(x)}${x.eq ? ` <i class="eqtag">${gearOf(x) && gearOf(x).kind === "armor" && gearOf(x).cat !== "shield" ? "portée" : "équipé"}</i>` : ""}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}</button>${x.q !== 1 || x.c ? `<b class="q">×${x.q}</b>` : ""}</div>${open ? itemPlay(g, x, i) : ""}`; }).join("")}
+    ${addFormHTML(g)}
     ${g.items.some(actionable) ? `<p class="chhelp" style="margin:6px 0 0">Potions, munitions et charges s'utilisent depuis l'onglet ${C(g).tabs(g)[0][1]}.</p>` : ""}</div>`;
   return h;
+}
+/** Fiche d'un objet en jeu : détail de l'arme ou de l'armure, puis les gestes de la partie (le reste se règle dans ✎ Gérer). */
+function itemPlay(g, x, i) {
+  const gear = gearOf(x), lbl = x.eq ? "Ranger" : gear && gear.kind === "armor" && gear.cat !== "shield" ? "Porter" : "Équiper";
+  return `${gear ? gearDetail(g, gear, x) : ""}<div class="itplay"><button class="btn sm${x.eq ? "" : " cast-go"}" data-a="it-eq" data-i="${i}" aria-pressed="${!!x.eq}">${lbl}</button><span class="muted">${x.eq ? "sur toi, utilisé" : "dans le sac"}</span><span style="flex:1"></span><button class="btn ghost sm" data-a="it-del" data-i="${i}">Retirer</button></div>`;
 }
 
 // ---------- Actions
@@ -131,9 +139,10 @@ onClick("m-spend", (b, a, e) => { e.preventDefault(); doSpend(); });
 onSubmit("m-form", () => doSpend()); // Entrée dans le montant : dépenser
 
 onInput("#it-new", t => { S.itQ = t.value; render(); });
-onClick("it-pick", (b) => { const x = GEAR[b.dataset.id]; if (!x) return; S.itQ = ""; mutate(g => { g.items.push({ n: x.n, q: 1, eq: false, c: false, note: "", ref: x.id }); }); toast(`Ajouté : <b>${esc(x.n)}</b> · coche « équipé » pour ${x.kind === "weapon" ? "l'utiliser dans tes attaques" : "le compter dans ta CA"}`); const el = document.getElementById("it-new"); if (el) el.focus({ preventScroll: true }); });
+onClick("it-pick", (b) => { const x = GEAR[b.dataset.id]; if (!x) return; S.itQ = ""; mutate(g => { g.items.push({ n: x.n, q: 1, eq: false, c: false, note: "", ref: x.id }); }); toast(`Ajouté : <b>${esc(x.n)}</b> · ${S.view === "jeu" ? "touche-le puis Équiper" : "coche « équipé »"} pour ${x.kind === "weapon" ? "l'utiliser dans tes attaques" : "le compter dans ta CA"}`); const el = document.getElementById("it-new"); if (el) el.focus({ preventScroll: true }); });
 onSubmit("it-add", () => { const el = document.getElementById("it-new"), n = el.value.trim(); if (!n) return; S.itQ = ""; const same = Object.values(GEAR).find(x => norm(x.n) === norm(n)); // nom exact du Manuel : relié au catalogue
-  mutate(g => { g.items.push({ n, q: 1, eq: false, c: false, note: "", ...(same ? { ref: same.id } : {}) }); }); const nx = document.getElementById("it-new"); if (nx) nx.focus({ preventScroll: true }); });
+  mutate(g => { g.items.push({ n, q: 1, eq: false, c: false, note: "", ...(same ? { ref: same.id } : {}) }); });
+  toast(`Ajouté : <b>${esc(n)}</b>`, () => { mutate(g => { g.items.pop(); }); return "Ajout annulé"; }); const nx = document.getElementById("it-new"); if (nx) nx.focus({ preventScroll: true }); });
 onClick("it-eq", (b) => { mutate(g => { const x = g.items[+b.dataset.i]; if (x) x.eq = !x.eq; }); });
 onClick("it-edit", (b) => { S.itEdit = +b.dataset.i; render(); const el = document.getElementById("it-name"); if (el) el.focus(); });
 onClick("it-cancel", () => { S.itEdit = null; render(); });

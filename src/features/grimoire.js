@@ -123,7 +123,7 @@ function extrasNotesHTML(g) {
 }
 function grimoireHTML(g) {
   const slots = R.slots(g);
-  let h = `<div class="viewsw" role="group" aria-label="Affichage du grimoire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
+  let h = `<div class="viewsw" role="group" aria-label="Affichage du grimoire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">✎ Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
   const jeu = S.view === "jeu";
   // Gérer : préparation et capacités seulement ; emplacements, repos et ressources (actions) sont dans En jeu
   if (!jeu) return h + featsHTML(g) + (C(g).settings ? C(g).settings(g) : "") + (C(g).book ? bookGererHTML(g) : C(g).known ? knownGererHTML(g) : preparedGererHTML(g)); // réglages de la classe (rôdeur : ennemis jurés, compagnon…)

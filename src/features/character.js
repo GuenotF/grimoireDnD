@@ -19,7 +19,7 @@ import { restBarHTML } from "./rest.js";
 import { toolsGerer, toolsJeu } from "./tools.js";
 import { traitsSheetGerer, traitsSheetJeu } from "./traits.js";
 
-const viewSwitch = () => `<div class="viewsw" role="group" aria-label="Affichage de la fiche"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
+const viewSwitch = () => `<div class="viewsw" role="group" aria-label="Affichage de la fiche"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">✎ Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>`;
 const speedTxt = g => `${fmt(speedOf(g))} m`;
 
 function incompleteHTML(g) {
