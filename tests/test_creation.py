@@ -128,7 +128,7 @@ def test_sorts_innes(browser, devices, url):
     check(a.js("JSON.stringify(G().used)") == "{}", "aucun emplacement dépensé")
     a.click('[data-a="inn-cast"][data-id="darkness"]')
     check(a.js("concOf(G()) && concOf(G()).id") == "darkness", "Ténèbres : concentration suivie")
-    a.click('[data-a="longrest"]')
+    a.long_rest()
     check(not a.g("innU['hellish-rebuke']"), "repos long : de nouveau disponible")
     a.close()
     b = App(browser, devices, url, char=dict(OMBRE, level=3), view="jeu")

@@ -9,9 +9,8 @@ import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { hitDieSize } from "../rules/character.js";
 import { R } from "../rules/common.js";
-import { hdLeft, hpCur, isDown, longRestHP, spendHitDie } from "../rules/hp.js";
+import { hdLeft, hpCur, isDown, spendHitDie } from "../rules/hp.js";
 import { FEATS, featPlay, featRecharge } from "../rules/feats.js";
-import { innateRest } from "./innate.js";
 import { recoveryHTML } from "./recovery.js";
 import { rechargeItems } from "../rules/magic.js";
 
@@ -71,6 +70,6 @@ onClick("hp-hd", () => {
   if (got != null) toast(`Dé de vie : ${n} ${signed(R.ab(g, "con"))} CON → <b>+${got} PV</b> · ${hpCur(G())}/${g.hpMax} · reste ${hdLeft(G())}`, () => { mutate(g => Object.assign(g, prev)); return "Dé de vie annulé"; });
   const nx = document.getElementById("hd-n"); if (nx) nx.focus({ preventScroll: true });
 });
-onClick("longrest", () => { S.concPanel = false; S.shortOpen = false; S.sr = {}; mutate(g => { g.used = {}; g.effects = []; if (C(g).longRest) C(g).longRest(g); g.extras.forEach(x => x.used = false); longRestHP(g); rechargeItems(g, "long"); featRecharge(g, "long"); innateRest(g); toast(`Repos long : ${g.hpMax != null ? "PV au maximum, " : ""}emplacements et capacités récupérés, sorts en cours terminés`); }); });
+// Repos long : écran guidé, features/longrest.js
 
 export { restBarHTML };

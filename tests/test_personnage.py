@@ -115,7 +115,7 @@ def test_points_de_vie(browser, devices, url):
     check(a.g("hp") == 1, "ramené à la vie")
     a.tab("grimoire")
     check(a.text("#topbar .chip.hp").strip() == "♥ 1/31", f"puce des PV : {a.text('#topbar .chip.hp')}")
-    a.click('[data-a="longrest"]')
+    a.long_rest()
     check(a.g("hp") is None and a.g("hdU") == 0 and "PV au maximum" in a.toast(), "repos long : PV et dés de vie")
     a.click("#topbar .chip.hp")
     check(a.js("S.tab") == "grimoire" and a.count("#hppanel:not([hidden]) .hpcard") == 1, "la puce ouvre le volet des PV sur place")

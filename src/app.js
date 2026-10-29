@@ -14,6 +14,7 @@ import { characterHTML } from "./features/character.js";
 import { grimoireHTML } from "./features/grimoire.js";
 import { hpCardHTML } from "./features/hp.js";
 import { luHTML } from "./features/levelup.js";
+import { lrHTML } from "./features/longrest.js";
 import { biblioHTML } from "./features/library.js";
 import { crHTML } from "./features/creation.js";
 import { raceField } from "./features/innate.js";
@@ -62,11 +63,16 @@ function renderApp() {
   cr.hidden = !showCr; if (showCr) { const sc = cr.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; cr.innerHTML = crHTML(); const nb = cr.querySelector(".lubody"); if (nb && S.luKeep) nb.scrollTop = top; else if (nb) nb.scrollTop = 0; if (!S.lu) S.luKeep = false; }
   const lu = document.getElementById("lvlup"), showLu = !!g && !!S.lu;
   if (!showLu) S.lu = null;
-  lu.hidden = !showLu; document.body.classList.toggle("lu-on", showLu);
+  // Repos long guidé (plein écran) : features/longrest.js
+  const lr = document.getElementById("lrsheet"), showLr = !!g && !!S.lr && !showLu;
+  if (!showLr) S.lr = null;
+  lr.hidden = !showLr;
+  if (showLr) { const sc = lr.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; lr.innerHTML = lrHTML(g); const nb = lr.querySelector(".lubody"); if (nb && S.luKeep) nb.scrollTop = top; S.luKeep = false; }
+  lu.hidden = !showLu; document.body.classList.toggle("lu-on", showLu || showLr);
   if (showLu) { const sc = lu.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; lu.innerHTML = luHTML(g); const nb = lu.querySelector(".lubody"); if (nb && S.luKeep) nb.scrollTop = top; S.luKeep = false; }
   // Volets propres aux classes (Imposition des mains, formes possibles) : chaque classe gère les siens, refermés si le personnage affiché est d'une autre classe
   const showSheet = Object.values(CLASSES).map(c => c.renderSheets ? c.renderSheets(g && C(g) === c ? g : null, showLu) : false).some(Boolean);
-  document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showNw || showSheet || showHp || showCr || showAb); // le message ne couvre pas le volet ouvert
+  document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showNw || showSheet || showHp || showCr || showAb || showLr); // le message ne couvre pas le volet ouvert
   // Focus retrouvé en dernier : les volets (assistant de niveau…) sont redessinés juste avant
   if (keep) { const el = document.querySelector(keep.sel); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
 }

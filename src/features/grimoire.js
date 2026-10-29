@@ -14,6 +14,7 @@ import { itemsActionHTML } from "./equipment.js";
 import { featsPlayHTML } from "./featplay.js";
 import { innateHTML } from "./innate.js";
 import { restBarHTML } from "./rest.js";
+import { prepOpenHTML } from "./longrest.js";
 import { keyPills, noteBox, noteGerer, noteMark, noteOf, notePen, pillsHTML, spellBody, tags } from "./spells.js";
 
 function featsHTML(g) {
@@ -37,7 +38,7 @@ function featsHTML(g) {
 }
 function preparedGererHTML(g) {
   const max = R.maxLevel(g), pMax = R.prepMax(g), prepared = new Set(g.prepared), oath = alwaysPrepared(g);
-  let h = "";
+  let h = prepOpenHTML(g); // « Préparer les sorts » : écran de préparation (features/longrest.js)
   if (oath.length) {
     const list = oath.map(id => BY_ID[id]).sort(byName), ap = C(g).alwaysPreparedInfo(g);
     h += foldHead("o", "oath", ap.title, ap.aside, plural(list.length, "sort"));
@@ -144,7 +145,7 @@ function grimoireHTML(g) {
 // Grimoire du magicien, mode Gérer : sorts mineurs et sorts du grimoire à préparer
 function bookGererHTML(g) {
   const slots = R.slots(g), max = slots.length, pMax = R.prepMax(g);
-  let h = "";
+  let h = prepOpenHTML(g); // « Préparer les sorts » : écran de préparation (features/longrest.js)
 
   // Sorts mineurs
   const cMax = R.cantrips(g);

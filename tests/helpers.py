@@ -69,6 +69,15 @@ class App:
     def view(self, v):
         self.click(f'[data-a="view"][data-v="{v}"]')
 
+    def long_rest(self, sel='[data-a="longrest"]'):
+        """Repos long guidé : ouvre l'écran, garde les sorts préparés, passe les étapes jusqu'à « Terminer le repos »."""
+        self.click(sel)
+        for _ in range(4):
+            if self.count('#lrsheet [data-a="lr-done"]:not(.x)') and self.count('#lrsheet .lufoot [data-a="lr-done"]'):
+                self.click('#lrsheet .lufoot [data-a="lr-done"]'); return
+            self.click('#lrsheet .lufoot [data-a="lr-next"]')
+        raise AssertionError("repos long : pas de bouton Terminer")
+
     def tab(self, v):
         sel = f'[data-a="tab"][data-v="{v}"]'
         if self.count(sel) == 0:  # onglet rangé dans le menu Plus

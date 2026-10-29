@@ -43,7 +43,7 @@ def test_source_et_metamagie(browser, devices, url):
     check(a.g("spU") == 3 and "Sort jumeau" in a.toast(), "Sort jumeau sur un sort mineur : 1 point")
     a.click('[data-a="row"][data-id="fireball"]')
     check(a.count('[data-a="mm-tog"][data-id="fireball"][data-v="jumeau"]:disabled') == 1, "Sort jumeau grisé pour un sort de zone")
-    a.click('[data-a="longrest"]')
+    a.long_rest()
     check(a.g("spU") == 0 and a.js("Object.keys(G().made).length") == 0, "repos long : points récupérés, emplacements créés perdus")
     a.close()
     a = App(browser, devices, url, char=dict(YSOLDE, level=6), tab="grimoire", view="jeu")

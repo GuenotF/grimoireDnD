@@ -70,6 +70,7 @@ src/
     spells.js               affichage d'un sort, notes personnelles
     cast.js                 Lancer, concentration, sorts en cours
     topbar.js               barre du haut collée (PV, CA, initiative, puces en cours, six caracs), ligne des emplacements, volet d'une carac. (JdS, test, compétences)
+    longrest.js             repos long guidé : récapitulatif, préparation des sorts (aussi hors repos, bouton dans Gérer), étape de classe (C(g).lrStep)
     grimoire.js             onglet Sorts/Grimoire : Gérer, En jeu, capacités de classe, repos
     library.js              Bibliothèque
     levelup.js              assistant de passage de niveau (structure et étapes des classes à sorts préparés)
@@ -108,7 +109,8 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `features(g)` | Capacités de classe (avec `control(g)` pour un réglage, ex. style de combat) | | ✓ | ✓ |
 | `resources(g)`, `resourceMax` | Ressources en haut de l'onglet et maximum de chaque compteur | | ✓ | ✓ |
 | `beforeSlots(g)`, `playTop(g)`, `barChips(g)` | Ajouts à l'écran : forme active, Châtiment divin, puce de la barre du haut | | ✓ | ✓ |
-| `restBar(g)`, `shortPanel(g)`, `shortRest`, `longRest(g)` | Ajouts à la barre de repos, panneau propre au repos court (Restauration arcanique) ou ressource récupérée, repos long (dés de vie et PV : communs, `features/rest.js`) | ✓ | ✓ | ✓ |
+| `lrStep(g)` | Étape du repos long guidé après le repos : `{ label, html(g) }` (Présage de la divination) ; `null` sinon | | ✓ | ✓ |
+| `restBar(g)`, `shortPanel(g)`, `shortRest`, `longRest(g)` | Ajouts à la barre de repos, panneau propre au repos court (Restauration arcanique) ou ressource récupérée, repos long (dés de vie et PV : communs, `features/longrest.js`) | ✓ | ✓ | ✓ |
 | `renderSheets(g, levelUpOpen)` | Volets propres (Imposition des mains, formes possibles) | | ✓ | ✓ |
 | `levelUp` | Assistant : étapes propres (`init`, `steps`, `apply`…) ou crochets des étapes communes (`rowsBefore`, `rowsAfter`, `summaryExtra`, `notes`, `choicesFirst`, `choices`, `recapBefore`, `recapAfter`, `recapNotes`, `apply`) | ✓ | ✓ | ✓ |
 | `weaponProf`, `armorProf`, `tools` en fonction | Maîtrises selon le personnage (domaine du clerc : armures lourdes, armes de guerre) | | | |

@@ -45,7 +45,7 @@ def test_rage_frenesie(browser, devices, url):
     check(not a.g("raging") and a.g("exh") == 1 and "épuisement 1" in a.toast(), "fin de rage avec Frénésie : épuisement")
     a.tab("perso")
     check("Épuisement 1" in a.text(".hpexh"), "épuisement affiché dans la carte des PV")
-    a.tab("caps"); a.click('[data-a="longrest"]')
+    a.tab("caps"); a.long_rest()
     check(a.g("rageU") == 0 and a.g("exh") == 0 and a.g("hp") is None, "repos long : rages, épuisement, PV")
     a.close()
 

@@ -95,7 +95,7 @@ def test_maitre_des_betes(browser, devices, url):
     check("13/20" in a.text('[data-a="pet-top"]'), "puce du compagnon dans la barre du haut")
     a.pg.fill("#pet-n", "30"); a.click('[data-a="pet-dmg"]')
     check(a.g("pet.hp") == 0 and "à 0 PV" in a.text("#pet-card"), "compagnon à 0 PV")
-    a.click('[data-a="longrest"]') if a.count('[data-a="longrest"]') else None
+    a.long_rest() if a.count('[data-a="longrest"]') else None
     check(a.g("pet.hp") is None, "repos long : compagnon soigné")
     # 5 → 6 : un ennemi juré et un terrain de plus
     a.click('[data-a="lu-open"]'); lu_next(a)

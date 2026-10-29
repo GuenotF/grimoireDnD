@@ -45,7 +45,7 @@ function pickRow({ act, id, on, full, off, why, name, label, pills, body }) {
   <button class="pktog${on ? " on" : ""}${full && !on ? " full" : ""}" ${act} data-id="${esc(id)}" data-v="${esc(id)}" aria-pressed="${!!on}" aria-label="${on ? "Retirer" : "Choisir"} ${lbl}"${off && !on ? " disabled" : ""}${full && !on ? ' aria-disabled="true"' : ""}>${on ? "✓" : off ? "" : "+"}</button></div>
   ${open ? `<div class="pkbody">${body || ""}${off && !on ? "" : `<div class="cast"><button class="btn sm${on ? "" : " cast-go"}" ${act} data-id="${esc(id)}" aria-pressed="${!!on}">${on ? "Retirer" : "Choisir"}</button></div>`}</div>` : ""}</div>`;
 }
-onClick("pk-open", (b) => { const k = "pk:" + b.dataset.id; if (S.open.has(k)) S.open.delete(k); else S.open.add(k); if (S.lu || S.cr) S.luKeep = true; render(); });
+onClick("pk-open", (b) => { const k = "pk:" + b.dataset.id; if (S.open.has(k)) S.open.delete(k); else S.open.add(k); if (S.lu || S.cr || S.lr) S.luKeep = true; render(); });
 
 /** Section repliable (ressources de classe, réglages) : en-tête ▾ comme les autres sections ; body omis si repliée. */
 const foldSec = (k, title, aside, body, summary = "") => !body ? "" : foldHead(k, "", title, aside || "", summary) + (isFold(k) ? "" : body);

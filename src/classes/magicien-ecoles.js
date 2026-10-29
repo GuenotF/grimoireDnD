@@ -3,7 +3,7 @@
 // Présage (Divination), et une utilisation par repos pour Permutation, Double illusoire et Métamorphe.
 import { onChange, onClick, onInput } from "../core/actions.js";
 import { esc, signed } from "../core/format.js";
-import { G } from "../core/state.js";
+import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { R } from "../rules/common.js";
@@ -75,6 +75,16 @@ function schoolUse(g) {
   if (isSchool(g, "Transmutation", 10)) return { n: "Métamorphe", rest: "repos court", short: true };
   return null;
 }
+/** Les d20 du Présage : champs à remplir, puis résultats à toucher pour les utiliser. */
+function portentDice(g) {
+  const n = portentN(g), v = g.portent || [], u = g.portentU || [];
+  return `<div class="portent">${Array.from({ length: n }, (_, i) => v[i] ? `<button class="pdie${u[i] ? " used" : ""}" data-a="portent-use" data-i="${i}" aria-pressed="${!!u[i]}" aria-label="Présage ${v[i]}${u[i] ? ", utilisé (toucher pour annuler)" : ", disponible"}">${v[i]}${u[i] ? "<small>utilisé</small>" : ""}</button>` : `<input id="portent-${i}" class="pdie" type="number" inputmode="numeric" min="1" max="20" placeholder="d20" aria-label="Résultat du d20 de Présage ${i + 1}" enterkeyhint="done">`).join("")}
+    ${v.some(Boolean) ? `<button class="linkbtn" data-a="portent-clear">Corriger les résultats</button>` : ""}</div>`;
+}
+/** Étape du repos long guidé (Divination, niveau 2) : lancer les d20 du Présage. */
+const wizLrStep = g => isSchool(g, "Divination", 2) ? { label: "Présage", html: g => `<p class="lrlead">Présage</p>
+  <p style="margin:0;font-size:14.5px;line-height:1.45">Lance <b>${portentN(g)}d20</b> et note les résultats. Tu peux remplacer un jet d'attaque, de sauvegarde ou de caractéristique, le tien ou celui d'une créature que tu vois, par l'un d'eux, avant le jet ; une fois par tour, chaque résultat une seule fois. Les résultats d'avant sont perdus.</p>
+  ${portentDice(g)}<p class="muted lrnote">Tu peux aussi les noter plus tard : Ressources de l'école, onglet Grimoire (En jeu).</p>` } : null;
 function wizResHTML(g) {
   let rows = "";
   if (isSchool(g, "Abjuration", 2)) {
@@ -84,10 +94,8 @@ function wizResHTML(g) {
     ${g.wardMade ? `<div class="cast">${[1, 2, 3].filter(l => R.slots(g).length >= l).map(l => `<button class="btn sm" data-a="ward-add" data-v="${2 * l}"${hp >= max ? " disabled" : ""}>+${2 * l} (niv. ${l})</button>`).join("")}<span class="muted" style="font-size:12.5px">recharge en lançant une abjuration</span></div>` : ""}`;
   }
   if (isSchool(g, "Divination", 2)) {
-    const n = portentN(g), v = g.portent || [], u = g.portentU || [];
-    rows += `<div class="resrow"><span class="rn"><b>Présage</b><small>${n} d20 après chaque repos long · touche un résultat pour l'utiliser</small></span></div>
-    <div class="portent">${Array.from({ length: n }, (_, i) => v[i] ? `<button class="pdie${u[i] ? " used" : ""}" data-a="portent-use" data-i="${i}" aria-pressed="${!!u[i]}" aria-label="Présage ${v[i]}${u[i] ? ", utilisé (toucher pour annuler)" : ", disponible"}">${v[i]}${u[i] ? "<small>utilisé</small>" : ""}</button>` : `<input id="portent-${i}" class="pdie" type="number" inputmode="numeric" min="1" max="20" placeholder="d20" aria-label="Résultat du d20 de Présage ${i + 1}" enterkeyhint="done">`).join("")}
-    ${v.some(Boolean) ? `<button class="linkbtn" data-a="portent-clear">Corriger les résultats</button>` : ""}</div>`;
+    rows += `<div class="resrow"><span class="rn"><b>Présage</b><small>${portentN(g)} d20 après chaque repos long · touche un résultat pour l'utiliser</small></span></div>
+    ${S.lr ? `<p class="muted" style="margin:0;font-size:13px">Saisie dans l'écran du repos long.</p>` : portentDice(g)}`; // un seul jeu de champs à la fois (identifiants)
   }
   const su = schoolUse(g);
   if (su) rows += capRow(g, "schoolu", su.n, su.rest, `<button class="pip${g.schoolU ? " used" : ""}" data-a="school-use" aria-label="${su.n}, ${g.schoolU ? "utilisé" : "disponible"}"></button>`, false, () => pillsRaw([["f", "Effet", (wizFeats(g).find(f => f.n === su.n) || {}).pill ? wizFeats(g).find(f => f.n === su.n).pill(g) : ""]]));
@@ -136,4 +144,4 @@ function wizNormalize(o) {
 function wizLongRest(g) { g.arcane = false; g.wardMade = false; g.wardHp = 0; g.portent = []; g.portentU = []; g.schoolU = 0; }
 const wizShortRest = g => { const su = schoolUse(g); return su && su.short ? { field: "schoolU", label: su.n, done: "récupéré" } : null; };
 
-export { wizFeats, wizResHTML, wardAbsorb, wizOnCast, wizDmgBonus, wizNormalize, wizLongRest, wizShortRest, SCHOOL_FEATS };
+export { wizLrStep, wizFeats, wizResHTML, wardAbsorb, wizOnCast, wizDmgBonus, wizNormalize, wizLongRest, wizShortRest, SCHOOL_FEATS };

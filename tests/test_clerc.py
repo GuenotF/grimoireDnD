@@ -42,7 +42,7 @@ def test_vie_conduit_divin(browser, devices, url):
     a.click('[data-a="ccd-use"][data-v="life"]')
     check(a.g("ccdU") == 1 and "25 PV" in a.toast(), "Préservation de la vie : Conduit divin utilisé, réserve rappelée")
     check(a.count('[data-a="ccd-use"]:disabled') == 2, "plus d'utilisation")
-    a.click('[data-a="longrest"]'); check(a.g("ccdU") == 0, "repos long : Conduit divin récupéré")
+    a.long_rest(); check(a.g("ccdU") == 0, "repos long : Conduit divin récupéré")
     a.close()
 
 

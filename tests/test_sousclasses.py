@@ -26,7 +26,7 @@ def test_abjuration_protection(browser, devices, url):
     a.undo(); check(a.g("wardHp") == 5 and a.g("hp") is None, "annulable")
     a.click('#hppanel [data-a="hp-close"]'); a.click('.jline [data-a="cast"][data-id="shield"]')
     check(a.g("wardHp") == 7, "nouvelle abjuration : +2 × niveau du sort")
-    a.click('[data-a="longrest"]')
+    a.long_rest()
     check(not a.g("wardMade") and a.g("wardHp") == 0, "repos long : protection à recréer")
     a.close()
 
@@ -42,7 +42,7 @@ def test_divination_presage(browser, devices, url):
     check(a.g("portentU[1]") and a.count(".pdie.used") == 1 and a.js("getComputedStyle(document.querySelector('.pdie.used')).textDecorationLine") == "line-through", "résultat barré")
     a.undo(); check(not a.g("portentU[1]"), "annulable")
     a.click('[data-a="portent-use"][data-i="1"]')
-    a.click('[data-a="longrest"]')
+    a.long_rest()
     check(a.js("G().portent.length") == 0, "repos long : nouveau Présage")
     a.close()
 

@@ -99,7 +99,7 @@ def test_dons_en_jeu(browser, devices, url):
     a.click('.jline [data-a="cast"][data-id="levitate"]')
     a.click("#topbar .chip.hp"); a.pg.fill("#hp-n", "6"); a.click('#hppanel [data-a="hp-dmg"]')
     check("avantage (Mage de guerre)" in a.text("#hppanel .concwarn"), "concentration : avantage rappelé")
-    a.click('#hppanel [data-a="hp-close"]'); a.click('[data-a="longrest"]')
+    a.click('#hppanel [data-a="hp-close"]'); a.long_rest()
     check(not a.g("featU.lucky"), "repos long : points de chance récupérés")
     a.close()
     b = App(browser, devices, url, char=dict(GARAL, traits=[{"n": "Adepte martial", "o": "don", "d": ""}]), view="jeu")

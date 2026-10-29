@@ -12,7 +12,7 @@ import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills, metaLine, pText, pillsHTML, tags, tier } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { SCHOOLS, SLOTS } from "../rules/tables.js";
-import { SCHOOL_FEATS, wardAbsorb, wizDmgBonus, wizFeats, wizLongRest, wizNormalize, wizOnCast, wizResHTML, wizShortRest } from "./magicien-ecoles.js";
+import { wizLrStep, SCHOOL_FEATS, wardAbsorb, wizDmgBonus, wizFeats, wizLongRest, wizNormalize, wizOnCast, wizResHTML, wizShortRest } from "./magicien-ecoles.js";
 import { statLabel } from "../ui/components.js";
 
 function rulesHTML(g) {
@@ -190,6 +190,7 @@ export default {
   resources: g => wizResHTML(g),
   normalize: o => wizNormalize(o),
   longRest: g => wizLongRest(g),
+  lrStep: g => wizLrStep(g), // repos long guidé : Présage (Divination)
   shortRest: g => wizShortRest(g),
   onCast: (g, s, lv) => wizOnCast(g, s, lv),
   absorb: (g, n) => wardAbsorb(g, n),

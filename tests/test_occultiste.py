@@ -56,7 +56,7 @@ def test_sans_emplacement(browser, devices, url):
     a.click('[data-a="inn-cast"][data-id="mage-armor"]')
     check(a.g("used['5']") == 1, "Armure d'ombres : à volonté")
     a.click('[data-a="occ-bless"]'); check(a.g("hpTemp") == 4 + 11, "Bénédiction du ténébreux : CHA + niveau")
-    a.click('[data-a="longrest"]'); check(not a.js("G().innU['circle-of-death']"), "repos long : arcanum récupéré")
+    a.long_rest(); check(not a.js("G().innU['circle-of-death']"), "repos long : arcanum récupéré")
     a.close()
 
 
