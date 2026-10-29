@@ -66,7 +66,7 @@ const frenzyOn = g => g.raging && g.frenzy && g.level >= 3 && g.voie === "berser
 
 // ---------- Carte Rage (onglet Capacités, Gérer et En jeu)
 function rageCard(g) {
-  const n = BAR.rage(g), u = Math.min(n, g.rageU);
+  const n = BAR.rage(g), u = Math.min(n, g.rageU), frz = g.level >= 3 && g.voie === "berserker"; // Berserker : Frénésie par défaut
   const pips = n > 10 ? `<span class="muted">illimitée</span>` : Array.from({ length: n }, (_, k) => `<button class="pip fire${k < u ? " used" : ""}" data-a="res-pip" data-r="rage" data-k="${k}" aria-label="Rage ${k + 1}, ${k < u ? "utilisée" : "disponible"}"></button>`).join("");
   if (g.raging) return `<section class="ragecard on" id="rage-card"><div class="rh"><b>🔥 En rage${frenzyOn(g) ? " · Frénésie" : ""}</b><span class="muted">1 minute</span></div>
     <div class="pills">${[["d", "Dégâts", `+${BAR.dmg(g)} FOR au corps à corps`], ["s", "Résistance", "contondant, perforant, tranchant"], ["n", "Force", "avantage tests et JdS"], ...(frenzyOn(g) ? [["f", "Frénésie", "attaque en action bonus"]] : []), ...(g.level >= 6 && g.voie === "berserker" ? [["f", "Rage aveugle", "ni charmée ni effrayée"]] : []), ...(isTotem(g) ? [["s", `Esprit totem · ${TOTEMS[totemOf(g, 3)]}`, TOTEM_FX[3][totemOf(g, 3)][1]]] : []), ...(isTotem(g) && g.level >= 14 ? [["f", `Lien totémique · ${TOTEMS[totemOf(g, 14)]}`, TOTEM_FX[14][totemOf(g, 14)][1]]] : [])].map(([k, l, v]) => `<div class="pill ${k}"><span class="pl">${l}</span><span class="pv">${v}</span></div>`).join("")}</div>
@@ -74,13 +74,13 @@ function rageCard(g) {
     <div class="cast"><button class="btn" data-a="rage-end">Fin de la rage</button></div></section>`;
   return `<section class="ragecard" id="rage-card"><div class="rh"><b>Rage</b><span class="muted">repos long</span><span class="pips">${pips}</span></div>
     <p>Action bonus · 1 minute. <b>+${BAR.dmg(g)} dégâts</b> (attaques de FOR au corps à corps) · <b>résistance</b> contondant, perforant, tranchant · avantage aux tests et JdS de FOR.</p>
-    <div class="cast"><button class="btn rage-go" data-a="rage-start"${rageLeft(g) || n > 10 ? "" : " disabled"}>🔥 Entrer en rage</button>${g.level >= 3 && g.voie === "berserker" ? `<label class="check"><input type="checkbox" data-a="rage-frenzy"${S.frenzyPick ? " checked" : ""}> avec Frénésie</label>` : ""}</div>
-    ${g.level >= 3 && g.voie === "berserker" ? `<p class="muted">Frénésie : une attaque au corps à corps en action bonus à chaque tour ; un niveau d'épuisement à la fin de la rage.</p>` : ""}${rageLeft(g) || n > 10 ? "" : `<p class="muted">Plus de rage : elles reviennent au repos long.</p>`}</section>`;
+    <div class="cast"><button class="btn rage-go" data-a="rage-start"${rageLeft(g) || n > 10 ? "" : " disabled"}>🔥 Entrer en rage${frz && !S.rageClassic ? " · Frénésie" : ""}</button>${frz ? `<label class="check small"><input type="checkbox" data-a="rage-classic"${S.rageClassic ? " checked" : ""}> Rage classique</label>` : ""}</div>
+    ${frz ? `<p class="muted">${S.rageClassic ? "Rage classique : sans attaque de Frénésie, sans épuisement." : "Frénésie : une attaque au corps à corps en action bonus à chaque tour suivant ; un niveau d'épuisement à la fin de la rage. Coche « Rage classique » pour l'éviter."}</p>` : ""}${rageLeft(g) || n > 10 ? "" : `<p class="muted">Plus de rage : elles reviennent au repos long.</p>`}</section>`;
 }
-onChange("rage-frenzy", t => { S.frenzyPick = t.checked; });
+onChange("rage-classic", t => { S.rageClassic = t.checked; render(); }); // Berserker : Frénésie par défaut, rage classique à cocher
 onClick("rage-start", () => {
   const g = G(); if (!g || g.raging) return; const prev = { rageU: g.rageU, raging: false, frenzy: false };
-  const fr = !!S.frenzyPick && g.level >= 3; S.frenzyPick = false;
+  const fr = !S.rageClassic && g.level >= 3 && g.voie === "berserker"; S.rageClassic = false;
   mutate(g => { g.raging = true; g.frenzy = fr; if (BAR.rage(g) <= 10) g.rageU = Math.min(BAR.rage(g), g.rageU + 1); g.effects = g.effects.filter(e => !e.c); });
   toast(`<b>🔥 Rage</b>${fr ? " et Frénésie" : ""} · reste ${BAR.rage(g) > 10 ? "∞" : rageLeft(G())}`, () => { mutate(g => Object.assign(g, prev)); return "Rage annulée"; });
 });

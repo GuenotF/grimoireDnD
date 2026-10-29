@@ -30,8 +30,9 @@ def test_classe_sans_sorts(browser, devices, url):
 
 def test_rage_frenesie(browser, devices, url):
     a = App(browser, devices, url, char=GARAL, view="jeu")
-    a.pg.check('[data-a="rage-frenzy"]'); a.click('[data-a="rage-start"]')
-    check(a.g("raging") and a.g("frenzy") and a.g("rageU") == 1 and a.count(".ragecard.on") == 1, "en rage, avec Frénésie")
+    check("Frénésie" in a.text('[data-a="rage-start"]') and a.count('[data-a="rage-classic"]') == 1, "Berserker : Frénésie par défaut, rage classique à cocher")
+    a.click('[data-a="rage-start"]')
+    check(a.g("raging") and a.g("frenzy") and a.g("rageU") == 1 and a.count(".ragecard.on") == 1, "en rage, avec Frénésie (par défaut)")
     check("🔥 Rage" in a.text("#topbar .chip.fire"), "puce Rage dans la barre du haut")
     atk = a.texts(".atk .ah")
     check(atk[0] == "Hache à deux mains +5 1d12 + 5 tranchant" and "Frénésie" in atk[1], f"rage +2 et attaque de Frénésie : {atk}")
@@ -73,4 +74,15 @@ def test_maitre_d_armes_lourdes(browser, devices, url):
     atk = a.texts(".atk .ah")
     check(atk[0] == "Hache à deux mains +0 1d12 + 15 tranchant" and atk[1].startswith("Hachette ×2 +5 1d6 + 5"), f"MAL sur l'arme lourde seulement : {atk}")
     check("Maître des armes à deux mains" in a.text(".atknotes"), "rappel de l'attaque bonus")
+    a.close()
+
+
+def test_rage_classique(browser, devices, url):
+    a = App(browser, devices, url, char=GARAL, view="jeu")
+    a.pg.check('[data-a="rage-classic"]'); a.pg.wait_for_timeout(50)
+    check("Frénésie" not in a.text('[data-a="rage-start"]'), "rage classique cochée : bouton sans Frénésie")
+    a.click('[data-a="rage-start"]')
+    check(a.g("raging") and not a.g("frenzy"), "rage sans Frénésie")
+    a.click('[data-a="rage-end"]')
+    check(a.g("exh") in (0, None) and a.count('[data-a="rage-classic"]:checked') == 0, "pas d'épuisement ; la case se décoche pour la rage suivante")
     a.close()
