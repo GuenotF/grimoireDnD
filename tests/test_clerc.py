@@ -34,7 +34,7 @@ def test_vie_conduit_divin(browser, devices, url):
     a = App(browser, devices, url, char=ALDRIC, tab="grimoire", view="gerer")
     t = a.text("#panel")
     check("Sorts de domaine" in t and "Retour à la vie" in t and "Soins" in t, "sorts de domaine (niveau 5) toujours préparés")
-    check("Soigne 1d8 + 3" in t, "Disciple de la vie : Soins +3 (2 + niveau 1)")
+    check("Soigne 1d8 + 6" in t, "Disciple de la vie : Soins + SAG 3 + 3 (2 + niveau 1)")
     a.view("jeu")
     a.click('[data-a="row"][data-id="res:ccd"]')
     t = a.text("#panel")

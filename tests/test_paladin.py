@@ -92,3 +92,18 @@ def test_serment_de_devotion(browser, devices, url):
     a.tab("regles")
     check("Renvoi des impies" in a.text("#panel") and "Serment de dévotion" in a.text("#panel"), "onglet Règles")
     a.close()
+
+
+def test_sorts_et_ca_et_modificateur(browser, devices, url):
+    a = App(browser, devices, url, char=dict(KAEL, v=3, abil={"str": 16, "dex": 10, "con": 14, "int": 10, "wis": 12, "cha": 16}, acMode="calc"), view="jeu")
+    check("Soigne 1d8 + 3" in a.text('.jline:has([data-id="cure-wounds"])'), f"Soins : + mod. de CHA calculé ({a.text('.jline:has([data-id=cure-wounds])')})")
+    base = a.js("acOf(G())")
+    a.click('.jline [data-a="cast"][data-id="shield-of-faith"]')
+    check(a.js("acOf(G())") == base + 2 and a.text("#topbar .tbst").startswith(str(base + 2)), "Bouclier de la foi en cours : +2 CA")
+    a.js("(mutate(g => { g.effects.push({ k: 'b', id: 'shield', name: 'Bouclier', d: '1 round', c: false, note: '' }); }), 0)")
+    check(a.js("acOf(G())") == base + 7, "Bouclier (+5) s'ajoute")
+    a.js("(mutate(g => { g.effects = [{ k: 'p', id: 'barkskin', name: 'Peau d\\'écorce', d: '1 heure', c: true, note: '' }]; }), 0)")
+    check(a.js("acOf(G())") == 16, f"Peau d'écorce : CA 16 minimum ({a.js('acOf(G())')}, base {base})")
+    a.js("(mutate(g => { g.effects = []; }), 0)")
+    check(a.js("acOf(G())") == base, "sorts terminés : CA de base")
+    a.close()

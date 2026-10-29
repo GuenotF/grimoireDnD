@@ -41,6 +41,11 @@ function acCalc(g) {
   if (shield) parts.push([`Bouclier${mb(sw.item) ? ` +${mb(sw.item)}` : ""}`, shield.ac + mb(sw.item)]);
   for (const [l, n] of (C(g).acBonus ? C(g).acBonus(g, armor) : [])) parts.push([l, n]);
   if (hasFeat(g, "dual-wielder") && !shield && twoWeapons(g)) parts.push(["Combattant à deux armes", 1]);
+  // Sorts en cours qui changent la CA (lancés sur soi) : bonus, puis plancher de Peau d'écorce
+  const on = id => (g.effects || []).some(e => e.id === id);
+  for (const [id, l, n] of [["shield-of-faith", "Bouclier de la foi (sort en cours)", 2], ["haste", "Hâte (sort en cours)", 2], ["shield", "Bouclier (sort, jusqu'au début de ton prochain tour)", 5]]) if (on(id)) parts.push([l, n]);
+  const sub = parts.reduce((t, [, n]) => t + (n || 0), 0);
+  if (on("barkskin") && sub < 16) parts.push(["Peau d'écorce (sort en cours) : CA 16 minimum", 16 - sub]);
   [armor, shield].filter(Boolean).forEach(a => {
     if (!armorProf(g, a)) warn.push(`${a.n} : <b>non maîtrisé${a.cat === "shield" ? "" : "e"}</b> par ta classe : désavantage aux jets de FOR et DEX (caractéristique, sauvegarde, attaque), et pas de sorts.`);
     if (C(g).noMetal && a.metal) warn.push(`${a.n} : armure métallique. Les druides refusent de porter du métal (armure et bouclier) ; peaux, cuir, cuir clouté ou matelassée conviennent.`);

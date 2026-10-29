@@ -36,6 +36,8 @@ function pText(s, lv, g) {
   if (at > s.l) v = upcast(v, s.up, at - s.l);
   const b = g && C(g).dmgBonus ? C(g).dmgBonus(g, s) : 0; // ex. Évocation améliorée : + INT à un jet de dégâts
   if (b && !v.includes("×")) v = v.replace(/(\d+d\d+)/, `$1 ${b > 0 ? "+" : "−"} ${Math.abs(b)}`);
+  // « + mod. » : modificateur d'incantation de la classe (Soins : 1d8 + 3), additionné à un bonus déjà posé (Disciple de la vie : 1d8 + 3 + 3 → 1d8 + 6)
+  if (g) v = v.replace(/(?: ([+−]) (\d+))? \+ mod\./, (_, sg, n) => { const m = R.am(g) + (n ? (sg === "−" ? -n : +n) : 0); return m < 0 ? ` − ${-m}` : m ? ` + ${m}` : ""; });
   return g && C(g).pillText ? C(g).pillText(g, s, v) : v; // ex. Décharge occulte : nombre de rayons
 }
 /** Dégâts à un niveau d'emplacement plus élevé (n niveaux au-dessus) : « +1d6 par niveau » ou « +1 rayon par niveau ». */
