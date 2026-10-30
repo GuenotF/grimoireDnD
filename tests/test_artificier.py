@@ -65,6 +65,8 @@ def test_impregnations_et_attaques(browser, devices, url):
     atk = a.texts(".atk .ah")
     check(atk[0] == "Arbalète légère +6 1d8 + 4 perforant" or any("Dague +6 1d4 + 4" in x for x in atk), f"attaques avec l'imprégnation : {atk}")
     check("Imprégnations" in a.text("#panel") and "✦" in a.text("#panel"), "rappel des objets imprégnés en jeu")
+    a.pg.reload(); a.pg.wait_for_timeout(400)
+    check(a.js("G().items.filter(x => x.inf).length") == 2, "imprégnations conservées au rechargement")
     a.close()
 
 
