@@ -4,7 +4,7 @@ from helpers import App, check, KAEL, MALFAEL, NEMEIA
 
 def test_navigation_menu_plus(browser, devices, url):
     a = App(browser, devices, url, char=MALFAEL)
-    check(a.texts(".tabs > .tab") == ["Personnage", "Sorts", "Bibliothèque", "Bestiaire"], f"rangée principale : {a.texts('.tabs > .tab')}")
+    check(a.texts(".tabscroll .tab") == ["Personnage", "Sorts", "Inventaire", "Bibliothèque", "Bestiaire"], f"rangée principale : {a.texts('.tabscroll .tab')}")
     check(a.count(".tab.play") == 2, "Personnage et Sorts mis en avant")
     a.click('[data-a="more"]')
     check(a.texts(".moremenu button") == ["Règles", "Imprimer", "Sauvegarde"], "menu Plus")

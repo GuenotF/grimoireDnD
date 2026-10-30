@@ -1,4 +1,5 @@
 // Balayage horizontal : passe à l'onglet voisin de la rangée principale (vers la gauche : suivant ; vers la droite : précédent).
+// Un geste sur la barre d'onglets la fait défiler (zone qui défile) sans changer d'onglet.
 // Raccourci en plus des onglets, qui restent cliquables. Ignoré : départ près des bords (retour du navigateur sur iPhone),
 // geste surtout vertical ou trop court, champ de saisie, zone qui défile déjà horizontalement, volet ouvert, texte sélectionné.
 import { S } from "../core/state.js";
@@ -29,7 +30,7 @@ function end(e) {
   const p = e.changedTouches[0], dx = p.clientX - s.x, dy = p.clientY - s.y;
   if (Math.abs(dx) < MIN || Math.abs(dx) < SLOPE * Math.abs(dy) || Date.now() - s.t > MAXMS) return;
   if (String(window.getSelection ? window.getSelection() : "").trim()) return;
-  const tabs = [...document.querySelectorAll('.tabs > button.tab[data-a="tab"]')], i = tabs.findIndex(b => b.getAttribute("aria-selected") === "true");
+  const tabs = [...document.querySelectorAll('.tabscroll .tab[data-a="tab"]')], i = tabs.findIndex(b => b.getAttribute("aria-selected") === "true");
   if (i < 0) return; // onglet du menu Plus : pas de balayage
   const next = tabs[i + (dx < 0 ? 1 : -1)];
   if (!next) return; // premier ou dernier onglet : on s'arrête là

@@ -14,6 +14,7 @@ import { abSheetHTML, slotLineHTML, topbarHTML } from "./features/topbar.js";
 import { characterHTML } from "./features/character.js";
 import { grimoireHTML } from "./features/grimoire.js";
 import { hpCardHTML } from "./features/hp.js";
+import { inventoryHTML } from "./features/equipment.js";
 import { luHTML } from "./features/levelup.js";
 import { lrHTML } from "./features/longrest.js";
 import { biblioHTML } from "./features/library.js";
@@ -38,10 +39,12 @@ function renderApp() {
   const keep = sel ? { sel, s: a.selectionStart, e: a.selectionEnd } : null;
   renderPicker();
   const g = G(); const main = document.getElementById("main");
+  const osc = main.querySelector(".tabscroll"), keepX = osc && osc.dataset.tab === S.tab ? osc.scrollLeft : null; // barre d'onglets : position gardée sur le même onglet
   if (!g) { main.innerHTML = welcomeHTML(); }
   else {
     const line = S.tab === C(g).tabs(g)[0][0] || S.tab === "grimoire" ? slotLineHTML(g) : ""; // emplacements : onglet principal de la classe et onglet Sorts
     main.innerHTML = heroHTML(g) + `<div class="stick">${topbarHTML(g)}${tabsHTML(g)}${line}</div><div class="panel" id="panel">${panelHTML(g)}</div>`;
+    tabScroll(main.querySelector(".tabscroll"), keepX);
   }
   setStatus(S.statusText || "", S.statusErr);
   const stick = main.querySelector(".stick"); document.documentElement.style.setProperty("--stickh", (stick ? stick.offsetHeight : 0) + "px");
@@ -111,17 +114,27 @@ function heroHTML(g) {
 // (Sorts ou Grimoire en premier, Bibliothèque, Bestiaire…). Menu Plus : onglets secondaires de la classe (Règles, Imprimer), puis Sauvegarde.
 const PLAY_TABS = 2; // Personnage et Sorts : les écrans de jeu, mis en avant
 function tabsHTML(g) {
-  const main = [["perso", "Personnage"], ...C(g).tabs(g)], more = [...(C(g).moreTabs ? C(g).moreTabs(g) : []), ["sauvegarde", "Sauvegarde"]];
+  const ct = C(g).tabs(g), main = [["perso", "Personnage"], ct[0], ["inv", "Inventaire"], ...ct.slice(1)], more = [...(C(g).moreTabs ? C(g).moreTabs(g) : []), ["sauvegarde", "Sauvegarde"]];
   if (![...main, ...more].some(x => x[0] === S.tab)) S.tab = main[1][0]; // onglet principal de la classe (Sorts, Capacités…)
   const inMore = more.some(x => x[0] === S.tab);
   const tab = ([k, l, c], i) => `<button class="tab${i < PLAY_TABS ? " play" : ""}" role="tab" data-a="tab" data-v="${k}" aria-selected="${S.tab === k}">${l}${k === "perso" && sheetIncomplete(g) ? `<span class="todo" title="Fiche à compléter"></span>` : ""}${c != null ? `<span class="count">${c}</span>` : ""}</button>${i === PLAY_TABS - 1 ? `<span class="tabsep" aria-hidden="true"></span>` : ""}`;
-  return `<div class="tabs" role="tablist">${main.map(tab).join("")}
+  return `<div class="tabs" role="tablist"><div class="tabscroll">${main.map(tab).join("")}</div>
     <div class="tabmore"><button class="tab" data-a="more" aria-haspopup="menu" aria-expanded="${!!S.moreOpen}" aria-selected="${inMore}">Plus <span aria-hidden="true">${S.moreOpen ? "▴" : "▾"}</span></button>
     ${S.moreOpen ? `<div class="moreback" data-a="more"></div><div class="moremenu" role="menu">${more.map(([k, l]) => `<button role="menuitem" data-a="tab" data-v="${k}" aria-current="${S.tab === k}">${l}</button>`).join("")}</div>` : ""}</div></div>`;
+}
+// Barre d'onglets qui défile : l'onglet ouvert recentré quand il change, fondu sur le bord coupé (classes fl / fr)
+function tabScroll(sc, keepX) {
+  if (!sc) return;
+  sc.dataset.tab = S.tab;
+  const a = sc.querySelector('[aria-selected="true"]');
+  sc.scrollLeft = keepX != null ? keepX : a ? a.offsetLeft - (sc.clientWidth - a.offsetWidth) / 2 : 0;
+  const fade = () => { sc.classList.toggle("fl", sc.scrollLeft > 2); sc.classList.toggle("fr", sc.scrollLeft + sc.clientWidth < sc.scrollWidth - 2); };
+  fade(); sc.addEventListener("scroll", fade, { passive: true });
 }
 function panelHTML(g) {
   if (S.tab === "perso") return characterHTML(g);
   if (S.tab === "biblio") return biblioHTML(g);
+  if (S.tab === "inv") return inventoryHTML(g);
   if (S.tab === "sauvegarde") return saveHTML(g);
   const own = C(g).panels && C(g).panels[S.tab]; // onglets propres à la classe (Règles, Bestiaire…)
   return own ? own(g) : grimoireHTML(g);

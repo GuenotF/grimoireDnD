@@ -166,7 +166,7 @@ def _swipe(a, x0, x1, y0=420, y1=None, sel="#panel"):
 def test_balayage_entre_onglets(browser, devices, url):
     a = App(browser, devices, url, char=NEMEIA, tab="perso")
     cur = lambda: a.js("document.querySelector('.tabs [aria-selected=true]').dataset.v")
-    tabs = a.js("[...document.querySelectorAll('.tabs > button.tab[data-a=tab]')].map(b => b.dataset.v)")
+    tabs = a.js("[...document.querySelectorAll('.tabscroll .tab[data-a=tab]')].map(b => b.dataset.v)")
     _swipe(a, 300, 150); check(cur() == tabs[1], f"vers la gauche : onglet suivant ({cur()})")
     _swipe(a, 150, 300); check(cur() == "perso", "vers la droite : onglet précédent")
     _swipe(a, 150, 300); check(cur() == "perso", "premier onglet : on s'arrête là")

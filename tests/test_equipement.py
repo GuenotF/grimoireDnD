@@ -9,7 +9,7 @@ def money(a, n, coin, act):
 
 
 def test_bourse(browser, devices, url):
-    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, money={"po": 2, "pa": 3}), tab="perso", view="jeu")
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, money={"po": 2, "pa": 3}), tab="inv", view="jeu")
     check("0 objet" in a.text('[data-k="ch-eqj"]') and a.count(".purse") == 1, "nombre d'objets à côté du titre, bourse affichée")
     a.click('.purse')
     money(a, 15, "pc", "m-gain")
@@ -26,7 +26,7 @@ def test_bourse(browser, devices, url):
 
 
 def test_objets(browser, devices, url):
-    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE), tab="perso", view="gerer")
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE), tab="inv", view="gerer")
     for n in ["Bâton", "Rations", "Potion de soins"]:
         a.pg.fill("#it-new", n); a.pg.press("#it-new", "Enter"); a.pg.wait_for_timeout(60)
     check(a.g("items.length") == 3 and a.pg.evaluate("document.activeElement.id") == "it-new", "3 objets ajoutés, champ prêt pour le suivant")
@@ -40,7 +40,7 @@ def test_objets(browser, devices, url):
     check(a.texts('[data-k="act-it"] ~ .itbox .itn > span') == ["Rations"], "onglet Sorts : section Objets, objets à décompter seulement")
     a.click('[data-a="it-dec"][data-i="1"]')
     check(a.g("items[1].q") == 6, "une ration de moins")
-    a.tab("perso"); a.view("gerer"); a.click('[data-a="it-edit"][data-i="2"]'); a.click('[data-a="it-del"][data-i="2"]')
+    a.tab("inv"); a.view("gerer"); a.click('[data-a="it-edit"][data-i="2"]'); a.click('[data-a="it-del"][data-i="2"]')
     check(a.g("items.length") == 2, "objet retiré"); a.undo()
     check(a.g("items.length") == 3 and a.g("items[2].n") == "Potion de soins", "retrait annulé")
     a.close()
@@ -78,13 +78,14 @@ def test_catalogue_ca_et_attaques(browser, devices, url):
     a.pg.fill("#f-ac", "20"); a.pg.press("#f-ac", "Tab"); a.pg.wait_for_timeout(60)
     check("le calcul donne 19" in a.text(".acblock"), "écart affiché")
     a.click('[data-a="ac-mode"][data-v="calc"]')
+    a.tab("inv")
     a.pg.fill("#it-new", "épée"); a.pg.wait_for_timeout(60)
     check(a.count(".sug") == 3 and a.pg.evaluate("document.activeElement.id") == "it-new", "3 épées proposées, saisie continue")
     a.click('[data-a="it-pick"][data-id="greatsword"]')
     check(a.g("items.length") == 4 and a.pg.input_value("#it-new") == "Épée à deux mains" and a.count(".sugok") == 1, "suggestion choisie : recopiée dans le champ, pas encore ajoutée")
     a.click('[data-a="it-add"] [type="submit"]')
     check(a.g("items[4].ref") == "greatsword" and a.g("items[4].eq") is False, "＋ : épée à deux mains ajoutée, reliée au catalogue")
-    a.view("jeu")
+    a.tab("perso"); a.view("jeu")
     check(a.texts(".chstat .v")[0] == "19" and a.count(".atk") == 0, "CA en jeu, plus d'attaques dans Personnage")
     a.tab("grimoire")
     check(s_order(a), "Châtiment divin puis attaques en tête de l'onglet Sorts")
@@ -112,12 +113,13 @@ def test_alertes_druide_et_magicien(browser, devices, url):
 def test_lien_catalogue_conserve(browser, devices, url):
     """Régression : modifier un objet (note…) gardait le nom mais perdait le lien avec le Manuel (attaque et CA disparues)."""
     a = App(browser, devices, url, char=dict(MALFAEL, **dict(FICHE, ac=None, abil=dict(FICHE["abil"], dex=12)),
-            items=[{"n": "Bâton", "q": 1, "eq": True}, {"n": "Armure en cuir clouté", "q": 1, "eq": True}]), tab="perso", view="gerer")
+            items=[{"n": "Bâton", "q": 1, "eq": True}, {"n": "Armure en cuir clouté", "q": 1, "eq": True}]), tab="inv", view="gerer")
     check(a.g("items[0].ref") == "quarterstaff" and a.g("items[1].ref") is None, "à l'ouverture : nom exact du Manuel relié, nom libre non")
     a.click('[data-a="it-edit"][data-i="0"]'); a.pg.fill("#it-note", "focaliseur druidique"); a.click('.itform [type="submit"]')
     check(a.g("items[0].ref") == "quarterstaff" and a.g("items[0].note") == "focaliseur druidique", "note ajoutée, lien conservé")
     a.click('[data-a="it-edit"][data-i="1"]'); a.pg.select_option("#it-ref", "studded-leather"); a.click('.itform [type="submit"]')
     check(a.g("items[1].ref") == "studded-leather", "lien choisi dans le formulaire")
+    a.tab("perso")
     a.click('[data-a="ac-mode"][data-v="calc"]')
     check(a.text(".acv") == "13", f"CA : cuir clouté 12 + DEX 1 = 13 : {a.text('.acblock')}")
     a.view("jeu"); a.tab("grimoire")
@@ -127,17 +129,19 @@ def test_lien_catalogue_conserve(browser, devices, url):
 
 def test_objets_magiques(browser, devices, url):
     from helpers import KAEL
-    a = App(browser, devices, url, char=dict(KAEL, **KAEL_F), tab="perso", view="gerer")
+    a = App(browser, devices, url, char=dict(KAEL, **KAEL_F), tab="inv", view="gerer")
     a.click('[data-a="it-edit"][data-i="2"]')  # épée longue
     a.pg.select_option("#it-bonus", "1"); a.pg.fill("#it-xdmg", "1d6 radiant"); a.pg.check("#it-att"); a.click('.itform [type="submit"]')
     check(a.g("items[2].bonus") == 1 and a.g("items[2].att") and not a.g("items[2].attuned"), "épée +1 à harmoniser")
     a.view("jeu"); a.tab("grimoire")
     check("non harmonisée" in a.text(".atkbox") and a.texts(".atk .ah")[0] == "Épée longue +5 1d8 + 3 tranchant", "non harmonisée : pas de bonus")
-    a.tab("perso"); a.view("gerer"); a.click('[data-a="it-edit"][data-i="2"]'); a.pg.check("#it-attuned"); a.click('.itform [type="submit"]')
+    a.tab("inv"); a.view("gerer"); a.click('[data-a="it-edit"][data-i="2"]'); a.pg.check("#it-attuned"); a.click('.itform [type="submit"]')
     a.view("jeu"); a.tab("grimoire")
     check(a.texts(".atk .ah")[0] == "Épée longue +6 1d8 + 4 tranchant + 1d6 radiant" and "+1 magique" in a.text(".atkbox"), f"harmonisée : +1 et dégâts en plus : {a.texts('.atk .ah')[0]}")
-    a.tab("perso"); a.view("gerer"); a.click('[data-a="it-edit"][data-i="1"]'); a.pg.select_option("#it-bonus", "1"); a.click('.itform [type="submit"]')
+    a.tab("inv"); a.view("gerer"); a.click('[data-a="it-edit"][data-i="1"]'); a.pg.select_option("#it-bonus", "1"); a.click('.itform [type="submit"]')
+    a.tab("perso")
     check(a.text(".acv") == "20" and "Bouclier +1" in a.text(".acparts"), "bouclier +1 : CA 20")
+    a.tab("inv")
     a.click('[data-a="it-edit"][data-i="3"]'); a.pg.fill("#it-ch", "3"); a.pg.select_option("#it-rec", "court"); a.click('.itform [type="submit"]')
     a.view("jeu")
     check(a.count('[data-a="it-chg"]') == 0 and "3/3 charges" in a.text(".itbox"), "Personnage : charges en lecture")
@@ -153,7 +157,7 @@ def test_objets_magiques(browser, devices, url):
 
 def test_limite_harmonisation(browser, devices, url):
     items = [{"n": f"Anneau {k}", "q": 1, "eq": True, "att": True, "attuned": k < 3} for k in range(4)]
-    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="perso", view="gerer")
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="inv", view="gerer")
     check("harmonisation 3/3" in a.text('[data-k="ch-eq"]'), "compteur d'harmonisation")
     a.click('[data-a="it-edit"][data-i="3"]'); a.pg.check("#it-attuned"); a.click('.itform [type="submit"]')
     check(not a.g("items[3].attuned") and "Déjà 3" in a.toast(), "pas plus de 3 objets harmonisés")
@@ -163,7 +167,7 @@ def test_limite_harmonisation(browser, devices, url):
 def test_main_secondaire_regle(browser, devices, url):
     from helpers import KAEL
     items = [{"n": "Rapière", "q": 1, "eq": True, "ref": "rapier"}, {"n": "Rapière", "q": 1, "eq": True, "ref": "rapier", "oh": True}]
-    a = App(browser, devices, url, char=dict(KAEL, **dict(KAEL_F, items=items)), tab="perso", view="gerer")
+    a = App(browser, devices, url, char=dict(KAEL, **dict(KAEL_F, items=items)), tab="inv", view="gerer")
     a.click('[data-a="it-edit"][data-i="0"]')
     check(a.count("#it-oh") == 0, "rapière (non légère) : pas de case Main secondaire")
     a.click('[data-a="it-cancel"]'); a.click('[data-a="it-open"][data-i="0"]')
@@ -175,7 +179,7 @@ def test_main_secondaire_regle(browser, devices, url):
 
 
 def test_equipement_en_jeu(browser, devices, url):
-    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE), tab="perso", view="jeu")
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE), tab="inv", view="jeu")
     check(a.text('[data-a="view"][data-v="gerer"]') == "✎ Gérer", "sélecteur : ✎ Gérer")
     a.pg.fill("#it-new", "épée lo")
     check("Épée longue" in a.text(".sugbox"), "En jeu : armes du Manuel proposées")
@@ -197,7 +201,7 @@ def test_equipement_en_jeu(browser, devices, url):
 
 
 def test_ajout_avec_details(browser, devices, url):
-    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE), tab="perso", view="jeu")
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE), tab="inv", view="jeu")
     a.pg.fill("#it-new", "Perles"); a.click('[data-a="it-det"]')
     check(a.count(".itform.itnew") == 1 and a.pg.input_value("#it-name") == "Perles" and a.count('.itnew [data-a="it-del"]') == 0, "✎ Détails : formulaire complet, nom repris, sans Retirer")
     a.click('.itnew [data-a="it-cancel"]')
@@ -218,7 +222,7 @@ def test_ajout_avec_details(browser, devices, url):
 
 def test_ranger_inventaire(browser, devices, url):
     items = [{"n": "Bâton", "q": 1, "eq": True, "ref": "quarterstaff"}, {"n": "Corde", "q": 1}, {"n": "Rations", "q": 5}, {"n": "Torches", "q": 10}, {"n": "Bouclier", "q": 1, "eq": True, "ref": "shield"}]
-    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="perso", view="gerer")
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="inv", view="gerer")
     check(a.texts(".itgrp") == ["Équipé 2", "Autres objets 3"], f"deux sections : {a.texts('.itgrp')}")
     names = lambda: [t.split("×")[0].replace("▸", "").strip() for t in a.texts(".it .itn > span")]
     check(names() == ["Bâton", "Bouclier", "Corde", "Rations", "Torches"], f"ordre : {names()}")
@@ -229,4 +233,34 @@ def test_ranger_inventaire(browser, devices, url):
     check(names() == ["Bouclier", "Bâton", "Corde", "Torches", "Rations"], f"Bouclier monte dans Équipé : {names()}")
     a.view("jeu")
     check(a.texts(".itgrp") == ["Équipé 2", "Autres objets 3"] and a.count('[data-a="it-mv"]') == 0, "En jeu : mêmes sections, sans flèches")
+    a.close()
+
+
+def test_onglet_inventaire_et_recherche(browser, devices, url):
+    items = [{"n": "Bâton", "q": 1, "eq": True, "ref": "quarterstaff"}, {"n": "Corde de chanvre", "q": 1}, {"n": "Potion de soins", "q": 2, "note": "2d4 + 2"}, {"n": "Clé rouillée", "q": 1, "note": "manoir de Tresendar"}]
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="perso", view="gerer")
+    check(a.count(".itbox") == 0 and a.count(".purse") == 0, "Personnage : plus d'équipement ni de bourse")
+    names = lambda: [t.split("×")[0].replace("▸", "").strip() for t in a.texts(".it .itn > span")]
+    a.tab("inv")
+    check(a.count(".purse") == 1 and "Sac" in a.text(".rubric.fold[data-k='ch-eq']") and len(names()) == 4, "Inventaire : bourse et sac")
+    a.pg.fill("#it-find", "tresendar"); a.pg.wait_for_timeout(60)
+    check(names() == ["Clé rouillée"] and a.pg.evaluate("document.activeElement.id") == "it-find", f"recherche dans les notes, saisie continue : {names()}")
+    check(a.count('[data-a="it-mv"]') == 0, "pas de flèches pendant la recherche")
+    a.pg.fill("#it-find", "cle"); a.pg.wait_for_timeout(60)
+    check(names() == ["Clé rouillée"], "accents ignorés")
+    a.pg.fill("#it-find", "zzz"); a.pg.wait_for_timeout(60)
+    check("Aucun objet" in a.text(".itbox"), "aucun résultat")
+    a.pg.fill("#it-find", ""); a.pg.wait_for_timeout(60)
+    check(len(names()) == 4 and a.count('[data-a="it-mv"]') > 0, "recherche vidée : tout revient, flèches comprises")
+    a.view("jeu")
+    check(a.count("#it-find") == 1 and a.count(".purse") == 1, "En jeu : recherche et bourse aussi")
+    # Barre d'onglets qui défile : l'onglet ouvert recentré, fondu sur le bord coupé
+    sc = lambda e: a.js(f"(() => {{ const s = document.querySelector('.tabscroll'); return {e}; }})()")
+    check(sc("s.scrollWidth > s.clientWidth"), "druide sur téléphone : la rangée dépasse, elle défile")
+    a.tab("bestiaire")
+    check(sc("s.classList.contains('fl') && Math.abs(s.scrollLeft + s.clientWidth - s.scrollWidth) < 3"), "Bestiaire : barre au bout, fondu à gauche")
+    a.tab("perso")
+    check(sc("s.scrollLeft === 0 && s.classList.contains('fr') && !s.classList.contains('fl')"), "Personnage : barre au début, fondu à droite")
+    check(a.js("document.querySelector('.tabmore').getBoundingClientRect().right <= window.innerWidth"), "Plus reste visible à droite")
+    check(not a.errors, f"erreurs : {a.errors}")
     a.close()

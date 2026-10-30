@@ -10,7 +10,7 @@ GARAL = {"name": "Garal Ulcer", "cls": "barbare", "level": 4, "v": 3, "voie": "b
 
 def test_classe_sans_sorts(browser, devices, url):
     a = App(browser, devices, url, char=GARAL, view="jeu")
-    check(a.js("S.tab") == "caps" and a.texts(".tabs > .tab") == ["Personnage", "Capacités"], f"onglets : {a.texts('.tabs > .tab')}")
+    check(a.js("S.tab") == "caps" and a.texts(".tabscroll .tab") == ["Personnage", "Capacités", "Inventaire"], f"onglets : {a.texts('.tabscroll .tab')}")
     a.click('[data-a="more"]')
     check(a.texts(".moremenu button") == ["Règles", "Imprimer", "Sauvegarde"], "menu Plus")
     a.pg.keyboard.press("Escape")

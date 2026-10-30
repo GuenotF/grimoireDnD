@@ -50,7 +50,7 @@ def test_outils_langues_et_vigilant(browser, devices, url):
 
 
 def test_main_secondaire_au_choix(browser, devices, url):
-    a = App(browser, devices, url, char=OMBRE, tab="perso", view="gerer")
+    a = App(browser, devices, url, char=OMBRE, tab="inv", view="gerer")
     a.click('[data-a="it-edit"][data-i="0"]')
     check(a.count("#it-oh") == 1, "case Main secondaire sur une dague")
     a.pg.check("#it-oh"); a.click('.itform [type="submit"]')
@@ -60,7 +60,7 @@ def test_main_secondaire_au_choix(browser, devices, url):
     a.click('[data-a="it-edit"][data-i="0"]'); a.pg.check("#it-oh"); a.click('.itform [type="submit"]')
     a.view("jeu"); a.tab("caps")
     check(any(t.startswith("Dague de cultiste (main secondaire)") for t in a.texts(".atk .ah")), f"attaque bonus avec l'arme choisie : {a.texts('.atk .ah')}")
-    a.tab("perso")
+    a.tab("inv")
     a.click('[data-a="it-open"][data-i="2"]')
     check("Munitions (portée 9 m/36 m)" in a.text(".itdet") and "1 pa" in a.text(".itdet"), "En jeu : arme dépliée avec ses propriétés")
     a.view("gerer"); a.click('[data-a="it-open"][data-i="3"]')

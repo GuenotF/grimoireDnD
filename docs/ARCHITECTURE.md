@@ -64,7 +64,7 @@ src/
   features/                 mécaniques partagées par toutes les classes
     character.js            onglet Personnage : caractéristiques, combat, jets de sauvegarde (Gérer, En jeu)
     hp.js                   carte des points de vie, puce de la barre du haut, rappel de concentration
-    equipment.js            équipement : bourse et objets (Gérer, En jeu)
+    equipment.js            onglet Inventaire : bourse, sac (Gérer, En jeu), recherche ; rubrique Objets des onglets d'action
     abilities.js            onglet Capacités des classes sans sorts
     attacks.js              section Attaques (Personnage ou Capacités)
     tools.js                outils (maîtrise, expertise) et langues

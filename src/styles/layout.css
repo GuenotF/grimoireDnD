@@ -85,3 +85,11 @@ button.rubric.fold.rit { border-bottom-color: var(--ok); } button.rubric.fold.ri
   @keyframes swl { from { transform: translateX(28px); opacity: .4; } }
   @keyframes swr { from { transform: translateX(-28px); opacity: .4; } }
 }
+/* Barre d'onglets qui défile au doigt (Plus ▾ reste à droite) ; fondu sur le bord coupé */
+.tabscroll { display: flex; align-items: stretch; gap: inherit; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; margin-bottom: -1px; }
+.tabscroll::-webkit-scrollbar { display: none; }
+.tabscroll .tab { margin-bottom: 0; flex: none; }
+.tabscroll.fr { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+.tabscroll.fl { -webkit-mask-image: linear-gradient(90deg, transparent, #000 22px); mask-image: linear-gradient(90deg, transparent, #000 22px); }
+.tabscroll.fl.fr { -webkit-mask-image: linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 28px), transparent); }
+.itfind { width: 100%; box-sizing: border-box; margin: 6px 0 8px; }
