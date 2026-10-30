@@ -2,6 +2,7 @@
 import { C, alwaysPrepared, classFeats, isAlwaysPrepared } from "../classes/index.js";
 import { NEXT, onChange, onClick, onInput, onSubmit } from "../core/actions.js";
 import { byName, esc, fmt, fr, plural } from "../core/format.js";
+import { goSpot, keepSpot } from "../core/scroll.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
@@ -255,7 +256,7 @@ onClick("rm", (b) => {
     if (t === "x") { g.extras.splice(+v, 1); S.editX = null; S.xdraft = null; [...S.open].forEach(k => { if (k.startsWith("x:")) S.open.delete(k); }); }
   });
 });
-onClick("view", (b) => { S.view = b.dataset.v; S.open.clear(); S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); });
+onClick("view", (b) => { keepSpot(); S.view = b.dataset.v; S.open.clear(); S.concWarn = null; try { localStorage.setItem("grimoire.view", S.view); } catch (e) {} render(); goSpot(); });
 onClick("row", (b) => { const k = b.dataset.id; if (S.open.has(k)) S.open.delete(k); else S.open.add(k); S.castOpen = null; render(); });
 onClick("xedit", (b) => { S.open.delete("x:" + b.dataset.i); S.editX = +b.dataset.i; S.xdraft = null; render(); const el = document.getElementById("x-ename"); if (el) { el.focus(); el.select(); } });
 onClick("xcancel", () => { S.editX = null; S.xdraft = null; render(); });

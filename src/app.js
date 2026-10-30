@@ -4,6 +4,7 @@ import { C, CLASSES, alwaysPrepared, noSpells } from "./classes/index.js";
 import { beforeEachClick, onChange, onClick, onInput, onKey, startActions } from "./core/actions.js";
 import { esc } from "./core/format.js";
 import { showIosTip } from "./core/pwa.js";
+import { goSpot, keepSpot } from "./core/scroll.js";
 import { G, S } from "./core/state.js";
 import { loadLocal, mutate, pickCurrent, setCur } from "./core/store.js";
 import { render, setRenderer, setStatus, toast } from "./core/ui.js";
@@ -128,7 +129,7 @@ function panelHTML(g) {
 beforeEachClick(a => { if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null; if (a !== "more" && a !== "tab") S.moreOpen = false; }); // un autre clic annule une confirmation en attente
 onClick("hero-edit", () => { S.heroEdit = !S.heroEdit; try { localStorage.setItem("grimoire.edit", S.heroEdit ? "1" : "0"); } catch (e) {} render(); });
 onClick("more", () => { S.moreOpen = !S.moreOpen; render(); });
-onClick("tab", (b) => { S.tab = b.dataset.v; S.moreOpen = false; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); });
+onClick("tab", (b) => { keepSpot(); S.tab = b.dataset.v; S.moreOpen = false; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); goSpot(); }); // chaque onglet garde sa position (core/scroll.js)
 onClick("undo", () => { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } });
 onChange("#cur", t => { setCur(t.value); });
 onChange("#f-level", t => { mutate(g => { g.level = +t.value; }); });

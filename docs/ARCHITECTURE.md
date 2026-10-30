@@ -30,6 +30,7 @@ src/
   styles/                   CSS, un fichier par partie de l'écran (index.css fixe l'ordre)
   core/
     state.js                état de l'écran (S) et personnage en cours (G)
+    scroll.js               position de défilement retenue par personnage, onglet et affichage (Gérer / En jeu)
     schema.js               format d'un personnage : valeurs par défaut, contrôle, version (v3) et migrations
     store.js                enregistrement sur l'appareil, personnage affiché, mutate
     ui.js                   rendu (fourni par app.js), message d'annulation, statut
