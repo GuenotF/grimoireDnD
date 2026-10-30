@@ -6,7 +6,7 @@ const recLabel = r => (REC.find(x => x[0] === r) || REC[3])[1];
 const MAX_ATT = 3;
 /** Un objet qui demande l'harmonisation n'a d'effet magique qu'harmonisé. */
 const usable = x => !x.att || x.attuned;
-const isMagic = x => !!(x.bonus || x.xdmg || x.att || x.chMax);
+const isMagic = x => !!(x.bonus || x.xdmg || x.att || x.chMax || x.inf); // inf : imprégnation d'artificier
 const attunedCount = g => g.items.filter(x => x.att && x.attuned).length;
 /** Recharge des charges : repos long (« à l'aube » compté au repos long), ou repos court pour les objets qui le permettent. */
 function rechargeItems(g, kind) {

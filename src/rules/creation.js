@@ -12,6 +12,9 @@ const { toolLists: TOOL_LISTS, langs: LANGS, packs: PACKS } = ORIGINS;
 // Classes : compétences au choix, Expertise au niveau 1, équipement (options a / b / c), équipement fixe, or de départ (×10 po)
 const W = (ref, q = 1) => ({ ref, q }), O = (n, q = 1, c = false) => ({ n, q, c }), P = pick => ({ pick });
 const CLASS_START = {
+  artificier: { skills: { n: 2, list: ["arcana", "history", "investigation", "medicine", "nature", "perception", "sleight"] }, gold: "5d4",
+    equip: [[["deux armes courantes", [P("simple"), P("simple")]]], [["une armure de cuir clouté", [W("studded-leather")]], ["une armure d'écailles", [W("scale-mail")]]]],
+    fixed: [W("crossbow-light"), O("Carreaux", 20, true), O("Outils de voleur"), O("Sac d'exploration souterraine")] },
   barde: { skills: { n: 3, list: ["acrobatics", "arcana", "athletics", "stealth", "animal", "sleight", "history", "intimidation", "insight", "investigation", "medicine", "nature", "perception", "persuasion", "religion", "performance", "survival", "deception"] }, gold: "5d4",
     equip: [[["une rapière", [W("rapier")]], ["une épée longue", [W("longsword")]], ["une arme courante", [P("simple")]]], [["un sac de diplomate", [O("Sac de diplomate")]], ["un sac d'artiste", [O("Sac d'artiste")]]], [["un luth", [O("Luth")]], ["un autre instrument de musique", [O("Instrument de musique")]]]],
     fixed: [W("leather"), W("dagger")] },

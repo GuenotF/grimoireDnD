@@ -21,7 +21,7 @@ const armorProf = (g, a) => listOf(C(g).armorProf, g).includes(a.cat) || featArm
 function acCalc(g) {
   const dex = R.ab(g, "dex"), worn = equipped(g, "armor");
   const aw = worn.find(x => x.gear.cat !== "shield") || {}, sw = worn.find(x => x.gear.cat === "shield") || {};
-  const armor = aw.gear, shield = sw.gear, mb = it => it && usable(it) ? it.bonus || 0 : 0; // bonus magique (+1…) de l'objet
+  const armor = aw.gear, shield = sw.gear, mb = it => (it && usable(it) ? it.bonus || 0 : 0) + infB(g, it).ac; // bonus magique (+1…) de l'objet, imprégnation comprise
   const parts = [], warn = [];
   if (armor) {
     const dexMax = armor.dexMax != null && armor.cat === "medium" && hasFeat(g, "medium-armor-master") ? FEATS["medium-armor-master"].dexMax : armor.dexMax; // Maître des armures intermédiaires
@@ -60,14 +60,18 @@ const acOf = g => acMode(g) === "calc" ? acCalc(g).total : g.ac;
  * Attaque avec une arme : caractéristique (finesse : la meilleure de FOR et DEX ; distance : DEX ; sinon FOR),
  * maîtrise si la classe maîtrise l'arme, bonus de classe (attackMods). Renvoie { hit, ab, dmg (texte), pills, notes }.
  */
+/** Imprégnation d'artificier portée par l'objet (C(g).itemMagic) : { atk, ac }. */
+const infB = (g, it) => (it && it.inf && C(g).itemMagic && C(g).itemMagic(g, it)) || { atk: 0, ac: 0 };
 function attackOf(g, w, off = false, item = null) { // off : main secondaire (pas de modificateur positif aux dégâts) ; item : objet porté (bonus magique)
   if (C(g).weaponAdjust) w = C(g).weaponAdjust(g, w); // ex. moine : arme de moine (DEX, dé d'arts martiaux)
   const str = R.ab(g, "str"), dex = R.ab(g, "dex");
-  const ab = w.finesse ? (dex > str ? "dex" : "str") : w.rng === "ranged" ? "dex" : "str", mod = ab === "dex" ? dex : str;
+  let ab = w.finesse ? (dex > str ? "dex" : "str") : w.rng === "ranged" ? "dex" : "str", mod = ab === "dex" ? dex : str;
+  const ov = C(g).attackAb ? C(g).attackAb(g, w, item) : null; // ex. Apte au combat (forgeron de guerre) : Intelligence avec une arme magique
+  if (ov && R.ab(g, ov) > mod) { ab = ov; mod = R.ab(g, ov); }
   const prof = weaponProf(g, w) ? R.prof(g.level) : 0, x = C(g).attackMods ? C(g).attackMods(g, w, ab, off) : {};
   const f = featAttack(g, w, ab, !!prof); // options des dons cochées (Maître d'armes lourdes…)
-  const mg = item && usable(item) ? item.bonus || 0 : 0, xd = item && usable(item) && item.xdmg ? ` + ${item.xdmg}` : ""; // objet magique
-  f.hit += mg; f.dmg += mg; if (mg) f.pills.unshift(`+${mg} magique`); if (item && item.att && !item.attuned) f.pills.push("non harmonisée : pas d'effet magique");
+  const ib = infB(g, item), mg = (item && usable(item) ? item.bonus || 0 : 0) + ib.atk, xd = item && usable(item) && item.xdmg ? ` + ${item.xdmg}` : ""; // objet magique
+  f.hit += mg; f.dmg += mg; if (mg) f.pills.unshift(`+${mg} magique`); if (ib.label && item.inf === "boomerang") f.pills.push("revient en main"); if (item && item.att && !item.attuned) f.pills.push("non harmonisée : pas d'effet magique");
   const hit = mod + prof + (x.hit || 0) + f.hit, dmod = (off && !x.offMod ? Math.min(0, mod) : mod) + (x.dmg || 0) + f.dmg, plus = n => n ? ` ${n > 0 ? "+" : "−"} ${Math.abs(n)}` : "";
   const pills = [];
   if (w.vers) pills.push(`à deux mains : ${w.vers}${plus(mod + (x.dmg2 != null ? x.dmg2 : x.dmg || 0))}`);

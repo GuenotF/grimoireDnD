@@ -1,0 +1,108 @@
+## Table dévolution
+ |  |  |  |  | - Emplacements de sorts - |  |  |  |  | 
+Niv | Bonus de maîtrise | Capacités | Imprégnations connues | Objets imprégnés | Sorts mineurs connus | 1.0 | 2.0 | 3.0 | 4.0 | 5.0
+1.0 | 2 | Incantation, Bricolage magique | - | - | 2.0 | 2.0 | - | - | - | -
+2.0 | 2 | Imprégnation d'objet | 4.0 | 2.0 | 2.0 | 2.0 | - | - | - | -
+3.0 | 2 | Spécialité d'artificier, Outil de circonstance | 4.0 | 2.0 | 2.0 | 3.0 | - | - | - | -
+4.0 | 2 | Amélioration de caractéristiques | 4.0 | 2.0 | 2.0 | 3.0 | - | - | - | -
+5.0 | 3 | Capacité de la spécialité d'artificier | 4.0 | 2.0 | 2.0 | 4.0 | 2.0 | - | - | -
+6.0 | 3 | Expertise de l'outillage | 6.0 | 3.0 | 2.0 | 4.0 | 2.0 | - | - | -
+7.0 | 3 | Trait de génie | 6.0 | 3.0 | 2.0 | 4.0 | 3.0 | - | - | -
+8.0 | 3 | Amélioration de caractéristiques | 6.0 | 3.0 | 2.0 | 4.0 | 3.0 | - | - | -
+9.0 | 4 | Capacité de la spécialité d'artificier | 6.0 | 3.0 | 2.0 | 4.0 | 3.0 | 2.0 | - | -
+10.0 | 4 | Adepte des objets magiques | 8.0 | 4.0 | 3.0 | 4.0 | 3.0 | 2.0 | - | -
+11.0 | 4 | Objet de stockage de sort | 8.0 | 4.0 | 3.0 | 4.0 | 3.0 | 3.0 | - | -
+12.0 | 4 | Amélioration de caractéristiques | 8.0 | 4.0 | 3.0 | 4.0 | 3.0 | 3.0 | - | -
+13.0 | 5 | - | 8.0 | 4.0 | 3.0 | 4.0 | 3.0 | 3.0 | 1.0 | -
+14.0 | 5 | Érudit des objets magiques | 10.0 | 5.0 | 4.0 | 4.0 | 3.0 | 3.0 | 1.0 | -
+15.0 | 5 | Capacité de la spécialité d'artificier | 10.0 | 5.0 | 4.0 | 4.0 | 3.0 | 3.0 | 2.0 | -
+16.0 | 5 | Amélioration de caractéristiques | 10.0 | 5.0 | 4.0 | 4.0 | 3.0 | 3.0 | 2.0 | -
+17.0 | 6 | - | 10.0 | 5.0 | 4.0 | 4.0 | 3.0 | 3.0 | 3.0 | 1.0
+18.0 | 6 | Maître des objets magiques | 12.0 | 6.0 | 4.0 | 4.0 | 3.0 | 3.0 | 3.0 | 1.0
+19.0 | 6 | Amélioration de caractéristiques | 12.0 | 6.0 | 4.0 | 4.0 | 3.0 | 3.0 | 3.0 | 2.0
+20.0 | 6 | Âme de l'artifice | 12.0 | 6.0 | 4.0 | 4.0 | 3.0 | 3.0 | 3.0 | 2.0
+## Sorts
+Sorts mineurs | Niveau 1 | Niveau 2 | Niveau 3 | Niveau 4 | Niveau 5
+aspersion d'acide
+assistance
+bouffée de poison
+coup de tonnerre *
+embrasement *
+fouet épineux
+gelure *
+lumière
+lumières dansantes
+main de mage
+message
+pierre magique *
+poigne électrique
+prestidigitation
+rayon de givre
+réparation
+résistance
+stabilisation
+trait de feu | absorption des éléments *
+alarme (rituel)
+catapulte *
+collet *
+déguisement
+détection de la magie (rituel)
+feuille morte
+graisse
+grande foulée
+identification (rituel)
+lueurs féeriques
+purification de nourriture et d'eau (rituel)
+repli expéditif
+sanctuaire
+saut
+simulacre de vie
+soins | agrandissement/rapetissement
+aide
+amélioration de caractéristique
+arme magique
+bouche magique (rituel)
+corde enchantée
+écrire dans le ciel (rituel) *
+flamme éternelle
+flou
+invisibilité
+lévitation
+métal brûlant
+modification d'apparence
+pattes d'araignée
+protection contre le poison
+pyrotechnie *
+restauration partielle
+toile d'araignée
+verrou magique
+vision dans le noir
+voir l'invisible | arme élémentaire
+clignotement
+création de nourriture et d'eau
+dissipation de la magie
+flèches enflammées *
+glyphe de protection
+hâte
+marche sur l'eau (rituel)
+protection contre une énergie
+respiration aquatique (rituel)
+retour à la vie
+serviteur miniature *
+sieste *
+vol | chien de garde de Mordenkainen
+coffre secret de Léomund
+fabrication
+façonnage de la pierre
+fléau élémentaire *
+liberté de mouvement
+œil magique
+peau de pierre
+sanctuaire privé de Mordenkainen
+sphère résiliente d'Otiluke | amélioration de compétences *
+animation d'objets
+création
+main de Bigby
+mur de pierre
+restauration supérieure
+transmutation de la pierre *

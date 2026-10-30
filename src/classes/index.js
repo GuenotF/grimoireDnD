@@ -13,10 +13,11 @@ import rodeur from "./rodeur.js";
 import barde from "./barde.js";
 import clerc from "./clerc.js";
 import ensorceleur from "./ensorceleur.js";
+import artificier from "./artificier.js";
 
 /** Classe sans sorts (le guerrier en a en Chevalier occulte, au niveau 3). */
 export const noSpells = g => { const n = C(g).noSpells; return typeof n === "function" ? n(g) : !!n; };
-export const CLASSES = { magicien, paladin, druide, clerc, ensorceleur, barde, occultiste, barbare, guerrier, moine, roublard, rodeur };
+export const CLASSES = { magicien, paladin, druide, clerc, ensorceleur, barde, occultiste, barbare, guerrier, moine, roublard, rodeur, artificier };
 /** Définition de la classe d'un personnage (magicien pour les anciens fichiers sans classe). */
 export const C = g => CLASSES[g && g.cls] || CLASSES.magicien;
 /** Sorts toujours préparés, hors limite (sorts de serment du paladin). */

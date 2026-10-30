@@ -9,6 +9,7 @@ import { render, toast } from "../core/ui.js";
 import { crStart } from "./creation.js";
 
 const CLASS_INFO = {
+  artificier: { i: "A", col: "#9A5B00", d: "Sorts préparés (Intelligence), imprégnations d'objets, Bricolage magique ; spécialité au niveau 3 (Alchimiste, Artilleur, Forgeron de guerre). Version d'Eberron.", tags: ["Demi-lanceur", "Sorts niv. 1 à 5"] },
   barbare: { i: "B", col: "#C2410C", d: "Rage, Défense sans armure, Attaque téméraire ; voie primitive au niveau 3. Pas de sorts.", tags: ["Combattant", "Dé de vie d12"] },
   barde: { i: "B", col: "#B4436C", d: "Sorts connus, Inspiration bardique, Touche-à-tout, Secrets magiques (sorts de toutes les classes) ; collège au niveau 3. Caractéristique : Charisme.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },
   clerc: { i: "C", col: "#8A6516", d: "Sorts préparés dans toute la liste, domaine divin dès le niveau 1 (sorts de domaine), Conduit divin, Renvoi des morts-vivants. Caractéristique : Sagesse.", tags: ["Lanceur complet", "Sorts niv. 1 à 9"] },

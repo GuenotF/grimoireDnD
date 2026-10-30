@@ -121,3 +121,19 @@ button.rubric.fold.oath { border-bottom-color: var(--gold); } button.rubric.fold
 .portent input.pdie { background: var(--surface); color: var(--ink); border-style: dashed; cursor: text; font-size: 18px; }
 .portent .pdie.used { background: var(--sunk); border-color: var(--rule); color: var(--muted); text-decoration: line-through; }
 .portent .pdie small { font-family: var(--f-body, inherit); font-size: 10px; font-weight: 400; text-decoration: none; margin-top: 2px; }
+/* Artificier : imprégnations, canon occulte, élixirs, défenseur d'acier, homoncule */
+.artbox { display: grid; gap: 8px; margin: 6px 0 12px; }
+.artcount { display: flex; align-items: baseline; justify-content: space-between; font-family: var(--f-display); font-size: 17px; }
+.artcount span { font-weight: 700; }
+.artcount .good { color: var(--ok); } .artcount .over { color: var(--warn); }
+.artinf { display: grid; gap: 4px; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.artinf .h { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.artinf .h b { font-family: var(--f-display); font-size: 15.5px; flex: 1; min-width: 0; }
+.artinf small { font-size: 12.5px; color: var(--muted); }
+.artcard { display: grid; gap: 8px; background: var(--surface); border: 1.5px solid var(--pd-bd); border-radius: 10px; padding: 10px 12px; }
+.artcard .h { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.artcard .h b { font-family: var(--f-display); font-size: 16.5px; flex: 1; min-width: 0; }
+.arthp { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.arthp .v { font-size: 14px; color: var(--muted); margin-right: 4px; }
+.arthp .v b { font-family: var(--f-display); font-size: 20px; color: var(--ink); }
+.arthp input { width: 74px; }

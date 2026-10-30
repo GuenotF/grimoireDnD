@@ -90,7 +90,7 @@ function suggestHTML(g) {
     <div class="sugfree">Entrée : ajouter « ${esc((S.itQ || "").trim())} » comme objet libre</div></div>`;
 }
 // Marques d'un objet magique : bonus, harmonisation, charges
-const magicMarks = x => !isMagic(x) ? "" : ` <i class="mg">✦${x.bonus ? ` +${x.bonus}` : ""}${x.att ? (x.attuned ? " · harmonisé" : " · à harmoniser") : ""}${x.chMax ? ` · ${x.chMax - (x.chU || 0)}/${x.chMax} charge${x.chMax > 1 ? "s" : ""}` : ""}</i>`;
+const magicMarks = x => !isMagic(x) ? "" : ` <i class="mg">✦${x.inf && G() && C(G()).itemMagic ? ` ${esc((C(G()).itemMagic(G(), x) || {}).label || "")}` : ""}${x.bonus ? ` +${x.bonus}` : ""}${x.att ? (x.attuned ? " · harmonisé" : " · à harmoniser") : ""}${x.chMax ? ` · ${x.chMax - (x.chU || 0)}/${x.chMax} charge${x.chMax > 1 ? "s" : ""}` : ""}</i>`;
 const attAside = g => g.items.some(x => x.att) ? ` · harmonisation ${attunedCount(g)}/${MAX_ATT}` : "";
 // Cercles de charges (En jeu) : toucher un cercle pour dépenser ou rendre une charge
 const chargePips = (x, i) => `<div class="itch">${Array.from({ length: x.chMax }, (_, k) => `<button class="pip${k < (x.chU || 0) ? " used" : ""}" data-a="it-chg" data-i="${i}" data-k="${k}" aria-label="${esc(x.n)} : charge ${k + 1}, ${k < (x.chU || 0) ? "utilisée" : "disponible"}"></button>`).join("")}<small>${recLabel(x.rec)}</small></div>`;

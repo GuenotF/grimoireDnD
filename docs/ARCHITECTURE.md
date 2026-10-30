@@ -57,6 +57,8 @@ src/
     rodeur.js               contrat + sorts connus, Ennemi juré, Explorateur-né, Chasseur, réglages (voir AJOUTER_UNE_CLASSE.md)
     rodeur-compagnon.js     Maître des bêtes : compagnon (Bestiaire, maîtrise, PV)
     druide-wildshape.js     Forme sauvage : formes possibles, forme active, Changeforme de combat, Bestiaire
+    artificier.js           contrat + spécialités (canon occulte, élixirs, défenseur d'acier), objets imprégnés, étape Imprégner du repos long
+    artificier-impregnations.js  catalogue des imprégnations et des répliques d'objets magiques (AideDD)
   ui/components.js          éléments réutilisables : sections repliables, capacités dépliables, bouton Retirer
   features/                 mécaniques partagées par toutes les classes
     character.js            onglet Personnage : caractéristiques, combat, jets de sauvegarde (Gérer, En jeu)
@@ -109,6 +111,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `features(g)` | Capacités de classe (avec `control(g)` pour un réglage, ex. style de combat) | | ✓ | ✓ |
 | `resources(g)`, `resourceMax` | Ressources en haut de l'onglet et maximum de chaque compteur | | ✓ | ✓ |
 | `beforeSlots(g)`, `playTop(g)`, `barChips(g)` | Ajouts à l'écran : forme active, Châtiment divin, puce de la barre du haut | | ✓ | ✓ |
+| `itemMagic(g, objet)`, `attackAb(g, arme, objet)` | Artificier : effet de l'imprégnation portée par l'objet (`{ atk, ac, label }`, ajouté au bonus magique) ; caractéristique d'attaque de remplacement (Apte au combat : Intelligence avec une arme magique) | | | |
 | `lrStep(g)` | Étape du repos long guidé après le repos : `{ label, html(g) }` (Présage de la divination) ; `null` sinon | | ✓ | ✓ |
 | `restBar(g)`, `shortPanel(g)`, `shortRest`, `longRest(g)` | Ajouts à la barre de repos, panneau propre au repos court (Restauration arcanique) ou ressource récupérée, repos long (dés de vie et PV : communs, `features/longrest.js`) | ✓ | ✓ | ✓ |
 | `renderSheets(g, levelUpOpen)` | Volets propres (Imposition des mains, formes possibles) | | ✓ | ✓ |
