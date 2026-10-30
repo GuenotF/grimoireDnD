@@ -72,6 +72,7 @@ src/
     spells.js               affichage d'un sort, notes personnelles
     cast.js                 Lancer, concentration, sorts en cours
     topbar.js               barre du haut collée (PV, CA, initiative, puces en cours, six caracs), ligne des emplacements, volet d'une carac. (JdS, test, compétences)
+    swipe.js                balayage horizontal : onglet voisin de la rangée principale (bords, champs, zones défilantes et volets ignorés)
     longrest.js             repos long guidé : récapitulatif, préparation des sorts (aussi hors repos, bouton dans Gérer), étape de classe (C(g).lrStep)
     grimoire.js             onglet Sorts/Grimoire : Gérer, En jeu, capacités de classe, repos
     library.js              Bibliothèque

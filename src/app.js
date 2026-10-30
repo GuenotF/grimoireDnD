@@ -27,6 +27,7 @@ import { ABILITIES } from "./rules/tables.js";
 import { statLabel } from "./ui/components.js";
 import "./ui/components.js";
 import "./features/spells.js";
+import "./features/swipe.js";
 
 function boot() {
   loadLocal(); pickCurrent(); setStatus("Enregistré sur cet appareil"); render();

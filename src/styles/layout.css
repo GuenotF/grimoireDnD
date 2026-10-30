@@ -93,3 +93,9 @@ button.rubric.fold.locked { border-bottom-color: var(--rule); } button.rubric.fo
 button.rubric.fold.rit { border-bottom-color: var(--ok); } button.rubric.fold.rit .chev, button.rubric.fold.rit .h { color: var(--ok); }
 .rubric.locked h3 { color: var(--muted); }
 
+/* Balayage d'onglet (features/swipe.js) : le nouveau panneau arrive du côté du geste */
+@media (prefers-reduced-motion: no-preference) {
+  .panel.swl { animation: swl .18s ease-out; } .panel.swr { animation: swr .18s ease-out; }
+  @keyframes swl { from { transform: translateX(28px); opacity: .4; } }
+  @keyframes swr { from { transform: translateX(-28px); opacity: .4; } }
+}

@@ -152,3 +152,31 @@ def test_nouveau_personnage_clavier(browser, devices, url):
     r = a.js("(() => { const b = document.getElementById('nwsheet').getBoundingClientRect(); return [Math.round(b.bottom), innerHeight, Math.round(b.height)]; })()")
     check(r[0] == r[1] - 300 and r[2] <= 484, f"volet au-dessus du clavier : {r}")
     a.close()
+
+
+def _swipe(a, x0, x1, y0=420, y1=None, sel="#panel"):
+    """Balayage tactile simulé (touchstart puis touchend) depuis un élément de la page."""
+    a.pg.evaluate("""([x0, x1, y0, y1, sel]) => { const el = document.querySelector(sel);
+      const t = (x, y) => new Touch({ identifier: 1, target: el, clientX: x, clientY: y });
+      el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, touches: [t(x0, y0)], changedTouches: [t(x0, y0)] }));
+      el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: [t(x1, y1)] })); }""", [x0, x1, y0, y0 if y1 is None else y1, sel])
+    a.pg.wait_for_timeout(80)
+
+
+def test_balayage_entre_onglets(browser, devices, url):
+    a = App(browser, devices, url, char=NEMEIA, tab="perso")
+    cur = lambda: a.js("document.querySelector('.tabs [aria-selected=true]').dataset.v")
+    tabs = a.js("[...document.querySelectorAll('.tabs > button.tab[data-a=tab]')].map(b => b.dataset.v)")
+    _swipe(a, 300, 150); check(cur() == tabs[1], f"vers la gauche : onglet suivant ({cur()})")
+    _swipe(a, 150, 300); check(cur() == "perso", "vers la droite : onglet précédent")
+    _swipe(a, 150, 300); check(cur() == "perso", "premier onglet : on s'arrête là")
+    _swipe(a, 10, 200); check(cur() == "perso", "départ au bord de l'écran : ignoré (retour du navigateur)")
+    _swipe(a, 300, 260); check(cur() == "perso", "geste trop court : ignoré")
+    _swipe(a, 300, 180, 300, 600); check(cur() == "perso", "geste surtout vertical : ignoré")
+    a.click('[data-a="ab-open"][data-v="dex"]')
+    _swipe(a, 300, 150, sel="#main"); check(cur() == "perso", "volet ouvert : ignoré")
+    a.click('[data-a="ab-close"]')
+    for _ in tabs: _swipe(a, 300, 150)
+    check(cur() == tabs[-1], "dernier onglet : on s'arrête là")
+    check(not a.errors, f"erreurs : {a.errors}")
+    a.close()
