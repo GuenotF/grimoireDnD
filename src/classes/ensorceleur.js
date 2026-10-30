@@ -13,7 +13,7 @@ import { pCantrips, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, pSpel
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { SLOTS } from "../rules/tables.js";
-import { capRow, foldSec, pickRow, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pickRow } from "../ui/components.js";
 import { surge } from "./ensorceleur-sauvage.js";
 
 // Sorts connus par niveau d'ensorceleur ; sorts mineurs 4, 5 (niveau 4), 6 (niveau 10)
@@ -224,8 +224,6 @@ export default {
   subline: g => `Ensorceleur niveau ${g.level} · ${esc(ORIG[g.sorig].n)}${g.sorig === "draco" ? ` (${anc(g)[0].toLowerCase()})` : ""}`,
   subclassField: g => `<div class="field"><label for="f-sorig">Origine magique</label><select id="f-sorig">${Object.entries(ORIG).map(([k, o]) => `<option value="${k}"${k === g.sorig ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>
     ${g.sorig === "draco" ? `<div class="field"><label for="f-anc">Ancêtre</label><select id="f-anc">${Object.entries(ANC).map(([k, [n, t]]) => `<option value="${k}"${k === g.anc ? " selected" : ""}>${n} · ${t}</option>`).join("")}</select></div>` : ""}`,
-  heroStats: g => { const cMax = R.cantrips(g); return `<div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div>${statLabel("Sorts mineurs", "Mineurs")}</div>
-    <div class="stat" role="listitem"><div class="v">${ENS.pts(g) ? `${ENS.left(g)}<small>/${ENS.pts(g)}</small>` : "—"}</div>${statLabel("Points de sorcellerie", "Points")}</div>`; },
   tabs: g => [["grimoire", "Sorts"], ["biblio", "Bibliothèque", classSpells(g).length]],
   moreTabs: () => [["regles", "Règles"], ["imprimer", "Imprimer"]],
   panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },

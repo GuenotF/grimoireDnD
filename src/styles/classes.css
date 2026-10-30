@@ -52,12 +52,10 @@ button.rubric.fold.oath { border-bottom-color: var(--gold); } button.rubric.fold
 .btn.rage-go { background: var(--pd-bd); border-color: var(--pd-bd); color: #fff; font-weight: 700; }
 .pip.fire { border-color: var(--pd-bd); } .pip.fire.used { background: var(--pd-bd); }
 .chip.fire { background: var(--pd-bd); border-color: var(--pd-bd); color: #fff; font-weight: 700; }
-.stat.fire .v { color: var(--pd-fg); }
 .atkopts { display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; padding-top: 6px; font-size: 14px; } .atkopts .warn { font-size: 12.5px; color: var(--warn); flex-basis: 100%; }
 .hpin .btn.half { border-color: var(--ps-bd); color: var(--ps-fg); }
 .hpexh { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 13.5px; border-left: 3px solid var(--warn); padding-left: 8px; } .hpexh span { flex: 1; color: var(--muted); font-size: 12.5px; }
 .ragecard.sneak { border-color: var(--rubric); } .ragecard.sneak.used { opacity: .8; background: var(--sunk); } .ragecard .rh .kp { font-size: 13px; }
-.stat.sneak .v { color: var(--rubric); }
 
 /* Sorts connus (rôdeur…) */
 .knmark { width: 20px; height: 20px; flex: none; border-radius: 50%; border: 1.5px solid var(--rule); box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }

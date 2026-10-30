@@ -11,7 +11,7 @@ import { BY_ID } from "../data.js";
 import { R, classSpells } from "../rules/common.js";
 import { TOOL_LISTS } from "../rules/creation.js";
 import { isMagic } from "../rules/magic.js";
-import { capRow, foldSec, pickRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pickRow, pillsRaw } from "../ui/components.js";
 import { INF, RES_TYPES, allInf, infItems, infKnown, infOf, infPills } from "./artificier-impregnations.js";
 
 // ---------- Table de l'artificier (emplacements de sorts par niveau)
@@ -287,8 +287,6 @@ export default {
   subclass: { lv: 3, label: "Spécialité d'artificier", field: "aspec", opts: () => Object.entries(SPEC).map(([k, s]) => [k, s.full, `${s.sum} Sorts : ${s.sp[3].map(id => BY_ID[id] ? BY_ID[id].n : id).join(", ")}… (outils : ${s.tool.toLowerCase()})`]) },
   subline: g => `Artificier niveau ${g.level}${spec(g) ? ` · ${esc(SPEC[g.aspec].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-aspec">Spécialité</label><select id="f-aspec">${Object.entries(SPEC).map(([k, s]) => `<option value="${k}"${k === g.aspec ? " selected" : ""}>${s.n}</option>`).join("")}</select></div>`,
-  heroStats: g => `<div class="stat" role="listitem"><div class="v">${active(g).length}<small>/${infItems(g.level)}</small></div>${statLabel("Objets imprégnés", "Imprégnés")}</div>
-    <div class="stat" role="listitem"><div class="v">${known(g).length}<small>/${infKnown(g.level)}</small></div>${statLabel("Imprégnations connues", "Connues")}</div>`,
   tabs: g => [["grimoire", "Sorts"], ["biblio", "Bibliothèque", classSpells(g).length]],
   alwaysPrepared: g => specSpells(g),
   alwaysPreparedInfo: g => ({ title: "Sorts de spécialité", aside: `toujours préparés · ${esc(SPEC[g.aspec].n)}`, origin: `Sort de spécialité · ${esc(SPEC[g.aspec].full)}`,
@@ -305,7 +303,8 @@ export default {
   itemMagic: (g, x) => { const f = x && x.inf && INF[x.inf]; return f ? { atk: f.atk ? f.atk(g) : 0, ac: f.ac ? f.ac(g) : 0, label: f.n } : x && x.inf && infOf(x.inf) ? { atk: 0, ac: 0, label: infOf(x.inf).n } : null; },
   // Apte au combat (Forgeron de guerre) : Intelligence avec une arme magique
   attackAb: (g, w, item) => spec(g) === "forgeron" && item && (isMagic(item) || item.inf) ? "int" : null,
-  attackNotes: g => [spec(g) === "forgeron" && g.level >= 5 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "",
+  attacksPerAction: g => spec(g) === "forgeron" && g.level >= 5 ? 2 : 1,
+  attackNotes: g => [
     spec(g) === "artilleur" && g.level >= 5 ? "<b>Arme à feu arcanique</b> : un sort lancé à travers elle gagne +1d8 à un jet de dégâts." : ""].filter(Boolean),
   creation,
   levelUp: {

@@ -11,8 +11,7 @@ import { pConc, pExtras, pFoot, pHeader, pNotes, pSlots, pSpellRow, printHTML } 
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { HALF } from "../rules/tables.js";
-import { statLabel } from "../ui/components.js";
-import { PET_OK, petBeasts, petChips, petGererHTML, petHp, petMax, petPlayHTML, petPrint } from "./rodeur-compagnon.js";
+import { PET_OK, petBeasts, petChips, petGererHTML, petMax, petPlayHTML, petPrint } from "./rodeur-compagnon.js";
 
 // Sorts connus par niveau de rôdeur (le rôdeur n'a pas de sort mineur)
 const KNOWN = [0, 0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11];
@@ -200,7 +199,8 @@ export default {
   },
   acBonus: (g, armor) => g.level >= 2 ? styleAC([g.style], armor) : [],
   attackMods: (g, w, ab, off) => g.level >= 2 ? styleMods(g, [g.style], w, off) : {},
-  attackNotes: g => [g.level >= 5 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "",
+  attacksPerAction: g => g.level >= 5 ? 2 : 1,
+  attackNotes: g => [
     g.level >= 3 && g.rarch === "chasseur" && huntOf(g, 3) ? `<b>${esc(huntOf(g, 3).n)}</b> : ${esc(huntOf(g, 3).d)}` : "",
     foeList(g).length ? `<b>Ennemi juré</b> (${esc(foeList(g).join(", "))}) : avantage pour les pister et te souvenir d'eux.` : ""].filter(Boolean),
   halfDamage: g => g.level >= 15 && g.rarch === "chasseur" && (g.hunt || {})[15] === "instinct" ? "Esquive instinctive (réaction, attaquant visible)" : "",
@@ -209,9 +209,6 @@ export default {
     apply: (g, x) => { if (x && g.rarch === "chasseur") g.hunt = { ...(g.hunt || {}), 3: x }; } },
   subline: g => `Rôdeur niveau ${g.level}${g.level >= 3 ? ` · ${esc(ARCH[g.rarch].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-rarch">Archétype de rôdeur</label><select id="f-rarch">${Object.entries(ARCH).map(([k, o]) => `<option value="${k}"${k === g.rarch ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
-  heroStats: g => { const pet = g.level >= 3 && g.rarch === "betes" && g.pet;
-    return `<div class="stat" role="listitem"><div class="v">${pet ? `${petHp(g)}<small>/${petMax(g)}</small>` : (g.foes || []).length}</div>${statLabel(pet ? "Compagnon (PV)" : "Ennemis jurés", pet ? "Compagnon" : "Ennemis")}</div>
-    <div class="stat" role="listitem"><div class="v">${(g.terrs || []).length}</div>${statLabel("Terrains favoris", "Terrains")}</div>`; },
   tabs: g => [["grimoire", "Sorts"], ["biblio", "Bibliothèque", classSpells(g).length]],
   moreTabs: () => [["regles", "Règles"], ["imprimer", "Imprimer"]],
   panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },

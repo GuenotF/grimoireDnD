@@ -13,12 +13,11 @@ import { BY_ID, SPELLS } from "../data.js";
 import { abilitiesHTML } from "../features/abilities.js";
 import { pCantrips, pDots, pFoot, pHeader, pSlots, pSpellRow, printHTML } from "../features/print.js";
 import { castingRules, concentrationRules } from "../features/rules.js";
-import { initiative } from "../rules/character.js";
 import { R, classSpells } from "../rules/common.js";
 import { TOOL_LISTS } from "../rules/creation.js";
 import { acOf } from "../rules/equipment.js";
 import { heal, hpCur } from "../rules/hp.js";
-import { capRow, foldSec, pickRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pickRow, pillsRaw } from "../ui/components.js";
 
 // ---------- Tables
 const STYLES = stylesOf(["archerie", "deuxmains", "deuxarmes", "defense", "duel", "protection"]); // les six styles du guerrier (AideDD)
@@ -219,13 +218,6 @@ export default {
   subclass: { lv: 3, label: "Archétype martial", field: "garch", opts: () => Object.entries(ARCH).map(([k, a]) => [k, a.full, a.sum]) },
   subline: g => `Guerrier niveau ${g.level}${g.level >= 3 ? ` · ${esc(ARCH[g.garch].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-garch">Archétype martial</label><select id="f-garch">${Object.entries(ARCH).map(([k, o]) => `<option value="${k}"${k === g.garch ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
-  heroStats: g => {
-    const st = (v, f, s, cls = "") => `<div class="stat${cls}" role="listitem"><div class="v">${v}</div>${statLabel(f, s)}</div>`;
-    const sw = st(`${1 - Math.min(1, g.swU)}<small>/1</small>`, "Second souffle", "Souffle"), atk = st(GUE.attacks(g.level), "Attaques par action", "Attaques");
-    if (ek(g) && S.tab !== "caps") return atk + sw; // en-tête des sorts (onglet Sorts) : 4 cases de sorts + 2
-    return atk + st(acOf(g) ?? "?", "CA", "CA") + sw + (mdg(g) ? st(`${GUE.supN(g.level) - Math.min(GUE.supN(g.level), g.supU)}<small>/${GUE.supN(g.level)}</small>`, `Dés de supériorité (${GUE.supD(g.level)})`, GUE.supD(g.level))
-      : st(champ(g) ? GUE.crit(g) : "20", "Critique", "Critique")) + st(signed(initiative(g)), "Initiative", "Initiative") + st(signed(R.prof(g.level)), "Maîtrise", "Maîtrise");
-  },
   tabs: g => [["caps", "Capacités"], ...(ek(g) ? [["grimoire", "Sorts"], ["biblio", "Bibliothèque", classSpells(g).length]] : [])],
   moreTabs: () => [["regles", "Règles"], ["imprimer", "Imprimer"]],
   panels: { caps: g => abilitiesHTML(g), regles: g => rulesHTML(g), imprimer: g => printHTML(g) },
@@ -241,7 +233,8 @@ export default {
   longRest: g => { SHORT.forEach(f => { g[f] = 0; }); g.indU = 0; },
   acBonus: (g, armor) => styleAC(styles(g), armor),
   attackMods: (g, w, ab, off) => { const x = styleMods(g, styles(g), w, off); if (champ(g)) x.pills.push(`critique ${GUE.crit(g)}`); return x; },
-  attackNotes: g => [GUE.attacks(g.level) > 1 ? `<b>Attaque supplémentaire</b> : ${GUE.attacks(g.level)} attaques par action Attaquer.` : "",
+  attacksPerAction: g => GUE.attacks(g.level),
+  attackNotes: g => [
     ...styleNotes(g, styles(g)),
     ek(g) && g.level >= 7 ? `<b>Magie de guerre</b> : ${g.level >= 18 ? "après un sort" : "après un sort mineur"} lancé avec ton action, une attaque d'arme en action bonus.` : "",
     ek(g) && g.level >= 10 ? "<b>Frappe occulte</b> : la cible touchée a un désavantage à son prochain JdS contre ton sort." : "",

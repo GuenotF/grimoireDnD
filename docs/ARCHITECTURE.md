@@ -96,7 +96,9 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `hitDie`, `fileLabel`, `prepNote` | Dé de vie (PV moyens, rappel), nom des sauvegardes, précision sur la préparation | ✓ | ✓ | ✓ |
 | `weaponProf`, `armorProf`, `noMetal` | Maîtrises d'armes (catégories `simple`, `martial` ou identifiants) et d'armures (`light`, `medium`, `heavy`, `shield`) ; refus du métal (druide) | ✓ | ✓ | ✓ |
 | `acBonus(g, armure)`, `attackMods(g, arme)`, `attackNotes(g)` | Bonus de CA (style Défense), modificateurs d'attaque (Duel, Arme à deux mains), rappels sous les attaques (Châtiment divin) | | ✓ | |
-| `noSpells` | Classe sans sorts : onglet Capacités (`tabs` → `caps`, `panels.caps` = `abilitiesHTML`), en-tête de la classe (`heroStats` : six cases), barre du haut sans emplacements, assistant de niveau sans lignes de sorts | | | |
+| `attacksPerAction(g)` | Attaques par action Attaquer (Attaque supplémentaire), affiché dans l'en-tête des Attaques à partir de 2 | | ✓ | |
+| `prepLine(g)` | Ligne de plus dans le cadre « Préparer les sorts » (Gérer), ex. sorts du grimoire du magicien | | | |
+| `noSpells` | Classe sans sorts : onglet Capacités (`tabs` → `caps`, `panels.caps` = `abilitiesHTML`), barre du haut sans emplacements, assistant de niveau sans lignes de sorts | | | |
 | `capsTop(g)`, `attackOptions(g)`, `extraAttacks(g, liste)` | Carte en tête de l'onglet Capacités (Rage), cases d'options sous les attaques (Attaque téméraire), attaques ajoutées (Frénésie) | | | |
 | `acBase(g)`, `speedBonus(g)` | CA sans armure (Défense sans armure), bonus de vitesse (Déplacement rapide) | | | |
 | `halfDamage(g)`, `onDown(g)` | Résistance active : bouton « Dégâts ½ » de la carte des PV ; effet d'une chute à 0 PV (fin de la rage) | | | |
@@ -105,7 +107,7 @@ Chaque fichier `classes/<classe>.js` exporte par défaut un objet de même forme
 | `asiLevels` | Niveaux d'amélioration de caractéristiques, si différents de 4, 8, 12, 16, 19 (guerrier, roublard plus tard) | | | |
 | `saves` | Jets de sauvegarde maîtrisés par la classe (codes `str`, `dex`, `con`, `int`, `wis`, `cha`) | ✓ | ✓ | ✓ |
 | `defaults()`, `normalize(o)` | Champs propres au personnage et leur contrôle à l'ouverture | ✓ | ✓ | ✓ |
-| `subline(g)`, `subclassField(g)`, `heroStats(g)` | En-tête : sous-titre, champ de sous-classe, statistiques | ✓ | ✓ | ✓ |
+| `subline(g)`, `subclassField(g)` | En-tête : sous-titre, champ de sous-classe | ✓ | ✓ | ✓ |
 | `tabs(g)`, `moreTabs(g)`, `panels` | Onglets de la rangée principale (Sorts, Bibliothèque, Bestiaire), onglets du menu Plus (Règles, Imprimer), contenu des onglets propres. Personnage et Sauvegarde sont ajoutés par l'application | ✓ | ✓ | ✓ |
 | `alwaysPrepared(g)`, `alwaysPreparedInfo(g)` | Sorts toujours préparés et leurs libellés (serment) | | ✓ | |
 | `canRitual(prepared)`, `ritualNeedsPrep` | Lancer en rituel | ✓ | | ✓ |

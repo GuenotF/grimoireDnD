@@ -9,7 +9,7 @@ import { pCantrips, pClassList, pConc, pDots, pExtras, pFoot, pHeader, pNotes, p
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { SLOTS } from "../rules/tables.js";
-import { capRow, foldSec, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pillsRaw } from "../ui/components.js";
 import { MV, SIZES, actRest, bestiaryHTML, fpLabel, modOf, newForms, spdTxt, wsActiveHTML, wsAllowed, wsConcHTML, wsSheetHTML } from "./druide-wildshape.js";
 
 const DRU_FEATS = [
@@ -163,8 +163,6 @@ export default {
     apply: (g, x) => { if (x) g.terrain = x; } },
   subline: g => `Druide niveau ${g.level}${g.level >= 2 ? ` · ${esc(CIRCLES[g.circle].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-circle">Cercle druidique</label><select id="f-circle">${Object.entries(CIRCLES).map(([k, o]) => `<option value="${k}"${k === g.circle ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
-  heroStats: g => { const cMax = R.cantrips(g); return `<div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div>${statLabel("Sorts mineurs", "Mineurs")}</div>
-    <div class="stat" role="listitem"><div class="v">${DRU.ws(g) ? `FP ${DRU.fp(g)}` : "—"}</div>${statLabel("Forme sauvage", "Forme")}</div>`; },
   tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length],["bestiaire","Bestiaire", BEASTS.filter(b => wsAllowed(g, b)).length]],
   moreTabs: () => [["regles","Règles"],["imprimer","Imprimer"]],
   panels: { bestiaire: g => bestiaryHTML(g), imprimer: g => printHTML(g), regles: g => rulesHTML(g) },

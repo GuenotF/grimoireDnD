@@ -13,7 +13,7 @@ import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { HALF } from "../rules/tables.js";
-import { capRow, foldSec, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pillsRaw } from "../ui/components.js";
 
 // Détail de Perception divine (capacité dépliable)
 function dsBody(g) {
@@ -229,7 +229,8 @@ export default {
   acBonus: (g, armor) => g.level >= 2 ? styleAC([g.style], armor) : [],
   // Styles de combat (rules/styles.js) : Duel, Défense calculés ; Arme à deux mains, Protection rappelés
   attackMods: (g, w, ab, off) => g.level >= 2 ? styleMods(g, [g.style], w, off) : {},
-  attackNotes: g => [g.level >= 5 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "", ...(g.level >= 2 ? styleNotes(g, [g.style]) : []),
+  attacksPerAction: g => g.level >= 5 ? 2 : 1,
+  attackNotes: g => [...(g.level >= 2 ? styleNotes(g, [g.style]) : []),
     g.level >= 2 ? `Touché au corps à corps ? <b>Châtiment divin</b> : dépense un emplacement, +2d8 radiant (+1d8 par niveau au-dessus du 1er, +1d8 contre morts-vivants et fiélons).` : "",
     (g.effects || []).some(e => e.name === "Arme sacrée") ? `<b>Arme sacrée</b> active : +${Math.max(1, R.am(g))} au toucher avec l'arme choisie.` : ""].filter(Boolean),             // jets de sauvegarde maîtrisés par la classe
   cantrips: () => 0,
@@ -244,8 +245,6 @@ export default {
   subclass: { lv: 3, label: "Serment sacré", field: "oath", opts: () => Object.entries(OATHS).map(([k, o]) => [k, o.full, `Conduit divin : ${o.cd.map(x => x.n).join(" ou ")}. Sorts : ${o.sp[3].map(id => BY_ID[id] ? BY_ID[id].n : id).join(", ")}…${o.src !== "Manuel des joueurs 2014" ? ` (${o.src})` : ""}`]) },
   subline: g => `Paladin niveau ${g.level}${g.level >= 3 ? ` · ${esc(OATHS[g.oath].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-oath">Serment sacré</label><select id="f-oath">${Object.entries(OATHS).map(([k, o]) => `<option value="${k}"${k === g.oath ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
-  heroStats: g => `<div class="stat" role="listitem"><div class="v">${oathSpells(g).length}</div>${statLabel("Sorts de serment", "Serment")}</div>
-    <div class="stat" role="listitem"><div class="v">${5 * g.level}</div>${statLabel("Imposition (PV)", "Imposition")}</div>`,
   tabs: g => [["grimoire","Sorts"],["biblio","Bibliothèque", classSpells(g).length]],
   moreTabs: () => [["regles","Règles"],["imprimer","Imprimer"]],
   panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },

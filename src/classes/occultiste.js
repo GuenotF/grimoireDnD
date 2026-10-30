@@ -12,7 +12,7 @@ import { pCantrips, pConc, pDots, pExtras, pFoot, pHeader, pNotes, pSlots, pSpel
 import { castingRules, concentrationRules } from "../features/rules.js";
 import { R, classSpells } from "../rules/common.js";
 import { setTemp } from "../rules/hp.js";
-import { capRow, foldSec, pickRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pickRow, pillsRaw } from "../ui/components.js";
 
 // ---------- Tables
 const KNOWN = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
@@ -286,8 +286,6 @@ export default {
   subclass: { lv: 1, label: "Patron d'Outremonde", field: "patron", opts: () => Object.entries(PATRONS).map(([k, p]) => [k, p.full, p.sum]) },
   subline: g => `Occultiste niveau ${g.level} · ${esc(pat(g).full)}`,
   subclassField: g => `<div class="field"><label for="f-patron">Patron d'Outremonde</label><select id="f-patron">${Object.entries(PATRONS).map(([k, p]) => `<option value="${k}"${k === g.patron ? " selected" : ""}>${p.n}</option>`).join("")}</select></div>`,
-  heroStats: g => { const cMax = R.cantrips(g); return `<div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div>${statLabel("Sorts mineurs", "Mineurs")}</div>
-    <div class="stat" role="listitem"><div class="v">${(g.inv || []).length}<small>/${INV_N[g.level]}</small></div>${statLabel("Manifestations", "Manif.")}</div>`; },
   tabs: g => [["grimoire", "Sorts"], ["biblio", "Bibliothèque", classSpells(g).length]],
   moreTabs: () => [["regles", "Règles"], ["imprimer", "Imprimer"]],
   panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },

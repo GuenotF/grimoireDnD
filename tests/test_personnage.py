@@ -57,7 +57,12 @@ def test_creation_puis_fiche(browser, devices, url):
     a.click('#absheet [data-a="ab-close"]')
     check(a.pg.is_hidden("#absheet"), "volet fermé")
     a.tab("grimoire")
-    check(a.text(".statcap") == "Sorts" and "DD des sorts" in a.text(".stats") and a.count("#topbar .tbab") == 6, "en-tête des sorts dans l'onglet Sorts, barre toujours là")
+    check(a.count(".hero .stats") == 0 and a.count("#topbar .tbab") == 6, "pas de bandeau des sorts, barre toujours là")
+    a.view("jeu")
+    dd = a.js("8 + R.prof(G().level) + R.am(G())"); at = a.js("R.prof(G().level) + R.am(G())")
+    check(a.text(".slotline .dd") == f"DD {dd} · Att. +{at}", f"en jeu : DD et attaque de sort dans la ligne des emplacements ({a.text('.slotline .dd')})")
+    a.view("gerer")
+    check(a.count(".slotline .dd") == 0 and "Préparés" in a.text(".slotline"), "Gérer : sorts préparés dans la ligne, sans le DD")
     check(a.js("getComputedStyle(document.querySelector('.stick')).position") == "sticky" and a.count(".stick .tabs") == 1, "barre et onglets collés en haut")
     a.close()
 

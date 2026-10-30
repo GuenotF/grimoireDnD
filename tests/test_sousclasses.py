@@ -52,7 +52,7 @@ def test_druide_terre(browser, devices, url):
     prep = a.js("alwaysPrepared(G())")
     check(set(prep) == {"spider-climb", "barkskin", "call-lightning", "plant-growth"}, f"sorts de cercle Forêt niveaux 3 et 5 : {prep}")
     check(a.js("R.cantrips(G())") == 4, "un sort mineur de plus (3 + 1)")
-    check(a.count(".wscf") == 0 and "FP 1/2" in a.text(".stats") or "FP 0.5" in a.text(".stats"), f"Forme sauvage du druide de base ({a.text('.stats')})")
+    check(a.count(".wscf") == 0, "Forme sauvage du druide de base (pas de forme de combat)")
     a.click('[data-a="short-open"]')
     check("Récupération naturelle" in a.text("#short-panel") and "Forme sauvage" in a.text("#short-panel"), "repos court : Forme sauvage et Récupération naturelle")
     a.click('#short-panel [data-a="sr-pick"] >> nth=0'); a.click('#short-panel [data-a="sr-go"]')

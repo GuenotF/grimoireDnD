@@ -6,6 +6,8 @@ def test_limite_de_preparation(browser, devices, url):
     a = App(browser, devices, url, char=NEMEIA)
     q = lambda: (a.g("prepared.length"), a.count(".gprep.full"))
     check(q() == (7, 0), f"7 préparés sur 8 : {q()}")
+    n, exp = a.g("spells.length"), a.js("R.expected(G().level)")
+    check(f"Grimoire : {n} / {exp} min." in a.text(".lrentry") and a.count(".lrentry small b.over") == (1 if n < exp else 0), f"cadre de préparation : sorts du grimoire ({a.text('.lrentry')})")
     a.pg.check('.gprep[data-id="detect-magic"]'); a.pg.wait_for_timeout(50)
     check(q() == (8, 1), f"limite atteinte, une case grisée : {q()}")
     a.click('.gprep[data-id="sleep"]', force=True)

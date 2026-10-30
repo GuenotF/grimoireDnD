@@ -10,7 +10,7 @@ OMBRE = {"name": "Ombre-Poigne", "cls": "roublard", "level": 4, "v": 3, "arch": 
 
 def test_capacites_et_attaques(browser, devices, url):
     a = App(browser, devices, url, char=OMBRE, view="jeu")
-    check(a.texts(".stats .v")[:5] == ["2d6", "+8", "14", "+7", "14"], f"en-tête : {a.texts('.stats .v')}")
+    check(a.count(".hero .stats") == 0 and "+2d6" in a.text("#sneak-card"), "pas de bandeau : attaque sournoise dans sa carte")
     atk = a.texts(".atk .ah")
     check(atk[0] == "Dague de cultiste +5 1d4 + 3 perforant" and atk[2] == "Dague (main secondaire) +5 1d4 perforant" and atk[3].startswith("Fronde +5 1d4 + 3"), f"attaques : {atk}")
     check(a.text(".atkbox").count("sournoise +2d6") == 4 and atk[4] == "Mains nues +2 1 contondant", "sournoise sur les armes de finesse et à distance, pas à mains nues")
@@ -82,5 +82,5 @@ def test_escroc_arcanique(browser, devices, url):
     check(a.g("level") == 3 and a.g("arch") == "escroc" and a.g("prepared.length") == 3 and a.js("G().cantrips.join()") == "mage-hand,minor-illusion,fire-bolt", "niveau 3 : 3 sorts connus, main de mage + 2 sorts mineurs")
     check(a.count('[data-a="tab"][data-v="grimoire"]') == 1, "onglet Sorts")
     a.tab("grimoire"); a.view("jeu")
-    check(a.count('.slotrow [data-a="pip"]') == 2 and "DD" in a.text(".hero"), "2 emplacements, en-tête des sorts")
+    check(a.count('.slotrow [data-a="pip"]') == 2 and a.text(".slotline .dd").startswith("DD "), "2 emplacements, DD dans la ligne des emplacements")
     a.close()

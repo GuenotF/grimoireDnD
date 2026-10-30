@@ -24,14 +24,16 @@ function topbarHTML(g) {
   return `<div class="topbar" id="topbar"><div class="tbrow">${hpChipHTML(g)}${st(acOf(g) ?? "?", "CA")}${st(signed(initiative(g)), "Init")}<div class="fx">${fx}</div></div>
   <div class="tbabs" role="group" aria-label="Caractéristiques">${abs}</div></div>`;
 }
-// Ligne des emplacements (onglet principal, lanceurs de sorts) : toucher descend aux emplacements
+// Ligne des emplacements (onglet principal, lanceurs de sorts) : toucher descend aux emplacements.
+// En jeu : DD et attaque de sort en tête ; dans Gérer : sorts préparés ou connus.
 function slotLineHTML(g) {
   if (!R.slots(g).length) return "";
-  return `<button class="slotline" data-a="to-slots" aria-label="Aller aux emplacements de sorts"><span class="grp">${R.slots(g).map((n, i) => {
+  const mod = R.am(g), prof = R.prof(g.level), jeu = S.view === "jeu";
+  return `<button class="slotline" data-a="to-slots" aria-label="Aller aux emplacements de sorts">${jeu ? `<span class="prepc dd" title="DD des sorts · attaque de sort">DD <b>${8 + prof + mod}</b> · Att. <b>${signed(prof + mod)}</b></span>` : ""}<span class="grp">${R.slots(g).map((n, i) => {
     if (!n) return ""; // magie de pacte
     const used = Math.min(n, +(g.used[i + 1] || 0));
     return `<span class="lv" aria-label="Niveau ${i + 1} : ${n - used} sur ${n}"><b>${i + 1}</b>${Array.from({ length: n }, (_, k) => `<span class="d${k < used ? " u" : ""}"></span>`).join("")}</span>`;
-  }).join("")}</span>${S.view !== "jeu" && R.maxLevel(g) ? `<span class="prepc${g.prepared.length > R.prepMax(g) ? " over" : ""}">${C(g).known ? "Connus" : "Préparés"} <b>${g.prepared.length}</b>/${R.prepMax(g)}</span>` : ""}<span class="go">Emplacements ⌃</span></button>`;
+  }).join("")}</span>${!jeu && R.maxLevel(g) ? `<span class="prepc${g.prepared.length > R.prepMax(g) ? " over" : ""}">${C(g).known ? "Connus" : "Préparés"} <b>${g.prepared.length}</b>/${R.prepMax(g)}</span>` : ""}<span class="go">Emplacements ⌃</span></button>`;
 }
 function abSheetHTML(g) {
   const k = S.abOpen, p = saveProf(g, k), half = halfProf(g, k);

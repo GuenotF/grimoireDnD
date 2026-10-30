@@ -148,6 +148,6 @@ onClick("lr-flt", (b) => { if (!S.lr) return; S.lr.lv = b.dataset.v; S.luKeep = 
 onInput("#lr-q", t => { if (!S.lr) return; S.lr.q = t.value; S.luKeep = true; render(); });
 
 /** Bouton « Préparer les sorts » en tête de la liste (onglet Sorts, Gérer). */
-const prepOpenHTML = g => prepares(g) ? `<div class="lrentry"><div><b>Sorts préparés <span class="${g.prepared.length > R.prepMax(g) ? "over" : g.prepared.length === R.prepMax(g) ? "good" : ""}">${g.prepared.length} / ${R.prepMax(g)}</span></b><small>à changer après un repos long</small></div><button class="btn" data-a="prep-open">Préparer les sorts</button></div>` : "";
+const prepOpenHTML = g => prepares(g) ? `<div class="lrentry"><div><b>Sorts préparés <span class="${g.prepared.length > R.prepMax(g) ? "over" : g.prepared.length === R.prepMax(g) ? "good" : ""}">${g.prepared.length} / ${R.prepMax(g)}</span></b><small>à changer après un repos long</small>${C(g).prepLine ? `<small>${C(g).prepLine(g)}</small>` : ""}</div><button class="btn" data-a="prep-open">Préparer les sorts</button></div>` : "";
 
 export { lrHTML, prepOpenHTML, applyLongRest, prepares };

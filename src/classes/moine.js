@@ -13,13 +13,13 @@ import { NO_TRACK, concOf } from "../features/cast.js";
 import { innateBlock, innateSpells } from "../features/innate.js";
 import { pDots, pFoot, pHeader, printHTML } from "../features/print.js";
 import { pText, upcast } from "../features/spells.js";
-import { initiative, speedOf } from "../rules/character.js";
+import { speedOf } from "../rules/character.js";
 import { R } from "../rules/common.js";
 import { TOOL_LISTS } from "../rules/creation.js";
 import { acCalc } from "../rules/equipment.js";
 import { heal, hpCur } from "../rules/hp.js";
 import { ABILITIES } from "../rules/tables.js";
-import { foldSec, pickRow, pillsRaw, statLabel } from "../ui/components.js";
+import { foldSec, pickRow, pillsRaw } from "../ui/components.js";
 
 // ---------- Tables
 const MON = {
@@ -253,11 +253,6 @@ export default {
   subclass: { lv: 3, label: "Tradition monastique", field: "mtrad", opts: () => Object.entries(TRAD).map(([k, t]) => [k, t.full, t.sum]) },
   subline: g => `Moine niveau ${g.level}${g.level >= 3 ? ` · ${esc(TRAD[g.mtrad].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-mtrad">Tradition monastique</label><select id="f-mtrad">${Object.entries(TRAD).map(([k, t]) => `<option value="${k}"${k === g.mtrad ? " selected" : ""}>${t.n}</option>`).join("")}</select></div>`,
-  heroStats: g => {
-    const st = (v, f, s, cls = "") => `<div class="stat${cls}" role="listitem"><div class="v">${v}</div>${statLabel(f, s)}</div>`;
-    return st(MON.ki(g) ? `${kiLeft(g)}<small>/${MON.ki(g)}</small>` : "—", "Points de ki", "Ki") + st(MON.die(g.level), "Arts martiaux", "Dé") + st(acCalc(g).total, "CA", "CA")
-      + st(`${String(speedOf(g)).replace(".", ",")} m`, "Vitesse", "Vitesse") + st(MON.dd(g), "DD de ki", "DD") + st(signed(initiative(g)), "Initiative", "Init.");
-  },
   tabs: () => [["caps", "Capacités"]],
   moreTabs: () => [["regles", "Règles"], ["imprimer", "Imprimer"]],
   panels: { caps: g => abilitiesHTML(g), regles: g => rulesHTML(g), imprimer: g => printHTML(g) },
@@ -279,7 +274,8 @@ export default {
   weaponAdjust: (g, w) => !monkWeapon(w) || !noArmor(g) ? w : { ...w, finesse: true, monk: true, dmg: avg(MON.die(g.level)) > avg(w.dmg) ? MON.die(g.level) : w.dmg },
   unarmed: g => noArmor(g) ? { die: MON.die(g.level), bonus: true, pills: ["arts martiaux", ...(g.level >= 6 ? ["magique (ki)"] : [])] } : null,
   attackMods: (g, w) => w.monk ? { pills: ["arme de moine"] } : {},
-  attackNotes: g => [g.level >= 5 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "",
+  attacksPerAction: g => g.level >= 5 ? 2 : 1,
+  attackNotes: g => [
     MON.ki(g) ? `<b>Déluge de coups</b> (1 ki) : deux attaques à mains nues en action bonus au lieu d'une.` : "",
     g.level >= 5 ? `<b>Frappe étourdissante</b> (1 ki) : au toucher au corps à corps, JdS CON ${MON.dd(g)}.` : "",
     noArmor(g) ? "" : "<b>Arts martiaux</b> : seulement sans armure ni bouclier."].filter(Boolean),

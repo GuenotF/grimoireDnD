@@ -14,7 +14,7 @@ import { keyPills } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { LANGS } from "../rules/creation.js";
 import { SLOTS, SKILLS } from "../rules/tables.js";
-import { capRow, foldSec, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pillsRaw } from "../ui/components.js";
 
 const DD = g => 8 + R.prof(g.level) + R.am(g);
 const WIS = g => Math.max(1, R.am(g));
@@ -243,8 +243,6 @@ export default {
   subclass: { lv: 1, label: "Domaine divin", field: "domain", opts: () => Object.entries(DOMAINS).map(([k, d]) => [k, d.full, d.sum]) },
   subline: g => `Clerc niveau ${g.level} · ${esc(dom(g).full)}`,
   subclassField: g => `<div class="field"><label for="f-domain">Domaine divin</label><select id="f-domain">${Object.entries(DOMAINS).map(([k, d]) => `<option value="${k}"${k === g.domain ? " selected" : ""}>${d.n}</option>`).join("")}</select></div>`,
-  heroStats: g => { const cMax = R.cantrips(g); return `<div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div>${statLabel("Sorts mineurs", "Mineurs")}</div>
-    <div class="stat" role="listitem"><div class="v">${CLE.cd(g) ? `${CLE.cd(g) - Math.min(CLE.cd(g), g.ccdU)}<small>/${CLE.cd(g)}</small>` : "—"}</div>${statLabel("Conduit divin", "Conduit")}</div>`; },
   tabs: g => [["grimoire", "Sorts"], ["biblio", "Bibliothèque", classSpells(g).length]],
   moreTabs: () => [["regles", "Règles"], ["imprimer", "Imprimer"]],
   panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },

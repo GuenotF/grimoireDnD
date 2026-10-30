@@ -1,16 +1,14 @@
 // Barbare (Manuel des joueurs 2014) : Rage, Défense sans armure, Attaque téméraire, voie primitive (Berserker).
 // Classe sans sorts : onglet Capacités (features/abilities.js). Résumés rédigés pour la table, à vérifier dans le livre.
 import { onChange, onClick } from "../core/actions.js";
-import { esc, fmt, plural, signed } from "../core/format.js";
+import { esc, plural, signed } from "../core/format.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
 import { abilitiesHTML } from "../features/abilities.js";
 import { pDots, pFoot, pHeader, printHTML } from "../features/print.js";
-import { speedOf } from "../rules/character.js";
 import { R } from "../rules/common.js";
 import { acCalc } from "../rules/equipment.js";
-import { statLabel } from "../ui/components.js";
 
 // Voies primitives du Manuel des joueurs
 const VOIES = { berserker: { n: "Berserker", full: "Voie du Berserker", sum: "Frénésie : attaque en action bonus pendant la rage (un niveau d'épuisement à la fin). Puis Rage aveugle, Présence intimidante, Représailles." },
@@ -143,11 +141,6 @@ export default {
     apply: (g, x) => { if (x) g.totem = { ...(g.totem || {}), 3: x }; } },
   subline: g => `Barbare niveau ${g.level}${g.level >= 3 ? ` · ${esc(VOIES[g.voie].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-voie">Voie primitive</label><select id="f-voie">${Object.entries(VOIES).map(([k, o]) => `<option value="${k}"${k === g.voie ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
-  heroStats: g => {
-    const n = BAR.rage(g), st = (v, f, s, cls = "") => `<div class="stat${cls}" role="listitem"><div class="v">${v}</div>${statLabel(f, s)}</div>`;
-    return st(n > 10 ? "∞" : `${rageLeft(g)}<small>/${n}</small>`, "Rages", "Rage", g.raging ? " fire" : "") + st(`+${BAR.dmg(g)}`, "Dégâts de rage", "Dégâts") + st(acCalc(g).total, "CA (calculée)", "CA")
-      + st(`${fmt(speedOf(g))} m`, "Vitesse", "Vitesse") + st(g.level >= 5 ? 2 : 1, "Attaques par action", "Attaques") + st(signed(R.prof(g.level)), "Maîtrise", "Maîtrise");
-  },
   tabs: () => [["caps", "Capacités"]],
   moreTabs: () => [["regles", "Règles"], ["imprimer", "Imprimer"]],
   panels: { caps: g => abilitiesHTML(g), regles: g => rulesHTML(g), imprimer: g => printHTML(g) },
@@ -172,7 +165,8 @@ export default {
   },
   attackOptions: g => g.level >= 2 ? `<div class="atkopts"><label class="check"><input type="checkbox" data-a="opt-reckless"${S.reckless ? " checked" : ""}> Attaque téméraire</label>${S.reckless ? `<span class="warn">Les attaques contre toi ont l'avantage jusqu'à ton prochain tour.</span>` : ""}</div>` : "",
   extraAttacks: (g, list) => { if (!frenzyOn(g)) return; const m = list.find(a => a.melee); if (m) list.splice(list.indexOf(m) + 1, 0, { ...m, n: `${m.n} · Frénésie (action bonus)`, q: 1 }); },
-  attackNotes: g => [g.level >= 5 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "", g.level >= 9 ? `<b>Critique brutal</b> : +${plural(BAR.brutal(g), "dé")} de l'arme sur un critique au corps à corps.` : ""].filter(Boolean),
+  attacksPerAction: g => g.level >= 5 ? 2 : 1,
+  attackNotes: g => [g.level >= 9 ? `<b>Critique brutal</b> : +${plural(BAR.brutal(g), "dé")} de l'arme sur un critique au corps à corps.` : ""].filter(Boolean),
   // Carte des PV : en rage, bouton « dégâts réduits » (résistance contondant, perforant, tranchant)
   onDown: g => { if (!g.raging) return ""; const fr = frenzyOn(g); g.raging = false; g.frenzy = false; if (fr) g.exh = Math.min(6, (g.exh || 0) + 1); return `fin de la rage${fr ? ` (épuisement ${g.exh})` : ""}`; },
   halfDamage: g => !g.raging ? "" : isTotem(g) && totemOf(g, 3) === "ours" ? "Rage, Ours : tous les dégâts sauf psychiques" : "Rage : contondant, perforant, tranchant",

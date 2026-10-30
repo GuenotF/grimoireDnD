@@ -14,7 +14,8 @@ def test_classe_sans_sorts(browser, devices, url):
     a.click('[data-a="more"]')
     check(a.texts(".moremenu button") == ["Règles", "Imprimer", "Sauvegarde"], "menu Plus")
     a.pg.keyboard.press("Escape")
-    check(a.text(".statcap") == "Barbare" and "3/3" in a.texts(".stats .v")[0] and a.texts(".stats .v")[2] == "14", f"en-tête : {a.texts('.stats .v')}")
+    check(a.count(".hero .stats") == 0 and a.count('[data-a="res-pip"][data-r="rage"]') == 3 and a.text("#topbar .tbst b") == "14", "pas de bandeau de classe : rages dans la carte, CA dans la barre")
+    check("attaques / action" not in a.text(".rubric.fold[data-k='ch-atk']"), "une seule attaque : rien dans l'en-tête des Attaques")
     check("sorts" not in a.text(".subline"), "pas de « sorts jusqu'au niveau »")
     check(a.count("#topbar .chip.hp") == 1, "barre du haut avec les PV, sans emplacements")
     check(a.count(".atk") == 3, "attaques dans l'onglet Capacités (hache, hachette, mains nues)")
@@ -64,7 +65,7 @@ def test_rage_prend_fin_a_0_pv_et_niveau_5(browser, devices, url):
     check(b.count('[data-a="lu-go"]') == 1 and "Rien à choisir" not in b.text("#lvlup"), "rien à choisir : étape 2 sautée")
     b.click('[data-a="lu-back"]'); check(b.js("S.lu.step") == 1, "retour : étape 1")
     b.click(".lufoot .primary"); b.click('[data-a="lu-go"]')
-    check(b.g("level") == 5 and "12 m" in b.texts(".stats .v")[3] and "Attaque supplémentaire" in b.text(".atknotes"), "niveau 5 : Déplacement rapide, Attaque supplémentaire")
+    check(b.g("level") == 5 and b.js("speedOf(G())") == 12 and "2 attaques / action" in b.text(".rubric.fold[data-k='ch-atk']"), "niveau 5 : Déplacement rapide, Attaque supplémentaire (en-tête des Attaques)")
     b.close()
 
 

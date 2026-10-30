@@ -12,7 +12,7 @@ import { castingRules, concentrationRules } from "../features/rules.js";
 import { keyPills, spellBody, tags } from "../features/spells.js";
 import { R, classSpells } from "../rules/common.js";
 import { SKILLS, SLOTS } from "../rules/tables.js";
-import { capRow, foldSec, pickRow, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pickRow, pillsRaw } from "../ui/components.js";
 import { CLASSES } from "./index.js";
 
 const KNOWN = [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 15, 16, 18, 19, 19, 20, 22, 22, 22];
@@ -187,8 +187,6 @@ export default {
   subclass: { lv: 3, label: "Collège bardique", field: "bcol", opts: () => Object.entries(COL).map(([k, c]) => [k, c.full, c.sum]) },
   subline: g => `Barde niveau ${g.level}${g.level >= 3 ? ` · ${esc(COL[g.bcol].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-bcol">Collège bardique</label><select id="f-bcol">${Object.entries(COL).map(([k, c]) => `<option value="${k}"${k === g.bcol ? " selected" : ""}>${c.n}</option>`).join("")}</select></div>`,
-  heroStats: g => { const cMax = R.cantrips(g); return `<div class="stat ${g.cantrips.length > cMax ? "alert" : ""}" role="listitem"><div class="v">${g.cantrips.length}<small>/${cMax}</small></div>${statLabel("Sorts mineurs", "Mineurs")}</div>
-    <div class="stat" role="listitem"><div class="v">${BAR.ins(g) - Math.min(BAR.ins(g), g.insU)}<small>/${BAR.ins(g)}</small></div>${statLabel(`Inspiration ${BAR.die(g.level)}`, `Inspi. ${BAR.die(g.level)}`)}</div>`; },
   tabs: g => [["grimoire", "Sorts"], ["biblio", "Bibliothèque", classSpells(g).length]],
   moreTabs: () => [["regles", "Règles"], ["imprimer", "Imprimer"]],
   panels: { imprimer: g => printHTML(g), regles: g => rulesHTML(g) },
@@ -203,7 +201,8 @@ export default {
   alwaysPrepared: g => (g.secrets || []).filter(id => BY_ID[id] && BY_ID[id].l <= R.maxLevel(g)),
   alwaysPreparedInfo: () => ({ title: "Secrets magiques", aside: "sorts d'autres classes · en plus des sorts connus", origin: "Secrets magiques", tip: "Secret magique : en plus des sorts connus", aria: "Secret magique" }),
   restBar: g => g.level >= 2 ? `<span class="muted">Repos court : dés de vie${g.level >= 5 ? ", Inspiration bardique" : ""} ; Chant reposant, +1${BAR.song(g.level)} PV par allié qui dépense un dé. Repos long : tout.</span>` : null,
-  attackNotes: g => [valor(g) && g.level >= 6 ? "<b>Attaque supplémentaire</b> : deux attaques par action Attaquer." : "", valor(g) && g.level >= 14 ? "<b>Magie de combat</b> : après un sort de barde (action), une attaque d'arme en action bonus." : ""].filter(Boolean),
+  attacksPerAction: g => valor(g) && g.level >= 6 ? 2 : 1,
+  attackNotes: g => [valor(g) && g.level >= 14 ? "<b>Magie de combat</b> : après un sort de barde (action), une attaque d'arme en action bonus." : ""].filter(Boolean),
   longRest: g => { g.insU = 0; },
   longOnly: g => [g.level < 5 && g.insU ? "Inspiration bardique (repos court dès le niveau 5)" : ""],
   shortRest: g => g.level >= 5 ? { field: "insU", label: "Inspiration bardique", done: "récupérée" } : null,

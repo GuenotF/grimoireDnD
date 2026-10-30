@@ -77,7 +77,7 @@ def test_chevalier_occulte(browser, devices, url):
     check(a.g("level") == 3 and a.g("garch") == "ek" and a.g("prepared.length") == 3 and a.g("cantrips.length") == 2, "niveau 3 : 3 sorts connus, 2 sorts mineurs")
     check(a.count('[data-a="tab"][data-v="grimoire"]') == 1, "onglet Sorts")
     a.tab("grimoire"); a.view("jeu")
-    check(a.count('.slotrow [data-a="pip"]') == 2 and "DD" in a.text(".hero"), "2 emplacements de niveau 1, en-tête des sorts")
+    check(a.count('.slotrow [data-a="pip"]') == 2 and a.text(".slotline .dd").startswith("DD "), "2 emplacements de niveau 1, DD dans la ligne des emplacements")
     a.close()
 
 

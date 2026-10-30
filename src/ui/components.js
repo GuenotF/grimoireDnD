@@ -21,7 +21,6 @@ function capRow(g, r, name, rest, pipsHTML, sep, body) {
   return `<div class="resrow${sep ? " sep" : ""}"><span class="rn"><button class="capname" data-a="row" data-id="${key}" aria-expanded="${open}">${name}<span class="chev">${open ? "▴" : "▾"}</span></button><small>${rest}</small></span><span class="pips">${pipsHTML}</span></div>${body ? `<div class="capbody">${body}</div>` : ""}`;
 }
 /** Intitulé d'une case de l'en-tête : complet, ou court sur téléphone (ex. « DD des sorts » / « DD »). */
-const statLabel = (full, short) => `<div class="l"><span class="lf">${full}</span><span class="ls">${short || full}</span></div>`;
 function removeBtn(key) {
   return S.confirm === key ? `<button class="btn confirm" data-a="rm" data-k="${esc(key)}">Retirer ?</button>` : `<button class="btn ghost" data-a="rm" data-k="${esc(key)}" aria-label="Retirer">Retirer</button>`;
 }
@@ -49,4 +48,4 @@ onClick("pk-open", (b) => { const k = "pk:" + b.dataset.id; if (S.open.has(k)) S
 
 /** Section repliable (ressources de classe, réglages) : en-tête ▾ comme les autres sections ; body omis si repliée. */
 const foldSec = (k, title, aside, body, summary = "") => !body ? "" : foldHead(k, "", title, aside || "", summary) + (isFold(k) ? "" : body);
-export { foldKey, isFold, foldHead, foldSec, pillsRaw, capRow, removeBtn, statLabel, pickRow };
+export { foldKey, isFold, foldHead, foldSec, pillsRaw, capRow, removeBtn, pickRow };

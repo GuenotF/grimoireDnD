@@ -129,3 +129,4 @@ body.lu-on, body.ws-on { overflow: hidden; }
 .lrentry small { font-size: 12.5px; color: var(--muted); }
 .lufoot .lrbtns .btn, .lufoot:has(.lrbtns) > .btn { white-space: nowrap; }
 @media (max-width: 420px) { .lufoot:has(.lrbtns) .btn { padding: 9px 10px; font-size: 14px; } }
+.lrentry small b { font-family: inherit; font-size: inherit; color: var(--ink); }

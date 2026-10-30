@@ -52,7 +52,7 @@ def test_domaines_bonus(browser, devices, url):
     t = a.text("#panel")
     check("2d8 + 3" in t, "Incantation puissante : Flamme sacrée 2d8 + SAG au niveau 8")
     check(a.count('[data-a="res-pip"][data-r="dres"]') == 3 and "Illumination protectrice" in t, "Illumination protectrice : SAG fois par repos long")
-    check("5/5" in a.text(".stats"), "Lumière : un sort mineur de plus (5/5 au niveau 8)")
+    check(a.js("R.cantrips(G())") == 5, "Lumière : un sort mineur de plus (5/5 au niveau 8)")
     a.close()
     gue = dict(ALDRIC, domain="guerre", level=10, items=[{"n": "Épée longue", "q": 1, "ref": "longsword", "eq": True}, {"n": "Harnois", "q": 1, "ref": "plate", "eq": True}])
     a = App(browser, devices, url, char=gue, tab="grimoire", view="jeu")

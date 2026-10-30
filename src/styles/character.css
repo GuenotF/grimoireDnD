@@ -31,12 +31,6 @@
 .chstat .v { font-family: var(--f-display); font-size: 21px; font-weight: 700; line-height: 1.15; white-space: nowrap; }
 .chstat .l { font-family: var(--f-sc); font-size: 11.5px; letter-spacing: .05em; color: var(--muted); }
 /* En-tête de l'onglet Personnage : les six caractéristiques */
-.statcap { font-family: var(--f-sc); font-size: 12px; letter-spacing: .06em; color: var(--muted); margin: 14px 0 4px; }
-.stat.ab .l { margin: 0 0 3px; }
-.stat.ab.mine .l { color: var(--rubric); }
-.stat.ab .sc { font-size: 12.5px; color: var(--muted); margin-top: 4px; white-space: nowrap; }
-@media (max-width: 560px) { .stat.ab .sc { display: grid; font-size: 11px; margin-top: 2px; line-height: 1.25; } .stat.ab .sc .dot { display: none; } .stat.ab .l { margin: 0 0 1px; } }
-.stat.ab .js.on { color: var(--ps-fg); font-weight: 700; }
 @media (max-width: 400px) { .chstat .v { font-size: 18px; } .chstat .l { font-size: 10.5px; } }
 
 /* Carte des points de vie (En jeu) */

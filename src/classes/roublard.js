@@ -13,7 +13,7 @@ import { R, classSpells } from "../rules/common.js";
 import { acOf } from "../rules/equipment.js";
 import { THIRD, THIRD_KNOWN, thirdFree, thirdOk } from "../rules/tables.js";
 import { BY_ID, SPELLS } from "../data.js";
-import { capRow, foldSec, pillsRaw, statLabel } from "../ui/components.js";
+import { capRow, foldSec, pillsRaw } from "../ui/components.js";
 
 // Archétypes du Manuel des joueurs
 const ARCH = { escroc: { n: "Escroc arcanique", full: "Escroc arcanique", sum: "Sorts de magicien (surtout enchantement et illusion), main de mage invisible pour l'escamotage, Embuscade magique (9), Escroc polyvalent (13), Voleur de sort (17)." }, assassin: { n: "Assassin", full: "Assassin", sum: "Assassinat : avantage contre qui n'a pas encore joué, critique contre une créature surprise. Puis fausse identité, Imposteur, Frappe mortelle." },
@@ -128,12 +128,6 @@ export default {
   subclass: { lv: 3, label: "Archétype", field: "arch", opts: () => Object.entries(ARCH).map(([k, a]) => [k, a.full, a.sum]) },
   subline: g => `Roublard niveau ${g.level}${g.level >= 3 ? ` · ${esc(ARCH[g.arch].full)}` : ""}`,
   subclassField: g => `<div class="field"><label for="f-arch">Archétype</label><select id="f-arch">${Object.entries(ARCH).map(([k, o]) => `<option value="${k}"${k === g.arch ? " selected" : ""}>${o.n}</option>`).join("")}</select></div>`,
-  heroStats: g => {
-    const st = (v, f, s, cls = "") => `<div class="stat${cls}" role="listitem"><div class="v">${v}</div>${statLabel(f, s)}</div>`;
-    if (at(g) && S.tab !== "caps") return st(`${ROU.sneak(g)}d6`, "Attaque sournoise", "Sournoise", " sneak") + st(signed(skillBonus(g, "sleight")), "Escamotage", "Escamotage"); // en-tête des sorts
-    return st(`${ROU.sneak(g)}d6`, "Attaque sournoise", "Sournoise", " sneak") + st(signed(initiative(g)), "Initiative", "Initiative") + st(acOf(g) ?? "?", "CA", "CA")
-      + st(signed(skillBonus(g, "stealth")), "Discrétion", "Discrétion") + st(passivePerception(g), "Perception passive", "Perc. passive") + st(signed(R.prof(g.level)), "Maîtrise", "Maîtrise");
-  },
   tabs: g => [["caps", "Capacités"], ...(at(g) ? [["grimoire", "Sorts"], ["biblio", "Bibliothèque", classSpells(g).length]] : [])],
   moreTabs: () => [["regles", "Règles"], ["imprimer", "Imprimer"]],
   panels: { caps: g => abilitiesHTML(g), regles: g => rulesHTML(g), imprimer: g => printHTML(g) },

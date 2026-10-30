@@ -2,7 +2,7 @@
 // Les modules importés déclarent leurs actions (boutons, champs) en se chargeant.
 import { C, CLASSES, alwaysPrepared, noSpells } from "./classes/index.js";
 import { beforeEachClick, onChange, onClick, onInput, onKey, startActions } from "./core/actions.js";
-import { esc, signed } from "./core/format.js";
+import { esc } from "./core/format.js";
 import { showIosTip } from "./core/pwa.js";
 import { G, S } from "./core/state.js";
 import { loadLocal, mutate, pickCurrent, setCur } from "./core/store.js";
@@ -23,8 +23,6 @@ import { saveHTML } from "./features/save.js";
 import { saveProf, sheetIncomplete, speedOf } from "./rules/character.js";
 import { acOf } from "./rules/equipment.js";
 import { R, inClass } from "./rules/common.js";
-import { ABILITIES } from "./rules/tables.js";
-import { statLabel } from "./ui/components.js";
 import "./ui/components.js";
 import "./features/spells.js";
 import "./features/swipe.js";
@@ -41,7 +39,7 @@ function renderApp() {
   const g = G(); const main = document.getElementById("main");
   if (!g) { main.innerHTML = welcomeHTML(); }
   else {
-    const line = S.tab === C(g).tabs(g)[0][0] ? slotLineHTML(g) : ""; // emplacements : onglet principal de la classe seulement
+    const line = S.tab === C(g).tabs(g)[0][0] || S.tab === "grimoire" ? slotLineHTML(g) : ""; // emplacements : onglet principal de la classe et onglet Sorts
     main.innerHTML = heroHTML(g) + `<div class="stick">${topbarHTML(g)}${tabsHTML(g)}${line}</div><div class="panel" id="panel">${panelHTML(g)}</div>`;
   }
   setStatus(S.statusText || "", S.statusErr);
@@ -88,19 +86,10 @@ function welcomeHTML() {
   <p>Aucun personnage pour l'instant. Crée un magicien, un paladin ou un druide : l'atelier calcule ses emplacements, ses sorts préparés et ses ressources d'après le Manuel des joueurs. Tu as déjà une sauvegarde (fichier .json ou .txt) ? Importe-la.</p>
   <div class="frow"><button class="btn primary" data-a="new">Créer un personnage</button><label class="btn" for="f-import">Importer une sauvegarde</label><input id="f-import" type="file" accept=".json,.txt,application/json,text/plain" hidden></div></div>`;
 }
-// En-tête : nom, sous-titre, ↑ Niveau et ✎ Modifier (nom, niveau, sous-classe repliés), puis six cases selon l'onglet :
-// rien dans Personnage (caractéristiques dans la barre du haut), statistiques de sorts ou de classe ailleurs. Intitulés courts sur téléphone (statLabel).
+// En-tête : nom, sous-titre, ↑ Niveau et ✎ Modifier (nom, niveau, sous-classe repliés). Plus de cases de statistiques :
+// caractéristiques dans la barre du haut, DD et attaque de sort dans la ligne des emplacements, compteurs dans Gérer.
 function heroHTML(g) {
-  const prof = R.prof(g.level), mod = R.am(g), max = R.maxLevel(g);
-  const nPrep = g.prepared.length, pMax = R.prepMax(g), abShort = (ABILITIES.find(a => a[0] === C(g).ab) || [])[1];
-  const first = esc(g.name.charAt(0)), rest = esc(g.name.slice(1));
-  const spells = `<div class="statcap">Sorts</div><div class="stats" role="list" aria-label="Sorts">
-    <div class="stat" role="listitem"><div class="v">${signed(mod)}</div>${statLabel(`Mod. ${C(g).abN}`, `Mod. ${abShort}`)}</div>
-    <div class="stat" role="listitem"><div class="v">${8 + prof + mod}</div>${statLabel("DD des sorts", "DD")}</div>
-    <div class="stat" role="listitem"><div class="v">${signed(prof + mod)}</div>${statLabel("Attaque de sort", "Attaque")}</div>
-    <div class="stat ${nPrep > pMax ? "alert" : nPrep === pMax ? "good" : ""}" role="listitem"><div class="v">${nPrep}<small>/${pMax}</small></div>${C(g).known ? statLabel("Sorts connus", "Connus") : statLabel("Sorts préparés", "Préparés")}</div>
-    ${C(g).heroStats(g)}
-  </div>`;
+  const max = R.maxLevel(g), first = esc(g.name.charAt(0)), rest = esc(g.name.slice(1));
   return `<section class="hero">
   <div class="herohead">
     <div class="ht"><h1 class="title" id="title"><span class="initial">${first}</span>${rest}</h1>
@@ -114,8 +103,6 @@ function heroHTML(g) {
     ${!C(g).subclass || g.level >= C(g).subclass.lv ? C(g).subclassField(g) : ""}
     ${raceField(g)}
   </div>` : ""}
-  ${S.tab === "perso" ? "" // caractéristiques : dans la barre du haut
-    : noSpells(g) || S.tab === "caps" ? `<div class="statcap">${C(g).n}</div><div class="stats" role="list" aria-label="${C(g).n}">${C(g).heroStats(g)}</div>` : spells}
   ${showIosTip() ? `<div class="banner">Sur iPhone ou iPad, installe l'atelier : bouton <b>Partager</b>, puis <b>Sur l'écran d'accueil</b>. Ouvre-le ensuite toujours depuis cette icône : c'est là que tes grimoires sont le mieux conservés. <button class="btn ghost" data-a="hide-ios">Masquer</button></div>` : ""}
   </section>`;
 }
