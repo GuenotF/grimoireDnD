@@ -101,9 +101,9 @@ const offhandOk = (g, x) => { const w = gearOf(x); return !!w && w.kind === "wea
 function itemForm(g, x, i) { // i : indice de l'objet, ou "new" (ajout avec détails : rien n'est créé avant Ajouter)
   return `<form class="itform${i === "new" ? " itnew" : ""}" data-a="it-save" data-i="${i}">${i === "new" ? `<div class="itnewh">Nouvel objet · détails</div>` : ""}<div class="frow2"><input id="it-name" type="text" value="${esc(x.n)}" aria-label="Nom" required><input id="it-q" type="number" inputmode="numeric" min="0" value="${x.q}" aria-label="Quantité"></div>
     <input id="it-note" type="text" value="${esc(x.note)}" placeholder="Note courte (effet, contenu…)" aria-label="Note">
-    <div class="frow3"><label><span>Dossier</span><select id="it-f" aria-label="Dossier">${g.folders.map(f => `<option value="${esc(f.id)}"${f.id === folderOf(g, x) ? " selected" : ""}>${esc(f.n)}</option>`).join("")}</select></label>
-      <label><span>Poids (kg)</span><input id="it-w" type="text" inputmode="decimal" value="${x.w != null ? String(x.w).replace(".", ",") : ""}" placeholder="${weightOf({ ref: x.ref }) != null ? String(weightOf({ ref: x.ref })) : "—"}" aria-label="Poids en kg, à l'unité"></label>
-      <label><span>Valeur (po)</span><input id="it-v" type="text" inputmode="decimal" value="${x.v != null ? String(x.v).replace(".", ",") : ""}" placeholder="—" aria-label="Valeur en po, à l'unité"></label></div>
+    <div class="frow3${g.load ? "" : " nw"}"><label><span>Dossier</span><select id="it-f" aria-label="Dossier">${g.folders.map(f => `<option value="${esc(f.id)}"${f.id === folderOf(g, x) ? " selected" : ""}>${esc(f.n)}</option>`).join("")}</select></label>
+${g.load ? `<label><span>Poids (kg)</span><input id="it-w" type="text" inputmode="decimal" value="${x.w != null ? String(x.w).replace(".", ",") : ""}" placeholder="${weightOf({ ref: x.ref, mat: x.mat }) != null ? String(weightOf({ ref: x.ref, mat: x.mat })).replace(".", ",") : "—"}" aria-label="Poids en kg, à l'unité"></label>` : ""}
+      <label><span>Valeur</span><span class="vrow"><input id="it-v" type="text" inputmode="decimal" value="${x.v != null ? String(+(x.v / VC[vcOf(x)]).toFixed(4)).replace(".", ",") : ""}" placeholder="—" aria-label="Valeur à l'unité"><select id="it-vc" aria-label="Pièce">${Object.keys(VC).map(k => `<option${k === vcOf(x) ? " selected" : ""}>${k}</option>`).join("")}</select></span></label></div>
     <textarea id="it-desc" rows="2" placeholder="Description (texte de l'objet, ce qu'en dit le MJ…)" aria-label="Description">${esc(x.desc || "")}</textarea>
     <label class="itref"><span>Arme ou armure du Manuel</span><select id="it-ref" aria-label="Arme ou armure du Manuel"><option value="">Aucune (objet libre)</option>${REF_GROUPS.map(([l, list]) => `<optgroup label="${l}">${list.map(r => `<option value="${r.id}"${r.id === x.ref ? " selected" : ""}>${esc(r.n)}</option>`).join("")}</optgroup>`).join("")}</select></label>
     <fieldset class="itmagic"><legend>✦ Objet magique</legend>
@@ -119,6 +119,10 @@ function itemForm(g, x, i) { // i : indice de l'objet, ou "new" (ajout avec dét
     <div class="row"><label class="check"><input type="checkbox" id="it-eq"${x.eq ? " checked" : ""}> Équipé</label><label class="check"><input type="checkbox" id="it-c"${x.c ? " checked" : ""}> À décompter en jeu</label>${offhandOk(g, x) ? `<label class="check" title="Combat à deux armes : cette arme pour l'attaque en action bonus"><input type="checkbox" id="it-oh"${x.oh ? " checked" : ""}> Main secondaire</label>` : ""}
     <span style="flex:1"></span>${i === "new" ? "" : `<button type="button" class="btn ghost" data-a="it-del" data-i="${i}">Retirer</button>`}<button type="button" class="btn ghost" data-a="it-cancel">Annuler</button><button class="btn primary" type="submit">${i === "new" ? "Ajouter" : "Enregistrer"}</button></div></form>`;
 }
+// Valeur d'un objet : saisie dans une pièce au choix (pp, po, pe, pa, pc), gardée en po (x.v) avec la pièce saisie (x.vc)
+const VC = { pp: 10, po: 1, pe: 0.5, pa: 0.1, pc: 0.01 };
+const vcOf = x => VC[x.vc] ? x.vc : "po";
+const valText = x => `${String(+(x.v / VC[vcOf(x)]).toFixed(4)).replace(".", ",")} ${vcOf(x)}`;
 // ---------- Catalogue (armes et armures du Manuel) : suggestions à l'ajout, résumé, étiquette
 const norm = t => String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[’']/g, "'");
 const CATN = { simple: "arme courante", martial: "arme de guerre", light: "armure légère", medium: "armure intermédiaire", heavy: "armure lourde", shield: "bouclier" };
@@ -210,7 +214,7 @@ function packHTML(g, x, i, m) {
     <div class="pkgo"><button class="btn sm cast-go" data-a="up-go" data-i="${i}"${n ? "" : " disabled"}>Déballer · ${n} objet${n > 1 ? "s" : ""}</button><button class="btn ghost sm" data-a="up-cancel">Garder en un seul objet</button></div><small>Les objets vont dans leur dossier (torches, rations : Consommables). Annulable.</small></div>`;
 }
 function itemOwn(g, x) {
-  const w = weightOf(x), pills = [w != null && (x.w != null || (!gearOf(x) && !MAT[x.mat])) ? fmtKg(w) + (x.q > 1 ? " pièce" : "") : "", x.v != null ? fmtPo(x.v) + (x.q > 1 ? " pièce" : "") : "", x.rar || ""].filter(Boolean), rs = MAT[x.mat] ? "" : resale(x); // poids du Manuel : déjà dans le détail de l'arme
+  const w = weightOf(x), pills = [w != null && (x.w != null || (!gearOf(x) && !MAT[x.mat])) ? fmtKg(w) + (x.q > 1 ? " pièce" : "") : "", x.v != null ? valText(x) + (x.q > 1 ? " pièce" : "") : "", x.rar || ""].filter(Boolean), rs = MAT[x.mat] ? "" : resale(x); // poids du Manuel : déjà dans le détail de l'arme
   return `${gearOf(x) ? gearDetail(g, gearOf(x), x) : ""}${pills.length || rs || x.desc ? `<div class="itinfo">${pills.length || rs ? `<div class="pills">${pills.map(t => `<span class="kp n">${esc(t)}</span>`).join("")}${rs}</div>` : ""}${x.desc ? `<p>${esc(x.desc)}</p>` : ""}</div>` : ""}`;
 }
 // Prix de revente d'un équipement du Manuel (moitié prix)
@@ -339,7 +343,8 @@ onSubmit("it-save", f => {
   ["inf", "infAt", "infOpt", "infCh"].forEach(k => { if (prev[k] != null) x[k] = prev[k]; }); // imprégnation d'artificier : gardée
   const sm = S.itNew && f.dataset.i === "new" ? S.itNew.mat : prev.mat; if (!x.ref && MAT[sm]) x.mat = sm; // lien avec le catalogue (poids, effet, paquetage)
   const num = id => { const t = v(id).value.trim().replace(",", "."); return t === "" || !isFinite(+t) || +t < 0 ? null : Math.round(+t * 100) / 100; };
-  x.f = v("it-f").value; if (num("it-w") != null) x.w = num("it-w"); if (num("it-v") != null) x.v = num("it-v");
+  x.f = v("it-f").value; if (v("it-w") ? num("it-w") != null : prev.w != null) x.w = v("it-w") ? num("it-w") : prev.w; // charge pas suivie : poids gardé, sans champ
+  if (num("it-v") != null) { const c = v("it-vc").value; x.v = Math.round(num("it-v") * VC[c] * 10000) / 10000; if (c !== "po") x.vc = c; } // valeur gardée en po, pièce saisie retenue
   if (v("it-rar").value) x.rar = v("it-rar").value; if (v("it-unid").checked) x.unid = true; if (v("it-desc").value.trim()) x.desc = v("it-desc").value.trim();
   if (bonus) x.bonus = bonus; if (v("it-xdmg").value.trim()) x.xdmg = v("it-xdmg").value.trim();
   if (v("it-att").checked) { x.att = true; x.attuned = v("it-attuned").checked; }

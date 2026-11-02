@@ -42,9 +42,10 @@ function magicOf(x) {
 // Imprégnation d'artificier portée par l'objet : identifiant, ordre, option (type de résistance), charges venues de l'imprégnation
 // Inventaire : dossier, poids (kg) et valeur (po) saisis, rareté, non identifié, description
 function invFields(x) {
-  const m = {}, num = v => v === "" || v == null || !isFinite(+v) || +v < 0 ? null : Math.round(+v * 100) / 100;
+  const m = {}, num = v => v === "" || v == null || !isFinite(+v) || +v < 0 ? null : Math.round(+v * 10000) / 10000;
   if (typeof x.f === "string" && x.f) m.f = x.f.slice(0, 40);
   if (num(x.w) != null) m.w = num(x.w); if (num(x.v) != null) m.v = num(x.v);
+  if (m.v != null && ["pp", "pe", "pa", "pc"].includes(x.vc)) m.vc = x.vc; // pièce dans laquelle la valeur a été saisie
   if (RARITIES.includes(x.rar)) m.rar = x.rar; if (x.unid) m.unid = true;
   if (typeof x.desc === "string" && x.desc.trim()) m.desc = x.desc.trim().slice(0, 2000);
   if (Math.floor(+x.shot) > 0) m.shot = Math.min(999, Math.floor(+x.shot)); // munitions tirées pendant le combat (à ramasser)

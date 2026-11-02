@@ -320,3 +320,7 @@
 .sellrow .pkrow { border-bottom: 0; width: 100%; }
 .sellq { display: flex; align-items: center; gap: 6px; padding: 0 0 6px 26px; font-size: 13.5px; }
 .sellq span, .sellq small { color: var(--muted); } .sellq small { margin-left: 4px; }
+.itform .frow3.nw { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.itform .vrow { display: flex; gap: 4px; min-width: 0; }
+.itform .vrow input { flex: 1; min-width: 0; }
+.itform .vrow select { flex: none; width: 4.2em; }

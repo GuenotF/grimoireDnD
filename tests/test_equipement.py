@@ -299,6 +299,8 @@ def test_dossiers_filtres_et_fiche(browser, devices, url):
     a.click('[data-a="it-flt"][data-v=""]')
     # Gérer : fiche complète (dossier, poids, valeur, rareté, description)
     a.view("gerer"); a.click('[data-a="it-edit"][data-i="5"]')
+    check(a.count("#it-w") == 0 and a.count("#it-vc") == 1, "charge pas suivie : pas de champ poids ; valeur avec sa pièce")
+    a.click('[data-a="it-cancel"]'); a.js("mutate(g => { g.load = 'cap'; })"); a.click('[data-a="it-edit"][data-i="5"]')
     a.pg.select_option("#it-f", "quete"); a.pg.fill("#it-w", "0,5"); a.pg.fill("#it-v", "120"); a.pg.select_option("#it-rar", "rare"); a.pg.fill("#it-desc", "Trouvée dans la tour."); a.click('.itform [type="submit"]')
     check(a.js("JSON.stringify([G().items[5].f, G().items[5].w, G().items[5].v, G().items[5].rar, G().items[5].desc])") == '["quete",0.5,120,"rare","Trouvée dans la tour."]', f"fiche (virgule acceptée) : {a.js('JSON.stringify(G().items[5])')}")
     a.click('[data-a="it-open"][data-i="5"]')
@@ -415,5 +417,22 @@ def test_vente_partielle(browser, devices, url):
     check(a.g("items[0].q") == 7 and a.g("money.po") == 300 and a.g("items.length") == 2, f"3 vendues, 7 gardées : {a.js('JSON.stringify(G().items.map(x => x.q))')}")
     a.undo()
     check(a.g("items[0].q") == 10 and a.g("money.po") == 0, "vente annulée")
+    check(not a.errors, f"erreurs : {a.errors}")
+    a.close()
+
+
+def test_valeur_en_pieces(browser, devices, url):
+    items = [{"n": "Perle", "q": 10, "f": "butin", "w": 0.01}]
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items, money={}), tab="inv", view="gerer")
+    a.click('[data-a="it-edit"][data-i="0"]'); a.pg.fill("#it-v", "5"); a.pg.select_option("#it-vc", "pa"); a.click('.itform [type="submit"]')
+    check(a.g("items[0].v") == 0.5 and a.g("items[0].vc") == "pa" and a.g("items[0].w") == 0.01, f"5 pa gardés en po (0,5), pièce retenue, poids conservé sans champ : {a.js('JSON.stringify(G().items[0])')}")
+    a.click('[data-a="it-edit"][data-i="0"]')
+    check(a.pg.input_value("#it-v") == "5" and a.pg.input_value("#it-vc") == "pa", "réaffichée en pa")
+    a.click('[data-a="it-cancel"]'); a.click('[data-a="it-open"][data-i="0"]')
+    check("5 pa pièce" in a.text(".itinfo"), f"fiche : {a.text('.itinfo')}")
+    a.view("jeu")
+    check("≈ 5 po" in a.text(".rubric.invsec[data-k='inv-butin'] .aside"), f"butin : 10 × 5 pa : {a.text('.rubric.invsec[data-k=inv-butin] .aside')}")
+    a.click('[data-a="sell-open"][data-v="butin"]'); a.click('[data-a="sell-go"]')
+    check(a.g("money.po") == 5, "vendu : 5 po")
     check(not a.errors, f"erreurs : {a.errors}")
     a.close()
