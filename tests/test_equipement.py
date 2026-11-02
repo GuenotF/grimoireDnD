@@ -363,3 +363,40 @@ def test_catalogue_paquetage_et_charge(browser, devices, url):
     check(a.count(".invsum.load") == 0, "charge plus suivie")
     check(not a.errors, f"erreurs : {a.errors}")
     a.close()
+
+
+def test_butin_vente_et_munitions(browser, devices, url):
+    items = [{"n": "Arc long", "q": 1, "eq": True, "ref": "longbow"}, {"n": "Flèches", "q": 5},
+             {"n": "Pierre précieuse", "q": 1, "v": 50, "f": "butin"}, {"n": "Épée courte", "q": 3, "ref": "shortsword", "f": "butin"},
+             {"n": "Statuette", "q": 1, "f": "butin"}, {"n": "Corde en soie (15 m)", "q": 1}]
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items, money={"po": 1}), tab="inv", view="jeu")
+    check("≈ 80 po" in a.text(".rubric.invsec[data-k='inv-butin'] .aside"), f"Butin : valeur pleine (50 + 3 × 10) : {a.text('.rubric.invsec[data-k=inv-butin] .aside')}")
+    check("Revente ≈ 65 po" in a.text(".sellbar") and "1 sans valeur" in a.text(".sellbar"), f"revente : 50 + 15 (moitié prix) : {a.text('.sellbar')}")
+    a.click('[data-a="sell-open"][data-v="butin"]')
+    check(a.count(".sellbox .pkrow") == 3 and a.count(".sellbox .pkrow:disabled") == 1 and "65 po" in a.text(".selltot"), "vente : 3 objets, la statuette sans valeur grisée, total 65 po")
+    a.click('[data-a="sell-n"][data-v="1"]'); a.click('[data-a="sell-n"][data-v="1"]')
+    check("21 po 6 pa 6 pc chacun" in a.text(".sellsplit"), f"partage entre 3 : {a.text('.sellsplit')}")
+    a.click('[data-a="sell-go"]')
+    check(a.js("JSON.stringify([G().money.po, G().money.pa, G().money.pc])") == "[22,6,6]" and a.g("items.length") == 4, f"ma part dans la bourse, objets vendus retirés : {a.js('JSON.stringify(G().money)')}")
+    a.undo()
+    check(a.g("money.po") == 1 and a.g("items.length") == 6, "vente annulée")
+    # Vendre depuis la fiche d'un objet (équipement du Manuel : moitié prix)
+    a.click('[data-a="it-open"][data-i="5"]')
+    check("revente 5 po (moitié prix)" in a.text(".itinfo"), f"fiche : prix de revente ({a.text('.itinfo')})")
+    a.click('.itplay [data-a="sell-open"]')
+    check(a.js("S.sell.sel.join()") == "5" and "5 po" in a.text(".selltot"), "vente d'un seul objet")
+    a.click('[data-a="sell-n"][data-v="-1"]') if a.count('[data-a="sell-n"][data-v="-1"]:not([disabled])') else None
+    a.click('[data-a="sell-cancel"]')
+    # Munitions : arc long équipé, flèches de l'inventaire
+    a.tab("grimoire"); a.view("jeu")
+    check("Flèches 5" in a.text(".ammo"), f"stock sur l'arme : {a.text('.ammo')}")
+    for _ in range(3): a.click('[data-a="ammo-shot"]')
+    check(a.g("items[1].q") == 2 and a.g("items[1].shot") == 3 and "3 tirées" in a.text(".ammo"), "3 tirs")
+    a.click('[data-a="ammo-pick"]')
+    check(a.g("items[1].q") == 3 and a.js("G().items[1].shot") is None, "ramassées : la moitié de 3 (1)")
+    a.undo()
+    check(a.g("items[1].q") == 2 and a.g("items[1].shot") == 3, "ramassage annulé")
+    a.js("mutate(g => { g.items.splice(1, 1); })")
+    check("Pas de munitions" in a.text(".atkbox"), "arc sans flèches : rappel")
+    check(not a.errors, f"erreurs : {a.errors}")
+    a.close()

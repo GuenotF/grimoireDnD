@@ -90,7 +90,7 @@ const POLE = ["glaive", "halberd", "quarterstaff", "spear"]; // Maître d'hast (
 const twoWeapons = g => { const m = equipped(g, "weapon").filter(({ gear }) => gear.rng === "melee" && !gear.two); return (m.length >= 2 || (m.length === 1 && m[0].item.q >= 2)) && !equipped(g, "weapon").some(({ gear }) => gear.two); };
 /** Attaques du personnage : armes équipées du catalogue, puis mains nues (1 + FOR, maîtrisée par tous). */
 function attacks(g) {
-  const list = equipped(g, "weapon").map(({ item, gear }) => { const a = attackOf(g, gear, false, item); return { n: item.n, q: item.q, ...a, notes: [item.note, ...a.notes].filter(Boolean) }; }); // la note de l'objet (ex. +1d4 nécrotique) suit l'attaque
+  const list = equipped(g, "weapon").map(({ item, gear }) => { const a = attackOf(g, gear, false, item); return { n: item.n, q: item.q, gid: gear.id, ...a, notes: [item.note, ...a.notes].filter(Boolean) }; }); // la note de l'objet (ex. +1d4 nécrotique) suit l'attaque
   const str = R.ab(g, "str");
   // Combat à deux armes : deux armes légères de corps à corps équipées (deux objets, ou un objet en 2 exemplaires),
   // aucune arme à deux mains : attaque de la main secondaire en action bonus, sans modificateur positif aux dégâts.

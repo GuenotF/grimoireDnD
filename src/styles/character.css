@@ -301,3 +301,18 @@
 .viewsw.ld3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .fdnp { font-size: 12px; padding: 2px 7px; }
 .fdnp[aria-pressed="true"] { color: var(--warn); border-color: var(--warn); }
+/* Inventaire : butin et vente ; munitions sur l'arme */
+.sellbar { display: flex; align-items: center; gap: 8px; padding: 2px 0 8px; border-bottom: 1px solid var(--rule); font-size: 13.5px; }
+.sellbar span { flex: 1; }
+.sellbox { margin-bottom: 8px; }
+.sellbox .sh { font-family: var(--f-display); font-size: 17px; margin-bottom: 4px; }
+.pkrow:disabled { opacity: .55; }
+.selltot { display: flex; align-items: baseline; padding: 6px 0 2px; }
+.selltot span { flex: 1; }
+.selltot b { font-family: var(--f-display); font-size: 18px; }
+.sellsplit { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13.5px; padding: 4px 0; }
+.sellsplit .part { margin-left: auto; color: var(--gold); font-family: var(--f-display); font-size: 15px; }
+.ammo { display: flex; align-items: center; gap: 8px; background: var(--bg); border-radius: 8px; padding: 5px 9px; margin-top: 6px; font-size: 14px; }
+.ammo span { flex: 1; } .ammo small { color: var(--muted); }
+.ammo2 { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.ammo2 small { flex: 1; color: var(--muted); font-size: 12.5px; }

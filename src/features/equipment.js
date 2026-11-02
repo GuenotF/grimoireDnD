@@ -13,7 +13,7 @@ import { GEAR, MAT, matByName } from "../data.js";
 import { armorProf, gearOf, weaponProf } from "../rules/equipment.js";
 import { hasFeat } from "../rules/feats.js";
 import { MAX_ATT, REC, attunedCount, isMagic, recLabel } from "../rules/magic.js";
-import { RARITIES, classify, fmtKg, fmtPo, folderOf, loadOf, weightOf } from "../rules/inventory.js";
+import { RARITIES, classify, coinsOf, fmtKg, fmtPo, folderOf, loadOf, pcText, saleOf, weightOf } from "../rules/inventory.js";
 import { COINS, purseText, purseValue, spend } from "../rules/money.js";
 import { foldHead, isFold } from "../ui/components.js";
 
@@ -36,8 +36,9 @@ function sectionsOf(g) {
 function grouped(g, row) {
   const secs = sectionsOf(g).filter(x => x.list.length);
   if (!secs.length) return finding() ? `<div class="empty">Aucun objet ne correspond à « ${esc(S.itFind.trim())} ».</div>` : `<div class="empty">${filterOf(g) ? "Rien ici pour l'instant." : "Sac vide : touche <b>＋</b> pour ajouter un objet."}</div>`;
-  return secs.map(x => { const k = "inv-" + x.id, np = (g.folders.find(f => f.id === x.id) || {}).np, h = foldHead(k, "invsec", esc(x.n), `${x.list.length}${np ? " · non porté" : ""}`, x.list.map(i => esc(g.items[i].n)).join(", "));
-    return isFold(k) && !finding() ? h : h + `<div class="chbox itbox">${x.list.map((i, p) => row(i, p, x.list.length)).join("")}</div>`; }).join("");
+  return secs.map(x => { const k = "inv-" + x.id, np = (g.folders.find(f => f.id === x.id) || {}).np, loot = x.id === "butin" ? lootOf(g, x.list) : null;
+    const h = foldHead(k, "invsec", esc(x.n), `${x.list.length}${np ? " · non porté" : ""}${loot && loot.pc ? ` · ≈ ${pcText(loot.pc)}` : ""}`, x.list.map(i => esc(g.items[i].n)).join(", "));
+    return isFold(k) && !finding() ? h : h + `<div class="chbox itbox">${loot && S.view === "jeu" && !S.sell ? `<div class="sellbar"><span>Revente ≈ <b>${pcText(loot.sale)}</b>${loot.none ? ` · ${loot.none} sans valeur` : ""}</span><button class="btn sm" data-a="sell-open" data-v="butin">Vendre…</button></div>` : ""}${x.list.map((i, p) => row(i, p, x.list.length)).join("")}</div>`; }).join("");
 }
 // Charge (si suivie) : barre de poids, seuils de la variante, avertissement
 function loadBarHTML(g) {
@@ -46,6 +47,22 @@ function loadBarHTML(g) {
   return `<div class="invsum load"><div class="ln"><span class="k">Charge</span><b>${fmtKg(L.kg).replace(" kg", "")} <small>/ ${fmtKg(L.cap)}</small></b><span class="r">${tag ? `<i class="ld l${L.level}">${tag}</i>` : g.load === "cap" ? "capacité FOR × 7,5" : "non encombré"}</span></div>
     <div class="bar" role="img" aria-label="Charge ${fmtKg(L.kg)} sur ${fmtKg(L.cap)}"><span class="fill l${L.level}" style="width:${pct(L.kg)}%"></span>${g.load === "enc" ? `<i style="left:${pct(L.enc)}%"></i><i style="left:${pct(L.heavy)}%"></i>` : ""}</div>
     <small>${g.load === "enc" ? `encombré au-delà de ${fmtKg(L.enc)}, lourdement au-delà de ${fmtKg(L.heavy)}${L.level >= 2 ? " : désavantage aux tests, attaques et JdS de FOR, DEX et CON" : ""}` : L.level ? "au-delà, tu peux seulement pousser ou tirer (vitesse 1,50 m)" : ""}${L.unknown ? `${g.load === "enc" || L.level ? " · " : ""}${L.unknown} objet${L.unknown > 1 ? "s" : ""} sans poids` : ""}</small></div>`;
+}
+// Butin : valeur (pleine) et revente (moitié prix pour l'équipement du Manuel) des objets d'une section
+function lootOf(g, list) {
+  let pc = 0, sale = 0, none = 0;
+  list.forEach(i => { const s = saleOf(g.items[i]); if (!s) { none++; return; } pc += Math.floor(s.unit * g.items[i].q); sale += s.total; });
+  return { pc, sale, none };
+}
+// Vendre (S.sell : sel, indices cochés ; cand, objets proposés ; n, joueurs pour le partage) : total, part de chacun, dans la bourse
+function sellHTML(g) {
+  const V = S.sell, rows = V.cand.filter(i => g.items[i]).map(i => { const x = g.items[i], s = saleOf(x), on = !!s && V.sel.includes(i);
+    return `<button class="pkrow" data-a="sell-tog" data-i="${i}" aria-pressed="${on}"${s ? "" : " disabled"}><span class="ck" aria-hidden="true"></span><span>${x.q > 1 ? x.q + " × " : ""}${esc(x.n)}</span><small>${s ? `${pcText(s.total)}${s.half ? " · moitié prix" : ""}` : "sans valeur : ✎ Gérer"}</small></button>`; }).join("");
+  const tot = V.sel.reduce((t, i) => t + ((g.items[i] && saleOf(g.items[i])) || { total: 0 }).total, 0), part = Math.floor(tot / V.n);
+  return `<div class="pkbox sellbox"><b class="sh">Vendre</b>${rows}<div class="selltot"><span>Total</span><b>${pcText(tot)}</b></div>
+    <div class="sellsplit"><span>Partager entre</span><button class="btn sm" data-a="sell-n" data-v="-1" aria-label="Un joueur de moins"${V.n > 1 ? "" : " disabled"}>−</button><b>${V.n}</b><button class="btn sm" data-a="sell-n" data-v="1" aria-label="Un joueur de plus">+</button><span>joueur${V.n > 1 ? "s" : ""}</span>${V.n > 1 ? `<b class="part">${pcText(part)} chacun</b>` : ""}</div>
+    <div class="pkgo"><button class="btn sm cast-go" data-a="sell-go"${tot ? "" : " disabled"}>Vendre · ${V.n > 1 ? `ma part (${pcText(part)})` : pcText(tot)} dans la bourse</button><button class="btn ghost sm" data-a="sell-cancel">Annuler</button></div>
+    <small>Manuel : armes, armures et équipement se revendent à moitié prix ; gemmes, bijoux, objets d'art et objets magiques à la valeur saisie. Les objets vendus quittent le sac ; annulable.</small></div>`;
 }
 // En tête : recherche, ＋ (formulaire d'ajout juste dessous), puces de filtre, résumé (bourse, harmonisation)
 function topHTML(g) {
@@ -57,6 +74,7 @@ function topHTML(g) {
   h += `<button class="invsum" data-a="m-open" aria-expanded="${!!S.purseOpen}" aria-label="Bourse : ${purseText(g.money)}. Gagner ou dépenser"><span class="k">Bourse</span><b>${purseText(g.money)}</b><span class="r">${val ? `≈ ${fmtPo(val)}` : ""} ${S.purseOpen ? "▴" : "›"}</span></button>`;
   if (S.purseOpen) h += purseHTML(g);
   if (g.load) h += loadBarHTML(g);
+  if (S.sell) h += sellHTML(g);
   if (g.items.some(x => x.att)) { const on = g.items.filter(x => x.att && x.attuned), c = on.length;
     h += `<div class="invsum att"><span class="k">Harmonisation</span><span class="pips">${Array.from({ length: MAX_ATT }, (_, k) => `<span class="pip${k < c ? " used" : ""}" aria-hidden="true"></span>`).join("")}</span><b>${c} / ${MAX_ATT}</b><span class="r">${esc(on.map(x => x.n).join(", "))}</span></div>`; }
   return h;
@@ -177,7 +195,7 @@ function equipmentJeu(g) {
 /** Détail d'un objet : arme ou armure du Manuel, poids, valeur, rareté, description ; objet du catalogue : groupe, prix, effet, contenu d'un paquetage. */
 function itemDetail(g, x, i) {
   const m = MAT[x.mat];
-  const mat = m ? `<div class="itinfo"><div class="pills"><span class="kp n">${esc(m.g)}</span><span class="kp n">${esc(m.u ? `${m.p} les ${m.u.q}` : m.p)}</span>${m.w != null && x.w == null ? `<span class="kp n">${fmtKg(m.w)}${x.q > 1 ? " pièce" : ""}</span>` : ""}</div>${m.fx ? `<p>${esc(m.fx)}</p>` : ""}${m.pack ? packHTML(g, x, i, m) : ""}</div>` : "";
+  const mat = m ? `<div class="itinfo"><div class="pills"><span class="kp n">${esc(m.g)}</span><span class="kp n">${esc(m.u ? `${m.p} les ${m.u.q}` : m.p)}</span>${m.w != null && x.w == null ? `<span class="kp n">${fmtKg(m.w)}${x.q > 1 ? " pièce" : ""}</span>` : ""}${resale(x)}</div>${m.fx ? `<p>${esc(m.fx)}</p>` : ""}${m.pack ? packHTML(g, x, i, m) : ""}</div>` : "";
   return mat + itemOwn(g, x);
 }
 // Paquetage : contenu ; « Déballer… » ouvre la liste à cocher (ce qui manque se décoche), puis le remplace par ses objets
@@ -189,13 +207,15 @@ function packHTML(g, x, i, m) {
     <div class="pkgo"><button class="btn sm cast-go" data-a="up-go" data-i="${i}"${n ? "" : " disabled"}>Déballer · ${n} objet${n > 1 ? "s" : ""}</button><button class="btn ghost sm" data-a="up-cancel">Garder en un seul objet</button></div><small>Les objets vont dans leur dossier (torches, rations : Consommables). Annulable.</small></div>`;
 }
 function itemOwn(g, x) {
-  const w = weightOf(x), pills = [w != null && (x.w != null || (!gearOf(x) && !MAT[x.mat])) ? fmtKg(w) + (x.q > 1 ? " pièce" : "") : "", x.v != null ? fmtPo(x.v) + (x.q > 1 ? " pièce" : "") : "", x.rar || ""].filter(Boolean); // poids du Manuel : déjà dans le détail de l'arme
-  return `${gearOf(x) ? gearDetail(g, gearOf(x), x) : ""}${pills.length || x.desc ? `<div class="itinfo">${pills.length ? `<div class="pills">${pills.map(t => `<span class="kp n">${esc(t)}</span>`).join("")}</div>` : ""}${x.desc ? `<p>${esc(x.desc)}</p>` : ""}</div>` : ""}`;
+  const w = weightOf(x), pills = [w != null && (x.w != null || (!gearOf(x) && !MAT[x.mat])) ? fmtKg(w) + (x.q > 1 ? " pièce" : "") : "", x.v != null ? fmtPo(x.v) + (x.q > 1 ? " pièce" : "") : "", x.rar || ""].filter(Boolean), rs = MAT[x.mat] ? "" : resale(x); // poids du Manuel : déjà dans le détail de l'arme
+  return `${gearOf(x) ? gearDetail(g, gearOf(x), x) : ""}${pills.length || rs || x.desc ? `<div class="itinfo">${pills.length || rs ? `<div class="pills">${pills.map(t => `<span class="kp n">${esc(t)}</span>`).join("")}${rs}</div>` : ""}${x.desc ? `<p>${esc(x.desc)}</p>` : ""}</div>` : ""}`;
 }
+// Prix de revente d'un équipement du Manuel (moitié prix)
+const resale = x => { const s = saleOf(x); return s && s.half ? `<span class="kp n">revente ${pcText(s.total)}${x.q > 1 ? " les " + x.q : ""} (moitié prix)</span>` : ""; };
 /** Fiche d'un objet en jeu : détail, puis les gestes de la partie (le reste se règle dans ✎ Gérer). */
 function itemPlay(g, x, i) {
   const gear = gearOf(x), lbl = x.eq ? "Ranger" : gear && gear.kind === "armor" && gear.cat !== "shield" ? "Porter" : "Équiper";
-  return `${itemDetail(g, x, i)}${x.unid ? `<p class="itunid">Effet inconnu : une étude pendant un repos court (ou le sort <i>identification</i>) le révèle. Complète la fiche (✎ Gérer) avec ce que dit le MJ.</p>` : ""}<div class="itplay">${x.c ? `<button class="btn sm cast-go" data-a="it-dec" data-i="${i}"${x.q ? "" : " disabled"}>Utiliser · −1</button>` : ""}<button class="btn sm${x.eq || x.c ? "" : " cast-go"}" data-a="it-eq" data-i="${i}" aria-pressed="${!!x.eq}">${lbl}</button>${x.unid ? `<button class="btn sm" data-a="it-idf" data-i="${i}">Identifié ✓</button>` : ""}<select class="itmvf" data-a="it-fold" data-i="${i}" aria-label="Déplacer ${esc(x.n)} vers un dossier"><option value="" selected>Déplacer…</option>${g.folders.filter(f => f.id !== folderOf(g, x)).map(f => `<option value="${esc(f.id)}">${esc(f.n)}</option>`).join("")}</select><span style="flex:1"></span><button class="btn ghost sm" data-a="it-del" data-i="${i}">Retirer</button></div>`;
+  return `${itemDetail(g, x, i)}${x.unid ? `<p class="itunid">Effet inconnu : une étude pendant un repos court (ou le sort <i>identification</i>) le révèle. Complète la fiche (✎ Gérer) avec ce que dit le MJ.</p>` : ""}<div class="itplay">${x.c ? `<button class="btn sm cast-go" data-a="it-dec" data-i="${i}"${x.q ? "" : " disabled"}>Utiliser · −1</button>` : ""}<button class="btn sm${x.eq || x.c ? "" : " cast-go"}" data-a="it-eq" data-i="${i}" aria-pressed="${!!x.eq}">${lbl}</button>${x.unid ? `<button class="btn sm" data-a="it-idf" data-i="${i}">Identifié ✓</button>` : ""}<select class="itmvf" data-a="it-fold" data-i="${i}" aria-label="Déplacer ${esc(x.n)} vers un dossier"><option value="" selected>Déplacer…</option>${g.folders.filter(f => f.id !== folderOf(g, x)).map(f => `<option value="${esc(f.id)}">${esc(f.n)}</option>`).join("")}</select><span style="flex:1"></span>${saleOf(x) && !x.eq ? `<button class="btn ghost sm" data-a="sell-open" data-i="${i}">Vendre</button>` : ""}<button class="btn ghost sm" data-a="it-del" data-i="${i}">Retirer</button></div>`;
 }
 /** Gérer : charge suivie ou non (au choix du MJ), poids des pièces. */
 function loadSetHTML(g) {
@@ -247,6 +267,21 @@ const autoFolder = (g, x) => g.folders.some(y => y.id === classify(x)) ? classif
 const newFolder = (g, x) => { const f = filterOf(g); return f && f !== "eq" ? f : autoFolder(g, x); };
 onChange("it-fold", t => { const i = +t.dataset.i, g = G(), x = g && g.items[i], f = t.value; if (!x || !f) return; const prev = x.f, fn = (g.folders.find(y => y.id === f) || {}).n;
   S.itOpen = null; mutate(g => { g.items[i].f = f; }); toast(`<b>${esc(x.n)}</b> → ${esc(fn)}`, () => { mutate(g => { g.items[i].f = prev; }); return "Rétabli"; }); });
+// Vendre : depuis la section Butin (tous ses objets cochés) ou la fiche d'un objet ; partage, puis la part dans la bourse
+onClick("sell-open", (b) => { const g = G(), i = b.dataset.i != null ? +b.dataset.i : null;
+  const cand = i != null ? [i, ...g.items.map((x, k) => k).filter(k => k !== i && folderOf(g, g.items[k]) === "butin" && !g.items[k].eq)] : g.items.map((x, k) => k).filter(k => folderOf(g, g.items[k]) === "butin" && !g.items[k].eq);
+  S.sell = { cand, sel: (i != null ? [i] : cand).filter(k => saleOf(g.items[k])), n: (S.sell && S.sell.n) || S.sellN || 1 }; S.itOpen = null; render(); window.scrollTo({ top: Math.min(window.scrollY, (document.querySelector(".sellbox") || {}).offsetTop || 0), behavior: "instant" }); });
+onClick("sell-tog", (b) => { const V = S.sell, i = +b.dataset.i; if (!V) return; V.sel = V.sel.includes(i) ? V.sel.filter(k => k !== i) : [...V.sel, i]; render(); });
+onClick("sell-n", (b) => { const V = S.sell; if (!V) return; V.n = Math.max(1, Math.min(12, V.n + +b.dataset.v)); S.sellN = V.n; render(); });
+onClick("sell-cancel", () => { S.sell = null; render(); });
+onClick("sell-go", () => {
+  const g = G(), V = S.sell; if (!g || !V) return; const sel = V.sel.filter(i => g.items[i] && saleOf(g.items[i]));
+  const tot = sel.reduce((t, i) => t + saleOf(g.items[i]).total, 0), part = Math.floor(tot / V.n); if (!tot) return;
+  const prevI = g.items.map(y => ({ ...y })), prevM = { ...g.money }, names = sel.map(i => g.items[i].n), c = coinsOf(part);
+  mutate(g => { g.items = g.items.filter((y, k) => !sel.includes(k)); g.money.po += c.po; g.money.pa += c.pa; g.money.pc += c.pc; });
+  S.sell = null; S.itOpen = null;
+  toast(`Vendu : ${esc(names.join(", "))} · <b>+${pcText(part)}</b>${V.n > 1 ? ` (ta part sur ${pcText(tot)})` : ""}`, () => { mutate(g => { g.items = prevI; g.money = prevM; }); return "Vente annulée"; });
+});
 onClick("up-open", (b) => { S.unpack = { i: +b.dataset.i, off: [] }; render(); });
 onClick("up-cancel", () => { S.unpack = null; render(); });
 onClick("up-tog", (b) => { if (!S.unpack) return; const k = +b.dataset.k, o = S.unpack.off; S.unpack.off = o.includes(k) ? o.filter(y => y !== k) : [...o, k]; render(); });

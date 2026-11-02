@@ -47,6 +47,7 @@ function invFields(x) {
   if (num(x.w) != null) m.w = num(x.w); if (num(x.v) != null) m.v = num(x.v);
   if (RARITIES.includes(x.rar)) m.rar = x.rar; if (x.unid) m.unid = true;
   if (typeof x.desc === "string" && x.desc.trim()) m.desc = x.desc.trim().slice(0, 2000);
+  if (Math.floor(+x.shot) > 0) m.shot = Math.min(999, Math.floor(+x.shot)); // munitions tirées pendant le combat (à ramasser)
   return m;
 }
 function infFields(x) {
