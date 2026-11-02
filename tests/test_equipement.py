@@ -10,8 +10,8 @@ def money(a, n, coin, act):
 
 def test_bourse(browser, devices, url):
     a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, money={"po": 2, "pa": 3}), tab="inv", view="jeu")
-    check("0 objet" in a.text('[data-k="ch-eqj"]') and a.count(".purse") == 1, "nombre d'objets à côté du titre, bourse affichée")
-    a.click('.purse')
+    check("2 po · 3 pa" in a.text(".invsum") and "≈ 2,3 po" in a.text(".invsum"), f"résumé : bourse et sa valeur en po ({a.text('.invsum')})")
+    a.click('.invsum[data-a="m-open"]')
     money(a, 15, "pc", "m-gain")
     check(a.g("money.pc") == 15, "gain de 15 pc")
     money(a, 5, "pa", "m-spend")
@@ -28,14 +28,14 @@ def test_bourse(browser, devices, url):
 def test_objets(browser, devices, url):
     a = App(browser, devices, url, char=dict(MALFAEL, **FICHE), tab="inv", view="gerer")
     for n in ["Bâton", "Rations", "Potion de soins"]:
-        a.pg.fill("#it-new", n); a.pg.press("#it-new", "Enter"); a.pg.wait_for_timeout(60)
+        a.add_open(); a.pg.fill("#it-new", n); a.pg.press("#it-new", "Enter"); a.pg.wait_for_timeout(60)
     check(a.g("items.length") == 3 and a.pg.evaluate("document.activeElement.id") == "it-new", "3 objets ajoutés, champ prêt pour le suivant")
     a.click('[data-a="it-eq"][data-i="0"]')
     a.click('[data-a="it-edit"][data-i="1"]'); a.pg.fill("#it-q", "7"); a.pg.check("#it-c"); a.pg.fill("#it-note", "une par jour"); a.click('.itform [type="submit"]')
     check(a.g("items[1].q") == 7 and a.g("items[1].c") and a.g("items[1].note") == "une par jour", "rations : 7, à décompter")
     a.view("jeu")
     check(a.texts(".it.j .itn > span")[0].startswith("▸ Bâton") and "équipé" in a.texts(".it.j .itn > span")[0] and a.count(".it.eq") == 1, "objet équipé en tête, en gras, marqué")
-    check(a.count('[data-a="it-dec"]') == 0 and "×7" in a.text(".itbox") and "onglet Sorts" in a.text(".itbox"), "Personnage en jeu : inventaire en lecture, renvoi vers Sorts")
+    check(a.count('[data-a="it-dec"]') == 1 and a.text('[data-a="it-dec"][data-i="1"] + b') == "7", "En jeu : − / + sur la ligne des rations (à décompter)")
     a.tab("grimoire")
     check(a.texts('[data-k="act-it"] ~ .itbox .itn > span') == ["Rations"], "onglet Sorts : section Objets, objets à décompter seulement")
     a.click('[data-a="it-dec"][data-i="1"]')
@@ -79,7 +79,7 @@ def test_catalogue_ca_et_attaques(browser, devices, url):
     check("le calcul donne 19" in a.text(".acblock"), "écart affiché")
     a.click('[data-a="ac-mode"][data-v="calc"]')
     a.tab("inv")
-    a.pg.fill("#it-new", "épée"); a.pg.wait_for_timeout(60)
+    a.add_open(); a.pg.fill("#it-new", "épée"); a.pg.wait_for_timeout(60)
     check(a.count(".sug") == 3 and a.pg.evaluate("document.activeElement.id") == "it-new", "3 épées proposées, saisie continue")
     a.click('[data-a="it-pick"][data-id="greatsword"]')
     check(a.g("items.length") == 4 and a.pg.input_value("#it-new") == "Épée à deux mains" and a.count(".sugok") == 1, "suggestion choisie : recopiée dans le champ, pas encore ajoutée")
@@ -158,7 +158,7 @@ def test_objets_magiques(browser, devices, url):
 def test_limite_harmonisation(browser, devices, url):
     items = [{"n": f"Anneau {k}", "q": 1, "eq": True, "att": True, "attuned": k < 3} for k in range(4)]
     a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="inv", view="gerer")
-    check("harmonisation 3/3" in a.text('[data-k="ch-eq"]'), "compteur d'harmonisation")
+    check("3 / 3" in a.text(".invsum.att") and a.count(".invsum.att .pip.used") == 3, "résumé : harmonisation 3 / 3")
     a.click('[data-a="it-edit"][data-i="3"]'); a.pg.check("#it-attuned"); a.click('.itform [type="submit"]')
     check(not a.g("items[3].attuned") and "Déjà 3" in a.toast(), "pas plus de 3 objets harmonisés")
     a.close()
@@ -181,11 +181,11 @@ def test_main_secondaire_regle(browser, devices, url):
 def test_equipement_en_jeu(browser, devices, url):
     a = App(browser, devices, url, char=dict(MALFAEL, **FICHE), tab="inv", view="jeu")
     check(a.text('[data-a="view"][data-v="gerer"]') == "✎ Gérer", "sélecteur : ✎ Gérer")
-    a.pg.fill("#it-new", "épée lo")
+    a.add_open(); a.pg.fill("#it-new", "épée lo")
     check("Épée longue" in a.text(".sugbox"), "En jeu : armes du Manuel proposées")
     a.click('.sug[data-id="longsword"]'); a.click('[data-a="it-add"] [type="submit"]')
     check(a.g("items.length") == 1 and a.g("items[0].ref") == "longsword" and not a.g("items[0].eq") and "touche-le puis Équiper" in a.toast(), "ajoutée depuis En jeu, non équipée")
-    a.pg.fill("#it-new", "Corde de chanvre"); a.pg.press("#it-new", "Enter"); a.pg.wait_for_timeout(60)
+    a.add_open(); a.pg.fill("#it-new", "Corde de chanvre"); a.pg.press("#it-new", "Enter"); a.pg.wait_for_timeout(60)
     check(a.g("items.length") == 2 and "Ajouté" in a.toast(), "objet libre ajouté")
     a.undo()
     check(a.g("items.length") == 1, "ajout annulable")
@@ -202,20 +202,20 @@ def test_equipement_en_jeu(browser, devices, url):
 
 def test_ajout_avec_details(browser, devices, url):
     a = App(browser, devices, url, char=dict(MALFAEL, **FICHE), tab="inv", view="jeu")
-    a.pg.fill("#it-new", "Perles"); a.click('[data-a="it-det"]')
+    a.add_open(); a.pg.fill("#it-new", "Perles"); a.click('[data-a="it-det"]')
     check(a.count(".itform.itnew") == 1 and a.pg.input_value("#it-name") == "Perles" and a.count('.itnew [data-a="it-del"]') == 0, "✎ Détails : formulaire complet, nom repris, sans Retirer")
     a.click('.itnew [data-a="it-cancel"]')
     check(a.g("items.length") == 0 and a.count(".itnew") == 0, "Annuler : rien n'est créé")
-    a.pg.fill("#it-new", "Perles"); a.click('[data-a="it-det"]')
+    a.add_open(); a.pg.fill("#it-new", "Perles"); a.click('[data-a="it-det"]')
     a.pg.fill("#it-q", "12"); a.pg.fill("#it-note", "valeur à estimer"); a.click('.itnew [type="submit"]')
     check(a.g("items.length") == 1 and a.g("items[0].q") == 12 and a.g("items[0].note") == "valeur à estimer" and "×12" in a.toast(), "12 perles en une fois")
-    a.pg.fill("#it-new", "épée lo"); a.click('.sug[data-id="longsword"]'); a.click('[data-a="it-det"]')
+    a.add_open(); a.pg.fill("#it-new", "épée lo"); a.click('.sug[data-id="longsword"]'); a.click('[data-a="it-det"]')
     check(a.pg.input_value("#it-ref") == "longsword", "nom du Manuel : arme déjà liée")
     a.pg.select_option("#it-bonus", "1"); a.pg.check("#it-eq"); a.click('.itnew [type="submit"]')
     check(a.g("items[1].bonus") == 1 and a.g("items[1].eq") and a.g("items[1].ref") == "longsword" and "✦" in a.toast(), "objet magique ajouté, équipé, en une fois")
     a.undo()
     check(a.g("items.length") == 1, "ajout annulable")
-    a.pg.fill("#it-new", "Corde"); a.click('[data-a="it-add"] [type="submit"]')
+    a.add_open(); a.pg.fill("#it-new", "Corde"); a.click('[data-a="it-add"] [type="submit"]')
     check(a.g("items.length") == 2 and a.g("items[1].n") == "Corde", "＋ : ajout rapide inchangé")
     a.close()
 
@@ -223,7 +223,8 @@ def test_ajout_avec_details(browser, devices, url):
 def test_ranger_inventaire(browser, devices, url):
     items = [{"n": "Bâton", "q": 1, "eq": True, "ref": "quarterstaff"}, {"n": "Corde", "q": 1}, {"n": "Rations", "q": 5}, {"n": "Torches", "q": 10}, {"n": "Bouclier", "q": 1, "eq": True, "ref": "shield"}]
     a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="inv", view="gerer")
-    check(a.texts(".itgrp") == ["Équipé 2", "Autres objets 3"], f"deux sections : {a.texts('.itgrp')}")
+    secs = lambda: [f"{h} {n}" for h, n in zip(a.texts(".rubric.invsec .h"), a.texts(".rubric.invsec .aside"))]
+    check(secs() == ["Équipé 2", "Divers 3"], f"deux sections : {secs()}")
     names = lambda: [t.split("×")[0].replace("▸", "").strip() for t in a.texts(".it .itn > span")]
     check(names() == ["Bâton", "Bouclier", "Corde", "Rations", "Torches"], f"ordre : {names()}")
     check(a.js("document.querySelector('[data-a=it-mv][data-i=\"1\"][data-v=\"-1\"]').disabled"), "premier de sa section : ▲ grisé")
@@ -232,28 +233,28 @@ def test_ranger_inventaire(browser, devices, url):
     a.click('[data-a="it-mv"][data-i="4"][data-v="-1"]')
     check(names() == ["Bouclier", "Bâton", "Corde", "Torches", "Rations"], f"Bouclier monte dans Équipé : {names()}")
     a.view("jeu")
-    check(a.texts(".itgrp") == ["Équipé 2", "Autres objets 3"] and a.count('[data-a="it-mv"]') == 0, "En jeu : mêmes sections, sans flèches")
+    check(secs() == ["Équipé 2", "Divers 3"] and a.count('[data-a="it-mv"]') == 0, "En jeu : mêmes sections, sans flèches")
     a.close()
 
 
 def test_onglet_inventaire_et_recherche(browser, devices, url):
     items = [{"n": "Bâton", "q": 1, "eq": True, "ref": "quarterstaff"}, {"n": "Corde de chanvre", "q": 1}, {"n": "Potion de soins", "q": 2, "note": "2d4 + 2"}, {"n": "Clé rouillée", "q": 1, "note": "manoir de Tresendar"}]
     a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="perso", view="gerer")
-    check(a.count(".itbox") == 0 and a.count(".purse") == 0, "Personnage : plus d'équipement ni de bourse")
+    check(a.count(".itbox") == 0 and a.count(".invsum") == 0, "Personnage : plus d'équipement ni de bourse")
     names = lambda: [t.split("×")[0].replace("▸", "").strip() for t in a.texts(".it .itn > span")]
     a.tab("inv")
-    check(a.count(".purse") == 1 and "Sac" in a.text(".rubric.fold[data-k='ch-eq']") and len(names()) == 4, "Inventaire : bourse et sac")
+    check(a.count(".invsum") == 1 and len(names()) == 4, "Inventaire : bourse et objets")
     a.pg.fill("#it-find", "tresendar"); a.pg.wait_for_timeout(60)
     check(names() == ["Clé rouillée"] and a.pg.evaluate("document.activeElement.id") == "it-find", f"recherche dans les notes, saisie continue : {names()}")
     check(a.count('[data-a="it-mv"]') == 0, "pas de flèches pendant la recherche")
     a.pg.fill("#it-find", "cle"); a.pg.wait_for_timeout(60)
     check(names() == ["Clé rouillée"], "accents ignorés")
     a.pg.fill("#it-find", "zzz"); a.pg.wait_for_timeout(60)
-    check("Aucun objet" in a.text(".itbox"), "aucun résultat")
+    check("Aucun objet" in a.text(".empty"), "aucun résultat")
     a.pg.fill("#it-find", ""); a.pg.wait_for_timeout(60)
     check(len(names()) == 4 and a.count('[data-a="it-mv"]') > 0, "recherche vidée : tout revient, flèches comprises")
     a.view("jeu")
-    check(a.count("#it-find") == 1 and a.count(".purse") == 1, "En jeu : recherche et bourse aussi")
+    check(a.count("#it-find") == 1 and a.count(".invsum") == 1, "En jeu : recherche et bourse aussi")
     # Barre d'onglets qui défile : l'onglet ouvert recentré, fondu sur le bord coupé
     sc = lambda e: a.js(f"(() => {{ const s = document.querySelector('.tabscroll'); return {e}; }})()")
     check(sc("s.scrollWidth > s.clientWidth"), "druide sur téléphone : la rangée dépasse, elle défile")
@@ -262,5 +263,59 @@ def test_onglet_inventaire_et_recherche(browser, devices, url):
     a.tab("perso")
     check(sc("s.scrollLeft === 0 && s.classList.contains('fr') && !s.classList.contains('fl')"), "Personnage : barre au début, fondu à droite")
     check(a.js("document.querySelector('.tabmore').getBoundingClientRect().right <= window.innerWidth"), "Plus reste visible à droite")
+    check(not a.errors, f"erreurs : {a.errors}")
+    a.close()
+
+
+def test_dossiers_filtres_et_fiche(browser, devices, url):
+    items = [{"n": "Épée longue", "q": 1, "eq": True, "ref": "longsword"}, {"n": "Dague", "q": 2, "ref": "dagger"}, {"n": "Potion de soins", "q": 2, "c": True},
+             {"n": "Anneau", "q": 1, "unid": True}, {"n": "Corde de chanvre (15 m)", "q": 1}]  # fichier sans dossiers : classement proposé à l'ouverture
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="inv", view="jeu")
+    secs = lambda: [f"{h} {n}" for h, n in zip(a.texts(".rubric.invsec .h"), a.texts(".rubric.invsec .aside"))]
+    names = lambda: [t.split("×")[0].replace("▸", "").replace("▾", "").replace("équipé", "").replace("non identifié", "").strip() for t in a.texts(".it .itn > span")]
+    check(a.js("G().items.map(x => x.f).join()") == "armes,armes,conso,magie,divers", f"classement : {a.js('G().items.map(x => x.f).join()')}")
+    check(secs() == ["Équipé 1", "Armes 1", "Consommables 1", "Magie 1", "Divers 1"], f"sections : {secs()}")
+    check(a.texts(".invf .chip") == ["Tout", "Équipé", "Armes", "Consommables", "Magie", "Divers"], f"puces : {a.texts('.invf .chip')}")
+    a.click('[data-a="it-flt"][data-v="armes"]')
+    check(secs() == ["Armes 2"] and names() == ["Épée longue", "Dague"], f"filtre Armes : équipée comprise ({names()})")
+    a.click('[data-a="it-flt"][data-v=""]')
+    # Consommable : − / + sur la ligne, Utiliser · −1 dans la fiche
+    a.click('[data-a="it-dec"][data-i="2"]')
+    check(a.g("items[2].q") == 1, "− sur la ligne")
+    a.click('[data-a="it-open"][data-i="2"]'); a.click('.itplay [data-a="it-dec"]')
+    check(a.g("items[2].q") == 0 and a.count('.itplay [data-a="it-dec"][disabled]') == 1, "Utiliser · −1, grisé à 0")
+    # Non identifié, puis identifié ; déplacer vers un dossier (annulable)
+    a.click('[data-a="it-open"][data-i="3"]')
+    check("Effet inconnu" in a.text(".itunid") and a.count(".unid") == 1, "anneau non identifié")
+    a.click('[data-a="it-idf"]')
+    check(not a.g("unid") and a.js("G().items[3].unid") is None, "identifié")
+    a.click('[data-a="it-open"][data-i="4"]'); a.pg.select_option('[data-a="it-fold"]', "quete"); a.pg.wait_for_timeout(60)
+    check(a.g("items[4].f") == "quete" and "Quête 1" in secs(), "corde déplacée dans Quête")
+    a.undo()
+    check(a.g("items[4].f") == "divers", "déplacement annulé")
+    # Ajout : dossier du filtre en cours
+    a.click('[data-a="it-flt"][data-v="magie"]'); a.add_open(); a.pg.fill("#it-new", "Baguette"); a.click('[data-a="it-add"] [type="submit"]')
+    check(a.g("items[5].f") == "magie", "ajouté dans le dossier du filtre")
+    a.click('[data-a="it-flt"][data-v=""]')
+    # Gérer : fiche complète (dossier, poids, valeur, rareté, description)
+    a.view("gerer"); a.click('[data-a="it-edit"][data-i="5"]')
+    a.pg.select_option("#it-f", "quete"); a.pg.fill("#it-w", "0,5"); a.pg.fill("#it-v", "120"); a.pg.select_option("#it-rar", "rare"); a.pg.fill("#it-desc", "Trouvée dans la tour."); a.click('.itform [type="submit"]')
+    check(a.js("JSON.stringify([G().items[5].f, G().items[5].w, G().items[5].v, G().items[5].rar, G().items[5].desc])") == '["quete",0.5,120,"rare","Trouvée dans la tour."]', f"fiche (virgule acceptée) : {a.js('JSON.stringify(G().items[5])')}")
+    a.click('[data-a="it-open"][data-i="5"]')
+    check("120 po" in a.text(".itinfo") and "rare" in a.text(".itinfo") and "Trouvée dans la tour." in a.text(".itinfo"), "détail : valeur, rareté, description")
+    a.click('[data-a="it-open"][data-i="0"]')
+    check("1,5 kg" in a.text(".itdet"), "poids du Manuel pour l'épée longue")
+    # Dossiers : créer, renommer, ranger, supprimer (objets dans Divers, annulable)
+    a.click('[data-a="fd-new"]'); a.pg.fill("#fd-name", "Monture"); a.click('[data-a="fd-save"] [type="submit"]')
+    check(a.js("G().folders.map(f => f.n).join()") == "Armes,Consommables,Magie,Quête,Butin,Divers,Monture", "dossier créé")
+    a.click('[data-a="fd-mv"][data-v="divers"][data-d="1"]')
+    check(a.js("G().folders.map(f => f.n).slice(-2).join()") == "Monture,Divers", "dossier rangé")
+    check(a.count('[data-a="fd-del"][data-v="divers"]') == 0, "Divers ne se supprime pas")
+    a.click('[data-a="fd-del"][data-v="quete"]')
+    check(a.g("items[5].f") == "divers" and "Quête" not in a.js("G().folders.map(f => f.n).join()"), "Quête supprimé : objets dans Divers")
+    a.undo()
+    check(a.g("items[5].f") == "quete" and a.js("G().folders.some(f => f.id === 'quete')"), "suppression annulée")
+    a.pg.reload(); a.pg.wait_for_timeout(400)
+    check(a.js("G().folders.length") == 7 and a.g("items[5].rar") == "rare", "dossiers et fiche conservés au rechargement")
     check(not a.errors, f"erreurs : {a.errors}")
     a.close()

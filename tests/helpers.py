@@ -78,6 +78,11 @@ class App:
             self.click('#lrsheet .lufoot [data-a="lr-next"]')
         raise AssertionError("repos long : pas de bouton Terminer")
 
+    def add_open(self):
+        """Inventaire : ouvre le formulaire d'ajout (bouton ＋ en tête) s'il est fermé."""
+        if self.count("#it-new") == 0:
+            self.click('[data-a="it-plus"]')
+
     def tab(self, v):
         sel = f'[data-a="tab"][data-v="{v}"]'
         if self.count(sel) == 0:  # onglet rangé dans le menu Plus

@@ -67,6 +67,9 @@ def test_impregnations_et_attaques(browser, devices, url):
     check("Imprégnations" in a.text("#panel") and "✦" in a.text("#panel"), "rappel des objets imprégnés en jeu")
     a.pg.reload(); a.pg.wait_for_timeout(400)
     check(a.js("G().items.filter(x => x.inf).length") == 2, "imprégnations conservées au rechargement")
+    a.tab("inv"); a.view("gerer"); k = a.js("G().items.findIndex(x => x.inf)")
+    a.click(f'[data-a="it-edit"][data-i="{k}"]'); a.pg.fill("#it-note", "révisée"); a.click('.itform [type="submit"]')
+    check(a.js(f"G().items[{k}].inf") and a.g(f"items[{k}].note") == "révisée", "imprégnation gardée après modification de l'objet")
     a.close()
 
 

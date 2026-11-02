@@ -45,6 +45,7 @@ src/
     magic.js                objets magiques : harmonisation (3 au plus), charges et recharge
     feats.js                dons qui modifient les calculs (Vigilant, Maître d'armes lourdes, Tireur d'élite)
     equipment.js            armes et armures : maîtrises, CA calculée, attaques
+    inventory.js            dossiers de l'inventaire, dossier proposé selon l'objet, poids (saisi ou du Manuel)
     hp.js                   points de vie : dégâts, soins, PV temporaires, jets contre la mort, dés de vie, repos long
   classes/
     index.js                registre des classes : C(g), sorts toujours préparés, capacités
@@ -64,7 +65,7 @@ src/
   features/                 mécaniques partagées par toutes les classes
     character.js            onglet Personnage : caractéristiques, combat, jets de sauvegarde (Gérer, En jeu)
     hp.js                   carte des points de vie, puce de la barre du haut, rappel de concentration
-    equipment.js            onglet Inventaire : bourse, sac (Gérer, En jeu), recherche ; rubrique Objets des onglets d'action
+    equipment.js            onglet Inventaire : recherche, ＋, filtres, résumé, sections (Équipé, dossiers), fiche d'un objet, dossiers (Gérer) ; rubrique Objets des onglets d'action
     abilities.js            onglet Capacités des classes sans sorts
     attacks.js              section Attaques (Personnage ou Capacités)
     tools.js                outils (maîtrise, expertise) et langues

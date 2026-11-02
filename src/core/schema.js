@@ -2,6 +2,7 @@
 import { CLASSES } from "../classes/index.js";
 import { BY_ID, GEAR } from "../data.js";
 import { FEATS, featByName } from "../rules/feats.js";
+import { DEF_FOLDERS, RARITIES, classify, folderOf } from "../rules/inventory.js";
 import { COINS, blankPurse } from "../rules/money.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { RACES } from "../rules/creation.js";
@@ -39,6 +40,15 @@ function magicOf(x) {
   return m;
 }
 // Imprégnation d'artificier portée par l'objet : identifiant, ordre, option (type de résistance), charges venues de l'imprégnation
+// Inventaire : dossier, poids (kg) et valeur (po) saisis, rareté, non identifié, description
+function invFields(x) {
+  const m = {}, num = v => v === "" || v == null || !isFinite(+v) || +v < 0 ? null : Math.round(+v * 100) / 100;
+  if (typeof x.f === "string" && x.f) m.f = x.f.slice(0, 40);
+  if (num(x.w) != null) m.w = num(x.w); if (num(x.v) != null) m.v = num(x.v);
+  if (RARITIES.includes(x.rar)) m.rar = x.rar; if (x.unid) m.unid = true;
+  if (typeof x.desc === "string" && x.desc.trim()) m.desc = x.desc.trim().slice(0, 2000);
+  return m;
+}
 function infFields(x) {
   if (typeof x.inf !== "string" || !x.inf) return {};
   const m = { inf: x.inf, infAt: Math.max(0, +x.infAt || 0) };
@@ -56,7 +66,7 @@ function blank(name, cls) {
     // Bas de fiche : défenses [{t: res|imm|vul|adv, v}], dons et traits [{n, o (origine), d}], historique, notes du personnage
     defs: [], traits: [], bg: { n: "", d: "" }, pnotes: "",
     // Équipement : objets [{n, q, eq, c (à décompter), note}] et bourse {pp, po, pe, pa, pc}
-    items: [], money: blankPurse(), acMode: null,
+    items: [], folders: DEF_FOLDERS.map(f => ({ ...f })), money: blankPurse(), acMode: null,
     hp: null, hpTemp: 0, death: { s: 0, f: 0, stable: false }, hdU: 0, exh: 0, spells: [],
     prepared: [], used: {}, extras: [], effects: [], notes: "", snotes: {}, ...Object.assign({}, ...Object.values(CLASSES).map(c => c.defaults ? c.defaults() : {})), updatedAt: Date.now() };
 }
@@ -108,7 +118,11 @@ function norm(g) {
   o.breathU = o.breathU ? 1 : 0;
   const iu = o.innU && typeof o.innU === "object" ? o.innU : {}; o.innU = Object.fromEntries(Object.entries(iu).filter(([, v]) => v).map(([k]) => [k, 1])); // sorts innés utilisés (repos long)
   o.bg = { n: str((o.bg || {}).n), d: str((o.bg || {}).d) }; o.pnotes = str(o.pnotes);
-  o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(x.oh ? { oh: true } : {}), ...magicOf(x), ...infFields(x), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : {}) }));
+  o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(x.oh ? { oh: true } : {}), ...magicOf(x), ...infFields(x), ...invFields(x), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : {}) }));
+  // Dossiers de l'inventaire (ordre des sections) ; un objet sans dossier (fichier plus ancien) reçoit celui proposé par son type
+  const fl = (Array.isArray(o.folders) ? o.folders : []).filter(f => f && str(f.id).trim() && str(f.n).trim()).map(f => ({ id: str(f.id).trim().slice(0, 40), n: str(f.n).trim().slice(0, 40) }));
+  o.folders = fl.length ? fl.filter((f, i) => fl.findIndex(y => y.id === f.id) === i) : DEF_FOLDERS.map(f => ({ ...f }));
+  o.items.forEach(x => { if (!o.folders.some(f => f.id === x.f)) x.f = o.folders.some(f => f.id === classify(x)) ? classify(x) : folderOf(o, x); });
   o.acMode = ["calc", "manual"].includes(o.acMode) ? o.acMode : null; // null : saisie si elle existe, sinon calcul
   const mo = o.money && typeof o.money === "object" ? o.money : {};
   o.money = Object.fromEntries(COINS.map(([k]) => [k, Math.max(0, Math.floor(+mo[k]) || 0)]));
