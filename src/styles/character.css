@@ -316,3 +316,7 @@
 .ammo span { flex: 1; } .ammo small { color: var(--muted); }
 .ammo2 { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
 .ammo2 small { flex: 1; color: var(--muted); font-size: 12.5px; }
+.sellrow { border-bottom: 1px solid var(--rule); }
+.sellrow .pkrow { border-bottom: 0; width: 100%; }
+.sellq { display: flex; align-items: center; gap: 6px; padding: 0 0 6px 26px; font-size: 13.5px; }
+.sellq span, .sellq small { color: var(--muted); } .sellq small { margin-left: 4px; }

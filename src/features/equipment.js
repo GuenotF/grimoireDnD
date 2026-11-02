@@ -55,10 +55,13 @@ function lootOf(g, list) {
   return { pc, sale, none };
 }
 // Vendre (S.sell : sel, indices cochés ; cand, objets proposés ; n, joueurs pour le partage) : total, part de chacun, dans la bourse
+// Nombre vendu d'un objet : choisi pour un objet en plusieurs exemplaires (ex. vendre 3 perles, en garder 7), tous par défaut
+const sellQ = (x, i) => Math.min(x.q, Math.max(1, (S.sell.qty || {})[i] ?? x.q));
+const sellPc = (x, i) => { const s = saleOf(x); return s ? Math.floor(s.unit * (s.half ? 0.5 : 1) * sellQ(x, i)) : 0; };
 function sellHTML(g) {
-  const V = S.sell, rows = V.cand.filter(i => g.items[i]).map(i => { const x = g.items[i], s = saleOf(x), on = !!s && V.sel.includes(i);
-    return `<button class="pkrow" data-a="sell-tog" data-i="${i}" aria-pressed="${on}"${s ? "" : " disabled"}><span class="ck" aria-hidden="true"></span><span>${x.q > 1 ? x.q + " × " : ""}${esc(x.n)}</span><small>${s ? `${pcText(s.total)}${s.half ? " · moitié prix" : ""}` : "sans valeur : ✎ Gérer"}</small></button>`; }).join("");
-  const tot = V.sel.reduce((t, i) => t + ((g.items[i] && saleOf(g.items[i])) || { total: 0 }).total, 0), part = Math.floor(tot / V.n);
+  const V = S.sell, rows = V.cand.filter(i => g.items[i]).map(i => { const x = g.items[i], s = saleOf(x), on = !!s && V.sel.includes(i), n = sellQ(x, i);
+    return `<div class="sellrow"><button class="pkrow" data-a="sell-tog" data-i="${i}" aria-pressed="${on}"${s ? "" : " disabled"}><span class="ck" aria-hidden="true"></span><span>${x.q > 1 && !on ? x.q + " × " : ""}${esc(x.n)}</span><small>${s ? `${pcText(on ? sellPc(x, i) : s.total)}${s.half ? " · moitié prix" : ""}` : "sans valeur : ✎ Gérer"}</small></button>${on && x.q > 1 ? `<div class="sellq"><button class="btn sm" data-a="sell-q" data-i="${i}" data-v="-1" aria-label="${esc(x.n)} : en vendre un de moins"${n > 1 ? "" : " disabled"}>−</button><b>${n}</b><span>/ ${x.q}</span><button class="btn sm" data-a="sell-q" data-i="${i}" data-v="1" aria-label="${esc(x.n)} : en vendre un de plus"${n < x.q ? "" : " disabled"}>+</button><small>${n < x.q ? `tu en gardes ${x.q - n}` : "tout"}</small></div>` : ""}</div>`; }).join("");
+  const tot = V.sel.reduce((t, i) => t + (g.items[i] ? sellPc(g.items[i], i) : 0), 0), part = Math.floor(tot / V.n);
   return `<div class="pkbox sellbox"><b class="sh">Vendre</b>${rows}<div class="selltot"><span>Total</span><b>${pcText(tot)}</b></div>
     <div class="sellsplit"><span>Partager entre</span><button class="btn sm" data-a="sell-n" data-v="-1" aria-label="Un joueur de moins"${V.n > 1 ? "" : " disabled"}>−</button><b>${V.n}</b><button class="btn sm" data-a="sell-n" data-v="1" aria-label="Un joueur de plus">+</button><span>joueur${V.n > 1 ? "s" : ""}</span>${V.n > 1 ? `<b class="part">${pcText(part)} chacun</b>` : ""}</div>
     <div class="pkgo"><button class="btn sm cast-go" data-a="sell-go"${tot ? "" : " disabled"}>Vendre · ${V.n > 1 ? `ma part (${pcText(part)})` : pcText(tot)} dans la bourse</button><button class="btn ghost sm" data-a="sell-cancel">Annuler</button></div>
@@ -274,11 +277,12 @@ onClick("sell-open", (b) => { const g = G(), i = b.dataset.i != null ? +b.datase
 onClick("sell-tog", (b) => { const V = S.sell, i = +b.dataset.i; if (!V) return; V.sel = V.sel.includes(i) ? V.sel.filter(k => k !== i) : [...V.sel, i]; render(); });
 onClick("sell-n", (b) => { const V = S.sell; if (!V) return; V.n = Math.max(1, Math.min(12, V.n + +b.dataset.v)); S.sellN = V.n; render(); });
 onClick("sell-cancel", () => { S.sell = null; render(); });
+onClick("sell-q", (b) => { const V = S.sell, i = +b.dataset.i, x = G() && G().items[i]; if (!V || !x) return; V.qty = { ...(V.qty || {}), [i]: Math.min(x.q, Math.max(1, sellQ(x, i) + +b.dataset.v)) }; render(); });
 onClick("sell-go", () => {
-  const g = G(), V = S.sell; if (!g || !V) return; const sel = V.sel.filter(i => g.items[i] && saleOf(g.items[i]));
-  const tot = sel.reduce((t, i) => t + saleOf(g.items[i]).total, 0), part = Math.floor(tot / V.n); if (!tot) return;
-  const prevI = g.items.map(y => ({ ...y })), prevM = { ...g.money }, names = sel.map(i => g.items[i].n), c = coinsOf(part);
-  mutate(g => { g.items = g.items.filter((y, k) => !sel.includes(k)); g.money.po += c.po; g.money.pa += c.pa; g.money.pc += c.pc; });
+  const g = G(), V = S.sell; if (!g || !V) return; const sel = V.sel.filter(i => g.items[i] && saleOf(g.items[i])), qs = Object.fromEntries(sel.map(i => [i, sellQ(g.items[i], i)]));
+  const tot = sel.reduce((t, i) => t + sellPc(g.items[i], i), 0), part = Math.floor(tot / V.n); if (!tot) return;
+  const prevI = g.items.map(y => ({ ...y })), prevM = { ...g.money }, names = sel.map(i => `${qs[i] > 1 ? qs[i] + " × " : ""}${g.items[i].n}`), c = coinsOf(part);
+  mutate(g => { sel.forEach(i => { g.items[i].q -= qs[i]; }); g.items = g.items.filter((y, k) => !sel.includes(k) || y.q > 0); g.money.po += c.po; g.money.pa += c.pa; g.money.pc += c.pc; }); // ce qui n'est pas vendu reste dans le sac
   S.sell = null; S.itOpen = null;
   toast(`Vendu : ${esc(names.join(", "))} · <b>+${pcText(part)}</b>${V.n > 1 ? ` (ta part sur ${pcText(tot)})` : ""}`, () => { mutate(g => { g.items = prevI; g.money = prevM; }); return "Vente annulée"; });
 });

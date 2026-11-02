@@ -400,3 +400,20 @@ def test_butin_vente_et_munitions(browser, devices, url):
     check("Pas de munitions" in a.text(".atkbox"), "arc sans flèches : rappel")
     check(not a.errors, f"erreurs : {a.errors}")
     a.close()
+
+
+def test_vente_partielle(browser, devices, url):
+    items = [{"n": "Perle", "q": 10, "v": 100, "f": "butin"}, {"n": "Épée courte", "q": 3, "ref": "shortsword", "f": "butin"}]
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items, money={}), tab="inv", view="jeu")
+    a.click('[data-a="sell-open"][data-v="butin"]')
+    check(a.count(".sellq") == 2 and "1 040 po" not in a.text(".selltot") and "1015 po" in a.text(".selltot"), f"tout par défaut : 1000 + 15 ({a.text('.selltot')})")
+    for _ in range(7): a.click('[data-a="sell-q"][data-i="0"][data-v="-1"]')
+    check("tu en gardes 7" in a.text(".sellq") and "300 po" in a.text(".sellbox .pkrow") , "3 perles sur 10")
+    a.click('[data-a="sell-tog"][data-i="1"]')
+    check(a.count(".sellq") == 1 and "300 po" in a.text(".selltot"), "épées décochées : seulement les perles")
+    a.click('[data-a="sell-go"]')
+    check(a.g("items[0].q") == 7 and a.g("money.po") == 300 and a.g("items.length") == 2, f"3 vendues, 7 gardées : {a.js('JSON.stringify(G().items.map(x => x.q))')}")
+    a.undo()
+    check(a.g("items[0].q") == 10 and a.g("money.po") == 0, "vente annulée")
+    check(not a.errors, f"erreurs : {a.errors}")
+    a.close()
