@@ -129,7 +129,7 @@ def test_fiches_imprimables(browser, devices, url):
     """Onglet Imprimer des trois classes : fichier téléchargé et contenu propre à chaque classe."""
     cases = [(NEMEIA, "Grimoire - Némeia.html", ["Le grimoire", "Restauration arcanique", "Journal de copie"]),
              (KAEL, "Paladin - Ser Kael.html", ["Imposition des mains", "reste", "/ 20 PV", "Châtiment divin", "Sorts de serment", "Agathys", "Sorts de paladin", "Style de combat"]),
-             (dict(MALFAEL, favs=["ours-brun"]), "Druide - Malfaël Clanchombre.html", ["Forme sauvage", "Forme active", "Mes formes", "Ours brun", "Griffes", "Sorts de druide", "Changeforme de combat"])]
+             (dict(MALFAEL, favs=["ours-brun"], items=[{"n": "Bâton", "q": 1, "eq": True, "ref": "quarterstaff"}, {"n": "Perle", "q": 2, "v": 100, "f": "butin"}, {"n": "Anneau", "q": 1, "unid": True}]), "Druide - Malfaël Clanchombre.html", ["Forme sauvage", "Forme active", "Mes formes", "Ours brun", "<b>Équipé</b>", "<b>Butin</b>", "≈ 200 po", "(non identifié)", "Griffes", "Sorts de druide", "Changeforme de combat"])]
     for char, name, words in cases:
         a = App(browser, devices, url, char=char, tab="imprimer")
         check(a.count('[data-a="open-print"]') == 1, f"onglet Imprimer : {name}")

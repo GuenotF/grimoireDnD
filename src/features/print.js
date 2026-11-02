@@ -11,12 +11,21 @@ import { acOf, attacks } from "../rules/equipment.js";
 import { FEATS } from "../rules/feats.js";
 import { recLabel } from "../rules/magic.js";
 import { COINS } from "../rules/money.js";
+import { fmtKg, folderOf, loadOf, pcText, unitPc } from "../rules/inventory.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { offer } from "./save.js";
 import { toolsPrint } from "./tools.js";
 import { innateSpells } from "./innate.js";
 import { pText, pillData } from "./spells.js";
 
+// Inventaire imprimé : Équipé, puis les dossiers dans l'ordre choisi (comme l'onglet Inventaire), valeur du butin, dossiers non portés signalés
+function pItems(g) {
+  if (!g.items.length) return "";
+  const line = x => `${esc(x.n)}${x.q !== 1 ? ` ×${x.q}` : ""}${x.bonus ? ` +${x.bonus}` : ""}${x.unid ? " (non identifié)" : ""}${x.att ? (x.attuned ? " (harmonisé)" : " (à harmoniser)") : ""}${x.chMax ? ` ${pDots(x.chMax)} <i>${recLabel(x.rec)}</i>` : ""}${x.note ? ` <i>(${esc(x.note)})</i>` : ""}`;
+  const secs = [["Équipé", g.items.filter(x => x.eq), ""], ...g.folders.map(f => [f.n, g.items.filter(x => !x.eq && folderOf(g, x) === f.id), f])];
+  return secs.filter(([, l]) => l.length).map(([n, l, f]) => { const val = f && f.id === "butin" ? l.reduce((t, x) => t + (unitPc(x) == null ? 0 : Math.floor(unitPc(x) * x.q)), 0) : 0;
+    return `<p class="trait"><b>${esc(n)}</b>${f && f.np ? " <i>(non porté)</i>" : ""}${val ? ` <i>(≈ ${pcText(val)})</i>` : ""} : ${l.map(line).join(" · ")}</p>`; }).join("");
+}
 function printHTML(g) {
   return `<div class="rubric" style="margin-top:4px"><h2>Fiche imprimable</h2></div>
   <p style="max-width:65ch">Ouvre la fiche de ${esc(g.name)} pour l'imprimer en A4 (ou « Enregistrer en PDF »), ou télécharge-la pour plus tard. ${C(g).printDesc}</p>
@@ -117,9 +126,9 @@ ${g.traits.length ? `<h2>Dons et traits</h2>${g.traits.map(t => { const r = t.fe
   return `<p class="trait"><b>${esc(t.n)}</b>${r ? ` ${pDots(r.n)} <i>${esc(r.label)} · ${r.rest === "court" ? "repos court" : "repos long"}</i>` : ""}${t.d ? ` · ${esc(t.d)}` : ""}</p>`; }).join("")}` : ""}
 ${pInnate(g)}
 ${g.bg.n || g.bg.d ? `<h2>Historique${g.bg.n ? ` <small>${esc(g.bg.n)}</small>` : ""}</h2>${g.bg.d ? `<p class="trait">${esc(g.bg.d)}</p>` : ""}` : ""}
-<h2>Équipement <small>bourse au crayon</small></h2>
+<h2>Inventaire <small>bourse au crayon${g.load ? ` · charge ${fmtKg(loadOf(g).kg)} / ${fmtKg(loadOf(g).cap)}` : ""}${g.items.some(x => x.att) ? ` · harmonisation ${g.items.filter(x => x.att && x.attuned).length}/3` : ""}</small></h2>
 <div class="res">${COINS.map(([k]) => `<span>${k} <span class="write" style="min-width:12mm">${g.money[k] || ""}</span></span>`).join("")}</div>
-${g.items.length ? `<p class="trait">${g.items.map(x => `${x.eq ? "<b>" : ""}${esc(x.n)}${x.eq ? "</b>" : ""}${x.q !== 1 ? ` ×${x.q}` : ""}${x.bonus ? ` +${x.bonus}` : ""}${x.att ? (x.attuned ? " (harmonisé)" : " (à harmoniser)") : ""}${x.chMax ? ` ${pDots(x.chMax)} <i>${recLabel(x.rec)}</i>` : ""}${x.note ? ` <i>(${esc(x.note)})</i>` : ""}`).join(" · ")}</p>` : ""}<div class="line"></div>
+${pItems(g)}<div class="line"></div>
 <h2>Notes du personnage</h2>${g.pnotes ? `<p style="white-space:pre-wrap;font-size:9.5pt;margin:0 0 2mm">${esc(g.pnotes)}</p>` : ""}${Array.from({ length: 3 }, () => '<div class="line"></div>').join("")}
 <div class="brk"></div>`;
 }

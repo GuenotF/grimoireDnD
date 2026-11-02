@@ -14,6 +14,12 @@ const listOf = (x, g) => typeof x === "function" ? x(g) : x || []; // maîtrises
 const weaponProf = (g, w) => listOf(C(g).weaponProf, g).some(p => p === w.cat || p === w.id) || ((g.race || {}).weapons || []).includes(w.id); // classe ou race (armes naines, elfiques…)
 const armorProf = (g, a) => listOf(C(g).armorProf, g).includes(a.cat) || featArmor(g).includes(a.cat) || ((g.race || {}).armor || []).includes(a.cat); // classe, don ou race
 
+/** Armure trop lourde (Force requise non atteinte) : vitesse −3 m ; pas pour le nain (vitesse non réduite par une armure lourde),
+ * ni avec la variante d'encombrement (la colonne Force des armures est alors ignorée). */
+function armorSpeed(g) {
+  const a = equipped(g, "armor").map(x => x.gear).find(x => x.cat !== "shield");
+  return a && a.str && g.abil.str < a.str && g.load !== "enc" && !((g.race || {}).id === "nain" && a.cat === "heavy") ? 3 : 0;
+}
 /**
  * Classe d'armure calculée : armure portée (base + DEX, plafonnée en intermédiaire, aucune en lourde), sinon 10 + DEX ;
  * bouclier ; bonus de classe. Renvoie { total, parts: [[libellé, valeur]], warn: [textes], armor, shield }.
@@ -29,7 +35,7 @@ function acCalc(g) {
     parts.push([`${armor.n}${mb(aw.item) ? ` +${mb(aw.item)}` : ""} (${{ light: "légère", medium: "intermédiaire", heavy: "lourde" }[armor.cat]})`, armor.ac + mb(aw.item)]);
     parts.push([armor.dex ? `DEX${dexMax != null && dex > dexMax ? ` (plafonnée à +${dexMax})` : ""}` : "DEX (aucune en armure lourde)", armor.dex ? d : null]);
     if (armor.stealth && !(armor.cat === "medium" && hasFeat(g, "medium-armor-master"))) warn.push(`${armor.n} : <b>désavantage en Discrétion</b>.`);
-    if (armor.str && g.abil.str < armor.str && g.load !== "enc") warn.push(`${armor.n} : Force ${armor.str} requise (tu as ${g.abil.str}) : <b>−3 m de vitesse</b>.`);
+    if (armorSpeed(g)) warn.push(`${armor.n} : Force ${armor.str} requise (tu as ${g.abil.str}) : <b>−3 m de vitesse</b> (déjà retirés).`);
   } else {
     // Sans armure : la meilleure base entre celle de la classe (Défense sans armure…), 10 + DEX et Armure de mage en cours (13 + DEX) ; ces bases ne se cumulent pas
     const own = C(g).acBase ? C(g).acBase(g, !!shield) : [];
@@ -118,4 +124,4 @@ function attacks(g) {
   return list;
 }
 
-export { gearOf, weaponProf, armorProf, acCalc, acMode, acOf, attackOf, attacks, twoWeapons };
+export { gearOf, weaponProf, armorProf, armorSpeed, acCalc, acMode, acOf, attackOf, attacks, twoWeapons };

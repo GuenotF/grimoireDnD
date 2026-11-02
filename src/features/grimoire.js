@@ -18,6 +18,8 @@ import { restBarHTML } from "./rest.js";
 import { prepOpenHTML } from "./longrest.js";
 import { keyPills, noteBox, noteGerer, noteMark, noteOf, notePen, pillsHTML, spellBody, tags } from "./spells.js";
 
+/** Rappel dans Gérer : sorts mineurs pas encore choisis (le passage de niveau en donne un de plus, une fiche importée peut en manquer). */
+const cantripWarn = (n, max) => n < max ? `<div class="note warn">${max - n === 1 ? "Il te manque un sort mineur" : `Il te manque ${max - n} sorts mineurs`} (${n} sur ${max}) : choisis-l${max - n === 1 ? "e" : "es"} dans la bibliothèque (filtre « Mineurs »).</div>` : "";
 function featsHTML(g) {
   const feats = classFeats(g), have = feats.filter(f => f.lv <= g.level), next = feats.filter(f => f.lv > g.level).slice(0, 2);
   if (!have.length && !next.length) return "";
@@ -48,6 +50,7 @@ function preparedGererHTML(g) {
   if (R.cantrips(g, 20) > 0) {
     const cMax = R.cantrips(g), cans = g.cantrips.map(id => BY_ID[id]).filter(Boolean).sort(byName);
     h += foldHead("c", "", "Sorts mineurs", `${cans.length} sur ${cMax} connus · à volonté, jamais préparés`, plural(cans.length, "sort"));
+    h += cantripWarn(cans.length, cMax); // sorts mineurs à choisir (passage de niveau, fiche importée)
     if (!isFold("c")) { if (!cans.length) h += `<div class="empty">Aucun sort mineur. Choisis-en ${cMax} dans la bibliothèque (filtre « Mineurs »).</div>`; cans.forEach(s => { h += gererRow(g, s, null, false, false, true); }); }
   }
   const conc = castable(g).filter(s => s.c);
@@ -72,6 +75,7 @@ function knownGererHTML(g) {
   if (R.cantrips(g, 20) > 0) {
     const cMax = R.cantrips(g), cans = g.cantrips.map(id => BY_ID[id]).filter(Boolean).sort(byName);
     h += foldHead("c", "", "Sorts mineurs", `${cans.length} sur ${cMax} connus · à volonté`, plural(cans.length, "sort"));
+    h += cantripWarn(cans.length, cMax); // sorts mineurs à choisir (passage de niveau, fiche importée)
     if (!isFold("c")) { if (!cans.length) h += `<div class="empty">Aucun sort mineur. Choisis-en ${cMax} dans la bibliothèque (filtre « Mineurs »).</div>`; cans.forEach(s => { h += gererRow(g, s, null, false, false, true); }); }
   }
   h += `<div class="rubric"><h2>Sorts connus</h2><span class="aside">${n > kMax ? `<span class="lim">Trop de sorts connus : ${n} / ${kMax}</span> · oublie-en ${n - kMax}` : `<b class="kncount">${n} / ${kMax}</b> · tous lançables, sans préparation ; on en change au passage de niveau`}</span></div>`;
@@ -151,6 +155,7 @@ function bookGererHTML(g) {
   // Sorts mineurs
   const cMax = R.cantrips(g);
   h += foldHead("c", "", "Sorts mineurs", `${g.cantrips.length} sur ${cMax} connus · à volonté, jamais préparés`, plural(g.cantrips.length, "sort"));
+  h += cantripWarn(g.cantrips.length, cMax); // sorts mineurs à choisir (passage de niveau, fiche importée)
   if (!isFold("c")) {
     if (!g.cantrips.length) h += `<div class="empty">Aucun sort mineur. Choisis-en ${cMax} dans la bibliothèque (filtre « Mineurs »).</div>`;
     g.cantrips.map(id => BY_ID[id]).sort(byName).forEach(s => { h += gererRow(g, s, null, false, false, true); });

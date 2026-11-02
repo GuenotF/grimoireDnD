@@ -436,3 +436,17 @@ def test_valeur_en_pieces(browser, devices, url):
     check(a.g("money.po") == 5, "vendu : 5 po")
     check(not a.errors, f"erreurs : {a.errors}")
     a.close()
+
+
+def test_armure_trop_lourde_et_sorts_mineurs(browser, devices, url):
+    items = [{"n": "Harnois", "q": 1, "eq": True, "ref": "plate"}]
+    a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items), tab="perso", view="gerer")
+    check(a.js("speedOf(G())") == 6 and "déjà retirés" in a.text(".acwarn"), f"harnois sans Force 15 : vitesse 9 − 3 ({a.js('speedOf(G())')} m)")
+    a.js("mutate(g => { g.race = { id: 'nain', n: 'Nain', hpLv: 0, weapons: [], armor: [] }; g.speed = 7.5; })")
+    check(a.js("speedOf(G())") == 7.5 and "Force 15" not in a.text("#panel"), "nain : vitesse non réduite par une armure lourde")
+    a.js("mutate(g => { g.race = null; g.speed = 9; g.load = 'enc'; })")
+    check(a.js("speedOf(G())") == 6 and "Force 15" not in a.text("#panel"), f"variante d'encombrement : Force des armures ignorée ; 32,5 kg pour FOR 10 : encombré, −3 m ({a.js('speedOf(G())')} m)")
+    a.close()
+    b = App(browser, devices, url, char=dict(MALFAEL, **FICHE, cantrips=["druidcraft"]), tab="grimoire", view="gerer")
+    check("Il te manque 2 sorts mineurs (1 sur 3)" in b.text(".note.warn"), f"rappel des sorts mineurs : {b.texts('.note.warn')}")
+    b.close()
