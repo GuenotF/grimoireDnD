@@ -8,6 +8,7 @@ import { render } from "../core/ui.js";
 import { R } from "../rules/common.js";
 import { halfProf, initiative, passivePerception, saveBonus, saveProf, skillBonus, skillLevel } from "../rules/character.js";
 import { acOf } from "../rules/equipment.js";
+import { loadOf } from "../rules/inventory.js";
 import { ABILITIES, SKILLS } from "../rules/tables.js";
 import { concOf } from "./cast.js";
 import { hpChipHTML } from "./hp.js";
@@ -17,7 +18,8 @@ const LV = ["", "maîtrise", "expertise"];
 
 function topbarHTML(g) {
   const cur = concOf(g), others = g.effects.filter(e => !e.c), cls = C(g).barChips ? C(g).barChips(g) : "";
-  const fx = cls + (cur ? `<button class="chip conc" data-a="conc-panel" aria-expanded="${!!S.concPanel}" title="Concentration : ${esc(cur.name)}">◉ ${esc(cur.name)}</button>` : "")
+  const ld = g.load ? loadOf(g).level : 0; // charge (Inventaire) : encombré, lourdement, au-delà de la capacité ; toucher : onglet Inventaire
+  const fx = cls + (ld ? `<button class="chip load l${ld}" data-a="tab" data-v="inv" title="Charge : voir l'inventaire">${["", "Encombré · −3 m", "Lourdement encombré", "Surchargé"][ld]}</button>` : "") + (cur ? `<button class="chip conc" data-a="conc-panel" aria-expanded="${!!S.concPanel}" title="Concentration : ${esc(cur.name)}">◉ ${esc(cur.name)}</button>` : "")
     + (others.length ? `<button class="chip more" data-a="fx-open" aria-label="${others.length} effet${others.length > 1 ? "s" : ""} en cours">✦ ${others.length} effet${others.length > 1 ? "s" : ""}</button>` : "");
   const st = (v, l) => `<span class="tbst"><b>${v}</b><span>${l}</span></span>`;
   const abs = ABILITIES.map(([k, a, n]) => { const p = saveProf(g, k); return `<button class="tbab${S.abOpen === k ? " on" : ""}" data-a="ab-open" data-v="${k}" aria-label="${n} ${signed(R.ab(g, k))}${p ? ", jet de sauvegarde maîtrisé" : ""}" aria-expanded="${S.abOpen === k}"><span class="l${p ? " js" : ""}">${a}${p ? `<i aria-hidden="true"></i>` : ""}</span><b>${signed(R.ab(g, k))}</b></button>`; }).join("");

@@ -271,3 +271,33 @@
 .fdrow.lock small { color: var(--muted); font-size: 12.5px; }
 .fdrow input { flex: 1; min-width: 0; }
 .fdbox > .btn { justify-self: start; margin-top: 8px; }
+/* Inventaire : paquetages (déballer), charge */
+.pkin { margin: 0; font-size: 13px; color: var(--muted); }
+.pkgo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.pkgo small { color: var(--muted); font-size: 12.5px; }
+.pkbox { display: grid; gap: 0; border: 1.5px solid var(--rubric); border-radius: 10px; padding: 8px 10px; background: var(--surface); }
+.pkbox > p { margin: 0 0 4px; font-size: 13px; color: var(--muted); }
+.pkbox > small { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.pkrow { display: flex; align-items: center; gap: 8px; padding: 5px 0; border: 0; border-bottom: 1px solid var(--rule); background: transparent; font: inherit; color: inherit; text-align: left; }
+.pkrow span:nth-child(2) { flex: 1; font-size: 14.5px; }
+.pkrow small { color: var(--muted); font-size: 12.5px; }
+.pkrow .ck { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--rule); box-sizing: border-box; flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+.pkrow[aria-pressed="true"] .ck { background: var(--rubric); border-color: var(--rubric); color: var(--surface); }
+.pkrow[aria-pressed="true"] .ck::after { content: "✓"; }
+.pkrow[aria-pressed="false"] span:nth-child(2) { color: var(--muted); text-decoration: line-through; }
+.invsum.load { display: grid; gap: 4px; }
+.invsum.load .ln { display: flex; align-items: baseline; gap: 8px; }
+.invsum.load b small { font-family: var(--f-body); font-weight: 400; font-size: 12.5px; color: var(--muted); }
+.invsum.load > small { font-size: 12px; color: var(--muted); }
+.invsum .bar { position: relative; height: 7px; border-radius: 4px; background: var(--bg); overflow: hidden; }
+.invsum .bar .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ok); border-radius: 4px; }
+.invsum .bar .fill.l1, .invsum .bar .fill.l2, .invsum .bar .fill.l3 { background: var(--warn); }
+.invsum .bar i { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--surface); }
+.ld { font-style: normal; font-weight: 700; color: var(--warn); border: 1.2px solid var(--warn); border-radius: 4px; padding: 0 5px; font-size: 12px; }
+.topbar .chip.load { border-color: var(--warn); color: var(--warn); background: var(--surface); font-weight: 700; }
+.ldbox { display: grid; gap: 6px; }
+.ldbox p { margin: 0; font-size: 13.5px; line-height: 1.45; }
+.ldbox small { color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+.viewsw.ld3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.fdnp { font-size: 12px; padding: 2px 7px; }
+.fdnp[aria-pressed="true"] { color: var(--warn); border-color: var(--warn); }

@@ -9,11 +9,11 @@ import { esc } from "../core/format.js";
 import { G, S } from "../core/state.js";
 import { mutate } from "../core/store.js";
 import { render, toast } from "../core/ui.js";
-import { GEAR } from "../data.js";
+import { GEAR, MAT, matByName } from "../data.js";
 import { armorProf, gearOf, weaponProf } from "../rules/equipment.js";
 import { hasFeat } from "../rules/feats.js";
 import { MAX_ATT, REC, attunedCount, isMagic, recLabel } from "../rules/magic.js";
-import { RARITIES, classify, fmtKg, fmtPo, folderOf, weightOf } from "../rules/inventory.js";
+import { RARITIES, classify, fmtKg, fmtPo, folderOf, loadOf, weightOf } from "../rules/inventory.js";
 import { COINS, purseText, purseValue, spend } from "../rules/money.js";
 import { foldHead, isFold } from "../ui/components.js";
 
@@ -36,8 +36,16 @@ function sectionsOf(g) {
 function grouped(g, row) {
   const secs = sectionsOf(g).filter(x => x.list.length);
   if (!secs.length) return finding() ? `<div class="empty">Aucun objet ne correspond à « ${esc(S.itFind.trim())} ».</div>` : `<div class="empty">${filterOf(g) ? "Rien ici pour l'instant." : "Sac vide : touche <b>＋</b> pour ajouter un objet."}</div>`;
-  return secs.map(x => { const k = "inv-" + x.id, h = foldHead(k, "invsec", esc(x.n), `${x.list.length}`, x.list.map(i => esc(g.items[i].n)).join(", "));
+  return secs.map(x => { const k = "inv-" + x.id, np = (g.folders.find(f => f.id === x.id) || {}).np, h = foldHead(k, "invsec", esc(x.n), `${x.list.length}${np ? " · non porté" : ""}`, x.list.map(i => esc(g.items[i].n)).join(", "));
     return isFold(k) && !finding() ? h : h + `<div class="chbox itbox">${x.list.map((i, p) => row(i, p, x.list.length)).join("")}</div>`; }).join("");
+}
+// Charge (si suivie) : barre de poids, seuils de la variante, avertissement
+function loadBarHTML(g) {
+  const L = loadOf(g), top = Math.max(L.cap, L.kg), pct = x => Math.min(100, x / top * 100).toFixed(1);
+  const tag = ["", "encombré · −3 m", "lourdement encombré · −6 m", "au-delà de la capacité"][L.level];
+  return `<div class="invsum load"><div class="ln"><span class="k">Charge</span><b>${fmtKg(L.kg).replace(" kg", "")} <small>/ ${fmtKg(L.cap)}</small></b><span class="r">${tag ? `<i class="ld l${L.level}">${tag}</i>` : g.load === "cap" ? "capacité FOR × 7,5" : "non encombré"}</span></div>
+    <div class="bar" role="img" aria-label="Charge ${fmtKg(L.kg)} sur ${fmtKg(L.cap)}"><span class="fill l${L.level}" style="width:${pct(L.kg)}%"></span>${g.load === "enc" ? `<i style="left:${pct(L.enc)}%"></i><i style="left:${pct(L.heavy)}%"></i>` : ""}</div>
+    <small>${g.load === "enc" ? `encombré au-delà de ${fmtKg(L.enc)}, lourdement au-delà de ${fmtKg(L.heavy)}${L.level >= 2 ? " : désavantage aux tests, attaques et JdS de FOR, DEX et CON" : ""}` : L.level ? "au-delà, tu peux seulement pousser ou tirer (vitesse 1,50 m)" : ""}${L.unknown ? `${g.load === "enc" || L.level ? " · " : ""}${L.unknown} objet${L.unknown > 1 ? "s" : ""} sans poids` : ""}</small></div>`;
 }
 // En tête : recherche, ＋ (formulaire d'ajout juste dessous), puces de filtre, résumé (bourse, harmonisation)
 function topHTML(g) {
@@ -48,6 +56,7 @@ function topHTML(g) {
   const val = purseValue(g.money) / 100;
   h += `<button class="invsum" data-a="m-open" aria-expanded="${!!S.purseOpen}" aria-label="Bourse : ${purseText(g.money)}. Gagner ou dépenser"><span class="k">Bourse</span><b>${purseText(g.money)}</b><span class="r">${val ? `≈ ${fmtPo(val)}` : ""} ${S.purseOpen ? "▴" : "›"}</span></button>`;
   if (S.purseOpen) h += purseHTML(g);
+  if (g.load) h += loadBarHTML(g);
   if (g.items.some(x => x.att)) { const on = g.items.filter(x => x.att && x.attuned), c = on.length;
     h += `<div class="invsum att"><span class="k">Harmonisation</span><span class="pips">${Array.from({ length: MAX_ATT }, (_, k) => `<span class="pip${k < c ? " used" : ""}" aria-hidden="true"></span>`).join("")}</span><b>${c} / ${MAX_ATT}</b><span class="r">${esc(on.map(x => x.n).join(", "))}</span></div>`; }
   return h;
@@ -109,22 +118,32 @@ function gearDetail(g, x, item) {
   if (x.kind === "weapon" && x.rng === "melee" && !x.two) h += row("Main secondaire", item && item.oh && (x.light || hasFeat(g, "dual-wielder")) ? "oui (attaque en action bonus)" : x.light ? "possible (arme légère)" : hasFeat(g, "dual-wielder") ? "possible (Combattant à deux armes)" : "arme légère requise (ou don Combattant à deux armes)");
   return `<div class="itdet">${h}</div>`;
 }
-const hasDetail = x => !!(gearOf(x) || x.desc || x.v != null || x.w != null || x.rar);
+const hasDetail = x => !!(gearOf(x) || MAT[x.mat] || x.desc || x.v != null || x.w != null || x.rar);
 const openBtn = (x, i, inner) => hasDetail(x) ? `<button class="itn itopen" data-a="it-open" data-i="${i}" aria-expanded="${S.itOpen === i}">${inner}</button>` : `<div class="itn">${inner}</div>`;
 const chev = (x, i) => hasDetail(x) ? `<span class="chev" aria-hidden="true">${S.itOpen === i ? "▾" : "▸"}</span> ` : "";
 // Choix du lien dans le formulaire, par catégorie
 const REF_GROUPS = [["simple", "Armes courantes"], ["martial", "Armes de guerre"], ["light", "Armures légères"], ["medium", "Armures intermédiaires"], ["heavy", "Armures lourdes"], ["shield", "Bouclier"]]
   .map(([k, l]) => [l, Object.values(GEAR).filter(x => x.cat === k)]);
 const gearTag = x => `<span class="gtag ${x.kind === "weapon" ? "w" : "a"}">${x.kind === "weapon" ? "arme" : x.cat === "shield" ? "bouclier" : "armure"}</span>`;
+// Équipement d'aventurier, outils, paquetages (data/materiel.json) : poids, prix et dossier proposé
+const matLine = (g, m) => [m.g, m.u ? `lot de ${m.u.q} · ${m.p}` : m.p, m.w != null ? fmtKg(m.u ? m.w * m.u.q : m.w) : "", (g.folders.find(f => f.id === m.f) || {}).n].filter(Boolean).join(" · ");
 function suggestHTML(g) {
   const q = norm((S.itQ || "").trim()); if (q.length < 2) return "";
-  const exact = Object.values(GEAR).find(x => norm(x.n) === q); // nom du Manuel complet : l'objet sera relié au catalogue
+  const exact = Object.values(GEAR).find(x => norm(x.n) === q), em = !exact && matByName(S.itQ); // nom du Manuel complet : l'objet sera relié au catalogue
   if (exact) return `<div class="sugok"><span>✓ <b>${esc(exact.n)}</b> du Manuel · ${esc(gearLine(exact))}</span><small><b>＋</b> pour l'ajouter, <b>✎ Détails</b> pour un bonus (+1…) ou une quantité</small></div>`;
-  const hits = Object.values(GEAR).filter(x => norm(x.n).includes(q) || norm(x.vo).includes(q)).slice(0, 6);
-  if (!hits.length) return "";
+  if (em) return `<div class="sugok"><span>✓ <b>${esc(em.u ? em.u.n : em.n)}</b>${em.u ? ` ×${em.u.q}` : ""} du Manuel · ${esc(matLine(g, em))}</span><small><b>＋</b> pour l'ajouter${em.pack ? " (à déballer ensuite si tu veux suivre son contenu)" : ""}, <b>✎ Détails</b> pour changer la quantité ou le dossier</small></div>`;
+  const hits = Object.values(GEAR).filter(x => norm(x.n).includes(q) || norm(x.vo).includes(q)).slice(0, 4);
+  const mh = Object.values(MAT).filter(x => [x.n, ...(x.al || [])].some(n => norm(n).includes(q))).slice(0, 6 - Math.min(2, hits.length));
+  if (!hits.length && !mh.length) return "";
   const prof = x => x.kind === "weapon" ? weaponProf(g, x) : armorProf(g, x);
-  return `<div class="sugbox" role="listbox" aria-label="Armes et armures du Manuel">${hits.map(x => `<button type="button" class="sug" data-a="it-pick" data-id="${x.id}" role="option"><span class="sh"><b>${esc(x.n)}</b>${prof(x) ? `<i class="ok">maîtrisé${x.kind === "armor" && x.cat !== "shield" ? "e" : ""}</i>` : `<i class="no">non maîtrisé${x.kind === "armor" && x.cat !== "shield" ? "e" : ""}</i>`}${C(g).noMetal && x.metal ? `<i class="no">métal</i>` : ""}</span><small>${esc(gearLine(x))}</small></button>`).join("")}
+  return `<div class="sugbox" role="listbox" aria-label="Objets du Manuel">${hits.map(x => `<button type="button" class="sug" data-a="it-pick" data-id="${x.id}" role="option"><span class="sh"><b>${esc(x.n)}</b>${prof(x) ? `<i class="ok">maîtrisé${x.kind === "armor" && x.cat !== "shield" ? "e" : ""}</i>` : `<i class="no">non maîtrisé${x.kind === "armor" && x.cat !== "shield" ? "e" : ""}</i>`}${C(g).noMetal && x.metal ? `<i class="no">métal</i>` : ""}</span><small>${esc(gearLine(x))}</small></button>`).join("")}${mh.map(x => `<button type="button" class="sug" data-a="it-pick" data-m="${x.id}" role="option"><span class="sh"><b>${esc(x.n)}</b></span><small>${esc(matLine(g, x))}</small></button>`).join("")}
     <div class="sugfree">Entrée : ajouter « ${esc((S.itQ || "").trim())} » comme objet libre</div></div>`;
+}
+/** Nouvel objet d'après son nom : arme ou armure du Manuel (lien ref), objet du catalogue (lien mat : lot, à décompter, dossier), sinon libre. */
+function newItem(g, n) {
+  const gear = Object.values(GEAR).find(x => norm(x.n) === norm(n)), m = !gear && matByName(n);
+  const x = { n: m && m.u && norm(n) === norm(m.n) ? m.u.n : n, q: m && m.u ? m.u.q : 1, /* nom tapé gardé (« Potion de soins ») ; lot : nom de l'objet */ eq: false, c: !!(m && m.c), note: "", ...(gear ? { ref: gear.id } : m ? { mat: m.id } : {}) };
+  x.f = newFolder(g, x); return x;
 }
 // Marques d'un objet magique : bonus, harmonisation, charges
 const magicMarks = x => !isMagic(x) ? "" : ` <i class="mg">✦${x.inf && G() && C(G()).itemMagic ? ` ${esc((C(G()).itemMagic(G(), x) || {}).label || "")}` : ""}${x.bonus ? ` +${x.bonus}` : ""}${x.att ? (x.attuned ? " · harmonisé" : " · à harmoniser") : ""}${x.chMax ? ` · ${x.chMax - (x.chU || 0)}/${x.chMax} charge${x.chMax > 1 ? "s" : ""}` : ""}</i>`;
@@ -132,8 +151,8 @@ const magicMarks = x => !isMagic(x) ? "" : ` <i class="mg">✦${x.inf && G() && 
 const chargePips = (x, i) => `<div class="itch">${Array.from({ length: x.chMax }, (_, k) => `<button class="pip${k < (x.chU || 0) ? " used" : ""}" data-a="it-chg" data-i="${i}" data-k="${k}" aria-label="${esc(x.n)} : charge ${k + 1}, ${k < (x.chU || 0) ? "utilisée" : "disponible"}"></button>`).join("")}<small>${recLabel(x.rec)}</small></div>`;
 function equipmentGerer(g) {
   const row = (i, p, n) => { const x = g.items[i]; return S.itEdit === i ? itemForm(g, x, i)
-    : `<div class="it${x.c && !x.q ? " out" : ""}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button>${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${x.oh ? ` <i class="ct">main secondaire</i>` : ""}${magicMarks(x)}${unidTag(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}`)}${gearOf(x) ? gearTag(gearOf(x)) : ""}${moveBtns(x, i, p, n)}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>${S.itOpen === i ? itemDetail(g, x) : ""}`; };
-  return topHTML(g) + grouped(g, row) + foldersHTML(g);
+    : `<div class="it${x.c && !x.q ? " out" : ""}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button>${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${x.oh ? ` <i class="ct">main secondaire</i>` : ""}${magicMarks(x)}${unidTag(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}`)}${gearOf(x) ? gearTag(gearOf(x)) : ""}${moveBtns(x, i, p, n)}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>${S.itOpen === i ? itemDetail(g, x, i) : ""}`; };
+  return topHTML(g) + grouped(g, row) + loadSetHTML(g) + foldersHTML(g);
 }
 // Objets qui servent en action : charges (objets magiques) ou à décompter (potions, munitions)
 const actionable = x => x.chMax || x.c;
@@ -155,15 +174,39 @@ function equipmentJeu(g) {
     return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}"><button class="itn itopen" data-a="it-open" data-i="${i}" aria-expanded="${open}"><span><span class="chev" aria-hidden="true">${open ? "▾" : "▸"}</span> ${esc(x.n)}${magicMarks(x)}${x.eq ? ` <i class="eqtag">${gearOf(x) && gearOf(x).kind === "armor" && gearOf(x).cat !== "shield" ? "portée" : "équipé"}</i>` : ""}${unidTag(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}</button>${x.c ? qtyBtns(x, i) : x.q !== 1 ? `<b class="q">×${x.q}</b>` : ""}</div>${open ? itemPlay(g, x, i) : ""}`; };
   return topHTML(g) + grouped(g, row);
 }
-/** Détail d'un objet : arme ou armure du Manuel, poids, valeur, rareté, description. */
-function itemDetail(g, x) {
-  const w = weightOf(x), pills = [w != null && (x.w != null || !gearOf(x)) ? fmtKg(w) + (x.q > 1 ? " pièce" : "") : "", x.v != null ? fmtPo(x.v) + (x.q > 1 ? " pièce" : "") : "", x.rar || ""].filter(Boolean); // poids du Manuel : déjà dans le détail de l'arme
+/** Détail d'un objet : arme ou armure du Manuel, poids, valeur, rareté, description ; objet du catalogue : groupe, prix, effet, contenu d'un paquetage. */
+function itemDetail(g, x, i) {
+  const m = MAT[x.mat];
+  const mat = m ? `<div class="itinfo"><div class="pills"><span class="kp n">${esc(m.g)}</span><span class="kp n">${esc(m.u ? `${m.p} les ${m.u.q}` : m.p)}</span>${m.w != null && x.w == null ? `<span class="kp n">${fmtKg(m.w)}${x.q > 1 ? " pièce" : ""}</span>` : ""}</div>${m.fx ? `<p>${esc(m.fx)}</p>` : ""}${m.pack ? packHTML(g, x, i, m) : ""}</div>` : "";
+  return mat + itemOwn(g, x);
+}
+// Paquetage : contenu ; « Déballer… » ouvre la liste à cocher (ce qui manque se décoche), puis le remplace par ses objets
+function packHTML(g, x, i, m) {
+  const U = S.unpack && S.unpack.i === i ? S.unpack : null, kgOf = ([, q, id]) => MAT[id] && MAT[id].w != null ? fmtKg(MAT[id].w * q) : "";
+  if (!U) return `<p class="pkin">Contient : ${m.pack.map(([n, q]) => `${q > 1 ? q + " × " : ""}${esc(n.toLowerCase())}`).join(", ")}.</p><div class="pkgo"><button class="btn sm" data-a="up-open" data-i="${i}">Déballer…</button><small>pour suivre chaque objet (torches, rations…)</small></div>`;
+  const n = m.pack.length - U.off.length;
+  return `<div class="pkbox"><p>Décoche ce que tu n'as plus.${x.q > 1 ? ` Un seul des ${x.q} sacs est déballé.` : ""}</p>${m.pack.map((c, k) => `<button class="pkrow" data-a="up-tog" data-k="${k}" aria-pressed="${!U.off.includes(k)}"><span class="ck" aria-hidden="true"></span><span>${c[1] > 1 ? c[1] + " × " : ""}${esc(c[0])}</span><small>${kgOf(c)}</small></button>`).join("")}
+    <div class="pkgo"><button class="btn sm cast-go" data-a="up-go" data-i="${i}"${n ? "" : " disabled"}>Déballer · ${n} objet${n > 1 ? "s" : ""}</button><button class="btn ghost sm" data-a="up-cancel">Garder en un seul objet</button></div><small>Les objets vont dans leur dossier (torches, rations : Consommables). Annulable.</small></div>`;
+}
+function itemOwn(g, x) {
+  const w = weightOf(x), pills = [w != null && (x.w != null || (!gearOf(x) && !MAT[x.mat])) ? fmtKg(w) + (x.q > 1 ? " pièce" : "") : "", x.v != null ? fmtPo(x.v) + (x.q > 1 ? " pièce" : "") : "", x.rar || ""].filter(Boolean); // poids du Manuel : déjà dans le détail de l'arme
   return `${gearOf(x) ? gearDetail(g, gearOf(x), x) : ""}${pills.length || x.desc ? `<div class="itinfo">${pills.length ? `<div class="pills">${pills.map(t => `<span class="kp n">${esc(t)}</span>`).join("")}</div>` : ""}${x.desc ? `<p>${esc(x.desc)}</p>` : ""}</div>` : ""}`;
 }
 /** Fiche d'un objet en jeu : détail, puis les gestes de la partie (le reste se règle dans ✎ Gérer). */
 function itemPlay(g, x, i) {
   const gear = gearOf(x), lbl = x.eq ? "Ranger" : gear && gear.kind === "armor" && gear.cat !== "shield" ? "Porter" : "Équiper";
-  return `${itemDetail(g, x)}${x.unid ? `<p class="itunid">Effet inconnu : une étude pendant un repos court (ou le sort <i>identification</i>) le révèle. Complète la fiche (✎ Gérer) avec ce que dit le MJ.</p>` : ""}<div class="itplay">${x.c ? `<button class="btn sm cast-go" data-a="it-dec" data-i="${i}"${x.q ? "" : " disabled"}>Utiliser · −1</button>` : ""}<button class="btn sm${x.eq || x.c ? "" : " cast-go"}" data-a="it-eq" data-i="${i}" aria-pressed="${!!x.eq}">${lbl}</button>${x.unid ? `<button class="btn sm" data-a="it-idf" data-i="${i}">Identifié ✓</button>` : ""}<select class="itmvf" data-a="it-fold" data-i="${i}" aria-label="Déplacer ${esc(x.n)} vers un dossier"><option value="" selected>Déplacer…</option>${g.folders.filter(f => f.id !== folderOf(g, x)).map(f => `<option value="${esc(f.id)}">${esc(f.n)}</option>`).join("")}</select><span style="flex:1"></span><button class="btn ghost sm" data-a="it-del" data-i="${i}">Retirer</button></div>`;
+  return `${itemDetail(g, x, i)}${x.unid ? `<p class="itunid">Effet inconnu : une étude pendant un repos court (ou le sort <i>identification</i>) le révèle. Complète la fiche (✎ Gérer) avec ce que dit le MJ.</p>` : ""}<div class="itplay">${x.c ? `<button class="btn sm cast-go" data-a="it-dec" data-i="${i}"${x.q ? "" : " disabled"}>Utiliser · −1</button>` : ""}<button class="btn sm${x.eq || x.c ? "" : " cast-go"}" data-a="it-eq" data-i="${i}" aria-pressed="${!!x.eq}">${lbl}</button>${x.unid ? `<button class="btn sm" data-a="it-idf" data-i="${i}">Identifié ✓</button>` : ""}<select class="itmvf" data-a="it-fold" data-i="${i}" aria-label="Déplacer ${esc(x.n)} vers un dossier"><option value="" selected>Déplacer…</option>${g.folders.filter(f => f.id !== folderOf(g, x)).map(f => `<option value="${esc(f.id)}">${esc(f.n)}</option>`).join("")}</select><span style="flex:1"></span><button class="btn ghost sm" data-a="it-del" data-i="${i}">Retirer</button></div>`;
+}
+/** Gérer : charge suivie ou non (au choix du MJ), poids des pièces. */
+function loadSetHTML(g) {
+  let h = foldHead("inv-load", "", "Charge", g.load === "enc" ? "variante d'encombrement" : g.load === "cap" ? "capacité de charge" : "pas suivie");
+  if (isFold("inv-load")) return h;
+  const s = g.abil.str, opt = (v, l) => `<button data-a="load-set" data-v="${v}" aria-pressed="${g.load === v}">${l}</button>`;
+  return h + `<div class="chbox ldbox"><div class="viewsw ld3" role="group" aria-label="Charge">${opt("", "Pas suivie")}${opt("cap", "Capacité")}${opt("enc", "Encombrement")}</div>
+    <p><b>Capacité de charge</b> (règle de base) : FOR × 7,5 kg = <b>${fmtKg(s * 7.5)}</b>. Au-delà, tu peux pousser ou tirer jusqu'au double (vitesse 1,50 m).</p>
+    <p><b>Encombrement</b> (variante du Manuel, au choix du MJ) : au-delà de FOR × 2,5 kg = <b>${fmtKg(s * 2.5)}</b>, encombré : vitesse −3 m ; au-delà de FOR × 5 kg = <b>${fmtKg(s * 5)}</b>, lourdement encombré : vitesse −6 m et désavantage aux tests, jets d'attaque et JdS de FOR, DEX et CON. La Force requise des armures ne s'applique plus.</p>
+    <label class="check"><input type="checkbox" data-a="coin-w"${g.coinW ? " checked" : ""}> Compter le poids des pièces (100 pièces = 1 kg)</label>
+    <small>Comptent : les objets équipés et ceux des dossiers portés. Un dossier <b>non porté</b> (monture, coffre) se règle dans Dossiers. Taille TP : capacité divisée par deux ; G : doublée (à ajuster par le MJ).</small></div>`;
 }
 /** Gérer : dossiers (ordre des sections, nom, création, suppression ; Divers reçoit les objets d'un dossier supprimé). */
 function foldersHTML(g) {
@@ -172,7 +215,7 @@ function foldersHTML(g) {
   const n = id => g.items.filter(x => folderOf(g, x) === id).length;
   h += `<div class="chbox fdbox"><div class="fdrow lock"><b>Équipé</b><small>toujours en premier</small></div>${g.folders.map((f, p) => S.fdEdit === f.id
     ? `<form class="fdrow" data-a="fd-save" data-v="${esc(f.id)}"><input id="fd-name" type="text" value="${esc(f.n)}" maxlength="40" aria-label="Nom du dossier" required><button class="btn primary sm" type="submit">OK</button></form>`
-    : `<div class="fdrow"><b>${esc(f.n)} <span>${n(f.id)}</span></b><span class="itmv"><button class="btn ghost sm" data-a="fd-mv" data-v="${esc(f.id)}" data-d="-1" aria-label="Monter ${esc(f.n)}"${p ? "" : " disabled"}>▲</button><button class="btn ghost sm" data-a="fd-mv" data-v="${esc(f.id)}" data-d="1" aria-label="Descendre ${esc(f.n)}"${p < g.folders.length - 1 ? "" : " disabled"}>▼</button></span><button class="btn ghost sm" data-a="fd-edit" data-v="${esc(f.id)}" aria-label="Renommer ${esc(f.n)}">✎</button>${f.id === "divers" ? "" : `<button class="btn ghost sm" data-a="fd-del" data-v="${esc(f.id)}" aria-label="Supprimer ${esc(f.n)}">✕</button>`}</div>`).join("")}
+    : `<div class="fdrow"><b>${esc(f.n)} <span>${n(f.id)}</span></b><button class="btn ghost sm fdnp" data-a="fd-np" data-v="${esc(f.id)}" aria-pressed="${!!f.np}" title="Un dossier non porté (monture, coffre) ne compte pas dans la charge">${f.np ? "non porté" : "porté"}</button><span class="itmv"><button class="btn ghost sm" data-a="fd-mv" data-v="${esc(f.id)}" data-d="-1" aria-label="Monter ${esc(f.n)}"${p ? "" : " disabled"}>▲</button><button class="btn ghost sm" data-a="fd-mv" data-v="${esc(f.id)}" data-d="1" aria-label="Descendre ${esc(f.n)}"${p < g.folders.length - 1 ? "" : " disabled"}>▼</button></span><button class="btn ghost sm" data-a="fd-edit" data-v="${esc(f.id)}" aria-label="Renommer ${esc(f.n)}">✎</button>${f.id === "divers" ? "" : `<button class="btn ghost sm" data-a="fd-del" data-v="${esc(f.id)}" aria-label="Supprimer ${esc(f.n)}">✕</button>`}</div>`).join("")}
     <button class="btn" data-a="fd-new">＋ Nouveau dossier</button></div>`;
   return h;
 }
@@ -200,12 +243,30 @@ onInput("#it-find", t => { S.itFind = t.value; render(); });
 onClick("it-plus", () => { S.itAdd = !S.itAdd; S.itNew = null; render(); const el = document.getElementById("it-new"); if (el) el.focus(); });
 onClick("it-flt", (b) => { S.itFilter = b.dataset.v; S.itOpen = null; render(); });
 // Dossier où va un nouvel objet : celui du filtre en cours, sinon celui proposé par son type
-const newFolder = (g, x) => { const f = filterOf(g); return f && f !== "eq" ? f : g.folders.some(y => y.id === classify(x)) ? classify(x) : folderOf(g, {}); };
+const autoFolder = (g, x) => g.folders.some(y => y.id === classify(x)) ? classify(x) : folderOf(g, {});
+const newFolder = (g, x) => { const f = filterOf(g); return f && f !== "eq" ? f : autoFolder(g, x); };
 onChange("it-fold", t => { const i = +t.dataset.i, g = G(), x = g && g.items[i], f = t.value; if (!x || !f) return; const prev = x.f, fn = (g.folders.find(y => y.id === f) || {}).n;
   S.itOpen = null; mutate(g => { g.items[i].f = f; }); toast(`<b>${esc(x.n)}</b> → ${esc(fn)}`, () => { mutate(g => { g.items[i].f = prev; }); return "Rétabli"; }); });
+onClick("up-open", (b) => { S.unpack = { i: +b.dataset.i, off: [] }; render(); });
+onClick("up-cancel", () => { S.unpack = null; render(); });
+onClick("up-tog", (b) => { if (!S.unpack) return; const k = +b.dataset.k, o = S.unpack.off; S.unpack.off = o.includes(k) ? o.filter(y => y !== k) : [...o, k]; render(); });
+onClick("up-go", (b) => {
+  const g = G(), i = +b.dataset.i, x = g && g.items[i], m = x && MAT[x.mat], U = S.unpack; if (!m || !m.pack || !U) return;
+  const prev = g.items.map(y => ({ ...y })), list = m.pack.filter((c, k) => !U.off.includes(k));
+  mutate(g => {
+    if (g.items[i].q > 1) g.items[i].q--; else g.items.splice(i, 1); // un sac de moins
+    list.forEach(([n, q, id]) => { const y = { n, q, eq: false, c: !!(MAT[id] && MAT[id].c), note: "", ...(MAT[id] ? { mat: id } : {}) }; y.f = autoFolder(g, y);
+      const same = g.items.find(z => !z.eq && z.n === y.n && folderOf(g, z) === y.f); if (same) same.q += q; else g.items.push(y); }); // même objet déjà dans le sac : quantités ajoutées
+  });
+  S.unpack = null; S.itOpen = null;
+  toast(`<b>${esc(m.n)}</b> déballé : ${list.length} objet${list.length > 1 ? "s" : ""}`, () => { mutate(g => { g.items = prev; }); return "Déballage annulé"; });
+});
 onClick("it-idf", (b) => { mutate(g => { const x = g.items[+b.dataset.i]; if (x) delete x.unid; }); toast("Objet identifié : complète sa fiche dans ✎ Gérer"); });
 // Dossiers (Gérer) : ordre, nom, création, suppression (objets envoyés dans Divers, annulable)
 onClick("fd-mv", (b) => { mutate(g => { const i = g.folders.findIndex(f => f.id === b.dataset.v), j = i + +b.dataset.d; if (i < 0 || !g.folders[j]) return; [g.folders[i], g.folders[j]] = [g.folders[j], g.folders[i]]; }); });
+onClick("fd-np", (b) => { mutate(g => { const f = g.folders.find(y => y.id === b.dataset.v); if (f) { if (f.np) delete f.np; else f.np = true; } }); });
+onClick("load-set", (b) => { mutate(g => { g.load = b.dataset.v; }); });
+onChange("coin-w", t => { mutate(g => { g.coinW = t.checked; }); });
 onClick("fd-edit", (b) => { S.fdEdit = b.dataset.v; render(); const el = document.getElementById("fd-name"); if (el) { el.focus(); el.select(); } });
 onSubmit("fd-save", f => { const n = document.getElementById("fd-name").value.trim(); S.fdEdit = null; if (!n) { render(); return; } mutate(g => { const d = g.folders.find(y => y.id === f.dataset.v); if (d) d.n = n.slice(0, 40); }); });
 onClick("fd-new", () => { const id = "f-" + Date.now().toString(36); mutate(g => { g.folders.push({ id, n: "Nouveau dossier" }); }); S.fdEdit = id; render(); const el = document.getElementById("fd-name"); if (el) { el.focus(); el.select(); } });
@@ -214,13 +275,12 @@ onClick("fd-del", (b) => { const g = G(), id = b.dataset.v, k = g.folders.findIn
   mutate(g => { g.folders.splice(k, 1); g.items.forEach(x => { if (x.f === id) x.f = folderOf(g, x); }); }); if (S.itFilter === id) S.itFilter = "";
   toast(`Dossier <b>${esc(d.n)}</b> supprimé${moved.length ? ` · ${moved.length} objet${moved.length > 1 ? "s" : ""} dans ${esc((G().folders.find(f => f.id === folderOf(G(), {})) || {}).n || "")}` : ""}`, () => { mutate(g => { g.folders = prev; moved.forEach(i => { if (g.items[i]) g.items[i].f = id; }); }); return "Rétabli"; }); });
 // Toucher une suggestion la recopie dans le champ (sans ajouter) : ＋ l'ajoute, ✎ Détails permet un bonus (+1) ou une quantité
-onClick("it-pick", (b) => { const x = GEAR[b.dataset.id]; if (!x) return; S.itQ = x.n; render(); const el = document.getElementById("it-new"); if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(el.value.length, el.value.length); } });
-onSubmit("it-add", () => { const el = document.getElementById("it-new"), n = el.value.trim(); if (!n) return; S.itQ = ""; const same = Object.values(GEAR).find(x => norm(x.n) === norm(n)); // nom exact du Manuel : relié au catalogue
-  mutate(g => { const x = { n, q: 1, eq: false, c: false, note: "", ...(same ? { ref: same.id } : {}) }; x.f = newFolder(g, x); g.items.push(x); });
-  toast(`Ajouté : <b>${esc(n)}</b>${same ? ` · ${S.view === "jeu" ? "touche-le puis Équiper" : "coche « équipé »"} pour ${same.kind === "weapon" ? "l'utiliser dans tes attaques" : "le compter dans ta CA"}` : ""}`, () => { mutate(g => { g.items.pop(); }); return "Ajout annulé"; }); const nx = document.getElementById("it-new"); if (nx) nx.focus({ preventScroll: true }); });
+onClick("it-pick", (b) => { const x = GEAR[b.dataset.id] || MAT[b.dataset.m]; if (!x) return; S.itQ = x.n; render(); const el = document.getElementById("it-new"); if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(el.value.length, el.value.length); } });
+onSubmit("it-add", () => { const el = document.getElementById("it-new"), n = el.value.trim(); if (!n) return; S.itQ = ""; const x = newItem(G(), n), same = GEAR[x.ref]; // nom exact du Manuel : relié au catalogue
+  mutate(g => { g.items.push(x); });
+  toast(`Ajouté : <b>${esc(x.n)}</b>${x.q !== 1 ? ` ×${x.q}` : ""}${MAT[x.mat] && MAT[x.mat].pack ? " · touche-le pour le déballer" : ""}${same ? ` · ${S.view === "jeu" ? "touche-le puis Équiper" : "coche « équipé »"} pour ${same.kind === "weapon" ? "l'utiliser dans tes attaques" : "le compter dans ta CA"}` : ""}`, () => { mutate(g => { g.items.pop(); }); return "Ajout annulé"; }); const nx = document.getElementById("it-new"); if (nx) nx.focus({ preventScroll: true }); });
 onClick("it-det", () => {
-  const el = document.getElementById("it-new"), n = (el && el.value || "").trim(), same = n && Object.values(GEAR).find(x => norm(x.n) === norm(n)); // nom du Manuel : arme ou armure déjà liée
-  const x = { n, q: 1, eq: false, c: false, note: "", ...(same ? { ref: same.id } : {}) }; x.f = newFolder(G(), x);
+  const el = document.getElementById("it-new"), n = (el && el.value || "").trim(), x = newItem(G(), n); // nom du Manuel : objet déjà lié
   S.itNew = S.itNew ? null : x; S.itQ = ""; S.itEdit = null; render();
   const f = document.getElementById(n ? "it-q" : "it-name"); if (f) { f.focus(); if (f.select) f.select(); }
 });
@@ -231,13 +291,14 @@ onClick("it-mv", (b) => { mutate(g => { const i = +b.dataset.i; if (!g.items[i])
 onClick("it-eq", (b) => { mutate(g => { const x = g.items[+b.dataset.i]; if (x) x.eq = !x.eq; }); });
 onClick("it-edit", (b) => { S.itEdit = +b.dataset.i; S.itNew = null; render(); const el = document.getElementById("it-name"); if (el) el.focus(); });
 onClick("it-cancel", () => { S.itEdit = null; S.itNew = null; render(); });
-onClick("it-open", (b) => { const i = +b.dataset.i; S.itOpen = S.itOpen === i ? null : i; render(); });
+onClick("it-open", (b) => { const i = +b.dataset.i; S.itOpen = S.itOpen === i ? null : i; S.unpack = null; render(); });
 onSubmit("it-save", f => {
   const add = f.dataset.i === "new", i = add ? G().items.length : +f.dataset.i, n = document.getElementById("it-name").value.trim(); if (!n) return;
   const ref = document.getElementById("it-ref").value; // le lien avec le catalogue est conservé (attaques, CA)
   const x = { n, q: Math.max(0, Math.floor(+document.getElementById("it-q").value || 0)), eq: document.getElementById("it-eq").checked, c: document.getElementById("it-c").checked, note: document.getElementById("it-note").value.trim(), ...(GEAR[ref] ? { ref } : {}) };
   const v = id => document.getElementById(id), prev = G().items[i] || {}, bonus = +v("it-bonus").value, ch = Math.max(0, Math.min(50, Math.floor(+v("it-ch").value) || 0));
   ["inf", "infAt", "infOpt", "infCh"].forEach(k => { if (prev[k] != null) x[k] = prev[k]; }); // imprégnation d'artificier : gardée
+  const sm = S.itNew && f.dataset.i === "new" ? S.itNew.mat : prev.mat; if (!x.ref && MAT[sm]) x.mat = sm; // lien avec le catalogue (poids, effet, paquetage)
   const num = id => { const t = v(id).value.trim().replace(",", "."); return t === "" || !isFinite(+t) || +t < 0 ? null : Math.round(+t * 100) / 100; };
   x.f = v("it-f").value; if (num("it-w") != null) x.w = num("it-w"); if (num("it-v") != null) x.v = num("it-v");
   if (v("it-rar").value) x.rar = v("it-rar").value; if (v("it-unid").checked) x.unid = true; if (v("it-desc").value.trim()) x.desc = v("it-desc").value.trim();

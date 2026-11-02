@@ -29,7 +29,7 @@ function acCalc(g) {
     parts.push([`${armor.n}${mb(aw.item) ? ` +${mb(aw.item)}` : ""} (${{ light: "légère", medium: "intermédiaire", heavy: "lourde" }[armor.cat]})`, armor.ac + mb(aw.item)]);
     parts.push([armor.dex ? `DEX${dexMax != null && dex > dexMax ? ` (plafonnée à +${dexMax})` : ""}` : "DEX (aucune en armure lourde)", armor.dex ? d : null]);
     if (armor.stealth && !(armor.cat === "medium" && hasFeat(g, "medium-armor-master"))) warn.push(`${armor.n} : <b>désavantage en Discrétion</b>.`);
-    if (armor.str && g.abil.str < armor.str) warn.push(`${armor.n} : Force ${armor.str} requise (tu as ${g.abil.str}) : <b>−3 m de vitesse</b>.`);
+    if (armor.str && g.abil.str < armor.str && g.load !== "enc") warn.push(`${armor.n} : Force ${armor.str} requise (tu as ${g.abil.str}) : <b>−3 m de vitesse</b>.`);
   } else {
     // Sans armure : la meilleure base entre celle de la classe (Défense sans armure…), 10 + DEX et Armure de mage en cours (13 + DEX) ; ces bases ne se cumulent pas
     const own = C(g).acBase ? C(g).acBase(g, !!shield) : [];

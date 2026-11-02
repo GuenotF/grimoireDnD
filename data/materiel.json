@@ -1,0 +1,1569 @@
+{
+ "source": "Manuel des joueurs 2014, chapitre 5 (tables AideDD)",
+ "items": [
+  {
+   "id": "acide-fiole",
+   "n": "Acide (fiole)",
+   "p": "25 po",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true,
+   "fx": "Action : lancer sur une créature à 1,50 m ou jusqu'à 6 m (attaque à distance, arme improvisée) ; touché : 2d6 acide."
+  },
+  {
+   "id": "antidote-fiole",
+   "n": "Antidote (fiole)",
+   "p": "50 po",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true,
+   "fx": "La boire : avantage aux JdS contre le poison pendant 1 heure (sans effet sur morts-vivants et créatures artificielles)."
+  },
+  {
+   "id": "balance-de-marchand",
+   "n": "Balance de marchand",
+   "p": "5 po",
+   "w": 1.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "belier-portable",
+   "n": "Bélier portable",
+   "p": "4 po",
+   "w": 17.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "billes-sac-de-1000",
+   "n": "Billes (sac de 1000)",
+   "p": "1 po",
+   "w": 1.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "fx": "Action : répandre sur un carré de 3 m ; qui s'y déplace : JdS DEX DD 10 ou à terre (pas s'il avance à demi-vitesse)."
+  },
+  {
+   "id": "boite-d-allume-feu",
+   "n": "Boite d'allume-feu",
+   "p": "5 pa",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "al": [
+    "Boîte d'allume-feu",
+    "Boîte à amadou"
+   ]
+  },
+  {
+   "id": "bougie",
+   "n": "Bougie",
+   "p": "1 pc",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true
+  },
+  {
+   "id": "boulier",
+   "n": "Boulier",
+   "p": "2 po",
+   "w": 1.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "bouteille-en-verre",
+   "n": "Bouteille en verre",
+   "p": "2 po",
+   "w": 1.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "cadenas",
+   "n": "Cadenas",
+   "p": "10 po",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "carquois",
+   "n": "Carquois",
+   "p": "1 po",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "fx": "Contient jusqu'à 20 flèches."
+  },
+  {
+   "id": "chaine-3-m",
+   "n": "Chaîne (3 m)",
+   "p": "5 po",
+   "w": 5.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "chausse-trappes-sac-de-20",
+   "n": "Chausse-trappes (sac de 20)",
+   "p": "1 po",
+   "w": 1.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "fx": "Action : couvrir un carré de 1,50 m ; qui y entre : JdS DEX DD 15 ou s'arrête, 1 perforant, vitesse −3 m jusqu'à récupérer 1 PV."
+  },
+  {
+   "id": "chevaliere",
+   "n": "Chevalière",
+   "p": "5 po",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "cire-a-cacheter",
+   "n": "Cire à cacheter",
+   "p": "5 pa",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "cloche",
+   "n": "Cloche",
+   "p": "1 po",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "coffre",
+   "n": "Coffre",
+   "p": "5 po",
+   "w": 12.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "corde-en-chanvre-15-m",
+   "n": "Corde en chanvre (15 m)",
+   "p": "1 po",
+   "w": 5.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "al": [
+    "Corde de chanvre (15 m)",
+    "Corde de chanvre"
+   ]
+  },
+  {
+   "id": "corde-en-soie-15-m",
+   "n": "Corde en soie (15 m)",
+   "p": "10 po",
+   "w": 2.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "couverture",
+   "n": "Couverture",
+   "p": "5 pa",
+   "w": 1.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "craie-un-morceau",
+   "n": "Craie (un morceau)",
+   "p": "1 pc",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true
+  },
+  {
+   "id": "cruche-ou-pichet",
+   "n": "Cruche ou pichet",
+   "p": "2 pc",
+   "w": 2.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "eau-benite-flasque",
+   "n": "Eau bénite (flasque)",
+   "p": "25 po",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true,
+   "fx": "Action : lancer à 1,50 m ou jusqu'à 6 m (attaque à distance, arme improvisée) ; touché : 2d6 radiants à un fiélon ou un mort-vivant."
+  },
+  {
+   "id": "echelle-3-m",
+   "n": "Échelle (3 m)",
+   "p": "1 pa",
+   "w": 12.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "encre-bouteille-de-30-ml",
+   "n": "Encre (bouteille de 30 ml)",
+   "p": "10 po",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "etui-a-carreaux",
+   "n": "Étui à carreaux",
+   "p": "1 po",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "fx": "Contient jusqu'à 20 carreaux."
+  },
+  {
+   "id": "etui-a-cartes-ou-parchemins",
+   "n": "Étui à cartes ou parchemins",
+   "p": "1 po",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "feu-gregeois-flasque",
+   "n": "Feu grégeois (flasque)",
+   "p": "50 po",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true,
+   "fx": "Action : lancer jusqu'à 6 m (attaque à distance, arme improvisée) ; touché : 1d4 feu au début de chacun de ses tours, jusqu'à un test de DEX DD 10 (action)."
+  },
+  {
+   "id": "fiole-10-cl",
+   "n": "Fiole (10 cl)",
+   "p": "1 po",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "flasque-ou-chope-50-cl",
+   "n": "Flasque ou chope (50 cl)",
+   "p": "2 pc",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "baguette-focaliseur-arcanique",
+   "n": "Baguette (focaliseur arcanique)",
+   "p": "10 po",
+   "w": 0.5,
+   "g": "Focaliseur arcanique",
+   "f": "divers"
+  },
+  {
+   "id": "baton-focaliseur-arcanique",
+   "n": "Bâton (focaliseur arcanique)",
+   "p": "5 po",
+   "w": 2.0,
+   "g": "Focaliseur arcanique",
+   "f": "divers"
+  },
+  {
+   "id": "boule-de-cristal-focaliseur-arcanique",
+   "n": "Boule de cristal (focaliseur arcanique)",
+   "p": "10 po",
+   "w": 0.5,
+   "g": "Focaliseur arcanique",
+   "f": "divers"
+  },
+  {
+   "id": "orbe-focaliseur-arcanique",
+   "n": "Orbe (focaliseur arcanique)",
+   "p": "20 po",
+   "w": 1.5,
+   "g": "Focaliseur arcanique",
+   "f": "divers"
+  },
+  {
+   "id": "sceptre-focaliseur-arcanique",
+   "n": "Sceptre (focaliseur arcanique)",
+   "p": "10 po",
+   "w": 1.0,
+   "g": "Focaliseur arcanique",
+   "f": "divers"
+  },
+  {
+   "id": "baguette-d-if-focaliseur-druidique",
+   "n": "Baguette d'if (focaliseur druidique)",
+   "p": "10 po",
+   "w": 0.5,
+   "g": "Focaliseur druidique",
+   "f": "divers"
+  },
+  {
+   "id": "baton-focaliseur-druidique",
+   "n": "Bâton (focaliseur druidique)",
+   "p": "5 po",
+   "w": 2.0,
+   "g": "Focaliseur druidique",
+   "f": "divers"
+  },
+  {
+   "id": "branche-de-gui-focaliseur-druidique",
+   "n": "Branche de gui (focaliseur druidique)",
+   "p": "1 po",
+   "w": null,
+   "g": "Focaliseur druidique",
+   "f": "divers"
+  },
+  {
+   "id": "totem-focaliseur-druidique",
+   "n": "Totem (focaliseur druidique)",
+   "p": "1 po",
+   "w": null,
+   "g": "Focaliseur druidique",
+   "f": "divers"
+  },
+  {
+   "id": "gamelle",
+   "n": "Gamelle",
+   "p": "2 pa",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "gourde-pleine",
+   "n": "Gourde (pleine)",
+   "p": "2 pa",
+   "w": 2.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "al": [
+    "Gourde"
+   ]
+  },
+  {
+   "id": "grappin",
+   "n": "Grappin",
+   "p": "2 po",
+   "w": 2.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "grimoire",
+   "n": "Grimoire",
+   "p": "50 po",
+   "w": 1.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "huile-flasque",
+   "n": "Huile (flasque)",
+   "p": "1 pa",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true,
+   "fx": "Lancée (attaque à distance, arme improvisée) : la cible prend 5 feu de plus si elle subit du feu dans la minute. Versée sur 1,50 m : brûle 2 rounds, 5 feu."
+  },
+  {
+   "id": "kit-d-escalade",
+   "n": "Kit d'escalade",
+   "p": "25 po",
+   "w": 6.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "fx": "Action : s'ancrer ; impossible de tomber ou de grimper à plus de 7,50 m du point d'ancrage."
+  },
+  {
+   "id": "lampe",
+   "n": "Lampe",
+   "p": "5 pa",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "fx": "Lumière vive sur 4,50 m, faible sur 9 m de plus ; 6 heures par flasque d'huile."
+  },
+  {
+   "id": "lanterne-a-capote",
+   "n": "Lanterne à capote",
+   "p": "5 po",
+   "w": 1.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "fx": "Lumière vive sur 9 m, faible sur 9 m de plus ; 6 heures par flasque d'huile ; une action la réduit à une lumière faible sur 1,50 m."
+  },
+  {
+   "id": "lanterne-sourde",
+   "n": "Lanterne sourde",
+   "p": "10 po",
+   "w": 1.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "fx": "Lumière vive dans un cône de 18 m, faible sur 18 m de plus ; 6 heures par flasque d'huile."
+  },
+  {
+   "id": "livre",
+   "n": "Livre",
+   "p": "25 po",
+   "w": 2.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "longue-vue",
+   "n": "Longue-vue",
+   "p": "1000 po",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "loupe",
+   "n": "Loupe",
+   "p": "100 po",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "marteau",
+   "n": "Marteau",
+   "p": "1 po",
+   "w": 1.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "marteau-de-forgeron",
+   "n": "Marteau de forgeron",
+   "p": "2 po",
+   "w": 5.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "materiel-de-peche",
+   "n": "Matériel de pêche",
+   "p": "1 po",
+   "w": 2.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "menottes",
+   "n": "Menottes",
+   "p": "2 po",
+   "w": 3.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "fx": "Créature P ou M ; s'échapper : DEX DD 20 ; briser : FOR DD 20 ; crocheter (outils de voleur) : DEX DD 15 ; 15 PV."
+  },
+  {
+   "id": "miroir-en-acier",
+   "n": "Miroir en acier",
+   "p": "5 po",
+   "w": 0.25,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "aiguilles-de-sarbacane-50",
+   "n": "Aiguilles de sarbacane (50)",
+   "p": "1 po",
+   "w": 0.01,
+   "g": "Munitions",
+   "f": "conso",
+   "c": true,
+   "u": {
+    "n": "Aiguilles de sarbacane",
+    "q": 50
+   }
+  },
+  {
+   "id": "billes-de-fronde-20",
+   "n": "Billes de fronde (20)",
+   "p": "4 pc",
+   "w": 0.0375,
+   "g": "Munitions",
+   "f": "conso",
+   "c": true,
+   "u": {
+    "n": "Billes de fronde",
+    "q": 20
+   }
+  },
+  {
+   "id": "carreaux-d-arbalete-20",
+   "n": "Carreaux d'arbalète (20)",
+   "p": "1 po",
+   "w": 0.0375,
+   "g": "Munitions",
+   "f": "conso",
+   "c": true,
+   "u": {
+    "n": "Carreaux",
+    "q": 20
+   },
+   "al": [
+    "Carreaux d'arbalète"
+   ]
+  },
+  {
+   "id": "fleches-20",
+   "n": "Flèches (20)",
+   "p": "1 po",
+   "w": 0.025,
+   "g": "Munitions",
+   "f": "conso",
+   "c": true,
+   "u": {
+    "n": "Flèches",
+    "q": 20
+   }
+  },
+  {
+   "id": "palan",
+   "n": "Palan",
+   "p": "1 po",
+   "w": 2.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "panier",
+   "n": "Panier",
+   "p": "4 pa",
+   "w": 1.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "papier-une-feuille",
+   "n": "Papier (une feuille)",
+   "p": "2 pa",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true
+  },
+  {
+   "id": "parchemin-une-feuille",
+   "n": "Parchemin (une feuille)",
+   "p": "1 pa",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true
+  },
+  {
+   "id": "parfum-fiole",
+   "n": "Parfum (fiole)",
+   "p": "5 po",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "pelle",
+   "n": "Pelle",
+   "p": "2 po",
+   "w": 2.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "perche-3-m",
+   "n": "Perche (3 m)",
+   "p": "5 pc",
+   "w": 3.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "pied-de-biche",
+   "n": "Pied-de-biche",
+   "p": "2 po",
+   "w": 2.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "piege-a-machoires",
+   "n": "Piège à mâchoires",
+   "p": "5 po",
+   "w": 12.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "pierre-a-aiguiser",
+   "n": "Pierre à aiguiser",
+   "p": "1 pc",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "pioche-de-mineur",
+   "n": "Pioche de mineur",
+   "p": "2 po",
+   "w": 5.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "piton",
+   "n": "Piton",
+   "p": "5 pc",
+   "w": 0.125,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true
+  },
+  {
+   "id": "plume-d-ecriture",
+   "n": "Plume d'écriture",
+   "p": "2 pc",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "pointes-en-fer-10",
+   "n": "Pointes en fer (10)",
+   "p": "1 po",
+   "w": 2.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "poison-fiole",
+   "n": "Poison (fiole)",
+   "p": "100 po",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true,
+   "fx": "Action : enduire une arme tranchante ou perforante, ou 3 munitions ; touché : JdS CON DD 10 ou 1d4 poison ; actif 1 minute."
+  },
+  {
+   "id": "pot-en-fer",
+   "n": "Pot en fer",
+   "p": "2 po",
+   "w": 5.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "potion-de-guerison",
+   "n": "Potion de guérison",
+   "p": "50 po",
+   "w": 0.25,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true,
+   "fx": "La boire ou la faire boire (action) : récupère 2d4 + 2 PV.",
+   "al": [
+    "Potion de soins"
+   ]
+  },
+  {
+   "id": "rations-1-jour",
+   "n": "Rations (1 jour)",
+   "p": "5 pa",
+   "w": 1.0,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true,
+   "al": [
+    "Rations"
+   ]
+  },
+  {
+   "id": "robes",
+   "n": "Robes",
+   "p": "1 po",
+   "w": 2.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "sablier",
+   "n": "Sablier",
+   "p": "25 po",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "sac",
+   "n": "Sac",
+   "p": "1 pc",
+   "w": 0.25,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "sac-a-dos",
+   "n": "Sac à dos",
+   "p": "2 po",
+   "w": 2.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "sac-de-couchage",
+   "n": "Sac de couchage",
+   "p": "1 po",
+   "w": 3.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "sacoche",
+   "n": "Sacoche",
+   "p": "5 pa",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "sacoche-a-composantes",
+   "n": "Sacoche à composantes",
+   "p": "25 po",
+   "w": 1.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "fx": "Composantes matérielles des sorts (sauf celles qui ont un prix indiqué)."
+  },
+  {
+   "id": "savon",
+   "n": "Savon",
+   "p": "2 pc",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "seau",
+   "n": "Seau",
+   "p": "5 pc",
+   "w": 1.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "sifflet",
+   "n": "Sifflet",
+   "p": "5 pc",
+   "w": null,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "amulette-symbole-sacre",
+   "n": "Amulette (symbole sacré)",
+   "p": "5 po",
+   "w": 0.5,
+   "g": "Symbole sacré",
+   "f": "divers"
+  },
+  {
+   "id": "embleme-symbole-sacre",
+   "n": "Emblème (symbole sacré)",
+   "p": "5 po",
+   "w": null,
+   "g": "Symbole sacré",
+   "f": "divers"
+  },
+  {
+   "id": "reliquaire-symbole-sacre",
+   "n": "Reliquaire (symbole sacré)",
+   "p": "5 po",
+   "w": 1.0,
+   "g": "Symbole sacré",
+   "f": "divers"
+  },
+  {
+   "id": "tente",
+   "n": "Tente",
+   "p": "2 po",
+   "w": 10.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "tonneau",
+   "n": "Tonneau",
+   "p": "2 po",
+   "w": 35.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "torche",
+   "n": "Torche",
+   "p": "1 pc",
+   "w": 0.5,
+   "g": "Équipement d'aventurier",
+   "f": "conso",
+   "c": true,
+   "fx": "Brûle 1 heure : lumière vive sur 6 m, faible sur 6 m de plus ; au corps à corps, allumée : 1 dégât de feu.",
+   "al": [
+    "Torches"
+   ]
+  },
+  {
+   "id": "trousse-de-soins",
+   "n": "Trousse de soins",
+   "p": "5 po",
+   "w": 1.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers",
+   "fx": "10 utilisations ; action : stabiliser une créature à 0 PV sans test de Sagesse (Médecine)."
+  },
+  {
+   "id": "vetements-communs",
+   "n": "Vêtements, communs",
+   "p": "5 pa",
+   "w": 1.5,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "vetements-costume",
+   "n": "Vêtements, costume",
+   "p": "5 po",
+   "w": 2.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "vetements-fins",
+   "n": "Vêtements, fins",
+   "p": "15 po",
+   "w": 3.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "vetements-voyage",
+   "n": "Vêtements, voyage",
+   "p": "2 po",
+   "w": 2.0,
+   "g": "Équipement d'aventurier",
+   "f": "divers"
+  },
+  {
+   "id": "chalemie",
+   "n": "Chalemie",
+   "p": "2 po",
+   "w": 0.5,
+   "g": "Instruments de musique",
+   "f": "divers"
+  },
+  {
+   "id": "cor",
+   "n": "Cor",
+   "p": "3 po",
+   "w": 1.0,
+   "g": "Instruments de musique",
+   "f": "divers"
+  },
+  {
+   "id": "cornemuse",
+   "n": "Cornemuse",
+   "p": "30 po",
+   "w": 3.0,
+   "g": "Instruments de musique",
+   "f": "divers"
+  },
+  {
+   "id": "flute",
+   "n": "Flûte",
+   "p": "2 po",
+   "w": 0.5,
+   "g": "Instruments de musique",
+   "f": "divers"
+  },
+  {
+   "id": "flute-de-pan",
+   "n": "Flûte de pan",
+   "p": "12 po",
+   "w": 1.0,
+   "g": "Instruments de musique",
+   "f": "divers"
+  },
+  {
+   "id": "luth",
+   "n": "Luth",
+   "p": "35 po",
+   "w": 1.0,
+   "g": "Instruments de musique",
+   "f": "divers"
+  },
+  {
+   "id": "lyre",
+   "n": "Lyre",
+   "p": "30 po",
+   "w": 1.0,
+   "g": "Instruments de musique",
+   "f": "divers"
+  },
+  {
+   "id": "tambour",
+   "n": "Tambour",
+   "p": "6 po",
+   "w": 1.5,
+   "g": "Instruments de musique",
+   "f": "divers"
+  },
+  {
+   "id": "tympanon",
+   "n": "Tympanon",
+   "p": "25 po",
+   "w": 5.0,
+   "g": "Instruments de musique",
+   "f": "divers"
+  },
+  {
+   "id": "viole",
+   "n": "Viole",
+   "p": "30 po",
+   "w": 0.5,
+   "g": "Instruments de musique",
+   "f": "divers"
+  },
+  {
+   "id": "des",
+   "n": "Dés",
+   "p": "1 pa",
+   "w": null,
+   "g": "Jeux",
+   "f": "divers"
+  },
+  {
+   "id": "jeu-d-echecs-draconiques",
+   "n": "Jeu d'échecs draconiques",
+   "p": "1 po",
+   "w": 0.25,
+   "g": "Jeux",
+   "f": "divers"
+  },
+  {
+   "id": "jeu-de-cartes",
+   "n": "Jeu de cartes",
+   "p": "5 pa",
+   "w": null,
+   "g": "Jeux",
+   "f": "divers"
+  },
+  {
+   "id": "jeu-des-dragons",
+   "n": "Jeu des Dragons",
+   "p": "1 po",
+   "w": null,
+   "g": "Jeux",
+   "f": "divers"
+  },
+  {
+   "id": "kit-d-empoisonneur",
+   "n": "Kit d'empoisonneur",
+   "p": "50 po",
+   "w": 1.0,
+   "g": "Outils",
+   "f": "divers"
+  },
+  {
+   "id": "kit-d-herboriste",
+   "n": "Kit d'herboriste",
+   "p": "5 po",
+   "w": 1.5,
+   "g": "Outils",
+   "f": "divers"
+  },
+  {
+   "id": "kit-de-contrefacon",
+   "n": "Kit de contrefaçon",
+   "p": "15 po",
+   "w": 2.5,
+   "g": "Outils",
+   "f": "divers"
+  },
+  {
+   "id": "kit-de-deguisement",
+   "n": "Kit de déguisement",
+   "p": "25 po",
+   "w": 1.5,
+   "g": "Outils",
+   "f": "divers"
+  },
+  {
+   "id": "materiel-d-alchimiste",
+   "n": "Matériel d'alchimiste",
+   "p": "50 po",
+   "w": 4.0,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "materiel-de-brasseur",
+   "n": "Matériel de brasseur",
+   "p": "20 po",
+   "w": 4.5,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "materiel-de-calligraphe",
+   "n": "Matériel de calligraphe",
+   "p": "10 po",
+   "w": 2.5,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "materiel-de-peintre",
+   "n": "Matériel de peintre",
+   "p": "10 po",
+   "w": 2.5,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-bijoutier",
+   "n": "Outils de bijoutier",
+   "p": "25 po",
+   "w": 1.0,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-bricoleur",
+   "n": "Outils de bricoleur",
+   "p": "50 po",
+   "w": 5.0,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-cartographe",
+   "n": "Outils de cartographe",
+   "p": "15 po",
+   "w": 3.0,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-charpentier",
+   "n": "Outils de charpentier",
+   "p": "8 po",
+   "w": 3.0,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-cordonnier",
+   "n": "Outils de cordonnier",
+   "p": "5 po",
+   "w": 2.5,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-forgeron",
+   "n": "Outils de forgeron",
+   "p": "20 po",
+   "w": 4.0,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-macon",
+   "n": "Outils de maçon",
+   "p": "10 po",
+   "w": 4.0,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-menuisier",
+   "n": "Outils de menuisier",
+   "p": "1 po",
+   "w": 2.5,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-potier",
+   "n": "Outils de potier",
+   "p": "10 po",
+   "w": 1.0,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-souffleur-de-verre",
+   "n": "Outils de souffleur de verre",
+   "p": "30 po",
+   "w": 2.5,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-tanneur",
+   "n": "Outils de tanneur",
+   "p": "5 po",
+   "w": 2.5,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-tisserand",
+   "n": "Outils de tisserand",
+   "p": "1 po",
+   "w": 2.5,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "ustensiles-de-cuisinier",
+   "n": "Ustensiles de cuisinier",
+   "p": "1 po",
+   "w": 4.0,
+   "g": "Outils d'artisan",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-navigateur",
+   "n": "Outils de navigateur",
+   "p": "25 po",
+   "w": 1.0,
+   "g": "Outils",
+   "f": "divers"
+  },
+  {
+   "id": "outils-de-voleur",
+   "n": "Outils de voleur",
+   "p": "25 po",
+   "w": 0.5,
+   "g": "Outils",
+   "f": "divers"
+  },
+  {
+   "id": "sac-d-artiste",
+   "n": "Sac d'artiste",
+   "p": "40 po",
+   "w": 19.0,
+   "g": "Paquetage",
+   "f": "divers",
+   "pack": [
+    [
+     "Sac à dos",
+     1,
+     "sac-a-dos"
+    ],
+    [
+     "Sac de couchage",
+     1,
+     "sac-de-couchage"
+    ],
+    [
+     "Vêtements, costume",
+     2,
+     "vetements-costume"
+    ],
+    [
+     "Bougie",
+     5,
+     "bougie"
+    ],
+    [
+     "Rations (1 jour)",
+     5,
+     "rations-1-jour"
+    ],
+    [
+     "Gourde (pleine)",
+     1,
+     "gourde-pleine"
+    ],
+    [
+     "Kit de déguisement",
+     1,
+     "kit-de-deguisement"
+    ]
+   ]
+  },
+  {
+   "id": "sac-de-cambrioleur",
+   "n": "Sac de cambrioleur",
+   "p": "16 po",
+   "w": 28.75,
+   "g": "Paquetage",
+   "f": "divers",
+   "pack": [
+    [
+     "Sac à dos",
+     1,
+     "sac-a-dos"
+    ],
+    [
+     "Billes (sac de 1000)",
+     1,
+     "billes-sac-de-1000"
+    ],
+    [
+     "Chaîne (3 m)",
+     1,
+     "chaine-3-m"
+    ],
+    [
+     "Cloche",
+     1,
+     "cloche"
+    ],
+    [
+     "Bougie",
+     5,
+     "bougie"
+    ],
+    [
+     "Pied-de-biche",
+     1,
+     "pied-de-biche"
+    ],
+    [
+     "Marteau",
+     1,
+     "marteau"
+    ],
+    [
+     "Piton",
+     10,
+     "piton"
+    ],
+    [
+     "Lanterne à capote",
+     1,
+     "lanterne-a-capote"
+    ],
+    [
+     "Huile (flasque)",
+     2,
+     "huile-flasque"
+    ],
+    [
+     "Rations (1 jour)",
+     5,
+     "rations-1-jour"
+    ],
+    [
+     "Boite d'allume-feu",
+     1,
+     "boite-d-allume-feu"
+    ],
+    [
+     "Gourde (pleine)",
+     1,
+     "gourde-pleine"
+    ],
+    [
+     "Corde en chanvre (15 m)",
+     1,
+     "corde-en-chanvre-15-m"
+    ]
+   ]
+  },
+  {
+   "id": "sac-de-diplomate",
+   "n": "Sac de diplomate",
+   "p": "39 po",
+   "w": 18.0,
+   "g": "Paquetage",
+   "f": "divers",
+   "pack": [
+    [
+     "Coffre",
+     1,
+     "coffre"
+    ],
+    [
+     "Étui à cartes ou parchemins",
+     2,
+     "etui-a-cartes-ou-parchemins"
+    ],
+    [
+     "Vêtements, fins",
+     1,
+     "vetements-fins"
+    ],
+    [
+     "Encre (bouteille de 30 ml)",
+     1,
+     "encre-bouteille-de-30-ml"
+    ],
+    [
+     "Plume d'écriture",
+     1,
+     "plume-d-ecriture"
+    ],
+    [
+     "Lampe",
+     1,
+     "lampe"
+    ],
+    [
+     "Huile (flasque)",
+     2,
+     "huile-flasque"
+    ],
+    [
+     "Papier (une feuille)",
+     5,
+     "papier-une-feuille"
+    ],
+    [
+     "Parfum (fiole)",
+     1,
+     "parfum-fiole"
+    ],
+    [
+     "Cire à cacheter",
+     1,
+     "cire-a-cacheter"
+    ],
+    [
+     "Savon",
+     1,
+     "savon"
+    ]
+   ]
+  },
+  {
+   "id": "sac-d-ecclesiastique",
+   "n": "Sac d'ecclésiastique",
+   "p": "19 po",
+   "w": 9.0,
+   "g": "Paquetage",
+   "f": "divers",
+   "pack": [
+    [
+     "Sac à dos",
+     1,
+     "sac-a-dos"
+    ],
+    [
+     "Couverture",
+     1,
+     "couverture"
+    ],
+    [
+     "Bougie",
+     10,
+     "bougie"
+    ],
+    [
+     "Boite d'allume-feu",
+     1,
+     "boite-d-allume-feu"
+    ],
+    [
+     "Boîte pour l'aumône",
+     1,
+     null
+    ],
+    [
+     "Bâtonnet d'encens",
+     2,
+     null
+    ],
+    [
+     "Encensoir",
+     1,
+     null
+    ],
+    [
+     "Habits de cérémonie",
+     1,
+     null
+    ],
+    [
+     "Rations (1 jour)",
+     2,
+     "rations-1-jour"
+    ],
+    [
+     "Gourde (pleine)",
+     1,
+     "gourde-pleine"
+    ]
+   ]
+  },
+  {
+   "id": "sac-d-erudit",
+   "n": "Sac d'érudit",
+   "p": "40 po",
+   "w": 5.0,
+   "g": "Paquetage",
+   "f": "divers",
+   "pack": [
+    [
+     "Sac à dos",
+     1,
+     "sac-a-dos"
+    ],
+    [
+     "Livre de connaissance",
+     1,
+     "livre"
+    ],
+    [
+     "Encre (bouteille de 30 ml)",
+     1,
+     "encre-bouteille-de-30-ml"
+    ],
+    [
+     "Plume d'écriture",
+     1,
+     "plume-d-ecriture"
+    ],
+    [
+     "Parchemin (une feuille)",
+     10,
+     "parchemin-une-feuille"
+    ],
+    [
+     "Petit sac de sable",
+     1,
+     null
+    ],
+    [
+     "Petit couteau",
+     1,
+     null
+    ]
+   ]
+  },
+  {
+   "id": "sac-d-explorateur",
+   "n": "Sac d'explorateur",
+   "p": "10 po",
+   "w": 29.5,
+   "g": "Paquetage",
+   "f": "divers",
+   "pack": [
+    [
+     "Sac à dos",
+     1,
+     "sac-a-dos"
+    ],
+    [
+     "Sac de couchage",
+     1,
+     "sac-de-couchage"
+    ],
+    [
+     "Gamelle",
+     1,
+     "gamelle"
+    ],
+    [
+     "Boite d'allume-feu",
+     1,
+     "boite-d-allume-feu"
+    ],
+    [
+     "Torche",
+     10,
+     "torche"
+    ],
+    [
+     "Rations (1 jour)",
+     10,
+     "rations-1-jour"
+    ],
+    [
+     "Gourde (pleine)",
+     1,
+     "gourde-pleine"
+    ],
+    [
+     "Corde en chanvre (15 m)",
+     1,
+     "corde-en-chanvre-15-m"
+    ]
+   ]
+  },
+  {
+   "id": "sac-d-exploration-souterraine",
+   "n": "Sac d'exploration souterraine",
+   "p": "12 po",
+   "w": 30.75,
+   "g": "Paquetage",
+   "f": "divers",
+   "pack": [
+    [
+     "Sac à dos",
+     1,
+     "sac-a-dos"
+    ],
+    [
+     "Pied-de-biche",
+     1,
+     "pied-de-biche"
+    ],
+    [
+     "Marteau",
+     1,
+     "marteau"
+    ],
+    [
+     "Piton",
+     10,
+     "piton"
+    ],
+    [
+     "Torche",
+     10,
+     "torche"
+    ],
+    [
+     "Boite d'allume-feu",
+     1,
+     "boite-d-allume-feu"
+    ],
+    [
+     "Rations (1 jour)",
+     10,
+     "rations-1-jour"
+    ],
+    [
+     "Gourde (pleine)",
+     1,
+     "gourde-pleine"
+    ],
+    [
+     "Corde en chanvre (15 m)",
+     1,
+     "corde-en-chanvre-15-m"
+    ]
+   ]
+  }
+ ]
+}

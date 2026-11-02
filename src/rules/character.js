@@ -3,6 +3,7 @@ import { C } from "../classes/index.js";
 import { R } from "./common.js";
 import { acOf } from "./equipment.js";
 import { featHpLv, featInit, featPassive, featSaves, featSpeed } from "./feats.js";
+import { loadSpeed } from "./inventory.js";
 import { SKILLS } from "./tables.js";
 
 /** Le personnage maîtrise-t-il les jets de sauvegarde de cette caractéristique ? (classe, ou ajout comme le don Résilience) */
@@ -16,7 +17,7 @@ const saveBonus = (g, k) => R.ab(g, k) + (saveProf(g, k) ? R.prof(g.level) : 0);
 const halfProf = (g, ab) => { const v = C(g).halfProf ? C(g).halfProf(g, ab) : false; return v === "up" ? Math.ceil(R.prof(g.level) / 2) : v ? Math.floor(R.prof(g.level) / 2) : 0; };
 const initiative = g => R.ab(g, "dex") + featInit(g) + (g.initX || 0) + halfProf(g, "dex");
 /** Vitesse en mètres : saisie + bonus de classe (Déplacement rapide du barbare…). */
-const speedOf = g => g.speed + (C(g).speedBonus ? C(g).speedBonus(g) : 0) + featSpeed(g); // + Mobile
+const speedOf = g => Math.max(0, g.speed + (C(g).speedBonus ? C(g).speedBonus(g) : 0) + featSpeed(g) - loadSpeed(g)); // + Mobile ; − encombrement (variante)
 /** Taille du dé de vie de la classe (8 pour « 1d8 »). */
 const hitDieSize = g => +String(C(g).hitDie || "1d8").split("d")[1] || 8;
 /** PV maximum à la moyenne : dé plein au niveau 1, puis moyenne arrondie au-dessus ; + mod. de CON à chaque niveau. */

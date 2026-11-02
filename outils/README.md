@@ -29,3 +29,5 @@ Relire ensuite `data/beasts.json.ecarte.txt` (texte écarté en fin de bloc) pui
 1. Export AideDD des sorts de la classe (règles 2014, pages `/dnd/sorts.php`), puis `ocr_pdf.py` et `sorts_aidedd.py`.
 2. Sur le modèle de `archives/ajout_sorts_druide.py` : marquer les sorts déjà présents (`cl`) et rédiger les nouveaux.
 3. `python3 build.py && python3 tests/run.py`.
+
+- `materiel_aidedd.py` : équipement d'aventurier, outils et paquetages du Manuel des joueurs 2014 (tables d'AideDD) → `data/materiel.json` (poids en kg à l'unité, prix, dossier proposé, effets résumés, contenu des paquetages).

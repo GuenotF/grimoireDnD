@@ -1,6 +1,6 @@
 // Format d'un personnage : valeurs par défaut, contrôle à l'ouverture, version et migrations.
 import { CLASSES } from "../classes/index.js";
-import { BY_ID, GEAR } from "../data.js";
+import { BY_ID, GEAR, MAT, matByName } from "../data.js";
 import { FEATS, featByName } from "../rules/feats.js";
 import { DEF_FOLDERS, RARITIES, classify, folderOf } from "../rules/inventory.js";
 import { COINS, blankPurse } from "../rules/money.js";
@@ -118,10 +118,11 @@ function norm(g) {
   o.breathU = o.breathU ? 1 : 0;
   const iu = o.innU && typeof o.innU === "object" ? o.innU : {}; o.innU = Object.fromEntries(Object.entries(iu).filter(([, v]) => v).map(([k]) => [k, 1])); // sorts innés utilisés (repos long)
   o.bg = { n: str((o.bg || {}).n), d: str((o.bg || {}).d) }; o.pnotes = str(o.pnotes);
-  o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(x.oh ? { oh: true } : {}), ...magicOf(x), ...infFields(x), ...invFields(x), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : {}) }));
+  o.items = (Array.isArray(o.items) ? o.items : []).filter(x => x && str(x.n).trim()).map(x => ({ n: str(x.n).trim(), q: Math.max(0, Math.floor(+x.q) || 0), eq: !!x.eq, c: !!x.c, note: str(x.note), ...(x.oh ? { oh: true } : {}), ...magicOf(x), ...infFields(x), ...invFields(x), ...(GEAR[x.ref] ? { ref: x.ref } : gearByName(x.n) ? { ref: gearByName(x.n).id } : MAT[x.mat] ? { mat: x.mat } : matByName(x.n) ? { mat: matByName(x.n).id } : {}) }));
   // Dossiers de l'inventaire (ordre des sections) ; un objet sans dossier (fichier plus ancien) reçoit celui proposé par son type
-  const fl = (Array.isArray(o.folders) ? o.folders : []).filter(f => f && str(f.id).trim() && str(f.n).trim()).map(f => ({ id: str(f.id).trim().slice(0, 40), n: str(f.n).trim().slice(0, 40) }));
+  const fl = (Array.isArray(o.folders) ? o.folders : []).filter(f => f && str(f.id).trim() && str(f.n).trim()).map(f => ({ id: str(f.id).trim().slice(0, 40), n: str(f.n).trim().slice(0, 40), ...(f.np ? { np: true } : {}) }));
   o.folders = fl.length ? fl.filter((f, i) => fl.findIndex(y => y.id === f.id) === i) : DEF_FOLDERS.map(f => ({ ...f }));
+  o.load = ["cap", "enc"].includes(o.load) ? o.load : ""; o.coinW = !!o.coinW; // charge suivie : capacité ou variante d'encombrement ; poids des pièces
   o.items.forEach(x => { if (!o.folders.some(f => f.id === x.f)) x.f = o.folders.some(f => f.id === classify(x)) ? classify(x) : folderOf(o, x); });
   o.acMode = ["calc", "manual"].includes(o.acMode) ? o.acMode : null; // null : saisie si elle existe, sinon calcul
   const mo = o.money && typeof o.money === "object" ? o.money : {};
