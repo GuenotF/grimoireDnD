@@ -78,10 +78,19 @@ class App:
             self.click('#lrsheet .lufoot [data-a="lr-next"]')
         raise AssertionError("repos long : pas de bouton Terminer")
 
-    def add_open(self):
-        """Inventaire : ouvre le formulaire d'ajout (bouton ＋ en tête) s'il est fermé."""
-        if self.count("#it-new") == 0:
+    def add_item(self, name, pick=None, qty=None, go=True):
+        """Inventaire : volet « Ajouter un objet » ; tape le nom, choisit une ligne (sinon Entrée : Manuel de ce nom, ou objet libre), quantité, Ajouter."""
+        if self.count("#adsheet:not([hidden])") == 0:
             self.click('[data-a="it-plus"]')
+        self.pg.fill("#ad-q", name); self.pg.wait_for_timeout(60)
+        if pick:
+            self.click(pick)
+        else:
+            self.pg.press("#ad-q", "Enter"); self.pg.wait_for_timeout(60)
+        if qty is not None:
+            self.pg.fill("#ad-qn", str(qty)); self.pg.wait_for_timeout(40)
+        if go:
+            self.click('[data-a="ad-go"]:not([data-v])')
 
     def tab(self, v):
         sel = f'[data-a="tab"][data-v="{v}"]'

@@ -14,7 +14,7 @@ import { abSheetHTML, slotLineHTML, topbarHTML } from "./features/topbar.js";
 import { characterHTML } from "./features/character.js";
 import { grimoireHTML } from "./features/grimoire.js";
 import { hpCardHTML } from "./features/hp.js";
-import { inventoryHTML } from "./features/equipment.js";
+import { addSheetHTML, inventoryHTML } from "./features/equipment.js";
 import { luHTML } from "./features/levelup.js";
 import { lrHTML } from "./features/longrest.js";
 import { biblioHTML } from "./features/library.js";
@@ -59,6 +59,9 @@ function renderApp() {
   const showFx = !!g && S.fxOpen && g.effects.length > 0, fs = document.getElementById("fxsheet");
   fs.hidden = !showFx; document.getElementById("fxback").hidden = !showFx; if (showFx) fs.innerHTML = fxSheetHTML(g);
   if (!showFx) S.fxOpen = false;
+  // Volet « Ajouter un objet » (onglet Inventaire) : features/equipment.js
+  const ad = document.getElementById("adsheet"), showAd = !!g && !!S.add;
+  if (!showAd) S.add = null; ad.hidden = !showAd; document.getElementById("adback").hidden = !showAd; if (showAd) ad.innerHTML = addSheetHTML(g);
   const nw = document.getElementById("nwsheet"), showNw = !!S.newOpen;
   nw.hidden = !showNw; document.getElementById("nwback").hidden = !showNw; if (showNw) nw.innerHTML = newHTML();
   // Assistant de création (plein écran), comme l'assistant de passage de niveau
@@ -75,7 +78,7 @@ function renderApp() {
   if (showLu) { const sc = lu.querySelector(".lubody"), top = sc ? sc.scrollTop : 0; lu.innerHTML = luHTML(g); const nb = lu.querySelector(".lubody"); if (nb && S.luKeep) nb.scrollTop = top; S.luKeep = false; }
   // Volets propres aux classes (Imposition des mains, formes possibles) : chaque classe gère les siens, refermés si le personnage affiché est d'une autre classe
   const showSheet = Object.values(CLASSES).map(c => c.renderSheets ? c.renderSheets(g && C(g) === c ? g : null, showLu) : false).some(Boolean);
-  document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showNw || showSheet || showHp || showCr || showAb || showLr); // le message ne couvre pas le volet ouvert
+  document.getElementById("toast").classList.toggle("on-top", showFx || showLu || showNw || showSheet || showHp || showCr || showAb || showLr || showAd); // le message ne couvre pas le volet ouvert
   // Focus retrouvé en dernier : les volets (assistant de niveau…) sont redessinés juste avant
   if (keep) { const el = document.querySelector(keep.sel); if (el) { el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) {} } }
 }
@@ -142,7 +145,7 @@ function panelHTML(g) {
 beforeEachClick(a => { if (a !== "rm" && a !== "del" && S.confirm) S.confirm = null; if (a !== "more" && a !== "tab") S.moreOpen = false; }); // un autre clic annule une confirmation en attente
 onClick("hero-edit", () => { S.heroEdit = !S.heroEdit; try { localStorage.setItem("grimoire.edit", S.heroEdit ? "1" : "0"); } catch (e) {} render(); });
 onClick("more", () => { S.moreOpen = !S.moreOpen; render(); });
-onClick("tab", (b) => { keepSpot(); S.tab = b.dataset.v; S.moreOpen = false; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); goSpot(); }); // chaque onglet garde sa position (core/scroll.js)
+onClick("tab", (b) => { keepSpot(); S.tab = b.dataset.v; S.moreOpen = false; S.fresh = null; S.add = null; try { localStorage.setItem("grimoire.tab", S.tab); } catch (e) {} render(); goSpot(); }); // chaque onglet garde sa position (core/scroll.js)
 onClick("undo", () => { const u = S.undo; S.undo = null; document.getElementById("toast").hidden = true; if (u) { const m = u(); toast(typeof m === "string" ? m : "Lancement annulé"); } });
 onChange("#cur", t => { setCur(t.value); });
 onChange("#f-level", t => { mutate(g => { g.level = +t.value; }); });
@@ -152,6 +155,7 @@ onKey(e => {
   if (e.key === "Escape" && S.moreOpen) { S.moreOpen = false; render(); return true; }
   if (e.key === "Escape" && S.lu) { S.lu = null; render(); return true; }
   if (e.key === "Escape" && S.newOpen) { S.newOpen = false; render(); return true; }
+  if (e.key === "Escape" && S.add) { S.add = null; render(); return true; }
   if (e.key === "Enter" && S.newOpen && e.target.id === "nw-name" && S.newCls) { document.querySelector('[data-a="nw-go"]').click(); return true; }
 });
 setRenderer(renderApp);

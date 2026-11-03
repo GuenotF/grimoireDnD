@@ -15,7 +15,7 @@ import { hasFeat } from "../rules/feats.js";
 import { MAX_ATT, REC, attunedCount, isMagic, recLabel } from "../rules/magic.js";
 import { RARITIES, classify, coinsOf, fmtKg, fmtPo, folderOf, loadOf, pcText, saleOf, weightOf } from "../rules/inventory.js";
 import { COINS, purseText, purseValue, spend } from "../rules/money.js";
-import { foldHead, isFold } from "../ui/components.js";
+import { foldHead, foldKey, isFold } from "../ui/components.js";
 
 /** Ordre d'affichage : objets équipés d'abord, puis l'ordre de la liste (indices du tableau d'origine, réglable avec ▲ ▼). */
 const order = g => g.items.map((x, i) => i).sort((a, b) => (g.items[b].eq - g.items[a].eq) || a - b);
@@ -69,8 +69,7 @@ function sellHTML(g) {
 }
 // En tête : recherche, ＋ (formulaire d'ajout juste dessous), puces de filtre, résumé (bourse, harmonisation)
 function topHTML(g) {
-  let h = `<div class="invtop"><input id="it-find" class="itfind" type="search" value="${esc(S.itFind || "")}" placeholder="🔍 Chercher un objet" aria-label="Chercher un objet" autocomplete="off"><button class="btn cast-go invplus" data-a="it-plus" aria-expanded="${!!S.itAdd}" aria-label="Ajouter un objet" title="Ajouter un objet">＋</button></div>`;
-  if (S.itAdd) h += `<div class="invadd">${addFormHTML(g)}</div>`;
+  let h = `<div class="invtop"><input id="it-find" class="itfind" type="search" value="${esc(S.itFind || "")}" placeholder="🔍 Chercher un objet" aria-label="Chercher un objet" autocomplete="off"><button class="btn cast-go invplus" data-a="it-plus" aria-haspopup="dialog" aria-label="Ajouter un objet" title="Ajouter un objet">＋</button></div>`;
   const flt = filterOf(g), n = id => g.items.filter(x => folderOf(g, x) === id).length, chip = (v, l) => `<button class="chip" data-a="it-flt" data-v="${v}" aria-pressed="${flt === v}">${l}</button>`;
   if (g.items.length) h += `<div class="invf" role="group" aria-label="Filtrer l'inventaire">${chip("", "Tout")}${g.items.some(x => x.eq) ? chip("eq", "Équipé") : ""}${g.folders.filter(f => n(f.id) || flt === f.id).map(f => chip(f.id, esc(f.n))).join("")}</div>`;
   const val = purseValue(g.money) / 100;
@@ -93,13 +92,10 @@ function purseHTML(g) {
     <p>Pas assez de cette pièce ? L'atelier fait la monnaie (1 po = 10 pa = 100 pc) ; tout est annulable.</p></form>`;
   return h;
 }
-/** Ajout d'un objet (Gérer et En jeu) : nom libre, ou arme / armure du Manuel proposée pendant la saisie. */
-// ＋ : ajout rapide ; ✎ Détails : le formulaire de Modifier (quantité, note, objet magique…), ouvert juste dessous
-const addFormHTML = g => `<form class="itadd" data-a="it-add"><input id="it-new" type="text" placeholder="Nom de l'objet" aria-label="Nouvel objet (ex. épée, cuir, rations)" autocomplete="off" value="${esc(S.itQ || "")}"><button class="btn cast-go itplus" type="submit" aria-label="Ajouter tout de suite" title="Ajouter tout de suite">＋</button><button class="btn" type="button" data-a="it-det" aria-expanded="${!!S.itNew}">✎ Détails</button></form>${S.itNew ? itemForm(g, S.itNew, "new") : suggestHTML(g)}`;
 // Arme pouvant aller en main secondaire : corps à corps légère, ou à une main avec le don Combattant à deux armes
 const offhandOk = (g, x) => { const w = gearOf(x); return !!w && w.kind === "weapon" && w.rng === "melee" && !w.two && (w.light || hasFeat(g, "dual-wielder")); };
-function itemForm(g, x, i) { // i : indice de l'objet, ou "new" (ajout avec détails : rien n'est créé avant Ajouter)
-  return `<form class="itform${i === "new" ? " itnew" : ""}" data-a="it-save" data-i="${i}">${i === "new" ? `<div class="itnewh">Nouvel objet · détails</div>` : ""}<div class="frow2"><input id="it-name" type="text" value="${esc(x.n)}" aria-label="Nom" required><input id="it-q" type="number" inputmode="numeric" min="0" value="${x.q}" aria-label="Quantité"></div>
+function itemForm(g, x, i) { // i : indice de l'objet (modification dans ✎ Gérer ; l'ajout passe par le volet « Ajouter un objet »)
+  return `<form class="itform" data-a="it-save" data-i="${i}"><div class="frow2"><input id="it-name" type="text" value="${esc(x.n)}" aria-label="Nom" required><input id="it-q" type="number" inputmode="numeric" min="0" value="${x.q}" aria-label="Quantité"></div>
     <input id="it-note" type="text" value="${esc(x.note)}" placeholder="Note courte (effet, contenu…)" aria-label="Note">
     <div class="frow3${g.load ? "" : " nw"}"><label><span>Dossier</span><select id="it-f" aria-label="Dossier">${g.folders.map(f => `<option value="${esc(f.id)}"${f.id === folderOf(g, x) ? " selected" : ""}>${esc(f.n)}</option>`).join("")}</select></label>
 ${g.load ? `<label><span>Poids (kg)</span><input id="it-w" type="text" inputmode="decimal" value="${x.w != null ? String(x.w).replace(".", ",") : ""}" placeholder="${weightOf({ ref: x.ref, mat: x.mat }) != null ? String(weightOf({ ref: x.ref, mat: x.mat })).replace(".", ",") : "—"}" aria-label="Poids en kg, à l'unité"></label>` : ""}
@@ -117,7 +113,7 @@ ${g.load ? `<label><span>Poids (kg)</span><input id="it-w" type="text" inputmode
       <p class="wide">Le bonus s'applique au toucher et aux dégâts d'une arme du Manuel, ou à la CA d'une armure ou d'un bouclier. Un objet à harmonisation n'a d'effet qu'harmonisé (${MAX_ATT} au plus).</p>
     </fieldset>
     <div class="row"><label class="check"><input type="checkbox" id="it-eq"${x.eq ? " checked" : ""}> Équipé</label><label class="check"><input type="checkbox" id="it-c"${x.c ? " checked" : ""}> À décompter en jeu</label>${offhandOk(g, x) ? `<label class="check" title="Combat à deux armes : cette arme pour l'attaque en action bonus"><input type="checkbox" id="it-oh"${x.oh ? " checked" : ""}> Main secondaire</label>` : ""}
-    <span style="flex:1"></span>${i === "new" ? "" : `<button type="button" class="btn ghost" data-a="it-del" data-i="${i}">Retirer</button>`}<button type="button" class="btn ghost" data-a="it-cancel">Annuler</button><button class="btn primary" type="submit">${i === "new" ? "Ajouter" : "Enregistrer"}</button></div></form>`;
+    <span style="flex:1"></span><button type="button" class="btn ghost" data-a="it-del" data-i="${i}">Retirer</button><button type="button" class="btn ghost" data-a="it-cancel">Annuler</button><button class="btn primary" type="submit">Enregistrer</button></div></form>`;
 }
 // Valeur d'un objet : saisie dans une pièce au choix (pp, po, pe, pa, pc), gardée en po (x.v) avec la pièce saisie (x.vc)
 const VC = { pp: 10, po: 1, pe: 0.5, pa: 0.1, pc: 0.01 };
@@ -152,17 +148,64 @@ const REF_GROUPS = [["simple", "Armes courantes"], ["martial", "Armes de guerre"
 const gearTag = x => `<span class="gtag ${x.kind === "weapon" ? "w" : "a"}">${x.kind === "weapon" ? "arme" : x.cat === "shield" ? "bouclier" : "armure"}</span>`;
 // Équipement d'aventurier, outils, paquetages (data/materiel.json) : poids, prix et dossier proposé
 const matLine = (g, m) => [m.g, m.u ? `lot de ${m.u.q} · ${m.p}` : m.p, m.w != null ? fmtKg(m.u ? m.w * m.u.q : m.w) : "", (g.folders.find(f => f.id === m.f) || {}).n].filter(Boolean).join(" · ");
-function suggestHTML(g) {
-  const q = norm((S.itQ || "").trim()); if (q.length < 2) return "";
-  const exact = Object.values(GEAR).find(x => norm(x.n) === q), em = !exact && matByName(S.itQ); // nom du Manuel complet : l'objet sera relié au catalogue
-  if (exact) return `<div class="sugok"><span>✓ <b>${esc(exact.n)}</b> du Manuel · ${esc(gearLine(exact))}</span><small><b>＋</b> pour l'ajouter, <b>✎ Détails</b> pour un bonus (+1…) ou une quantité</small></div>`;
-  if (em) return `<div class="sugok"><span>✓ <b>${esc(em.u ? em.u.n : em.n)}</b>${em.u ? ` ×${em.u.q}` : ""} du Manuel · ${esc(matLine(g, em))}</span><small><b>＋</b> pour l'ajouter${em.pack ? " (à déballer ensuite si tu veux suivre son contenu)" : ""}, <b>✎ Détails</b> pour changer la quantité ou le dossier</small></div>`;
-  const hits = Object.values(GEAR).filter(x => norm(x.n).includes(q) || norm(x.vo).includes(q)).slice(0, 4);
-  const mh = Object.values(MAT).filter(x => [x.n, ...(x.al || [])].some(n => norm(n).includes(q))).slice(0, 6 - Math.min(2, hits.length));
-  if (!hits.length && !mh.length) return "";
-  const prof = x => x.kind === "weapon" ? weaponProf(g, x) : armorProf(g, x);
-  return `<div class="sugbox" role="listbox" aria-label="Objets du Manuel">${hits.map(x => `<button type="button" class="sug" data-a="it-pick" data-id="${x.id}" role="option"><span class="sh"><b>${esc(x.n)}</b>${prof(x) ? `<i class="ok">maîtrisé${x.kind === "armor" && x.cat !== "shield" ? "e" : ""}</i>` : `<i class="no">non maîtrisé${x.kind === "armor" && x.cat !== "shield" ? "e" : ""}</i>`}${C(g).noMetal && x.metal ? `<i class="no">métal</i>` : ""}</span><small>${esc(gearLine(x))}</small></button>`).join("")}${mh.map(x => `<button type="button" class="sug" data-a="it-pick" data-m="${x.id}" role="option"><span class="sh"><b>${esc(x.n)}</b></span><small>${esc(matLine(g, x))}</small></button>`).join("")}
-    <div class="sugfree">Entrée : ajouter « ${esc((S.itQ || "").trim())} » comme objet libre</div></div>`;
+// ---------- Volet « Ajouter un objet » (S.add : q, recherche ; d, objet en préparation ; more, plus d'options ; loot, valeur visible)
+// Chercher → choisir (dans ton sac, Manuel, objet libre) → ajuster (quantité, dossier, équipé…) → Ajouter. Le volet se ferme après l'ajout.
+const plural2 = (n, x) => n > 1 && !/s$/i.test(x) ? x.replace(/^(\S+)/, "$1s") : x;
+function addSheetHTML(g) {
+  const A = S.add, head = (t, back) => `<div class="grab"></div><div class="head adhead">${back ? `<button class="btn ghost sm" data-a="ad-back" aria-label="Retour à la recherche">‹</button>` : ""}<h2>${t}</h2><button class="btn ghost sm" data-a="ad-close" aria-label="Fermer">✕</button></div>`;
+  if (!A.d) {
+    const q = (A.q || "").trim();
+    return head("Ajouter un objet") + `<form class="adfind" data-a="ad-find"><input id="ad-q" type="search" value="${esc(A.q || "")}" placeholder="🔍 Nom de l'objet" aria-label="Nom de l'objet" autocomplete="off" enterkeyhint="go"></form>`
+      + (q.length >= 2 ? addResultsHTML(g, q) : `<p class="help">Le Manuel est proposé pendant la saisie : armes, armures, équipement d'aventurier, outils, paquetages. Sinon, l'objet est créé à ton nom.</p>
+        <div class="adshort"><button class="btn mg" data-a="ad-new" data-v="magie">✦ Objet magique</button><button class="btn gd" data-a="ad-new" data-v="butin">◆ Butin (avec valeur)</button></div>`);
+  }
+  return head("Ajouter un objet", true) + addCfgHTML(g);
+}
+function addResultsHTML(g, q) {
+  const k = norm(q), mine = g.items.map((x, i) => i).filter(i => norm(g.items[i].n).includes(k)).slice(0, 4);
+  const gear = Object.values(GEAR).filter(x => norm(x.n).includes(k) || norm(x.vo).includes(k)).slice(0, 4);
+  const mat = Object.values(MAT).filter(x => [x.n, ...(x.al || [])].some(n => norm(n).includes(k))).slice(0, 7 - gear.length);
+  const prof = x => x.kind === "weapon" ? weaponProf(g, x) : armorProf(g, x), fe = x => x.kind === "armor" && x.cat !== "shield" ? "e" : "";
+  const row = (attrs, n, sub, tag = "") => `<button class="adres" ${attrs}><span><b>${n}</b>${tag}<small>${sub}</small></span><i aria-hidden="true">›</i></button>`;
+  let h = "";
+  if (mine.length) h += `<div class="adcap">Dans ton sac</div>` + mine.map(i => { const x = g.items[i], fn = (g.folders.find(f => f.id === folderOf(g, x)) || {}).n || "";
+    return `<div class="admine">${row(`data-a="ad-pick" data-i="${i}"`, esc(x.n), `${esc(fn)} · tu en as ${x.q}`)}<button class="btn sm" data-a="ad-inc" data-i="${i}" aria-label="${esc(x.n)} : un de plus">+1 → ${x.q + 1}</button></div>`; }).join("");
+  if (gear.length || mat.length) h += `<div class="adcap">Manuel</div>` + gear.map(x => row(`data-a="ad-pick" data-g="${x.id}"`, esc(x.n), esc(gearLine(x)), `<i class="${prof(x) ? "ok" : "no"}">${prof(x) ? "maîtrisé" : "non maîtrisé"}${fe(x)}</i>`)).join("")
+    + mat.map(x => row(`data-a="ad-pick" data-m="${x.id}"`, esc(x.n), esc(matLine(g, x)))).join("");
+  return h + `<div class="adcap">Libre</div>` + row(`data-a="ad-pick" data-n="1"`, `Créer « ${esc(q)} »`, "objet libre, à ton nom");
+}
+// Champ du volet : data-k (champ de S.add.d), data-t (texte, nombre, case)
+const adf = (k, attrs = "") => `class="adf" data-k="${k}" ${attrs}`;
+function addCfgHTML(g) {
+  const A = S.add, d = A.d, into = d.into != null ? g.items[d.into] : null, gear = GEAR[d.ref], m = MAT[d.mat], loot = A.loot || d.f === "butin";
+  const pills = gear ? `<span class="kp n">${esc(gearLine(gear))}</span>${gear.p ? `<span class="kp n">${esc(gear.p)}</span>` : ""}` : m ? `<span class="kp n">${esc(m.g)}</span><span class="kp n">${esc(m.u ? `${m.p} les ${m.u.q}` : m.p)}</span>${m.w != null ? `<span class="kp n">${fmtKg(m.w)}</span>` : ""}` : `<span class="kp f">objet libre</span>`;
+  const sw = (k, l, sub = "") => `<label class="adsw"><span>${l}${sub ? `<small>${sub}</small>` : ""}</span><input type="checkbox" ${adf(k, 'data-t="b"')}${d[k] ? " checked" : ""}><i aria-hidden="true"></i></label>`;
+  const coin = `<span class="adcoin" role="group" aria-label="Pièce">${Object.keys(VC).map(k => `<button type="button" data-a="ad-vc" data-v="${k}" aria-pressed="${(d.vc || "po") === k}">${k}</button>`).join("")}</span>`;
+  const value = `<div class="adblk"><span class="adcap">Valeur à l'unité${loot ? " (annoncée par le MJ)" : ""}</span><div class="adval"><input id="ad-v" type="text" inputmode="decimal" ${adf("v", 'data-t="n"')} value="${esc(d.v ?? "")}" placeholder="—" aria-label="Valeur à l'unité">${coin}</div></div>`;
+  let h = `<input id="ad-n" class="adf adname" data-k="n" type="text" value="${esc(d.n)}" placeholder="Nom de l'objet" aria-label="Nom de l'objet" required>
+    <div class="pills">${pills}</div>${m && m.fx ? `<p class="adfx">${esc(m.fx)}</p>` : ""}${m && m.pack ? `<p class="adfx">Paquetage : tu pourras le déballer ensuite (touche-le dans l'inventaire).</p>` : ""}
+    ${into ? `<p class="adinto">Tu en as déjà <b>${into.q}</b> : la quantité s'ajoute (${into.q} → ${into.q + (+d.q || 1)}).</p>` : ""}
+    <div class="adqty"><span>Quantité${m && m.u ? ` <small>lot de ${m.u.q}</small>` : ""}</span><button type="button" class="btn" data-a="ad-qty" data-v="-1" aria-label="Un de moins"${+d.q > 1 ? "" : " disabled"}>−</button><input id="ad-qn" type="text" inputmode="numeric" ${adf("q", 'data-t="i"')} value="${d.q}" aria-label="Quantité"><button type="button" class="btn" data-a="ad-qty" data-v="1" aria-label="Un de plus">+</button></div>`;
+  if (!into) {
+    if (loot) h += value;
+    h += `<div class="adblk"><span class="adcap">Dossier</span><div class="adfold">${g.folders.map(f => `<button type="button" class="chip" data-a="ad-f" data-v="${esc(f.id)}" aria-pressed="${d.f === f.id}">${esc(f.n)}</button>`).join("")}</div></div>
+      ${sw("eq", "Équipé", gear ? (gear.kind === "weapon" ? "attaques mises à jour" : "CA mise à jour") : "sur toi, utilisé")}${sw("c", "À décompter en jeu", "− / + sur la ligne, et dans l'onglet d'action")}
+      <button type="button" class="admore" data-a="ad-more" aria-expanded="${!!A.more}">${A.more ? "▾" : "▸"} Plus d'options <small>note, description, objet magique${g.load ? ", poids" : ""}${loot ? "" : ", valeur"}</small></button>`;
+    if (A.more) h += `<div class="adopts"><input id="ad-note" type="text" ${adf("note")} value="${esc(d.note || "")}" placeholder="Note courte (effet, contenu…)" aria-label="Note">
+      <textarea id="ad-desc" rows="2" ${adf("desc")} placeholder="Description (texte de l'objet, ce qu'en dit le MJ…)" aria-label="Description">${esc(d.desc || "")}</textarea>
+      ${g.load ? `<label class="adline"><span>Poids à l'unité (kg)</span><input id="ad-w" type="text" inputmode="decimal" ${adf("w", 'data-t="n"')} value="${esc(d.w ?? "")}" placeholder="${weightOf({ ref: d.ref, mat: d.mat }) != null ? String(weightOf({ ref: d.ref, mat: d.mat })).replace(".", ",") : "—"}"></label>` : ""}${loot ? "" : value}
+      <fieldset class="admagic"><legend>✦ Objet magique</legend>
+        <label><span>Bonus</span><select id="ad-bonus" ${adf("bonus", 'data-t="i"')}>${[0, 1, 2, 3].map(b => `<option value="${b}"${(d.bonus || 0) === b ? " selected" : ""}>${b ? "+" + b : "aucun"}</option>`).join("")}</select></label>
+        <label><span>Rareté</span><select id="ad-rar" ${adf("rar")}><option value="">—</option>${RARITIES.map(r => `<option${d.rar === r ? " selected" : ""}>${r}</option>`).join("")}</select></label>
+        <label><span>Dégâts en plus</span><input id="ad-xdmg" type="text" ${adf("xdmg")} value="${esc(d.xdmg || "")}" placeholder="ex. 1d4 feu"></label>
+        <label><span>Charges</span><input id="ad-ch" type="text" inputmode="numeric" ${adf("chMax", 'data-t="i"')} value="${d.chMax || ""}" placeholder="0"></label>
+        ${d.chMax ? `<label class="wide"><span>Recharge</span><select id="ad-rec" ${adf("rec")}>${REC.map(([k, l]) => `<option value="${k}"${(d.rec ?? "aube") === k ? " selected" : ""}>${l}</option>`).join("")}</select></label>` : ""}
+        <div class="wide row"><label class="check"><input type="checkbox" ${adf("att", 'data-t="b"')}${d.att ? " checked" : ""}> Harmonisation requise</label><label class="check"><input type="checkbox" ${adf("unid", 'data-t="b"')}${d.unid ? " checked" : ""}> Non identifié</label></div>
+      </fieldset></div>`;
+  }
+  const q = Math.max(1, Math.floor(+d.q) || 1), fn = into ? "" : ((g.folders.find(f => f.id === d.f) || {}).n || "");
+  const label = `Ajouter · ${q > 1 ? q + " " : ""}${esc(plural2(q, d.n.trim() || "objet"))}${d.bonus ? ` +${d.bonus}` : ""}`;
+  return h + `<div class="adfoot"><button class="btn primary adgo" data-a="ad-go"${d.n.trim() ? "" : " disabled"}>${label}</button><div class="row"><small>${into ? "au stock existant" : `dans ${esc(fn)}${d.eq ? " · équipé" : ""}`}</small><button class="btn ghost sm" data-a="ad-go" data-v="more"${d.n.trim() ? "" : " disabled"}>Ajouter et continuer</button></div></div>`;
 }
 /** Nouvel objet d'après son nom : arme ou armure du Manuel (lien ref), objet du catalogue (lien mat : lot, à décompter, dossier), sinon libre. */
 function newItem(g, n) {
@@ -176,7 +219,7 @@ const magicMarks = x => !isMagic(x) ? "" : ` <i class="mg">✦${x.inf && G() && 
 const chargePips = (x, i) => `<div class="itch">${Array.from({ length: x.chMax }, (_, k) => `<button class="pip${k < (x.chU || 0) ? " used" : ""}" data-a="it-chg" data-i="${i}" data-k="${k}" aria-label="${esc(x.n)} : charge ${k + 1}, ${k < (x.chU || 0) ? "utilisée" : "disponible"}"></button>`).join("")}<small>${recLabel(x.rec)}</small></div>`;
 function equipmentGerer(g) {
   const row = (i, p, n) => { const x = g.items[i]; return S.itEdit === i ? itemForm(g, x, i)
-    : `<div class="it${x.c && !x.q ? " out" : ""}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button>${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${x.oh ? ` <i class="ct">main secondaire</i>` : ""}${magicMarks(x)}${unidTag(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}`)}${gearOf(x) ? gearTag(gearOf(x)) : ""}${moveBtns(x, i, p, n)}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>${S.itOpen === i ? itemDetail(g, x, i) : ""}`; };
+    : `<div class="it${x.c && !x.q ? " out" : ""}${fresh(i)}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button>${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${freshTag(i)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${x.oh ? ` <i class="ct">main secondaire</i>` : ""}${magicMarks(x)}${unidTag(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}`)}${gearOf(x) ? gearTag(gearOf(x)) : ""}${moveBtns(x, i, p, n)}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>${S.itOpen === i ? itemDetail(g, x, i) : ""}`; };
   return topHTML(g) + grouped(g, row) + loadSetHTML(g) + foldersHTML(g);
 }
 // Objets qui servent en action : charges (objets magiques) ou à décompter (potions, munitions)
@@ -191,12 +234,15 @@ function itemsActionHTML(g) {
 }
 /** Onglet Inventaire : Gérer (rangement ▲ ▼, fiche complète, dossiers) ou En jeu (− / +, fiche d'un objet et ses gestes). */
 const inventoryHTML = g => `<div class="viewsw" role="group" aria-label="Affichage de l'inventaire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">✎ Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>` + (S.view === "jeu" ? equipmentJeu(g) : equipmentGerer(g));
+// Objet tout juste ajouté : ligne surlignée et « nouveau » (jusqu'au prochain ajout ou au changement d'onglet)
+const fresh = i => (S.fresh || []).includes(i) ? " fresh" : "";
+const freshTag = i => (S.fresh || []).includes(i) ? ` <i class="newtag">nouveau</i>` : "";
 const unidTag = x => x.unid ? ` <i class="unid">non identifié</i>` : "";
 const qtyBtns = (x, i) => `<div class="qty"><button class="btn sm" data-a="it-dec" data-i="${i}" aria-label="${esc(x.n)} : un de moins"${x.q ? "" : " disabled"}>−</button><b>${x.q}</b><button class="btn sm" data-a="it-inc" data-i="${i}" aria-label="${esc(x.n)} : un de plus">+</button></div>`;
 // En jeu : toucher un objet ouvre sa fiche ; les consommables (à décompter) ont − / + sur la ligne
 function equipmentJeu(g) {
   const row = i => { const x = g.items[i], open = S.itOpen === i;
-    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}"><button class="itn itopen" data-a="it-open" data-i="${i}" aria-expanded="${open}"><span><span class="chev" aria-hidden="true">${open ? "▾" : "▸"}</span> ${esc(x.n)}${magicMarks(x)}${x.eq ? ` <i class="eqtag">${gearOf(x) && gearOf(x).kind === "armor" && gearOf(x).cat !== "shield" ? "portée" : "équipé"}</i>` : ""}${unidTag(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}</button>${x.c ? qtyBtns(x, i) : x.q !== 1 ? `<b class="q">×${x.q}</b>` : ""}</div>${open ? itemPlay(g, x, i) : ""}`; };
+    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}${fresh(i)}"><button class="itn itopen" data-a="it-open" data-i="${i}" aria-expanded="${open}"><span><span class="chev" aria-hidden="true">${open ? "▾" : "▸"}</span> ${esc(x.n)}${freshTag(i)}${magicMarks(x)}${x.eq ? ` <i class="eqtag">${gearOf(x) && gearOf(x).kind === "armor" && gearOf(x).cat !== "shield" ? "portée" : "équipé"}</i>` : ""}${unidTag(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}</button>${x.c ? qtyBtns(x, i) : x.q !== 1 ? `<b class="q">×${x.q}</b>` : ""}</div>${open ? itemPlay(g, x, i) : ""}`; };
   return topHTML(g) + grouped(g, row);
 }
 /** Détail d'un objet : arme ou armure du Manuel, poids, valeur, rareté, description ; objet du catalogue : groupe, prix, effet, contenu d'un paquetage. */
@@ -265,9 +311,7 @@ function doSpend() {
 onClick("m-spend", (b, a, e) => { e.preventDefault(); doSpend(); });
 onSubmit("m-form", () => doSpend()); // Entrée dans le montant : dépenser
 
-onInput("#it-new", t => { S.itQ = t.value; render(); });
 onInput("#it-find", t => { S.itFind = t.value; render(); });
-onClick("it-plus", () => { S.itAdd = !S.itAdd; S.itNew = null; render(); const el = document.getElementById("it-new"); if (el) el.focus(); });
 onClick("it-flt", (b) => { S.itFilter = b.dataset.v; S.itOpen = null; render(); });
 // Dossier où va un nouvel objet : celui du filtre en cours, sinon celui proposé par son type
 const autoFolder = (g, x) => g.folders.some(y => y.id === classify(x)) ? classify(x) : folderOf(g, {});
@@ -289,6 +333,56 @@ onClick("sell-go", () => {
   mutate(g => { sel.forEach(i => { g.items[i].q -= qs[i]; }); g.items = g.items.filter((y, k) => !sel.includes(k) || y.q > 0); g.money.po += c.po; g.money.pa += c.pa; g.money.pc += c.pc; }); // ce qui n'est pas vendu reste dans le sac
   S.sell = null; S.itOpen = null;
   toast(`Vendu : ${esc(names.join(", "))} · <b>+${pcText(part)}</b>${V.n > 1 ? ` (ta part sur ${pcText(tot)})` : ""}`, () => { mutate(g => { g.items = prevI; g.money = prevM; }); return "Vente annulée"; });
+});
+// Volet « Ajouter un objet »
+const adFocus = id => { const el = document.getElementById(id); if (el) { el.focus(); if (el.select && id === "ad-n" && !el.value) el.select(); } };
+const adOpen = () => { S.add = { q: "", d: null }; S.itOpen = null; render(); adFocus("ad-q"); };
+onClick("it-plus", adOpen);
+onClick("ad-close", () => { S.add = null; render(); });
+onClick("ad-back", () => { S.add.d = null; S.add.more = false; S.add.loot = false; render(); adFocus("ad-q"); });
+onInput("#ad-q", t => { S.add.q = t.value; render(); });
+// Choix : objet du sac (ajout au stock), du Manuel (lien ref / mat, lot, dossier proposé) ou libre
+function adPick(g, b) {
+  const A = S.add, q = (A.q || "").trim();
+  if (b.dataset.i != null) { const x = g.items[+b.dataset.i]; return { ...x, q: 1, into: +b.dataset.i }; }
+  const gr = GEAR[b.dataset.g], m = MAT[b.dataset.m];
+  return newItem(g, gr ? gr.n : m ? m.n : q);
+}
+onClick("ad-pick", (b) => { const g = G(); S.add.d = adPick(g, b); S.add.more = isMagic(S.add.d); render(); adFocus(S.add.d.n ? "ad-qn" : "ad-n"); });
+onSubmit("ad-find", () => { const g = G(), q = (S.add.q || "").trim(); if (!q) return; S.add.d = newItem(g, q); render(); adFocus("ad-qn"); }); // Entrée : objet du Manuel de ce nom, sinon libre
+onClick("ad-new", (b) => { const g = G(), f = b.dataset.v; S.add.d = { n: (S.add.q || "").trim(), q: 1, eq: false, c: false, note: "", f: g.folders.some(y => y.id === f) ? f : folderOf(g, {}) }; S.add.more = f === "magie"; S.add.loot = f === "butin"; render(); adFocus("ad-n"); });
+onClick("ad-inc", (b) => { const i = +b.dataset.i, g = G(), x = g && g.items[i]; if (!x) return; mutate(g => { g.items[i].q++; }); S.add = null; S.fresh = [i]; adShow(G(), i);
+  toast(`<b>${esc(x.n)}</b> : ${x.q}`, () => { mutate(g => { g.items[i].q--; }); return "Annulé"; }); });
+onClick("ad-qty", (b) => { const d = S.add.d; d.q = Math.max(1, (Math.floor(+d.q) || 1) + +b.dataset.v); render(); });
+onClick("ad-f", (b) => { S.add.d.f = b.dataset.v; render(); });
+onClick("ad-vc", (b) => { S.add.d.vc = b.dataset.v; render(); });
+onClick("ad-more", () => { S.add.more = !S.add.more; render(); });
+// Saisie dans le volet : gardée dans l'objet en préparation (le volet est redessiné à chaque geste)
+onInput(t => t.classList && t.classList.contains("adf"), t => { const d = S.add && S.add.d; if (!d) return; d[t.dataset.k] = t.value; if (t.dataset.k === "n" || t.dataset.k === "q") { const b = document.querySelector(".adgo"); if (b) render(); } });
+onChange(t => t.classList && t.classList.contains("adf") && (t.type === "checkbox" || t.tagName === "SELECT"), t => { const d = S.add && S.add.d; if (!d) return; d[t.dataset.k] = t.type === "checkbox" ? t.checked : t.dataset.t === "i" ? +t.value : t.value; render(); });
+// Montre l'objet ajouté : son dossier déplié, le filtre retiré s'il le cache, la ligne surlignée (« nouveau ») et amenée à l'écran
+function adShow(g, i) {
+  const x = g.items[i]; if (!x) return; const sec = x.eq ? "eq" : folderOf(g, x);
+  if (S.itFilter && S.itFilter !== sec && !(S.itFilter !== "eq" && folderOf(g, x) === S.itFilter)) S.itFilter = "";
+  delete S.fold[foldKey("inv-" + (filterOf(g) && filterOf(g) !== "eq" ? filterOf(g) : sec))]; S.itFind = "";
+  render(); const el = document.querySelector(`.it.fresh`); if (el) el.scrollIntoView({ block: "center", behavior: "instant" });
+}
+onClick("ad-go", (b) => {
+  const g = G(), A = S.add, d = A && A.d; if (!d || !d.n.trim()) return; const q = Math.max(1, Math.floor(+d.q) || 1), num = v => { const t = String(v ?? "").trim().replace(",", "."); return t === "" || !isFinite(+t) || +t < 0 ? null : +t; };
+  let i;
+  if (d.into != null && g.items[d.into]) { i = d.into; mutate(g => { g.items[i].q += q; }); }
+  else {
+    const x = { n: d.n.trim(), q, eq: !!d.eq, c: !!d.c, note: (d.note || "").trim(), f: d.f, ...(d.ref ? { ref: d.ref } : {}), ...(d.mat ? { mat: d.mat } : {}) };
+    if (num(d.w) != null) x.w = num(d.w); if (num(d.v) != null) { x.v = Math.round(num(d.v) * VC[d.vc || "po"] * 10000) / 10000; if (d.vc && d.vc !== "po") x.vc = d.vc; }
+    if ((d.desc || "").trim()) x.desc = d.desc.trim(); if (+d.bonus) x.bonus = +d.bonus; if ((d.xdmg || "").trim()) x.xdmg = d.xdmg.trim();
+    const ch = Math.min(50, Math.floor(+d.chMax) || 0); if (ch) { x.chMax = ch; x.chU = 0; x.rec = d.rec ?? "aube"; }
+    if (d.att) { x.att = true; x.attuned = false; } if (d.rar) x.rar = d.rar; if (d.unid) x.unid = true;
+    i = g.items.length; mutate(g => { g.items.push(x); });
+  }
+  const it = G().items[i], into = d.into != null;
+  toast(`Ajouté : <b>${esc(it.n)}</b>${into ? ` (${it.q - q} → ${it.q})` : q > 1 ? ` ×${q}` : ""}${MAT[it.mat] && MAT[it.mat].pack ? " · touche-le pour le déballer" : ""}`, () => { mutate(g => { if (into) g.items[i].q -= q; else g.items.splice(i, 1); }); S.fresh = []; return "Ajout annulé"; });
+  S.fresh = [...(b.dataset.v === "more" ? S.fresh || [] : []), i];
+  if (b.dataset.v === "more") { S.add = { q: "", d: null }; render(); adFocus("ad-q"); } else { S.add = null; adShow(G(), i); }
 });
 onClick("up-open", (b) => { S.unpack = { i: +b.dataset.i, off: [] }; render(); });
 onClick("up-cancel", () => { S.unpack = null; render(); });
@@ -317,31 +411,21 @@ onClick("fd-del", (b) => { const g = G(), id = b.dataset.v, k = g.folders.findIn
   const prev = g.folders.map(f => ({ ...f })), moved = g.items.map((x, i) => x.f === id ? i : -1).filter(i => i >= 0), d = g.folders[k];
   mutate(g => { g.folders.splice(k, 1); g.items.forEach(x => { if (x.f === id) x.f = folderOf(g, x); }); }); if (S.itFilter === id) S.itFilter = "";
   toast(`Dossier <b>${esc(d.n)}</b> supprimé${moved.length ? ` · ${moved.length} objet${moved.length > 1 ? "s" : ""} dans ${esc((G().folders.find(f => f.id === folderOf(G(), {})) || {}).n || "")}` : ""}`, () => { mutate(g => { g.folders = prev; moved.forEach(i => { if (g.items[i]) g.items[i].f = id; }); }); return "Rétabli"; }); });
-// Toucher une suggestion la recopie dans le champ (sans ajouter) : ＋ l'ajoute, ✎ Détails permet un bonus (+1) ou une quantité
-onClick("it-pick", (b) => { const x = GEAR[b.dataset.id] || MAT[b.dataset.m]; if (!x) return; S.itQ = x.n; render(); const el = document.getElementById("it-new"); if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(el.value.length, el.value.length); } });
-onSubmit("it-add", () => { const el = document.getElementById("it-new"), n = el.value.trim(); if (!n) return; S.itQ = ""; const x = newItem(G(), n), same = GEAR[x.ref]; // nom exact du Manuel : relié au catalogue
-  mutate(g => { g.items.push(x); });
-  toast(`Ajouté : <b>${esc(x.n)}</b>${x.q !== 1 ? ` ×${x.q}` : ""}${MAT[x.mat] && MAT[x.mat].pack ? " · touche-le pour le déballer" : ""}${same ? ` · ${S.view === "jeu" ? "touche-le puis Équiper" : "coche « équipé »"} pour ${same.kind === "weapon" ? "l'utiliser dans tes attaques" : "le compter dans ta CA"}` : ""}`, () => { mutate(g => { g.items.pop(); }); return "Ajout annulé"; }); const nx = document.getElementById("it-new"); if (nx) nx.focus({ preventScroll: true }); });
-onClick("it-det", () => {
-  const el = document.getElementById("it-new"), n = (el && el.value || "").trim(), x = newItem(G(), n); // nom du Manuel : objet déjà lié
-  S.itNew = S.itNew ? null : x; S.itQ = ""; S.itEdit = null; render();
-  const f = document.getElementById(n ? "it-q" : "it-name"); if (f) { f.focus(); if (f.select) f.select(); }
-});
 // ▲ ▼ (Gérer) : échange avec l'objet voisin de la même section (Équipé, ou le dossier)
 onClick("it-mv", (b) => { mutate(g => { const i = +b.dataset.i; if (!g.items[i]) return; const list = (sectionsOf(g).find(x => x.list.includes(i)) || { list: [] }).list, p = list.indexOf(i), j = list[p + +b.dataset.v];
   if (j == null) return; [g.items[i], g.items[j]] = [g.items[j], g.items[i]]; S.itOpen = null; S.itEdit = null; });
   const el = document.querySelector(`[data-a="it-mv"][data-v="${b.dataset.v}"][aria-label="${CSS.escape(b.getAttribute("aria-label"))}"]`); if (el && !el.disabled) el.focus({ preventScroll: true }); });
 onClick("it-eq", (b) => { mutate(g => { const x = g.items[+b.dataset.i]; if (x) x.eq = !x.eq; }); });
-onClick("it-edit", (b) => { S.itEdit = +b.dataset.i; S.itNew = null; render(); const el = document.getElementById("it-name"); if (el) el.focus(); });
-onClick("it-cancel", () => { S.itEdit = null; S.itNew = null; render(); });
+onClick("it-edit", (b) => { S.itEdit = +b.dataset.i; render(); const el = document.getElementById("it-name"); if (el) el.focus(); });
+onClick("it-cancel", () => { S.itEdit = null; render(); });
 onClick("it-open", (b) => { const i = +b.dataset.i; S.itOpen = S.itOpen === i ? null : i; S.unpack = null; render(); });
 onSubmit("it-save", f => {
-  const add = f.dataset.i === "new", i = add ? G().items.length : +f.dataset.i, n = document.getElementById("it-name").value.trim(); if (!n) return;
+  const i = +f.dataset.i, n = document.getElementById("it-name").value.trim(); if (!n) return;
   const ref = document.getElementById("it-ref").value; // le lien avec le catalogue est conservé (attaques, CA)
   const x = { n, q: Math.max(0, Math.floor(+document.getElementById("it-q").value || 0)), eq: document.getElementById("it-eq").checked, c: document.getElementById("it-c").checked, note: document.getElementById("it-note").value.trim(), ...(GEAR[ref] ? { ref } : {}) };
   const v = id => document.getElementById(id), prev = G().items[i] || {}, bonus = +v("it-bonus").value, ch = Math.max(0, Math.min(50, Math.floor(+v("it-ch").value) || 0));
-  ["inf", "infAt", "infOpt", "infCh"].forEach(k => { if (prev[k] != null) x[k] = prev[k]; }); // imprégnation d'artificier : gardée
-  const sm = S.itNew && f.dataset.i === "new" ? S.itNew.mat : prev.mat; if (!x.ref && MAT[sm]) x.mat = sm; // lien avec le catalogue (poids, effet, paquetage)
+  ["inf", "infAt", "infOpt", "infCh", "shot"].forEach(k => { if (prev[k] != null) x[k] = prev[k]; }); // imprégnation d'artificier : gardée
+  if (!x.ref && MAT[prev.mat]) x.mat = prev.mat; // lien avec le catalogue (poids, effet, paquetage)
   const num = id => { const t = v(id).value.trim().replace(",", "."); return t === "" || !isFinite(+t) || +t < 0 ? null : Math.round(+t * 100) / 100; };
   x.f = v("it-f").value; if (v("it-w") ? num("it-w") != null : prev.w != null) x.w = v("it-w") ? num("it-w") : prev.w; // charge pas suivie : poids gardé, sans champ
   if (num("it-v") != null) { const c = v("it-vc").value; x.v = Math.round(num("it-v") * VC[c] * 10000) / 10000; if (c !== "po") x.vc = c; } // valeur gardée en po, pièce saisie retenue
@@ -351,12 +435,11 @@ onSubmit("it-save", f => {
   if (ch) { x.chMax = ch; x.chU = Math.min(ch, prev.chU || 0); x.rec = v("it-rec").value; }
   const oh = !!(v("it-oh") && v("it-oh").checked && GEAR[ref] && offhandOk(G(), x)); if (oh) x.oh = true; // une seule arme en main secondaire
   if (x.attuned && !prev.attuned && attunedCount(G()) >= MAX_ATT) { x.attuned = false; toast(`Déjà ${MAX_ATT} objets harmonisés : défais d'abord une harmonisation`); }
-  else if (!add) toast("Modification enregistrée");
-  S.itEdit = null; S.itNew = null; mutate(g => { if (oh) g.items.forEach(y => { delete y.oh; }); g.items[i] = x; });
-  if (add) toast(`Ajouté : <b>${esc(x.n)}</b>${x.q !== 1 ? ` ×${x.q}` : ""}${isMagic(x) ? " ✦" : ""}${x.eq ? " · équipé" : ""}`, () => { mutate(g => { g.items.splice(i, 1); }); return "Ajout annulé"; });
+  else toast("Modification enregistrée");
+  S.itEdit = null; mutate(g => { if (oh) g.items.forEach(y => { delete y.oh; }); g.items[i] = x; });
 });
 onClick("it-del", (b) => { const i = +b.dataset.i, prev = G().items[i]; if (!prev) return; S.itEdit = null; S.itOpen = null; mutate(g => { g.items.splice(i, 1); }); toast(`Retiré : <b>${esc(prev.n)}</b>`, () => { mutate(g => { g.items.splice(i, 0, prev); }); return "Rétabli"; }); });
 onClick("it-chg", (b) => { mutate(g => { const x = g.items[+b.dataset.i]; if (!x) return; const k = +b.dataset.k, u = x.chU || 0; x.chU = k < u ? k : k + 1; }); });
 onClick(["it-dec", "it-inc"], (b, a) => { mutate(g => { const x = g.items[+b.dataset.i]; if (x) x.q = Math.max(0, x.q + (a === "it-inc" ? 1 : -1)); }); });
 
-export { inventoryHTML, itemsActionHTML };
+export { addSheetHTML, inventoryHTML, itemsActionHTML };
