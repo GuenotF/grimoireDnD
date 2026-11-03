@@ -366,3 +366,9 @@
 .newtag { font-style: normal; font-family: var(--f-body); font-size: 10.5px; font-weight: 700; color: var(--ok); border: 1px solid var(--ok); border-radius: 3px; padding: 0 3px; vertical-align: 1px; }
 .lootv { font-style: normal; font-family: var(--f-body); font-weight: 700; font-size: 13px; color: var(--gold); margin-left: 4px; white-space: nowrap; }
 .lootv.none { color: var(--muted); font-weight: 400; }
+.admodes { display: flex; gap: 8px; }
+.admodes .btn { flex: 1; font-weight: 700; }
+.admodes .btn.mg[aria-pressed="true"] { background: #EFE6F7; border-width: 2px; }
+.admodes .btn.gd[aria-pressed="true"] { background: #F7EEDB; border-width: 2px; }
+.adhint { font-size: 12.5px; color: var(--muted); }
+.admagic label.check { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }

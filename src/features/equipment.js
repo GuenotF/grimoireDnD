@@ -177,34 +177,36 @@ function addResultsHTML(g, q) {
 // Champ du volet : data-k (champ de S.add.d), data-t (texte, nombre, case)
 const adf = (k, attrs = "") => `class="adf" data-k="${k}" ${attrs}`;
 function addCfgHTML(g) {
-  const A = S.add, d = A.d, into = d.into != null ? g.items[d.into] : null, gear = GEAR[d.ref], m = MAT[d.mat], loot = A.loot || d.f === "butin";
+  const A = S.add, d = A.d, into = d.into != null ? g.items[d.into] : null, gear = GEAR[d.ref], m = MAT[d.mat], loot = d.f === "butin";
   const pills = gear ? `<span class="kp n">${esc(gearLine(gear))}</span>${gear.p ? `<span class="kp n">${esc(gear.p)}</span>` : ""}` : m ? `<span class="kp n">${esc(m.g)}</span><span class="kp n">${esc(m.u ? `${m.p} les ${m.u.q}` : m.p)}</span>${m.w != null ? `<span class="kp n">${fmtKg(m.w)}</span>` : ""}` : `<span class="kp f">objet libre</span>`;
   const sw = (k, l, sub = "") => `<label class="adsw"><span>${l}${sub ? `<small>${sub}</small>` : ""}</span><input type="checkbox" ${adf(k, 'data-t="b"')}${d[k] ? " checked" : ""}><i aria-hidden="true"></i></label>`;
   const coin = `<span class="adcoin" role="group" aria-label="Pièce">${Object.keys(VC).map(k => `<button type="button" data-a="ad-vc" data-v="${k}" aria-pressed="${(d.vc || "po") === k}">${k}</button>`).join("")}</span>`;
-  const value = `<div class="adblk"><span class="adcap">Valeur à l'unité${loot ? " (annoncée par le MJ)" : ""}</span><div class="adval"><input id="ad-v" type="text" inputmode="decimal" ${adf("v", 'data-t="n"')} value="${esc(d.v ?? "")}" placeholder="—" aria-label="Valeur à l'unité">${coin}</div></div>`;
-  let h = `<input id="ad-n" class="adf adname" data-k="n" type="text" value="${esc(d.n)}" placeholder="Nom de l'objet" aria-label="Nom de l'objet" required>
-    <div class="pills">${pills}</div>${m && m.fx ? `<p class="adfx">${esc(m.fx)}</p>` : ""}${m && m.pack ? `<p class="adfx">Paquetage : tu pourras le déballer ensuite (touche-le dans l'inventaire).</p>` : ""}
-    ${into ? `<p class="adinto">Tu en as déjà <b>${into.q}</b> : la quantité s'ajoute (${into.q} → ${into.q + (+d.q || 1)}).</p>` : ""}
-    <div class="adqty"><span>Quantité${m && m.u ? ` <small>lot de ${m.u.q}</small>` : ""}</span><button type="button" class="btn" data-a="ad-qty" data-v="-1" aria-label="Un de moins"${+d.q > 1 ? "" : " disabled"}>−</button><input id="ad-qn" type="text" inputmode="numeric" ${adf("q", 'data-t="i"')} value="${d.q}" aria-label="Quantité"><button type="button" class="btn" data-a="ad-qty" data-v="1" aria-label="Un de plus">+</button></div>`;
-  if (!into) {
-    if (loot) h += value;
-    h += `<div class="adblk"><span class="adcap">Dossier</span><div class="adfold">${g.folders.map(f => `<button type="button" class="chip" data-a="ad-f" data-v="${esc(f.id)}" aria-pressed="${d.f === f.id}">${esc(f.n)}</button>`).join("")}</div></div>
-      ${sw("eq", "Équipé", gear ? (gear.kind === "weapon" ? "attaques mises à jour" : "CA mise à jour") : "sur toi, utilisé")}${sw("c", "À décompter en jeu", "− / + sur la ligne, et dans l'onglet d'action")}
-      <button type="button" class="admore" data-a="ad-more" aria-expanded="${!!A.more}">${A.more ? "▾" : "▸"} Plus d'options <small>note, description, objet magique${g.load ? ", poids" : ""}${loot ? "" : ", valeur"}</small></button>`;
-    if (A.more) h += `<div class="adopts"><input id="ad-note" type="text" ${adf("note")} value="${esc(d.note || "")}" placeholder="Note courte (effet, contenu…)" aria-label="Note">
-      <textarea id="ad-desc" rows="2" ${adf("desc")} placeholder="Description (texte de l'objet, ce qu'en dit le MJ…)" aria-label="Description">${esc(d.desc || "")}</textarea>
-      ${g.load ? `<label class="adline"><span>Poids à l'unité (kg)</span><input id="ad-w" type="text" inputmode="decimal" ${adf("w", 'data-t="n"')} value="${esc(d.w ?? "")}" placeholder="${weightOf({ ref: d.ref, mat: d.mat }) != null ? String(weightOf({ ref: d.ref, mat: d.mat })).replace(".", ",") : "—"}"></label>` : ""}${loot ? "" : value}
-      <fieldset class="admagic"><legend>✦ Objet magique</legend>
+  const sale = loot && (gear || m) && !A.mag ? " · revente à moitié prix" : loot && A.mag ? " · objet magique : pleine valeur à la vente" : "";
+  const value = `<div class="adblk"><span class="adcap">Valeur à l'unité</span><div class="adval"><input id="ad-v" type="text" inputmode="decimal" ${adf("v", 'data-t="n"')} value="${esc(d.v ?? "")}" placeholder="—" aria-label="Valeur à l'unité">${coin}</div>${loot ? `<small class="adhint">${gear || m ? "prix du Manuel, modifiable si le MJ annonce autre chose" : "valeur annoncée par le MJ"}${sale}</small>` : ""}</div>`;
+  const magic = `<fieldset class="admagic"><legend>✦ Objet magique</legend>
         <label><span>Bonus</span><select id="ad-bonus" ${adf("bonus", 'data-t="i"')}>${[0, 1, 2, 3].map(b => `<option value="${b}"${(d.bonus || 0) === b ? " selected" : ""}>${b ? "+" + b : "aucun"}</option>`).join("")}</select></label>
         <label><span>Rareté</span><select id="ad-rar" ${adf("rar")}><option value="">—</option>${RARITIES.map(r => `<option${d.rar === r ? " selected" : ""}>${r}</option>`).join("")}</select></label>
         <label><span>Dégâts en plus</span><input id="ad-xdmg" type="text" ${adf("xdmg")} value="${esc(d.xdmg || "")}" placeholder="ex. 1d4 feu"></label>
         <label><span>Charges</span><input id="ad-ch" type="text" inputmode="numeric" ${adf("chMax", 'data-t="i"')} value="${d.chMax || ""}" placeholder="0"></label>
         <label class="wide"><span>Recharge des charges</span><select id="ad-rec" ${adf("rec")}>${REC.map(([k, l]) => `<option value="${k}"${(d.rec ?? "aube") === k ? " selected" : ""}>${l}</option>`).join("")}</select></label>
         <div class="wide row"><label class="check"><input type="checkbox" ${adf("att", 'data-t="b"')}${d.att ? " checked" : ""}> Harmonisation requise</label><label class="check"><input type="checkbox" ${adf("unid", 'data-t="b"')}${d.unid ? " checked" : ""}> Non identifié</label></div>
-      </fieldset></div>`;
+      </fieldset>`;
+  let h = `<input id="ad-n" class="adf adname" data-k="n" type="text" value="${esc(d.n)}" placeholder="Nom de l'objet" aria-label="Nom de l'objet" required>
+    <div class="pills">${pills}</div>${m && m.fx ? `<p class="adfx">${esc(m.fx)}</p>` : ""}${m && m.pack ? `<p class="adfx">Paquetage : tu pourras le déballer ensuite (touche-le dans l'inventaire).</p>` : ""}
+    ${into ? `<p class="adinto">Tu en as déjà <b>${into.q}</b> : la quantité s'ajoute (${into.q} → ${into.q + (+d.q || 1)}).</p>` : ""}`;
+  // ✦ Magique et ◆ Butin : précisent l'objet choisi (lien avec le Manuel gardé)
+  if (!into) h += `<div class="admodes"><button type="button" class="btn mg" data-a="ad-mode" data-v="mag" aria-pressed="${!!A.mag}">✦ Magique${A.mag ? " ✓" : ""}</button><button type="button" class="btn gd" data-a="ad-mode" data-v="loot" aria-pressed="${loot}">◆ Butin${loot ? " ✓" : ""}</button></div>${A.mag ? magic : ""}${loot ? value : ""}`;
+  h += `<div class="adqty"><span>Quantité${m && m.u ? ` <small>lot de ${m.u.q}</small>` : ""}</span><button type="button" class="btn" data-a="ad-qty" data-v="-1" aria-label="Un de moins"${+d.q > 1 ? "" : " disabled"}>−</button><input id="ad-qn" type="text" inputmode="numeric" ${adf("q", 'data-t="i"')} value="${d.q}" aria-label="Quantité"><button type="button" class="btn" data-a="ad-qty" data-v="1" aria-label="Un de plus">+</button></div>`;
+  if (!into) {
+    h += `<div class="adblk"><span class="adcap">Dossier</span><div class="adfold">${g.folders.map(f => `<button type="button" class="chip" data-a="ad-f" data-v="${esc(f.id)}" aria-pressed="${d.f === f.id}">${esc(f.n)}</button>`).join("")}</div></div>
+      ${sw("eq", "Équipé", gear ? (gear.kind === "weapon" ? "attaques mises à jour" : "CA mise à jour") : "sur toi, utilisé")}${sw("c", "À décompter en jeu", "− / + sur la ligne, et dans l'onglet d'action")}
+      <button type="button" class="admore" data-a="ad-more" aria-expanded="${!!A.more}">${A.more ? "▾" : "▸"} Plus d'options <small>note, description${g.load ? ", poids" : ""}${loot ? "" : ", valeur"}</small></button>`;
+    if (A.more) h += `<div class="adopts"><input id="ad-note" type="text" ${adf("note")} value="${esc(d.note || "")}" placeholder="Note courte (effet, contenu…)" aria-label="Note">
+      <textarea id="ad-desc" rows="2" ${adf("desc")} placeholder="Description (texte de l'objet, ce qu'en dit le MJ…)" aria-label="Description">${esc(d.desc || "")}</textarea>
+      ${g.load ? `<label class="adline"><span>Poids à l'unité (kg)</span><input id="ad-w" type="text" inputmode="decimal" ${adf("w", 'data-t="n"')} value="${esc(d.w ?? "")}" placeholder="${weightOf({ ref: d.ref, mat: d.mat }) != null ? String(weightOf({ ref: d.ref, mat: d.mat })).replace(".", ",") : "—"}"></label>` : ""}${loot ? "" : value}</div>`;
   }
   const q = Math.max(1, Math.floor(+d.q) || 1), fn = into ? "" : ((g.folders.find(f => f.id === d.f) || {}).n || "");
-  const label = `Ajouter · ${q > 1 ? q + " " : ""}${esc(plural2(q, d.n.trim() || "objet"))}${d.bonus ? ` +${d.bonus}` : ""}`;
+  const label = `Ajouter · ${q > 1 ? q + " " : ""}${esc(plural2(q, d.n.trim() || "objet"))}${A.mag && +d.bonus ? ` +${d.bonus}` : ""}${A.mag ? " ✦" : ""}${!into && d.f === "butin" ? " au butin" : ""}`;
   return h + `<div class="adfoot"><button class="btn primary adgo" data-a="ad-go"${d.n.trim() ? "" : " disabled"}>${label}</button><div class="row"><small>${into ? "au stock existant" : `dans ${esc(fn)}${d.eq ? " · équipé" : ""}`}</small><button class="btn ghost sm" data-a="ad-go" data-v="more"${d.n.trim() ? "" : " disabled"}>Ajouter et continuer</button></div></div>`;
 }
 /** Nouvel objet d'après son nom : arme ou armure du Manuel (lien ref), objet du catalogue (lien mat : lot, à décompter, dossier), sinon libre. */
@@ -341,7 +343,7 @@ const adFocus = id => { const el = document.getElementById(id); if (el) { el.foc
 const adOpen = () => { S.add = { q: "", d: null }; S.itOpen = null; render(); adFocus("ad-q"); };
 onClick("it-plus", adOpen);
 onClick("ad-close", () => { S.add = null; render(); });
-onClick("ad-back", () => { S.add.d = null; S.add.more = false; S.add.loot = false; render(); adFocus("ad-q"); });
+onClick("ad-back", () => { S.add.d = null; S.add.more = false; S.add.mag = false; render(); adFocus("ad-q"); });
 onInput("#ad-q", t => { S.add.q = t.value; render(); });
 // Choix : objet du sac (ajout au stock), du Manuel (lien ref / mat, lot, dossier proposé) ou libre
 function adPick(g, b) {
@@ -350,9 +352,17 @@ function adPick(g, b) {
   const gr = GEAR[b.dataset.g], m = MAT[b.dataset.m];
   return newItem(g, gr ? gr.n : m ? m.n : q);
 }
-onClick("ad-pick", (b) => { const g = G(); S.add.d = adPick(g, b); S.add.more = isMagic(S.add.d); render(); adFocus(S.add.d.n ? "ad-qn" : "ad-n"); });
+onClick("ad-pick", (b) => { const g = G(); S.add.d = adPick(g, b); S.add.mag = isMagic(S.add.d); S.add.more = false; render(); adFocus(S.add.d.n ? "ad-qn" : "ad-n"); });
 onSubmit("ad-find", () => { const g = G(), q = (S.add.q || "").trim(); if (!q) return; S.add.d = newItem(g, q); render(); adFocus("ad-qn"); }); // Entrée : objet du Manuel de ce nom, sinon libre
-onClick("ad-new", (b) => { const g = G(), f = b.dataset.v; S.add.d = { n: (S.add.q || "").trim(), q: 1, eq: false, c: false, note: "", f: g.folders.some(y => y.id === f) ? f : folderOf(g, {}) }; S.add.more = f === "magie"; S.add.loot = f === "butin"; render(); adFocus("ad-n"); });
+onClick("ad-new", (b) => { const g = G(), f = b.dataset.v; S.add.d = { n: (S.add.q || "").trim(), q: 1, eq: false, c: false, note: "", f: g.folders.some(y => y.id === f) ? f : folderOf(g, {}) }; S.add.mag = f === "magie"; S.add.more = false; render(); adFocus("ad-n"); });
+// ✦ Magique : bloc objet magique (un objet libre rangé dans Divers passe dans Magie) ; ◆ Butin : dossier Butin et valeur (prix du Manuel proposé)
+onClick("ad-mode", (b) => {
+  const g = G(), A = S.add, d = A && A.d; if (!d) return; const has = id => g.folders.some(f => f.id === id);
+  if (b.dataset.v === "mag") { A.mag = !A.mag; if (!d.ref && !d.mat && has("magie") && d.f === (A.mag ? "divers" : "magie")) d.f = A.mag ? "magie" : "divers"; }
+  else if (d.f === "butin") { d.f = A.prevF && has(A.prevF) && A.prevF !== "butin" ? A.prevF : autoFolder(g, d); if (A.autoV && String(d.v) === A.autoV) { d.v = ""; delete d.vc; } } // valeur proposée et pas touchée : retirée
+  else if (has("butin")) { A.prevF = d.f; d.f = "butin"; if (d.v == null || d.v === "") { const pc = unitPc({ ref: d.ref, mat: d.mat }); if (pc) { const c = pc % 100 === 0 ? "po" : pc % 10 === 0 ? "pa" : "pc"; d.vc = c; d.v = String(pc / { po: 100, pa: 10, pc: 1 }[c]); A.autoV = d.v; } } }
+  render();
+});
 onClick("ad-inc", (b) => { const i = +b.dataset.i, g = G(), x = g && g.items[i]; if (!x) return; mutate(g => { g.items[i].q++; }); S.add = null; S.fresh = [i]; adShow(G(), i);
   toast(`<b>${esc(x.n)}</b> : ${x.q}`, () => { mutate(g => { g.items[i].q--; }); return "Annulé"; }); });
 onClick("ad-qty", (b) => { const d = S.add.d; d.q = Math.max(1, (Math.floor(+d.q) || 1) + +b.dataset.v); render(); });
@@ -376,9 +386,12 @@ onClick("ad-go", (b) => {
   else {
     const x = { n: d.n.trim(), q, eq: !!d.eq, c: !!d.c, note: (d.note || "").trim(), f: d.f, ...(d.ref ? { ref: d.ref } : {}), ...(d.mat ? { mat: d.mat } : {}) };
     if (num(d.w) != null) x.w = num(d.w); if (num(d.v) != null) { x.v = Math.round(num(d.v) * VC[d.vc || "po"] * 10000) / 10000; if (d.vc && d.vc !== "po") x.vc = d.vc; }
-    if ((d.desc || "").trim()) x.desc = d.desc.trim(); if (+d.bonus) x.bonus = +d.bonus; if ((d.xdmg || "").trim()) x.xdmg = d.xdmg.trim();
-    const ch = Math.min(50, Math.floor(+d.chMax) || 0); if (ch) { x.chMax = ch; x.chU = 0; x.rec = d.rec ?? "aube"; }
-    if (d.att) { x.att = true; x.attuned = false; } if (d.rar) x.rar = d.rar; if (d.unid) x.unid = true;
+    if ((d.desc || "").trim()) x.desc = d.desc.trim();
+    if (A.mag) { // champs magiques : seulement si ✦ Magique est actif
+      if (+d.bonus) x.bonus = +d.bonus; if ((d.xdmg || "").trim()) x.xdmg = d.xdmg.trim();
+      const ch = Math.min(50, Math.floor(+d.chMax) || 0); if (ch) { x.chMax = ch; x.chU = 0; x.rec = d.rec ?? "aube"; }
+      if (d.att) { x.att = true; x.attuned = false; } if (d.rar) x.rar = d.rar; if (d.unid) x.unid = true;
+    }
     i = g.items.length; mutate(g => { g.items.push(x); });
   }
   const it = G().items[i], into = d.into != null;
