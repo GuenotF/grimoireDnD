@@ -364,3 +364,5 @@
 .it.fresh { animation: fresh 3.5s ease-out; border-radius: 8px; }
 @keyframes fresh { 0%, 40% { background: #E2F1E7; box-shadow: inset 3px 0 0 var(--ok); } 100% { background: transparent; box-shadow: none; } }
 .newtag { font-style: normal; font-family: var(--f-body); font-size: 10.5px; font-weight: 700; color: var(--ok); border: 1px solid var(--ok); border-radius: 3px; padding: 0 3px; vertical-align: 1px; }
+.lootv { font-style: normal; font-family: var(--f-body); font-weight: 700; font-size: 13px; color: var(--gold); margin-left: 4px; white-space: nowrap; }
+.lootv.none { color: var(--muted); font-weight: 400; }

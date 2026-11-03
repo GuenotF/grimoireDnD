@@ -392,6 +392,7 @@ def test_butin_vente_et_munitions(browser, devices, url):
     a = App(browser, devices, url, char=dict(MALFAEL, **FICHE, items=items, money={"po": 1}), tab="inv", view="jeu")
     check("≈ 80 po" in a.text(".rubric.invsec[data-k='inv-butin'] .aside"), f"Butin : valeur pleine (50 + 3 × 10) : {a.text('.rubric.invsec[data-k=inv-butin] .aside')}")
     check("Revente ≈ 65 po" in a.text(".sellbar") and "1 sans valeur" in a.text(".sellbar"), f"revente : 50 + 15 (moitié prix) : {a.text('.sellbar')}")
+    check(a.texts(".lootv") == ["≈ 50 po", "≈ 30 po", "valeur ?"], f"valeur de chaque ligne du butin, sans déplier : {a.texts('.lootv')}")
     a.click('[data-a="sell-open"][data-v="butin"]')
     check(a.count(".sellbox .pkrow") == 3 and a.count(".sellbox .pkrow:disabled") == 1 and "65 po" in a.text(".selltot"), "vente : 3 objets, la statuette sans valeur grisée, total 65 po")
     a.click('[data-a="sell-n"][data-v="1"]'); a.click('[data-a="sell-n"][data-v="1"]')

@@ -13,7 +13,7 @@ import { GEAR, MAT, matByName } from "../data.js";
 import { armorProf, gearOf, weaponProf } from "../rules/equipment.js";
 import { hasFeat } from "../rules/feats.js";
 import { MAX_ATT, REC, attunedCount, isMagic, recLabel } from "../rules/magic.js";
-import { RARITIES, classify, coinsOf, fmtKg, fmtPo, folderOf, loadOf, pcText, saleOf, weightOf } from "../rules/inventory.js";
+import { RARITIES, classify, coinsOf, fmtKg, fmtPo, folderOf, loadOf, pcText, saleOf, unitPc, weightOf } from "../rules/inventory.js";
 import { COINS, purseText, purseValue, spend } from "../rules/money.js";
 import { foldHead, foldKey, isFold } from "../ui/components.js";
 
@@ -219,7 +219,7 @@ const magicMarks = x => !isMagic(x) ? "" : ` <i class="mg">✦${x.inf && G() && 
 const chargePips = (x, i) => `<div class="itch">${Array.from({ length: x.chMax }, (_, k) => `<button class="pip${k < (x.chU || 0) ? " used" : ""}" data-a="it-chg" data-i="${i}" data-k="${k}" aria-label="${esc(x.n)} : charge ${k + 1}, ${k < (x.chU || 0) ? "utilisée" : "disponible"}"></button>`).join("")}<small>${recLabel(x.rec)}</small></div>`;
 function equipmentGerer(g) {
   const row = (i, p, n) => { const x = g.items[i]; return S.itEdit === i ? itemForm(g, x, i)
-    : `<div class="it${x.c && !x.q ? " out" : ""}${fresh(i)}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button>${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${freshTag(i)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${x.oh ? ` <i class="ct">main secondaire</i>` : ""}${magicMarks(x)}${unidTag(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}`)}${gearOf(x) ? gearTag(gearOf(x)) : ""}${moveBtns(x, i, p, n)}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>${S.itOpen === i ? itemDetail(g, x, i) : ""}`; };
+    : `<div class="it${x.c && !x.q ? " out" : ""}${fresh(i)}"><button class="itck" data-a="it-eq" data-i="${i}" aria-pressed="${x.eq}" aria-label="${esc(x.n)} : ${x.eq ? "équipé" : "non équipé"}"></button>${openBtn(x, i, `<span>${chev(x, i)}${esc(x.n)}${freshTag(i)}${lootVal(g, x)}${x.q !== 1 ? ` <b>×${x.q}</b>` : ""}${x.c ? ` <i class="ct">à décompter</i>` : ""}${x.oh ? ` <i class="ct">main secondaire</i>` : ""}${magicMarks(x)}${unidTag(x)}</span>${x.note || gearOf(x) ? `<small>${esc(x.note || gearLine(gearOf(x)))}</small>` : ""}`)}${gearOf(x) ? gearTag(gearOf(x)) : ""}${moveBtns(x, i, p, n)}<button class="btn ghost sm" data-a="it-edit" data-i="${i}" aria-label="Modifier ${esc(x.n)}">✎</button></div>${S.itOpen === i ? itemDetail(g, x, i) : ""}`; };
   return topHTML(g) + grouped(g, row) + loadSetHTML(g) + foldersHTML(g);
 }
 // Objets qui servent en action : charges (objets magiques) ou à décompter (potions, munitions)
@@ -235,6 +235,8 @@ function itemsActionHTML(g) {
 /** Onglet Inventaire : Gérer (rangement ▲ ▼, fiche complète, dossiers) ou En jeu (− / +, fiche d'un objet et ses gestes). */
 const inventoryHTML = g => `<div class="viewsw" role="group" aria-label="Affichage de l'inventaire"><button data-a="view" data-v="gerer" aria-pressed="${S.view !== "jeu"}">✎ Gérer</button><button data-a="view" data-v="jeu" aria-pressed="${S.view === "jeu"}">En jeu</button></div>` + (S.view === "jeu" ? equipmentJeu(g) : equipmentGerer(g));
 // Objet tout juste ajouté : ligne surlignée et « nouveau » (jusqu'au prochain ajout ou au changement d'onglet)
+// Butin : valeur estimée de la ligne (quantité comprise), visible sans déplier
+const lootVal = (g, x) => { if (x.eq || folderOf(g, x) !== "butin") return ""; const u = unitPc(x); return ` <i class="lootv${u == null ? " none" : ""}">${u == null ? "valeur ?" : `≈ ${pcText(Math.floor(u * x.q))}`}</i>`; };
 const fresh = i => (S.fresh || []).includes(i) ? " fresh" : "";
 const freshTag = i => (S.fresh || []).includes(i) ? ` <i class="newtag">nouveau</i>` : "";
 const unidTag = x => x.unid ? ` <i class="unid">non identifié</i>` : "";
@@ -242,7 +244,7 @@ const qtyBtns = (x, i) => `<div class="qty"><button class="btn sm" data-a="it-de
 // En jeu : toucher un objet ouvre sa fiche ; les consommables (à décompter) ont − / + sur la ligne
 function equipmentJeu(g) {
   const row = i => { const x = g.items[i], open = S.itOpen === i;
-    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}${fresh(i)}"><button class="itn itopen" data-a="it-open" data-i="${i}" aria-expanded="${open}"><span><span class="chev" aria-hidden="true">${open ? "▾" : "▸"}</span> ${esc(x.n)}${freshTag(i)}${magicMarks(x)}${x.eq ? ` <i class="eqtag">${gearOf(x) && gearOf(x).kind === "armor" && gearOf(x).cat !== "shield" ? "portée" : "équipé"}</i>` : ""}${unidTag(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}</button>${x.c ? qtyBtns(x, i) : x.q !== 1 ? `<b class="q">×${x.q}</b>` : ""}</div>${open ? itemPlay(g, x, i) : ""}`; };
+    return `<div class="it j${x.eq ? " eq" : ""}${x.c && !x.q ? " out" : ""}${fresh(i)}"><button class="itn itopen" data-a="it-open" data-i="${i}" aria-expanded="${open}"><span><span class="chev" aria-hidden="true">${open ? "▾" : "▸"}</span> ${esc(x.n)}${freshTag(i)}${lootVal(g, x)}${magicMarks(x)}${x.eq ? ` <i class="eqtag">${gearOf(x) && gearOf(x).kind === "armor" && gearOf(x).cat !== "shield" ? "portée" : "équipé"}</i>` : ""}${unidTag(x)}</span>${x.note ? `<small>${esc(x.note)}</small>` : ""}</button>${x.c ? qtyBtns(x, i) : x.q !== 1 ? `<b class="q">×${x.q}</b>` : ""}</div>${open ? itemPlay(g, x, i) : ""}`; };
   return topHTML(g) + grouped(g, row);
 }
 /** Détail d'un objet : arme ou armure du Manuel, poids, valeur, rareté, description ; objet du catalogue : groupe, prix, effet, contenu d'un paquetage. */
