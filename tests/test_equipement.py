@@ -221,10 +221,11 @@ def test_volet_ajouter(browser, devices, url):
     a.click('[data-a="ad-back"]')
     check(a.pg.input_value("#ad-q") == "épée lo", "retour : recherche gardée")
     a.click('[data-a="ad-pick"][data-g="longsword"]'); a.click('[data-a="ad-more"]')
-    a.pg.select_option("#ad-bonus", "1"); a.pg.check('.adsw input[data-k="eq"]', force=True); a.pg.wait_for_timeout(40)
+    a.pg.select_option("#ad-bonus", "1"); a.pg.fill("#ad-ch", "3"); a.pg.select_option("#ad-rec", "court"); a.pg.check('.adsw input[data-k="eq"]', force=True); a.pg.wait_for_timeout(40)
     check("Ajouter · Épée longue +1" in a.text(".adgo") and "équipé" in a.text(".adfoot"), f"bouton : {a.text('.adgo')}")
     a.click('[data-a="ad-go"]:not([data-v])')
     check(a.g("items[1].bonus") == 1 and a.g("items[1].eq") and a.g("items[1].ref") == "longsword" and a.g("items[1].f") == "armes", "épée longue +1, équipée, dans Armes")
+    check(a.g("items[1].chMax") == 3 and a.g("items[1].rec") == "court", f"3 charges, recharge au repos court ou long : {a.js('JSON.stringify(G().items[1])')}")
     # Butin : valeur visible, pièce au choix ; Ajouter et continuer
     a.click('[data-a="it-plus"]'); a.click('[data-a="ad-new"][data-v="butin"]')
     a.pg.fill("#ad-n", "Perle noire"); a.pg.fill("#ad-qn", "10"); a.pg.fill("#ad-v", "100"); a.click('[data-a="ad-vc"][data-v="pa"]')

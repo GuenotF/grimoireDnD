@@ -199,7 +199,7 @@ function addCfgHTML(g) {
         <label><span>Rareté</span><select id="ad-rar" ${adf("rar")}><option value="">—</option>${RARITIES.map(r => `<option${d.rar === r ? " selected" : ""}>${r}</option>`).join("")}</select></label>
         <label><span>Dégâts en plus</span><input id="ad-xdmg" type="text" ${adf("xdmg")} value="${esc(d.xdmg || "")}" placeholder="ex. 1d4 feu"></label>
         <label><span>Charges</span><input id="ad-ch" type="text" inputmode="numeric" ${adf("chMax", 'data-t="i"')} value="${d.chMax || ""}" placeholder="0"></label>
-        ${d.chMax ? `<label class="wide"><span>Recharge</span><select id="ad-rec" ${adf("rec")}>${REC.map(([k, l]) => `<option value="${k}"${(d.rec ?? "aube") === k ? " selected" : ""}>${l}</option>`).join("")}</select></label>` : ""}
+        <label class="wide"><span>Recharge des charges</span><select id="ad-rec" ${adf("rec")}>${REC.map(([k, l]) => `<option value="${k}"${(d.rec ?? "aube") === k ? " selected" : ""}>${l}</option>`).join("")}</select></label>
         <div class="wide row"><label class="check"><input type="checkbox" ${adf("att", 'data-t="b"')}${d.att ? " checked" : ""}> Harmonisation requise</label><label class="check"><input type="checkbox" ${adf("unid", 'data-t="b"')}${d.unid ? " checked" : ""}> Non identifié</label></div>
       </fieldset></div>`;
   }
