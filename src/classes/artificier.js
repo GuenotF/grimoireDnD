@@ -148,10 +148,10 @@ function canonHTML(g) {
       ${CANON[f.t] ? `${pillsRaw(CANON[f.t].pills(g))}<div class="eff" style="font-size:13.5px">${CANON[f.t].d}</div>` : ""}
       <div class="chips"><button class="chip" data-a="can-sz" data-v="TP" aria-pressed="${f.sz !== "P"}">TP · porté dans une main</button><button class="chip" data-a="can-sz" data-v="P" aria-pressed="${f.sz === "P"}">P · occupe son espace</button></div>
       <label class="check"><input type="checkbox" data-a="can-legs"${f.legs ? " checked" : ""}> Avec des jambes (déplacement 4,50 m)</label>
-      <div class="cast"><button class="btn cast-go sm" data-a="can-go"${CANON[f.t] && (free || lv) ? "" : " disabled"}>${free ? "Créer · gratuit" : lv ? `Créer · emplacement niv. ${lv}` : "Plus d'emplacement"}</button><button class="btn ghost sm" data-a="can-form">Annuler</button></div>
+      <div class="cast"><button class="btn cast-go sm" data-a="can-go"${CANON[f.t] && (free || lv) ? "" : " disabled"}>${!CANON[f.t] ? "Choisis le type du canon" : free ? "Créer · gratuit" : lv ? `Créer · emplacement niv. ${lv}` : "Plus d'emplacement"}</button><button class="btn ghost sm" data-a="can-form">Annuler</button></div>
       <span class="muted" style="font-size:12.5px">${free ? "Gratuit une fois par repos long, ensuite un emplacement de niveau 1 ou plus." : "Création gratuite utilisée : il faut un emplacement de niveau 1 ou plus."}</span></div>`
-      : `<button class="btn" data-a="can-form">＋ Créer un canon${free ? " (gratuit)" : ""}</button>`;
-  }
+      : `<button class="btn" data-a="can-form">＋ Créer un canon${free ? " (gratuit)" : lv ? ` (emplacement niv. ${lv})` : ""}</button>`;
+  } else h += `<p class="muted" style="margin:0;font-size:13px">${canMax(g) > 1 ? `Deux canons au plus` : "Un seul canon à la fois"} : pour en créer un autre, révoque le canon actuel (action), ou attends qu'il disparaisse (0 PV ou 1 heure).</p>`;
   return foldSec("art-can", "Canon occulte", `${list.length ? `${list.length} actif${list.length > 1 ? "s" : ""} · 1 heure` : "pas de canon"} · ${g.canFree ? "création gratuite utilisée" : "1 gratuit par repos long"}`, `<div class="artbox">${h}</div>`);
 }
 const firstSlot = g => { const s = R.slots(g); for (let i = 0; i < s.length; i++) if ((s[i] || 0) - (+(g.used[i + 1] || 0)) > 0) return i + 1; return 0; };
@@ -206,7 +206,7 @@ onClick("art-hp", (b) => {
   });
   toast(`${k.startsWith("can") ? "Canon" : k === "sd" ? "Défenseur d'acier" : "Homoncule"} : ${sign < 0 ? "−" : "+"}${n} PV${k.startsWith("can") && !(G().can || [])[+k.slice(3)] ? " · détruit" : ""}`, () => { mutate(g => Object.assign(g, prev)); return "Annulé"; });
 });
-onClick("can-form", () => { S.canForm = S.canForm ? null : { t: "", sz: "TP", legs: false }; render(); });
+onClick("can-form", () => { S.canForm = S.canForm ? null : { t: "", sz: "TP", legs: false, ...(S.canLast || {}) }; render(); }); // dernier canon créé proposé
 onClick("can-t", (b) => { if (S.canForm) { S.canForm.t = b.dataset.v; render(); } });
 onClick("can-sz", (b) => { if (S.canForm) { S.canForm.sz = b.dataset.v; render(); } });
 onChange("can-legs", t => { if (S.canForm) S.canForm.legs = t.checked; });
@@ -214,7 +214,7 @@ onClick("can-go", () => {
   const g = G(), f = S.canForm; if (!g || !f || !CANON[f.t] || (g.can || []).length >= canMax(g)) return;
   const free = !g.canFree, lv = free ? 0 : firstSlot(g); if (!free && !lv) return;
   const prev = JSON.parse(JSON.stringify({ can: g.can || [], canFree: !!g.canFree, used: g.used }));
-  S.canForm = null;
+  S.canForm = null; S.canLast = { t: f.t, sz: f.sz, legs: !!f.legs };
   mutate(g => { g.can = [...(g.can || []), { t: f.t, sz: f.sz === "P" ? "P" : "TP", legs: !!f.legs, hp: canHp(g) }]; if (free) g.canFree = true; else g.used[lv] = (+(g.used[lv] || 0)) + 1; });
   toast(`<b>Canon · ${CANON[f.t].n}</b> créé (${canHp(g)} PV, 1 heure)${free ? " · création gratuite" : ` · emplacement de niveau ${lv}`}`, () => { mutate(g => Object.assign(g, prev)); return "Canon annulé"; });
 });
